@@ -3,39 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PR Eye Photography Toolkit</title>
+    <title>Photography Toolkit</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>PR Eye Photography Toolkit</h1>
-        <nav>
-            <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
+        <h1>Photography Toolkit</h1>
     </header>
     <main>
-        <section id="about">
-            <h2>About</h2>
-            <p>PR Eye is a comprehensive toolkit designed for photographers to enhance their workflow, manage portfolios, and edit images easily.</p>
+        <section>
+            <h2>Edit Your Photos</h2>
+            <button id="edit-btn">Edit Photo</button>
         </section>
-        <section id="features">
-            <h2>Features</h2>
-            <ul>
-                <li>Portfolio Management</li>
-                <li>Image Editing Tools</li>
-                <li>Client Collaboration Features</li>
-            </ul>
-        </section>
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>You can reach us at <a href="mailto:info@preye.com">info@preye.com</a>.</p>
+        <section>
+            <h2>Upload Your Photos</h2>
+            <input type="file" id="upload-btn">
         </section>
     </main>
     <footer>
-        <p>&copy; 2026 PR Eye. All rights reserved.</p>
+        <p>&copy; 2026 Photography Toolkit</p>
     </footer>
+    <script>
+        document.getElementById('edit-btn').addEventListener('click', function() {
+            alert('Edit your photos functionality coming soon!');
+        });
+    </script>
 </body>
 </html>
