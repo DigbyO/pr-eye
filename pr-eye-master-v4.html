@@ -1,34 +1,1596 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photography Toolkit</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <script src="service-worker.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1b2a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PR Eye">
+<title>PR Eye — Bespoke Photography Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════
+     INLINE PWA MANIFEST via blob
+════════════════════════════════════ -->
+<script>
+(function(){
+  const manifest={
+    name:"PR Eye — Bespoke Photography Toolkit",
+    short_name:"PR Eye",
+    start_url:".",
+    display:"standalone",
+    background_color:"#0d1b2a",
+    theme_color:"#0d1b2a",
+    description:"Professional photography toolkit: Kelvin meter, light meter, Pantone matcher, model release.",
+    icons:[
+      {src:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230d1b2a'/><text x='96' y='130' font-size='110' text-anchor='middle'>📷</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+      {src:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230d1b2a'/><text x='256' y='360' font-size='300' text-anchor='middle'>📷</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('link');
+  link.rel='manifest'; link.href=url;
+  document.head.appendChild(link);
+})();
+</script>
+
+<!-- ═══════════════════════════════════
+     INLINE SERVICE WORKER via blob
+════════════════════════════════════ -->
+<script>
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='preye-v3';
+    const ASSETS=['/'];
+    self.addEventListener('install',e=>{
+      e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
+    });
+    self.addEventListener('activate',e=>{
+      e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+    });
+    self.addEventListener('fetch',e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline',{status:503}))));
+    });
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url,{scope:'./'}).catch(()=>{});
+}
+</script>
+
+<style>
+/* ═══════════════════════════════════
+   BASE — 18px minimum, 48px buttons
+════════════════════════════════════ */
+:root{
+  --navy:#0d1b2a; --navy2:#112233; --navy3:#1a2f45; --navy4:#1e3a52;
+  --gold:#f0c040; --gold2:#c89a18; --gold3:#ffd966;
+  --text:#d4e0ec; --muted:#5a7090; --border:#1e3a52;
+  --red:#e05050; --green:#40c080; --purple:#c080ff; --warn:#ff9040;
+  --base:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--navy);color:var(--text);font-family:'DM Mono',monospace;font-size:var(--base);display:flex;flex-direction:column;height:100dvh;line-height:1.5}
+
+/* HEADER */
+.hdr{background:var(--navy2);border-bottom:2px solid var(--gold);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(240,192,64,.4),transparent)}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold);letter-spacing:.06em;line-height:1}
+.brand-sub{font-size:11px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.hdr-icon{font-size:26px}
+.hdr-local-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 10px;min-height:36px;border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace}
+
+/* SECURE CONTEXT BANNER */
+.ctx-banner{background:rgba(224,80,80,.1);border-bottom:1px solid rgba(224,80,80,.3);padding:10px 16px;display:none;align-items:center;gap:10px;flex-shrink:0}
+.ctx-banner.show{display:flex}
+.ctx-banner p{font-size:13px;color:#ff9090;flex:1;line-height:1.4}
+.ctx-banner button{padding:6px 12px;min-height:36px;border:1px solid #ff6060;background:transparent;color:#ff9090;border-radius:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;white-space:nowrap;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;background:var(--navy2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:62px;padding:9px 3px 8px;text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.tab .ti{font-size:20px;line-height:1}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{display:none;height:100%;overflow-y:auto;padding:14px 14px 28px}
+.page.active{display:block}
+.page::-webkit-scrollbar{width:3px}
+.page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* CAMERA */
+.cam-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;flex-shrink:0}
+.cam-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.cam-wrap canvas{display:none}
+.crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;pointer-events:none}
+.crosshair::before,.crosshair::after{content:'';position:absolute;background:rgba(240,192,64,.7)}
+.crosshair::before{width:1px;height:100%;left:50%;top:0;transform:translateX(-50%)}
+.crosshair::after{height:1px;width:100%;top:50%;left:0;transform:translateY(-50%)}
+.ch{position:absolute;width:12px;height:12px;border-color:var(--gold);border-style:solid}
+.ch.tl{top:0;left:0;border-width:2px 0 0 2px}.ch.tr{top:0;right:0;border-width:2px 2px 0 0}
+.ch.bl{bottom:0;left:0;border-width:0 0 2px 2px}.ch.br{bottom:0;right:0;border-width:0 2px 2px 0}
+.zone-a{position:absolute;top:50%;left:25%;transform:translate(-50%,-50%);width:52px;height:52px;pointer-events:none}
+.zone-b{position:absolute;top:50%;left:75%;transform:translate(-50%,-50%);width:52px;height:52px;pointer-events:none}
+.zone-a::before,.zone-b::before{content:'';position:absolute;width:1px;height:100%;left:50%;background:rgba(255,255,255,.6)}
+.zone-a::after,.zone-b::after{content:'';position:absolute;height:1px;width:100%;top:50%;background:rgba(255,255,255,.6)}
+.cam-swatch{position:absolute;bottom:12px;right:12px;width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.35);transition:background .15s}
+.cam-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);flex-direction:column;gap:8px}
+.cam-off span{font-size:34px}
+.cam-off small{font-size:13px;color:#999;letter-spacing:.1em}
+
+/* MANUAL CAMERA FALLBACK */
+.cam-fallback{display:none;margin-top:-6px;margin-bottom:14px}
+.cam-fallback.show{display:block}
+.cam-fallback-inner{background:rgba(255,144,64,.07);border:1px solid rgba(255,144,64,.3);border-radius:8px;padding:12px 14px}
+.cam-fallback-inner p{font-size:14px;color:var(--warn);margin-bottom:10px;line-height:1.5}
+.cam-fallback img{width:100%;border-radius:6px;margin-top:8px;display:none}
+.cam-fallback img.show{display:block}
+
+/* AWB CALIBRATION */
+.cal-banner{background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.22);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.cal-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+.cal-dot.set{background:var(--green)}
+.cal-text{flex:1;font-size:14px;line-height:1.45;color:var(--muted)}
+.cal-text strong{color:var(--text);font-weight:500}
+.cal-btn-sm{padding:8px 13px;min-height:40px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* BUTTONS — min 48px height */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;min-height:48px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:8px;cursor:pointer;width:100%;transition:all .2s}
+.btn:active{background:rgba(240,192,64,.12)}
+.btn.stop{border-color:var(--muted);color:var(--muted)}
+.btn.solid{background:var(--gold);color:var(--navy);font-weight:700}
+.btn.solid:active{background:var(--gold2);color:var(--navy)}
+.btn.sm{padding:10px 13px;min-height:44px;font-size:13px}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.btn-row{display:flex;gap:8px;margin-bottom:12px}
+.btn-row .btn{flex:1}
+
+/* CARDS */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:12px}
+.card-title{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:13px;display:flex;justify-content:space-between;align-items:center}
+
+/* BADGES */
+.badge{padding:4px 11px;border-radius:20px;font-size:12px;letter-spacing:.06em;font-weight:500;min-height:28px;display:inline-flex;align-items:center}
+.b-ok{background:rgba(64,192,128,.15);color:var(--green);border:1px solid rgba(64,192,128,.3)}
+.b-warm{background:rgba(224,80,80,.15);color:#ff8080;border:1px solid rgba(224,80,80,.3)}
+.b-cool{background:rgba(144,184,255,.15);color:#90b8ff;border:1px solid rgba(144,184,255,.3)}
+.b-off{background:rgba(74,96,128,.15);color:var(--muted);border:1px solid var(--border)}
+.b-warn{background:rgba(255,144,64,.12);color:var(--warn);border:1px solid rgba(255,144,64,.3)}
+
+/* KELVIN DISPLAY */
+.big-k-val{font-size:clamp(56px,15vw,80px);font-weight:400;line-height:1;transition:color .2s;letter-spacing:-.02em;text-align:center}
+.big-k-label{font-size:14px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-top:5px;text-align:center;margin-bottom:14px}
+
+/* BARS */
+.temp-bar{height:13px;border-radius:7px;position:relative;margin-bottom:7px;background:linear-gradient(to right,#ff6000,#ff9840,#ffbb66,#ffd166,#fff8e8,#e8f4ff,#c0dcff,#90b8ff,#6090ff)}
+.tint-bar{height:10px;border-radius:5px;position:relative;margin-bottom:6px;background:linear-gradient(to right,#ff40ff,#886688,#556655,#40c080)}
+.bar-needle{position:absolute;top:-5px;width:4px;height:23px;background:var(--gold);border-radius:2px;transform:translateX(-50%);transition:left .2s;box-shadow:0 0 8px rgba(240,192,64,.7)}
+.bar-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:12px}
+
+/* GODOX */
+.godox-row{display:flex;align-items:center;gap:12px}
+.godox-val{font-size:32px;font-weight:400;transition:color .2s;flex:1}
+.godox-desc{font-size:14px;color:var(--muted);margin-top:3px}
+.dial{width:58px;height:58px;border-radius:50%;border:2px solid var(--border);position:relative;flex-shrink:0;background:conic-gradient(from 210deg,#ff6000,#ffd166,#a0ccff,#a0ccff 30%);display:flex;align-items:center;justify-content:center}
+.dial-n{position:absolute;width:2px;height:21px;background:#fff;border-radius:1px;transform-origin:bottom center;bottom:50%;left:calc(50% - 1px);transition:transform .3s;box-shadow:0 -2px 6px rgba(255,255,255,.5)}
+.dial-dot{width:6px;height:6px;background:#fff;border-radius:50%;position:relative;z-index:2}
+
+/* RGB */
+.rgb-row{display:flex;gap:8px;margin-top:12px}
+.rgb-chip{flex:1;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:10px 5px;text-align:center}
+.rc-v{font-size:20px;font-weight:500}.rc-l{font-size:12px;letter-spacing:.1em;color:var(--muted);margin-top:3px}
+.r .rc-v{color:#ff7070}.g .rc-v{color:#50d090}.b .rc-v{color:#70b0ff}
+
+/* WB CHIPS */
+.wb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wb-chip{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.wb-v{font-size:24px;font-weight:400}.wb-l{font-size:12px;letter-spacing:.1em;color:var(--muted);margin-top:3px}
+
+/* DUAL ZONE */
+.dz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dz-chip{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.dz-swatch{width:100%;height:38px;border-radius:6px;margin-bottom:8px;background:#555}
+.dz-k{font-size:20px;font-weight:500;color:var(--gold)}
+.dz-l{font-size:12px;color:var(--muted);margin-top:3px}
+.dz-diff{text-align:center;padding:11px;background:var(--navy3);border:1px solid var(--border);border-radius:8px}
+.dd-v{font-size:28px;font-weight:500;color:var(--gold)}
+.dd-desc{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* LIGHT METER */
+.ev-big{font-size:clamp(62px,18vw,92px);font-weight:300;line-height:1;text-align:center;color:var(--gold);letter-spacing:-.02em}
+.ev-label{text-align:center;font-size:14px;letter-spacing:.16em;color:var(--muted);margin-bottom:14px}
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.exp-chip{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:12px 5px;text-align:center}
+.exp-chip .ev{font-size:17px;font-weight:500;color:var(--gold3)}
+.exp-chip .el{font-size:12px;color:var(--muted);margin-top:3px}
+.iso-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.iso-btn{padding:9px 13px;min-height:44px;border-radius:6px;font-size:13px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s}
+.iso-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.1)}
+.scene-bar{height:9px;border-radius:5px;position:relative;background:linear-gradient(to right,#111,#334,#668,#aac,#fff)}
+.sn{position:absolute;top:-5px;width:4px;height:19px;background:var(--gold);border-radius:2px;transform:translateX(-50%);transition:left .2s}
+.scene-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+
+/* PANTONE */
+.pan-big{height:140px;border-radius:10px;margin-bottom:12px;display:flex;align-items:flex-end;padding:14px;border:1px solid var(--border);transition:background .2s;position:relative}
+.pan-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600}
+.pan-num{font-size:14px;color:var(--muted);margin-top:2px}
+.pan-de{font-size:13px;margin-top:4px}
+.pan-alts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.pan-alt{border-radius:8px;height:64px;cursor:pointer;border:1.5px solid transparent;transition:border-color .2s;display:flex;align-items:flex-end;padding:5px}
+.pan-alt.best{border-color:var(--gold)}
+.pan-alt span{font-size:11px;color:rgba(0,0,0,.65);font-weight:500;line-height:1.2}
+.pan-share-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:7px;padding:8px 14px;min-height:38px;font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;backdrop-filter:blur(4px)}
+
+/* SWATCHES */
+.sw-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.sw-card{border-radius:9px;overflow:hidden;border:1px solid var(--border);cursor:pointer}
+.sw-color{height:80px}
+.sw-info{background:var(--navy2);padding:10px 11px}
+.sw-k{font-size:17px;font-weight:500}.sw-p{font-size:12px;color:var(--muted);margin-top:2px}.sw-t{font-size:11px;color:var(--muted);margin-top:4px}
+.sw-empty{text-align:center;padding:44px 20px;color:var(--muted);font-size:15px;line-height:1.8;grid-column:span 2}
+
+/* MODEL RELEASE */
+.rel-photo-wrap{width:100%;aspect-ratio:3/4;background:var(--navy3);border-radius:10px;overflow:hidden;position:relative;border:1px solid var(--border);margin-bottom:12px;display:flex;align-items:center;justify-content:center}
+.rel-photo-wrap img{width:100%;height:100%;object-fit:cover;display:none}
+.rel-placeholder{text-align:center;color:var(--muted)}
+.rel-placeholder span{font-size:44px;display:block;margin-bottom:8px}
+.rel-placeholder small{font-size:14px;letter-spacing:.08em}
+.form-grp{margin-bottom:14px}
+.form-lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.form-inp{width:100%;padding:12px 14px;min-height:48px;background:var(--navy3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:16px;outline:none;transition:border-color .2s}
+.form-inp:focus{border-color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sig-wrap{background:#fff;border-radius:9px;overflow:hidden;border:2px solid var(--gold);margin-bottom:10px}
+.sig-canvas{display:block;width:100%;height:130px;cursor:crosshair;touch-action:none}
+.rel-preview{background:#fff;color:#111;border-radius:9px;padding:17px;margin-bottom:12px;display:none}
+.rel-preview.show{display:block}
+.rel-preview h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;margin-bottom:3px}
+.rel-preview .rp-co{font-size:12px;color:#666;margin-bottom:12px;font-family:'DM Mono',monospace}
+.rel-preview p{font-size:12px;line-height:1.65;color:#333;margin-bottom:10px;font-family:'DM Mono',monospace}
+.rp-sigs{display:flex;gap:12px;margin-top:12px;align-items:flex-end}
+.rp-sb{flex:1;border-top:1px solid #333;padding-top:4px;font-size:11px;color:#666;font-family:'DM Mono',monospace}
+.rp-sig-img{max-height:50px;max-width:145px}
+.rp-photo-th{width:78px;height:98px;object-fit:cover;border-radius:4px;border:1px solid #ccc}
+
+/* OC WARNING BOX */
+.oc-box{background:rgba(255,144,64,.06);border:1px solid rgba(255,144,64,.25);border-radius:9px;padding:13px 15px;margin-bottom:12px}
+.oc-title{font-size:13px;color:var(--warn);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.oc-box p{font-size:14px;color:var(--muted);line-height:1.6}
+.oc-box a{color:var(--warn);text-decoration:none}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;z-index:200;padding:18px}
+.modal-bg.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--gold);border-radius:13px;padding:22px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:23px;color:var(--gold);margin-bottom:13px}
+.modal p{font-size:15px;line-height:1.65;color:var(--text);margin-bottom:11px}
+.modal code{background:var(--navy3);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--gold3)}
+.modal-btns{display:flex;gap:9px;margin-top:15px}
+
+/* MODE TOGGLE */
+.mode-row{display:flex;gap:8px;margin-bottom:12px}
+.mode-row .btn{flex:1}
+
+/* TIPS */
+.tip{font-size:13px;color:var(--muted);text-align:center;line-height:1.65;margin-top:10px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:23px;color:var(--gold);margin-bottom:14px}
+
+/* STORAGE INDICATOR */
+.storage-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);background:rgba(64,192,128,.1);border:1px solid rgba(64,192,128,.25);border-radius:12px;padding:3px 9px;margin-bottom:10px}
+</style>
 </head>
 <body>
-    <header>
-        <h1>Photography Toolkit</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Edit Your Photos</h2>
-            <button id="edit-btn">Edit Photo</button>
-        </section>
-        <section>
-            <h2>Upload Your Photos</h2>
-            <input type="file" id="upload-btn">
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Photography Toolkit</p>
-    </footer>
-    <script>
-        document.getElementById('edit-btn').addEventListener('click', function() {
-            alert('Edit your photos functionality coming soon!');
-        });
-    </script>
+
+<!-- ═══════════════════════════════════
+     SECURE CONTEXT WARNING
+════════════════════════════════════ -->
+<div class="ctx-banner" id="ctxBanner">
+  <p>⚠ Camera requires HTTPS or localhost. Running via file:// — camera blocked.</p>
+  <button onclick="showLocalGuide()">Fix This</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="brand-name">PR Eye</div>
+    <div class="brand-sub">Bespoke Photography Toolkit</div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-local-btn" onclick="showLocalGuide()">📡 Local</button>
+    <div class="hdr-icon">📷</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('kelvin')"><span class="ti">🌡</span>Kelvin</div>
+  <div class="tab" onclick="showTab('light')"><span class="ti">☀️</span>Meter</div>
+  <div class="tab" onclick="showTab('pantone')"><span class="ti">🎨</span>Pantone</div>
+  <div class="tab" onclick="showTab('swatches')"><span class="ti">🗂</span>Swatches</div>
+  <div class="tab" onclick="showTab('release')"><span class="ti">📋</span>Release</div>
+</div>
+
+<div class="pages">
+
+<!-- ═══ KELVIN ═══ -->
+<div class="page active" id="page-kelvin">
+
+  <div class="oc-box">
+    <div class="oc-title">⚠ AWB Warning</div>
+    <p>Your phone's Auto White Balance fights accuracy. Lock WB in <strong style="color:var(--warn)">Open Camera</strong> (Android, free) or use the calibration below.</p>
+  </div>
+
+  <div class="cal-banner" id="calBanner">
+    <div class="cal-dot" id="calDot"></div>
+    <div class="cal-text" id="calText"><strong>AWB Calibration not set</strong><br>Point at a white/grey card and tap Set Ref.</div>
+    <button class="cal-btn-sm" onclick="setCalibration()">Set Ref</button>
+  </div>
+
+  <div class="mode-row">
+    <button class="btn sm" id="modeSingle" onclick="setKMode('single')">Single Zone</button>
+    <button class="btn sm" id="modeDual" onclick="setKMode('dual')">Dual Zone</button>
+  </div>
+
+  <div class="cam-wrap" id="kCamWrap">
+    <video id="kVideo" autoplay playsinline muted></video>
+    <canvas id="kCanvas"></canvas>
+    <div id="kCrossSingle"><div class="crosshair"><div class="ch tl"></div><div class="ch tr"></div><div class="ch bl"></div><div class="ch br"></div></div></div>
+    <div id="kCrossDual" style="display:none">
+      <div class="zone-a"></div><div class="zone-b"></div>
+      <div style="position:absolute;top:7px;left:16%;font-size:11px;color:rgba(255,255,255,.8);font-family:'DM Mono',monospace">GREY CARD</div>
+      <div style="position:absolute;top:7px;left:60%;font-size:11px;color:rgba(255,255,255,.8);font-family:'DM Mono',monospace">SUBJECT</div>
+    </div>
+    <div class="cam-swatch" id="kSwatch"></div>
+    <div class="cam-off" id="kOff"><span>📷</span><small>Camera off</small></div>
+  </div>
+
+  <!-- MANUAL FALLBACK -->
+  <div class="cam-fallback" id="kFallback">
+    <div class="cam-fallback-inner">
+      <p>Camera blocked — use manual capture instead:</p>
+      <button class="btn sm warn" onclick="document.getElementById('kFallbackInput').click()">📷 Capture Photo for Analysis</button>
+      <input type="file" id="kFallbackInput" accept="image/*" capture="environment" style="display:none" onchange="analyseUploadedImage(this,'k')">
+      <img id="kFallbackPreview" alt="Captured image">
+    </div>
+  </div>
+
+  <div id="kSingleReadings">
+    <div style="text-align:center">
+      <div class="big-k-val" id="kVal" style="color:var(--muted)">—</div>
+      <div class="big-k-label">Colour Temperature</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Temperature Scale</div>
+      <div class="temp-bar"><div class="bar-needle" id="kNeedle" style="left:50%"></div></div>
+      <div class="bar-labels"><span>1K</span><span>2.7K</span><span>4.2K</span><span>6.5K</span><span>10K</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>Godox ML100Bi — Set To</span><span class="badge b-off" id="kBadge">STANDBY</span></div>
+      <div class="godox-row">
+        <div style="flex:1"><div class="godox-val" id="kSet" style="color:var(--muted)">—</div><div class="godox-desc" id="kSetDesc">Awaiting reading…</div></div>
+        <div class="dial"><div class="dial-n" id="kDialN"></div><div class="dial-dot"></div></div>
+      </div>
+      <div class="rgb-row">
+        <div class="rgb-chip r"><div class="rc-v" id="kR">—</div><div class="rc-l">RED</div></div>
+        <div class="rgb-chip g"><div class="rc-v" id="kG">—</div><div class="rc-l">GREEN</div></div>
+        <div class="rgb-chip b"><div class="rc-v" id="kB">—</div><div class="rc-l">BLUE</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">White Balance Offset</div>
+      <div class="tint-bar"><div class="bar-needle" id="tintNeedle" style="left:50%"></div></div>
+      <div class="bar-labels"><span>Magenta</span><span>Neutral</span><span>Green</span></div>
+      <div class="wb-grid">
+        <div class="wb-chip"><div class="wb-v" id="wbK" style="color:var(--gold)">—K</div><div class="wb-l">KELVIN</div></div>
+        <div class="wb-chip"><div class="wb-v" id="wbTint" style="color:var(--purple)">±0 MG</div><div class="wb-l">TINT SHIFT</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kDualReadings" style="display:none">
+    <div class="card">
+      <div class="card-title">Dual Zone Analysis</div>
+      <div class="dz-grid">
+        <div class="dz-chip"><div class="dz-swatch" id="dzSwatchA"></div><div class="dz-k" id="dzKA">—K</div><div class="dz-l">Grey Card</div></div>
+        <div class="dz-chip"><div class="dz-swatch" id="dzSwatchB"></div><div class="dz-k" id="dzKB">—K</div><div class="dz-l">Subject</div></div>
+      </div>
+      <div class="dz-diff" style="margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">OFFSET — SET THIS ON YOUR LIGHT</div>
+        <div class="dd-v" id="dzDiff">—</div>
+        <div class="dd-desc" id="dzDiffDesc">Start camera to measure</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="kBtn" onclick="toggleKCam()">▶ Start Camera</button>
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn sm" onclick="saveSwatch()" id="kSaveBtn" disabled>＋ Save Swatch</button>
+    <button class="btn sm warn" onclick="showOpenCameraGuide()">📱 AWB Guide</button>
+  </div>
+  <p class="tip">Aim crosshair at a neutral lit surface or grey card.</p>
+</div>
+
+<!-- ═══ LIGHT METER ═══ -->
+<div class="page" id="page-light">
+  <div class="oc-box">
+    <div class="oc-title">⚠ Accuracy Note</div>
+    <p>Lock exposure in Open Camera first for reliable readings. Phone AWB auto-adjusts aggressively.</p>
+  </div>
+  <div class="cam-wrap">
+    <video id="lVideo" autoplay playsinline muted></video>
+    <canvas id="lCanvas"></canvas>
+    <div class="cam-off" id="lOff"><span>☀️</span><small>Camera off</small></div>
+  </div>
+  <div class="cam-fallback" id="lFallback">
+    <div class="cam-fallback-inner">
+      <p>Camera blocked — upload a photo to analyse its exposure:</p>
+      <button class="btn sm warn" onclick="document.getElementById('lFallbackInput').click()">📷 Upload Photo</button>
+      <input type="file" id="lFallbackInput" accept="image/*" capture="environment" style="display:none" onchange="analyseUploadedImage(this,'l')">
+      <img id="lFallbackPreview" alt="">
+    </div>
+  </div>
+  <div class="ev-big" id="evVal">—</div>
+  <div class="ev-label">Exposure Value (EV)</div>
+  <div class="card">
+    <div class="card-title">Scene Brightness</div>
+    <div class="scene-bar"><div class="sn" id="sceneNeedle" style="left:50%"></div></div>
+    <div class="scene-labels"><span>Night</span><span>Shade</span><span>Cloudy</span><span>Sun</span><span>Snow</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>Exposure Combinations</span><span style="font-size:12px">ISO <span id="isoLabel" style="color:var(--gold)">400</span></span></div>
+    <div class="exp-grid" id="expGrid">
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/1.8</div></div>
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/2.8</div></div>
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/4</div></div>
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/5.6</div></div>
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/8</div></div>
+      <div class="exp-chip"><div class="ev">—</div><div class="el">f/11</div></div>
+    </div>
+    <div class="iso-row">
+      <button class="iso-btn" onclick="setISO(100,this)">100</button>
+      <button class="iso-btn" onclick="setISO(200,this)">200</button>
+      <button class="iso-btn active" onclick="setISO(400,this)">400</button>
+      <button class="iso-btn" onclick="setISO(800,this)">800</button>
+      <button class="iso-btn" onclick="setISO(1600,this)">1600</button>
+      <button class="iso-btn" onclick="setISO(3200,this)">3200</button>
+    </div>
+  </div>
+  <button class="btn" id="lBtn" onclick="toggleLCam()">▶ Start Camera</button>
+  <p class="tip">For incident reading: point at subject from light direction.</p>
+</div>
+
+<!-- ═══ PANTONE ═══ -->
+<div class="page" id="page-pantone">
+  <div class="cam-wrap">
+    <video id="pVideo" autoplay playsinline muted></video>
+    <canvas id="pCanvas"></canvas>
+    <div class="crosshair" id="pCross" style="display:none"><div class="ch tl"></div><div class="ch tr"></div><div class="ch bl"></div><div class="ch br"></div></div>
+    <div class="cam-swatch" id="pSwatch"></div>
+    <div class="cam-off" id="pOff"><span>🎨</span><small>Camera off</small></div>
+  </div>
+  <div class="cam-fallback" id="pFallback">
+    <div class="cam-fallback-inner">
+      <p>Camera blocked — upload a photo to match its colour:</p>
+      <button class="btn sm warn" onclick="document.getElementById('pFallbackInput').click()">📷 Upload Photo</button>
+      <input type="file" id="pFallbackInput" accept="image/*" style="display:none" onchange="analyseUploadedImage(this,'p')">
+      <img id="pFallbackPreview" alt="">
+    </div>
+  </div>
+  <div class="pan-big" id="panBig" style="background:#555">
+    <div>
+      <div class="pan-name" id="panName" style="color:#fff">—</div>
+      <div class="pan-num" id="panNum">Pantone —</div>
+      <div class="pan-de" id="panDE" style="color:var(--muted)">ΔE —</div>
+    </div>
+    <button class="pan-share-btn" onclick="sharePantone()">⬆ Share</button>
+  </div>
+  <div class="card">
+    <div class="card-title">4 Closest Matches</div>
+    <div class="pan-alts" id="panAlts">
+      <div class="pan-alt" style="background:#333"></div>
+      <div class="pan-alt" style="background:#333"></div>
+      <div class="pan-alt" style="background:#333"></div>
+      <div class="pan-alt" style="background:#333"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Sampled RGB</div>
+    <div class="rgb-row">
+      <div class="rgb-chip r"><div class="rc-v" id="pR">—</div><div class="rc-l">RED</div></div>
+      <div class="rgb-chip g"><div class="rc-v" id="pG">—</div><div class="rc-l">GREEN</div></div>
+      <div class="rgb-chip b"><div class="rc-v" id="pB">—</div><div class="rc-l">BLUE</div></div>
+    </div>
+  </div>
+  <button class="btn" id="pBtn" onclick="togglePCam()">▶ Start Camera</button>
+  <p class="tip">Point at solid colour in even light. Indicative — verify with physical swatch book for critical print work.</p>
+</div>
+
+<!-- ═══ SWATCHES ═══ -->
+<div class="page" id="page-swatches">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:0">Saved Swatches</div>
+    <button class="btn sm danger" onclick="clearSwatches()" style="width:auto">Clear All</button>
+  </div>
+  <div class="storage-badge" id="storageBadge">💾 Saved to device</div>
+  <div class="sw-grid" id="swatchGrid">
+    <div class="sw-empty"><span style="font-size:32px">🗂</span><br>No swatches yet.<br>Start Kelvin camera and tap Save Swatch.</div>
+  </div>
+</div>
+
+<!-- ═══ MODEL RELEASE — 6-step wizard ═══ -->
+<div class="page" id="page-release">
+
+<style>
+.rpg{display:none}.rpg.active{display:block}
+.rpg-title{font-family:var(--font-serif,Georgia,serif);font-size:22px;color:var(--gold);margin-bottom:4px}
+.rpg-sub{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.rp-prog-wrap{background:var(--navy3,#1a2f45);border-radius:8px;padding:10px 12px;margin-bottom:14px}
+.rp-prog-track{height:4px;background:var(--border,#1e3a52);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.rp-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold2,#c89a18),var(--gold,#f0c040));border-radius:2px;transition:width .4s}
+.rp-steps{display:flex;justify-content:space-between}
+.rp-step{font-size:11px;color:var(--muted);cursor:pointer;transition:color .2s;text-align:center;flex:1;letter-spacing:.04em;text-transform:uppercase;padding:2px 0}
+.rp-step.active{color:var(--gold)}.rp-step.done{color:var(--green,#40c080)}
+.fgrp{margin-bottom:13px}.flbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+.finp{width:100%;padding:12px 14px;min-height:50px;background:var(--navy3,#1a2f45);border:1px solid var(--border,#1e3a52);border-radius:8px;color:var(--text,#d4e0ec);font-family:var(--font-mono,monospace);font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.finp:focus{border-color:var(--gold,#f0c040)}.finp::placeholder{color:var(--muted)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+textarea.finp{resize:vertical;min-height:80px;line-height:1.5}
+.req{color:var(--red,#e05050)}
+.tgl-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.tgl-row:last-child{border-bottom:none}
+.tgl-lbl{flex:1;padding-right:14px}.tgl-lbl strong{display:block;font-size:16px;color:var(--text);margin-bottom:2px}.tgl-lbl span{font-size:13px;color:var(--muted);line-height:1.4}
+.tgl{position:relative;width:54px;height:30px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tgl-track{position:absolute;inset:0;background:var(--navy3);border:1px solid var(--border);border-radius:15px;cursor:pointer;transition:all .25s}
+.tgl input:checked+.tgl-track{background:var(--gold);border-color:var(--gold)}
+.tgl-track::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tgl input:checked+.tgl-track::after{transform:translateX(24px)}
+.photo-zone{position:relative;width:100%;height:230px;background:var(--navy3);border-radius:10px;overflow:hidden;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.photo-zone img{width:100%;height:100%;object-fit:cover;display:none}.photo-zone img.show{display:block}
+.pz-ph{text-align:center;color:var(--muted);pointer-events:none}.pz-ph .pzi{font-size:44px;display:block;margin-bottom:8px}.pz-ph span{font-size:15px}.pz-ph small{font-size:13px;display:block;margin-top:2px}
+.wsig-outer{background:#fff;border-radius:10px;border:2px solid var(--gold);overflow:hidden;margin-bottom:11px}
+.wsig-canvas{display:block;width:100%;height:140px;cursor:crosshair;touch-action:none}
+.wsig-bar{background:var(--navy3);padding:7px 13px;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.wsig-bar button{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 12px;min-height:36px;border-radius:5px;cursor:pointer;font-family:inherit}
+.rel-preview-doc{background:#fff;color:#1a1a1a;border-radius:10px;padding:18px;margin-bottom:14px;font-family:monospace;font-size:12px;line-height:1.75;overflow-x:auto}
+.rel-preview-doc h1{font-family:Georgia,serif;font-size:19px;font-weight:700;text-align:center;margin-bottom:4px}
+.rel-preview-doc .rpd-sub{font-size:10px;text-align:center;color:#666;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid #ccc}
+.rel-preview-doc h2{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:11px 0 4px;color:#333}
+.rel-preview-doc p{margin-bottom:7px;color:#333;font-size:11px}.fld{font-weight:bold;color:#000}
+.rpd-sig-row{display:flex;gap:10px;margin-top:14px;padding-top:10px;border-top:1px solid #ccc;flex-wrap:wrap}
+.rpd-sig-blk{flex:1;min-width:90px;text-align:center}.rpd-sig-blk img{max-height:48px;max-width:140px;margin:0 auto 3px;display:block}
+.rpd-sl{border-top:1px solid #333;padding-top:3px;font-size:9px;color:#666;margin-top:3px;line-height:1.4}
+.rel-nav{display:flex;gap:10px;margin-top:10px;position:sticky;bottom:0;background:linear-gradient(transparent,var(--navy,#0d1b2a) 30%);padding:16px 0 4px}
+.rel-nav .btn{flex:1}
+</style>
+
+  <!-- Progress bar -->
+  <div class="rp-prog-wrap">
+    <div class="rp-prog-track"><div class="rp-prog-fill" id="rProgFill" style="width:16.6%"></div></div>
+    <div class="rp-steps">
+      <div class="rp-step active" id="rst0" onclick="rGoTo(0)">Shoot</div>
+      <div class="rp-step" id="rst1" onclick="rGoTo(1)">Model</div>
+      <div class="rp-step" id="rst2" onclick="rGoTo(2)">Photo</div>
+      <div class="rp-step" id="rst3" onclick="rGoTo(3)">Rights</div>
+      <div class="rp-step" id="rst4" onclick="rGoTo(4)">Sign</div>
+      <div class="rp-step" id="rst5" onclick="rGoTo(5)">Send</div>
+    </div>
+  </div>
+
+  <!-- R0: SHOOT -->
+  <div class="rpg active" id="rpg-0">
+    <div class="rpg-title">Shoot Details</div>
+    <div class="rpg-sub">Date, location and project for this session.</div>
+    <div class="storage-badge">💾 Auto-saved to device</div>
+    <div class="card">
+      <div class="frow">
+        <div class="fgrp"><label class="flbl">Shoot Date <span class="req">*</span></label><input class="finp" id="rDate" type="date" oninput="rSave()"></div>
+        <div class="fgrp"><label class="flbl">Photographer</label><input class="finp" id="rPhotog" type="text" value="Digby Oldridge" oninput="rSave()"></div>
+      </div>
+      <div class="fgrp"><label class="flbl">Location <span class="req">*</span></label><input class="finp" id="rLoc" type="text" placeholder="e.g. Oxford Studio" oninput="rSave()"></div>
+      <div class="fgrp"><label class="flbl">Project / Shoot Name</label><input class="finp" id="rProj" type="text" placeholder="e.g. Spring Campaign 2026" oninput="rSave()"></div>
+      <div class="fgrp"><label class="flbl">Compensation (if any)</label><input class="finp" id="rComp" type="text" placeholder="e.g. £250 fee, TFP, none" oninput="rSave()"></div>
+    </div>
+    <div class="info-box"><strong>📋 About this release</strong>Legally binding model release for PR Eye Ltd, Longcot, Oxfordshire. Governed by the laws of England and Wales.</div>
+  </div>
+
+  <!-- R1: MODEL -->
+  <div class="rpg" id="rpg-1">
+    <div class="rpg-title">Model Details</div>
+    <div class="rpg-sub">Full legal name and contact information.</div>
+    <div class="card">
+      <div class="frow">
+        <div class="fgrp"><label class="flbl">First Name <span class="req">*</span></label><input class="finp" id="rFirst" type="text" placeholder="Jane" oninput="rSave()"></div>
+        <div class="fgrp"><label class="flbl">Last Name <span class="req">*</span></label><input class="finp" id="rLast" type="text" placeholder="Smith" oninput="rSave()"></div>
+      </div>
+      <div class="frow">
+        <div class="fgrp"><label class="flbl">Date of Birth <span class="req">*</span></label><input class="finp" id="rDOB" type="date" onchange="rCheckMinor();rSave()"></div>
+        <div class="fgrp"><label class="flbl">Phone</label><input class="finp" id="rPhone" type="tel" placeholder="07700 000000" oninput="rSave()"></div>
+      </div>
+      <div class="fgrp"><label class="flbl">Email <span class="req">*</span></label><input class="finp" id="rEmail" type="email" placeholder="jane@example.com" oninput="rSave()"></div>
+      <div class="fgrp"><label class="flbl">Address</label><textarea class="finp" id="rAddr" placeholder="Street, Town, Postcode" rows="2" oninput="rSave()"></textarea></div>
+    </div>
+    <div class="card" id="rMinorCard" style="display:none">
+      <div class="card-title" style="color:var(--warn,#ff9040)">⚠ Under 18 — Guardian Consent Required</div>
+      <div class="info-box" style="margin-bottom:12px"><strong>Parent / Guardian must complete this section</strong></div>
+      <div class="fgrp"><label class="flbl">Guardian Full Name <span class="req">*</span></label><input class="finp" id="rGName" type="text" oninput="rSave()"></div>
+      <div class="fgrp"><label class="flbl">Relationship</label><input class="finp" id="rGRel" type="text" placeholder="Mother / Father / Legal Guardian" oninput="rSave()"></div>
+      <div class="frow">
+        <div class="fgrp"><label class="flbl">Guardian Phone</label><input class="finp" id="rGPhone" type="tel" oninput="rSave()"></div>
+        <div class="fgrp"><label class="flbl">Guardian Email</label><input class="finp" id="rGEmail" type="email" oninput="rSave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- R2: PHOTO -->
+  <div class="rpg" id="rpg-2">
+    <div class="rpg-title">Model Photo</div>
+    <div class="rpg-sub">Photograph the model. Embedded in the signed document as identification.</div>
+    <div class="info-box"><strong>📷 Native Camera — works everywhere</strong>Uses your phone's camera app via file input. No HTTPS required, works on file://.</div>
+    <div class="btn-row" style="margin-bottom:10px">
+      <button class="btn solid" onclick="document.getElementById('rPhCam').click()">📷 Front Camera</button>
+      <button class="btn solid" onclick="document.getElementById('rPhEnv').click()">📷 Rear Camera</button>
+    </div>
+    <button class="btn muted" onclick="document.getElementById('rPhGal').click()" style="margin-bottom:14px">🖼 Gallery</button>
+    <input type="file" id="rPhCam" accept="image/*" capture="user" style="display:none" onchange="rHandlePhoto(this)">
+    <input type="file" id="rPhEnv" accept="image/*" capture="environment" style="display:none" onchange="rHandlePhoto(this)">
+    <input type="file" id="rPhGal" accept="image/*" style="display:none" onchange="rHandlePhoto(this)">
+    <div class="photo-zone" id="rPhZone">
+      <img id="rPhImg" alt="">
+      <div class="pz-ph" id="rPhPH"><span class="pzi">👤</span><span>No photo yet</span><small>Use buttons above</small></div>
+    </div>
+    <button class="btn sm danger" onclick="rClearPhoto()" style="width:auto">✕ Remove Photo</button>
+  </div>
+
+  <!-- R3: RIGHTS -->
+  <div class="rpg" id="rpg-3">
+    <div class="rpg-title">Rights &amp; Permissions</div>
+    <div class="rpg-sub">Toggle off any clause the model does not consent to.</div>
+    <div class="card">
+      <div class="card-title">Grant of Rights</div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Commercial Use</strong><span>Advertising, marketing, promotional materials</span></div><label class="tgl"><input type="checkbox" id="tCommercial" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Digital &amp; Social Media</strong><span>Instagram, Facebook, website, digital platforms</span></div><label class="tgl"><input type="checkbox" id="tSocial" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Print &amp; Publications</strong><span>Magazines, books, posters, press</span></div><label class="tgl"><input type="checkbox" id="tPrint" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>TV &amp; Film</strong><span>Television, film, broadcast media</span></div><label class="tgl"><input type="checkbox" id="tTV" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Image Manipulation</strong><span>Cropping, editing, digital alteration</span></div><label class="tgl"><input type="checkbox" id="tEdit" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Name &amp; Likeness</strong><span>Model's name and biographical info alongside images</span></div><label class="tgl"><input type="checkbox" id="tName" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>AI &amp; Technology</strong><span>AI training, generative AI (off by default)</span></div><label class="tgl"><input type="checkbox" id="tAI" onchange="rSave()"><div class="tgl-track"></div></label></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ownership</div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Full Copyright to Photographer</strong><span>All rights vest exclusively in PR Eye Ltd</span></div><label class="tgl"><input type="checkbox" id="tCopyright" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+      <div class="tgl-row"><div class="tgl-lbl"><strong>Irrevocable &amp; Perpetual</strong><span>Worldwide, royalty-free, in perpetuity</span></div><label class="tgl"><input type="checkbox" id="tPerp" checked onchange="rSave()"><div class="tgl-track"></div></label></div>
+    </div>
+    <div class="info-box"><strong>AI is off by default</strong>Enable only with explicit model consent.</div>
+  </div>
+
+  <!-- R4: SIGNATURES -->
+  <div class="rpg" id="rpg-4">
+    <div class="rpg-title">Signatures</div>
+    <div class="rpg-sub">Sign with your finger. All signatories required.</div>
+    <div class="card">
+      <div class="card-title">Model Signature <span class="req">*</span></div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:11px;line-height:1.5">By signing I confirm I have read and agree to all terms. This is a legally binding agreement.</p>
+      <div class="wsig-outer"><canvas class="wsig-canvas" id="wSigModel" width="700" height="140"></canvas><div class="wsig-bar"><span>Model — sign here</span><button onclick="rClearSig('wSigModel')">Clear</button></div></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fgrp"><label class="flbl">Print Name</label><input class="finp" id="rSMName" type="text" oninput="rSave()"></div>
+        <div class="fgrp"><label class="flbl">Date</label><input class="finp" id="rSMDate" type="date" oninput="rSave()"></div>
+      </div>
+    </div>
+    <div class="card" id="rGSigCard" style="display:none">
+      <div class="card-title" style="color:var(--warn,#ff9040)">Guardian Signature <span class="req">*</span></div>
+      <div class="wsig-outer"><canvas class="wsig-canvas" id="wSigGuardian" width="700" height="140"></canvas><div class="wsig-bar"><span>Parent/Guardian — sign here</span><button onclick="rClearSig('wSigGuardian')">Clear</button></div></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fgrp"><label class="flbl">Print Name</label><input class="finp" id="rSGName" type="text" oninput="rSave()"></div>
+        <div class="fgrp"><label class="flbl">Date</label><input class="finp" id="rSGDate" type="date" oninput="rSave()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Witness Signature</div>
+      <div class="info-box" style="margin-bottom:11px"><strong>Witness: must be 18+, independent, not party to the agreement</strong></div>
+      <div class="wsig-outer"><canvas class="wsig-canvas" id="wSigWitness" width="700" height="140"></canvas><div class="wsig-bar"><span>Witness — sign here</span><button onclick="rClearSig('wSigWitness')">Clear</button></div></div>
+      <div class="fgrp" style="margin-top:10px"><label class="flbl">Witness Full Name</label><input class="finp" id="rSWName" type="text" oninput="rSave()"></div>
+      <div class="fgrp"><label class="flbl">Witness Address</label><input class="finp" id="rSWAddr" type="text" oninput="rSave()"></div>
+      <div class="frow"><div class="fgrp"><label class="flbl">Date</label><input class="finp" id="rSWDate" type="date" oninput="rSave()"></div><div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Photographer Signature</div>
+      <div class="wsig-outer"><canvas class="wsig-canvas" id="wSigPhotog" width="700" height="140"></canvas><div class="wsig-bar"><span>Digby Oldridge / PR Eye Ltd</span><button onclick="rClearSig('wSigPhotog')">Clear</button></div></div>
+      <div class="frow" style="margin-top:10px"><div class="fgrp"><label class="flbl">Date</label><input class="finp" id="rSPDate" type="date" oninput="rSave()"></div><div></div></div>
+    </div>
+  </div>
+
+  <!-- R5: SEND -->
+  <div class="rpg" id="rpg-5">
+    <div class="rpg-title">Review &amp; Send</div>
+    <div class="rpg-sub">Review the completed release then send to the model.</div>
+    <button class="btn" onclick="rGenPreview()" style="margin-bottom:14px">🔄 Generate / Refresh Preview</button>
+    <div class="rel-preview-doc" id="rPreviewDoc"><p style="text-align:center;color:#999;font-size:13px;padding:20px 0">Tap Generate above to build the document.</p></div>
+    <div class="card">
+      <div class="card-title">Send &amp; Save</div>
+      <button class="btn solid" onclick="rSendEmail()" style="margin-bottom:10px">✉️ Email Release to Model</button>
+      <button class="btn" onclick="rSaveHTML()" style="margin-bottom:10px">💾 Save HTML to Device</button>
+      <button class="btn muted" onclick="rSaveRecord()">📁 Save to Release Log</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Release Log <span id="rLogCt" style="color:var(--gold)"></span></div>
+      <div id="rLogList"><p style="font-size:14px;color:var(--muted)">No saved releases yet.</p></div>
+      <button class="btn sm danger" onclick="rClearLog()" style="margin-top:10px;width:auto">Clear Log</button>
+    </div>
+    <div class="info-box" style="margin-top:8px"><strong>Email</strong>Opens your mail app pre-filled, CC'd to info@preye.co.uk.</div>
+  </div>
+
+  <!-- Nav -->
+  <div class="rel-nav">
+    <button class="btn muted" id="rBtnBack" onclick="rGoBack()" style="flex:0 0 85px">← Back</button>
+    <button class="btn solid" id="rBtnNext" onclick="rGoNext()">Next →</button>
+    <button class="btn sm warn" onclick="rResetRelease()" style="flex:0 0 52px;padding:0;min-width:0" title="Reset">✕</button>
+  </div>
+
+</div>
+
+</div><!-- /pages -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+    <div class="modal-btns"><button class="btn" onclick="closeModal()">Close</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// PANTONE DB
+// ═══════════════════════════════════════════
+const PT=[
+  {n:"Bright Red",p:"485 C",r:218,g:41,b:28},{n:"Warm Red",p:"179 C",r:243,g:76,b:53},
+  {n:"Orange 021",p:"021 C",r:254,g:80,b:0},{n:"Bright Orange",p:"151 C",r:255,g:130,b:0},
+  {n:"Yellow",p:"012 C",r:255,g:210,b:0},{n:"Lemon Yellow",p:"102 C",r:255,g:229,b:0},
+  {n:"Warm Yellow",p:"116 C",r:255,g:194,b:14},{n:"Gold",p:"124 C",r:196,g:154,b:46},
+  {n:"Dark Gold",p:"130 C",r:185,g:141,b:20},{n:"Tan",p:"7509 C",r:199,g:169,b:120},
+  {n:"Cream",p:"9180 C",r:238,g:228,b:200},{n:"Warm Grey 1",p:"WG1 C",r:215,g:210,b:203},
+  {n:"Warm Grey 5",p:"WG5 C",r:180,g:172,b:162},{n:"Warm Grey 9",p:"WG9 C",r:140,g:129,b:118},
+  {n:"Cool Grey 1",p:"CG1 C",r:218,g:218,b:218},{n:"Cool Grey 5",p:"CG5 C",r:176,g:176,b:178},
+  {n:"Cool Grey 9",p:"CG9 C",r:131,g:132,b:135},{n:"Black",p:"Black C",r:30,g:30,b:30},
+  {n:"White",p:"White",r:245,g:245,b:245},{n:"Bright Green",p:"802 C",r:105,g:234,b:74},
+  {n:"Green",p:"354 C",r:0,g:171,b:60},{n:"Dark Green",p:"3425 C",r:0,g:115,b:60},
+  {n:"Forest Green",p:"357 C",r:0,g:96,b:54},{n:"Teal",p:"3278 C",r:0,g:175,b:135},
+  {n:"Turquoise",p:"3255 C",r:0,g:199,b:177},{n:"Aqua",p:"324 C",r:118,g:208,b:197},
+  {n:"Light Blue",p:"297 C",r:106,g:193,b:229},{n:"Process Blue",p:"Proc Blue C",r:0,g:133,b:202},
+  {n:"Reflex Blue",p:"Reflex C",r:0,g:51,b:160},{n:"Bright Blue",p:"286 C",r:0,g:56,b:168},
+  {n:"Dark Navy",p:"289 C",r:12,g:35,b:85},{n:"Royal Blue",p:"280 C",r:0,g:45,b:136},
+  {n:"Sky Blue",p:"292 C",r:100,g:175,b:216},{n:"Periwinkle",p:"2726 C",r:75,g:100,b:216},
+  {n:"Violet",p:"2685 C",r:72,g:0,b:139},{n:"Purple",p:"2607 C",r:110,g:25,b:165},
+  {n:"Bright Purple",p:"2592 C",r:170,g:60,b:190},{n:"Magenta",p:"Rubine Red C",r:206,g:0,b:88},
+  {n:"Hot Pink",p:"812 C",r:255,g:60,b:140},{n:"Pink",p:"1895 C",r:255,g:167,b:196},
+  {n:"Light Pink",p:"9320 C",r:255,g:213,b:226},{n:"Rose",p:"1775 C",r:255,g:120,b:147},
+  {n:"Dusty Rose",p:"698 C",r:220,g:155,b:165},{n:"Coral",p:"1635 C",r:255,g:135,b:100},
+  {n:"Salmon",p:"1645 C",r:255,g:155,b:120},{n:"Brick Red",p:"7621 C",r:170,g:55,b:45},
+  {n:"Burgundy",p:"7421 C",r:110,g:30,b:45},{n:"Brown",p:"7526 C",r:140,g:90,b:55},
+  {n:"Chocolate",p:"4625 C",r:80,g:45,b:30},{n:"Rust",p:"167 C",r:180,g:90,b:40},
+  {n:"Burnt Orange",p:"1525 C",r:200,g:100,b:40},{n:"Olive",p:"385 C",r:130,g:125,b:0},
+  {n:"Sage",p:"5777 C",r:150,g:165,b:130},{n:"Mint",p:"351 C",r:155,g:220,b:175},
+  {n:"Lime",p:"382 C",r:190,g:215,b:0},{n:"Lavender",p:"2635 C",r:190,g:170,b:230},
+  {n:"Lilac",p:"2562 C",r:195,g:150,b:210},{n:"Baby Blue",p:"9420 C",r:195,g:225,b:240},
+  {n:"Powder Blue",p:"2707 C",r:180,g:215,b:235},{n:"Silver",p:"877 C",r:170,g:175,b:180},
+  {n:"Sand",p:"7502 C",r:215,g:200,b:165},{n:"Stone",p:"403 C",r:190,g:182,b:170},
+  {n:"Slate",p:"7544 C",r:140,g:155,b:165},{n:"Charcoal",p:"7540 C",r:90,g:93,b:96},
+  {n:"Steel Blue",p:"7692 C",r:70,g:115,b:150},{n:"Cobalt",p:"286 C",r:0,g:71,b:187},
+  {n:"Cerulean",p:"2995 C",r:0,g:163,b:224},{n:"Prussian Blue",p:"2767 C",r:0,g:31,b:84},
+  {n:"Tiffany Blue",p:"3242 C",r:129,g:216,b:207},{n:"Kelly Green",p:"347 C",r:0,g:148,b:68},
+  {n:"Emerald",p:"7726 C",r:0,g:122,b:77},{n:"Seafoam",p:"3258 C",r:100,g:210,b:190},
+  {n:"Peach",p:"163 C",r:255,g:180,b:130},{n:"Apricot",p:"1555 C",r:250,g:160,b:100},
+  {n:"Amber",p:"7548 C",r:240,g:165,b:0},{n:"Mustard",p:"7754 C",r:205,g:170,b:20},
+  {n:"Ivory",p:"9180 C",r:245,g:240,b:215},{n:"Blush",p:"9320 C",r:250,g:225,b:220},
+  {n:"Chartreuse",p:"389 C",r:215,g:230,b:0}
+];
+
+// ═══════════════════════════════════════════
+// INDEXEDDB STORAGE
+// ═══════════════════════════════════════════
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open('preye',2);
+    req.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains('swatches')) d.createObjectStore('swatches',{keyPath:'id',autoIncrement:true});
+      if(!d.objectStoreNames.contains('release')) d.createObjectStore('release',{keyPath:'key'});
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db);};
+    req.onerror=()=>rej();
+  });
+}
+async function dbPut(store,val){
+  if(!db)await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).put(val).onsuccess=e=>res(e.target.result);
+    tx.onerror=()=>rej();
+  });
+}
+async function dbGetAll(store){
+  if(!db)await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result);
+    tx.onerror=()=>rej([]);
+  });
+}
+async function dbGet(store,key){
+  if(!db)await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result);
+    tx.onerror=()=>rej(null);
+  });
+}
+async function dbClear(store){
+  if(!db)await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).clear().onsuccess=()=>res();
+    tx.onerror=()=>rej();
+  });
+}
+
+// ═══════════════════════════════════════════
+// SECURE CONTEXT CHECK
+// ═══════════════════════════════════════════
+function checkSecureContext(){
+  const isSecure=window.isSecureContext||location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  if(!isSecure){
+    document.getElementById('ctxBanner').classList.add('show');
+    return false;
+  }
+  return true;
+}
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let kStream=null,lStream=null,pStream=null;
+let kRunning=false,lRunning=false,pRunning=false;
+let kTimer=null,lTimer=null,pTimer=null;
+let currentISO=400;
+let kMode='single';
+let calRef=null;
+let currentReading=null;
+let relPhotoData=null;
+let sigActive=false;
+let lastSigPt=null;
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function showTab(id){
+  const names=['kelvin','light','pantone','swatches','release'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===id));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='swatches') renderSwatches();
+}
+
+// ═══════════════════════════════════════════
+// COLOUR MATH
+// ═══════════════════════════════════════════
+function rgbToKelvin(r,g,b){
+  if(calRef){
+    r=Math.min(255,r*(255/(calRef.r||255)));
+    g=Math.min(255,g*(255/(calRef.g||255)));
+    b=Math.min(255,b*(255/(calRef.b||255)));
+  }
+  return _cct(r,g,b);
+}
+function _cct(r,g,b){
+  const rl=r/255,gl=g/255,bl=b/255;
+  const X=rl*0.4124+gl*0.3576+bl*0.1805;
+  const Y=rl*0.2126+gl*0.7152+bl*0.0722;
+  const Z=rl*0.0193+gl*0.1192+bl*0.9505;
+  const s=X+Y+Z; if(s<0.001)return 5500;
+  const x=X/s,y=Y/s;
+  const n=(x-0.3320)/(0.1858-y);
+  return Math.round(Math.max(1000,Math.min(15000,449*n**3+3525*n**2+6823.3*n+5520.33)));
+}
+function tintMG(r,g,b){return Math.round(Math.max(-50,Math.min(50,(g-(r+b)/2)/1.5)));}
+function lum(r,g,b){return 0.2126*r+0.7152*g+0.0722*b;}
+function evFromLum(l,iso){if(l<1)return null;return Math.round((Math.log2((l/255)*100*(400/iso))*1.5+4)*10)/10;}
+function shutterStr(ev,ap,iso){
+  const t=ap*ap/Math.pow(2,ev-Math.log2(iso/100));
+  return t>=1?Math.round(t)+'s':'1/'+Math.round(1/t);
+}
+function rgbToLab(r,g,b){
+  let rl=r/255,gl=g/255,bl=b/255;
+  rl=rl>0.04045?((rl+0.055)/1.055)**2.4:rl/12.92;
+  gl=gl>0.04045?((gl+0.055)/1.055)**2.4:gl/12.92;
+  bl=bl>0.04045?((bl+0.055)/1.055)**2.4:bl/12.92;
+  let Xv=(rl*0.4124+gl*0.3576+bl*0.1805)/0.95047;
+  let Yv=(rl*0.2126+gl*0.7152+bl*0.0722);
+  let Zv=(rl*0.0193+gl*0.1192+bl*0.9505)/1.08883;
+  const f=t=>t>0.008856?t**(1/3):7.787*t+16/116;
+  return[116*f(Yv)-16,500*(f(Xv)-f(Yv)),200*(f(Yv)-f(Zv))];
+}
+function deltaE(r1,g1,b1,r2,g2,b2){
+  const[l1,a1,b1_]=rgbToLab(r1,g1,b1);
+  const[l2,a2,b2_]=rgbToLab(r2,g2,b2);
+  return Math.sqrt((l1-l2)**2+(a1-a2)**2+(b1_-b2_)**2);
+}
+function nearestPantones(r,g,b,n=4){
+  return PT.map(p=>({...p,de:deltaE(r,g,b,p.r,p.g,p.b)})).sort((a,b)=>a.de-b.de).slice(0,n);
+}
+function sampleZone(ctx,W,H,xF,yF,sz=70){
+  const cx=Math.floor(W*xF),cy=Math.floor(H*yF);
+  const d=ctx.getImageData(Math.max(0,cx-sz/2),Math.max(0,cy-sz/2),sz,sz).data;
+  let r=0,g=0,b=0,c=0;
+  for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];c++;}
+  return{r:Math.round(r/c),g:Math.round(g/c),b:Math.round(b/c)};
+}
+
+// ═══════════════════════════════════════════
+// CAMERA HELPERS
+// ═══════════════════════════════════════════
+async function startCam(videoEl){
+  const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  videoEl.srcObject=s; await videoEl.play(); return s;
+}
+function stopStream(stream,timer){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(timer)clearTimeout(timer);
+}
+function drawFrame(vid,can){
+  if(!vid.videoWidth)return null;
+  can.width=vid.videoWidth; can.height=vid.videoHeight;
+  const ctx=can.getContext('2d'); ctx.drawImage(vid,0,0); return ctx;
+}
+
+// ═══════════════════════════════════════════
+// MANUAL CAMERA FALLBACK
+// ═══════════════════════════════════════════
+function analyseUploadedImage(input,mode){
+  const f=input.files[0]; if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const can=document.createElement('canvas');
+      can.width=img.width; can.height=img.height;
+      const ctx=can.getContext('2d');
+      ctx.drawImage(img,0,0);
+      // Show preview
+      const prev=document.getElementById(mode+'FallbackPreview');
+      if(prev){prev.src=e.target.result; prev.classList.add('show');}
+      // Analyse centre
+      const {r,g,b}=sampleZone(ctx,can.width,can.height,.5,.5,100);
+      if(mode==='k'){
+        currentReading={r,g,b,k:rgbToKelvin(r,g,b)};
+        kAnalyseSingleValues(r,g,b);
+        document.getElementById('kSaveBtn').disabled=false;
+      } else if(mode==='l'){
+        const l=lum(r,g,b);
+        updateLightMeter(evFromLum(l,currentISO),l);
+      } else if(mode==='p'){
+        updatePantone(r,g,b);
+      }
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function showFallback(mode){
+  document.getElementById(mode+'Fallback').classList.add('show');
+}
+
+// ═══════════════════════════════════════════
+// KELVIN CAM
+// ═══════════════════════════════════════════
+function setKMode(m){
+  kMode=m;
+  ['single','dual'].forEach(n=>{
+    const btn=document.getElementById('mode'+n.charAt(0).toUpperCase()+n.slice(1));
+    btn.style.borderColor=n===m?'var(--gold)':'var(--muted)';
+    btn.style.color=n===m?'var(--gold)':'var(--muted)';
+  });
+  document.getElementById('kCrossSingle').style.display=m==='single'?'block':'none';
+  document.getElementById('kCrossDual').style.display=m==='dual'?'block':'none';
+  document.getElementById('kSingleReadings').style.display=m==='single'?'block':'none';
+  document.getElementById('kDualReadings').style.display=m==='dual'?'block':'none';
+}
+
+async function toggleKCam(){
+  if(kRunning){
+    stopStream(kStream,kTimer); kStream=null; kRunning=false;
+    document.getElementById('kBtn').textContent='▶ Start Camera';
+    document.getElementById('kBtn').className='btn';
+    document.getElementById('kOff').style.display='flex';
+  } else {
+    if(!checkSecureContext()){showFallback('k');return;}
+    try{
+      kStream=await startCam(document.getElementById('kVideo'));
+      kRunning=true;
+      document.getElementById('kBtn').textContent='⏹ Stop Camera';
+      document.getElementById('kBtn').className='btn stop';
+      document.getElementById('kOff').style.display='none';
+      document.getElementById('kFallback').classList.remove('show');
+      kLoop();
+    }catch(e){
+      showFallback('k');
+      showModal('Camera Blocked','Could not access camera. Use the manual capture button below, or see the Local Setup guide (📡 Local) to run this app with camera access.');
+    }
+  }
+}
+function kLoop(){
+  if(!kRunning)return;
+  const ctx=drawFrame(document.getElementById('kVideo'),document.getElementById('kCanvas'));
+  if(ctx){
+    const W=document.getElementById('kCanvas').width, H=document.getElementById('kCanvas').height;
+    if(kMode==='single'){
+      const{r,g,b}=sampleZone(ctx,W,H,.5,.5);
+      kAnalyseSingleValues(r,g,b);
+    } else kAnalyseDual(ctx,W,H);
+  }
+  kTimer=setTimeout(kLoop,220);
+}
+function kAnalyseSingleValues(r,g,b){
+  const k=rgbToKelvin(r,g,b);
+  const t=tintMG(r,g,b);
+  currentReading={r,g,b,k};
+  document.getElementById('kSaveBtn').disabled=false;
+  const kc=k<3500?'#ffbb66':k<5200?'#fff8e8':'#a8daff';
+  document.getElementById('kVal').textContent=k.toLocaleString();
+  document.getElementById('kVal').style.color=kc;
+  document.getElementById('kSwatch').style.background=`rgb(${r},${g},${b})`;
+  document.getElementById('kR').textContent=r;
+  document.getElementById('kG').textContent=g;
+  document.getElementById('kB').textContent=b;
+  const pct=Math.min(100,Math.max(0,(k-1000)/9000*100));
+  document.getElementById('kNeedle').style.left=pct+'%';
+  const gMin=2800,gMax=6500;
+  const clamped=Math.round(Math.max(gMin,Math.min(gMax,k)));
+  const oor=k<gMin||k>gMax;
+  document.getElementById('kSet').textContent=clamped.toLocaleString()+'K'+(oor?(k<gMin?' ▼':' ▲'):'');
+  document.getElementById('kSet').style.color=oor?(k<gMin?'#ff8080':'#90b8ff'):'#fff';
+  document.getElementById('kSetDesc').textContent=oor?(k<gMin?'Ambient warmer than light min':'Ambient cooler than light max'):'Set ML100Bi dial to this value';
+  const bd=document.getElementById('kBadge');
+  bd.textContent=oor?(k<gMin?'TOO WARM':'TOO COOL'):'IN RANGE';
+  bd.className='badge '+(oor?(k<gMin?'b-warm':'b-cool'):'b-ok');
+  document.getElementById('kDialN').style.transform=`rotate(${-100+((clamped-gMin)/(gMax-gMin))*200}deg)`;
+  document.getElementById('tintNeedle').style.left=((t+50)/100*100)+'%';
+  document.getElementById('wbK').textContent=k.toLocaleString()+'K';
+  document.getElementById('wbTint').textContent=(t>=0?'+':'')+t+' MG';
+  document.getElementById('wbTint').style.color=t>5?'var(--green)':t<-5?'var(--purple)':'var(--text)';
+}
+function kAnalyseDual(ctx,W,H){
+  const zA=sampleZone(ctx,W,H,.25,.5);
+  const zB=sampleZone(ctx,W,H,.75,.5);
+  const kA=_cct(zA.r,zA.g,zA.b), kB=_cct(zB.r,zB.g,zB.b);
+  const diff=kB-kA;
+  document.getElementById('dzSwatchA').style.background=`rgb(${zA.r},${zA.g},${zA.b})`;
+  document.getElementById('dzSwatchB').style.background=`rgb(${zB.r},${zB.g},${zB.b})`;
+  document.getElementById('dzKA').textContent=kA.toLocaleString()+'K';
+  document.getElementById('dzKB').textContent=kB.toLocaleString()+'K';
+  document.getElementById('dzDiff').textContent=(diff>=0?'+':'')+diff.toLocaleString()+'K';
+  document.getElementById('dzDiff').style.color=Math.abs(diff)<200?'var(--green)':Math.abs(diff)<600?'var(--warn)':'#ff8080';
+  document.getElementById('dzDiffDesc').textContent=Math.abs(diff)<200?'Sources well matched ✓':diff>0?`Subject ${diff}K cooler — shift light warmer`:`Subject ${Math.abs(diff)}K warmer — shift light cooler`;
+}
+
+// ═══════════════════════════════════════════
+// CALIBRATION
+// ═══════════════════════════════════════════
+function setCalibration(){
+  if(!kRunning){showModal('Calibration','Start the camera first, point at your white or grey card, then tap Set Ref.');return;}
+  const ctx=drawFrame(document.getElementById('kVideo'),document.getElementById('kCanvas'));
+  if(!ctx)return;
+  const W=document.getElementById('kCanvas').width, H=document.getElementById('kCanvas').height;
+  const{r,g,b}=sampleZone(ctx,W,H,.5,.5);
+  calRef={r,g,b};
+  document.getElementById('calDot').classList.add('set');
+  document.getElementById('calText').innerHTML=`<strong style="color:var(--green)">Calibrated ✓</strong> — White ref: RGB ${r}/${g}/${b}. All readings normalised.`;
+}
+
+// ═══════════════════════════════════════════
+// LIGHT METER
+// ═══════════════════════════════════════════
+async function toggleLCam(){
+  if(lRunning){
+    stopStream(lStream,lTimer); lStream=null; lRunning=false;
+    document.getElementById('lBtn').textContent='▶ Start Camera';
+    document.getElementById('lBtn').className='btn';
+    document.getElementById('lOff').style.display='flex';
+  } else {
+    if(!checkSecureContext()){showFallback('l');return;}
+    try{
+      lStream=await startCam(document.getElementById('lVideo'));
+      lRunning=true;
+      document.getElementById('lBtn').textContent='⏹ Stop Camera';
+      document.getElementById('lBtn').className='btn stop';
+      document.getElementById('lOff').style.display='none';
+      document.getElementById('lFallback').classList.remove('show');
+      lLoop();
+    }catch(e){showFallback('l');showModal('Camera Blocked','Camera access denied. Use manual upload below.');}
+  }
+}
+function lLoop(){
+  if(!lRunning)return;
+  const can=document.getElementById('lCanvas');
+  const ctx=drawFrame(document.getElementById('lVideo'),can);
+  if(ctx){
+    const d=ctx.getImageData(0,0,can.width,can.height).data;
+    let l=0,c=0;
+    for(let i=0;i<d.length;i+=16){l+=lum(d[i],d[i+1],d[i+2]);c++;}
+    l/=c;
+    updateLightMeter(evFromLum(l,currentISO),l);
+  }
+  lTimer=setTimeout(lLoop,250);
+}
+const APERTURES=[1.8,2.8,4,5.6,8,11];
+function updateLightMeter(ev,l){
+  const el=document.getElementById('evVal');
+  if(ev===null){el.textContent='—';return;}
+  el.textContent=ev.toFixed(1);
+  document.getElementById('sceneNeedle').style.left=Math.min(100,Math.max(0,(ev+2)/20*100))+'%';
+  document.getElementById('expGrid').querySelectorAll('.exp-chip').forEach((chip,i)=>{
+    chip.querySelector('.ev').textContent=shutterStr(ev,APERTURES[i],currentISO);
+  });
+}
+function setISO(val,btn){
+  currentISO=val;
+  document.querySelectorAll('.iso-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('isoLabel').textContent=val;
+}
+
+// ═══════════════════════════════════════════
+// PANTONE
+// ═══════════════════════════════════════════
+async function togglePCam(){
+  if(pRunning){
+    stopStream(pStream,pTimer); pStream=null; pRunning=false;
+    document.getElementById('pBtn').textContent='▶ Start Camera';
+    document.getElementById('pBtn').className='btn';
+    document.getElementById('pOff').style.display='flex';
+    document.getElementById('pCross').style.display='none';
+  } else {
+    if(!checkSecureContext()){showFallback('p');return;}
+    try{
+      pStream=await startCam(document.getElementById('pVideo'));
+      pRunning=true;
+      document.getElementById('pBtn').textContent='⏹ Stop Camera';
+      document.getElementById('pBtn').className='btn stop';
+      document.getElementById('pOff').style.display='none';
+      document.getElementById('pCross').style.display='block';
+      document.getElementById('pFallback').classList.remove('show');
+      pLoop();
+    }catch(e){showFallback('p');showModal('Camera Blocked','Camera access denied. Use manual upload below.');}
+  }
+}
+function pLoop(){
+  if(!pRunning)return;
+  const can=document.getElementById('pCanvas');
+  const ctx=drawFrame(document.getElementById('pVideo'),can);
+  if(ctx){
+    const{r,g,b}=sampleZone(ctx,can.width,can.height,.5,.5,80);
+    updatePantone(r,g,b);
+  }
+  pTimer=setTimeout(pLoop,300);
+}
+function updatePantone(r,g,b){
+  document.getElementById('pR').textContent=r;
+  document.getElementById('pG').textContent=g;
+  document.getElementById('pB').textContent=b;
+  document.getElementById('pSwatch').style.background=`rgb(${r},${g},${b})`;
+  const matches=nearestPantones(r,g,b,4);
+  const best=matches[0];
+  const tc=lum(best.r,best.g,best.b)>140?'rgba(0,0,0,0.85)':'rgba(255,255,255,0.95)';
+  document.getElementById('panBig').style.background=`rgb(${best.r},${best.g},${best.b})`;
+  document.getElementById('panName').textContent=best.n; document.getElementById('panName').style.color=tc;
+  document.getElementById('panNum').textContent='Pantone '+best.p; document.getElementById('panNum').style.color=tc==='rgba(0,0,0,0.85)'?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.5)';
+  document.getElementById('panDE').textContent='ΔE '+best.de.toFixed(1)+' — '+(best.de<10?'Good':best.de<20?'Fair':'Approximate');
+  document.getElementById('panDE').style.color=best.de<10?'rgba(64,220,128,0.9)':best.de<20?'rgba(255,200,0,0.9)':'rgba(255,100,100,0.9)';
+  const alts=document.getElementById('panAlts').children;
+  matches.forEach((m,i)=>{
+    if(!alts[i])return;
+    alts[i].style.background=`rgb(${m.r},${m.g},${m.b})`;
+    alts[i].className='pan-alt'+(i===0?' best':'');
+    alts[i].innerHTML=`<span style="color:${lum(m.r,m.g,m.b)>140?'rgba(0,0,0,.7)':'rgba(255,255,255,.8)'}">${m.p}</span>`;
+  });
+}
+
+// ═══════════════════════════════════════════
+// PANTONE SHARE
+// ═══════════════════════════════════════════
+function sharePantone(){
+  const name=document.getElementById('panName').textContent;
+  const num=document.getElementById('panNum').textContent;
+  const de=document.getElementById('panDE').textContent;
+  const r=parseInt(document.getElementById('pR').textContent)||128;
+  const g=parseInt(document.getElementById('pG').textContent)||128;
+  const b=parseInt(document.getElementById('pB').textContent)||128;
+  if(name==='—'){showModal('No Reading','Start the camera and point at a colour first.');return;}
+  const W=800,H=500;
+  const cvs=document.createElement('canvas'); cvs.width=W; cvs.height=H;
+  const ctx=cvs.getContext('2d');
+  ctx.fillStyle=`rgb(${r},${g},${b})`; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(13,27,42,0.88)'; ctx.fillRect(W*0.45,0,W*0.55,H);
+  const l=lum(r,g,b);
+  ctx.fillStyle=l>160?'rgba(0,0,0,0.85)':'rgba(255,255,255,0.95)';
+  ctx.font='bold 54px serif'; ctx.fillText(name,36,H-110);
+  ctx.font='26px monospace'; ctx.fillStyle=l>160?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.55)';
+  ctx.fillText(num,36,H-68);
+  ctx.fillStyle='#f0c040'; ctx.font='bold 21px monospace';
+  ctx.fillText('PR Eye — Colour Reading',W*0.47+20,55);
+  ctx.fillStyle='rgba(212,224,236,0.9)'; ctx.font='17px monospace';
+  ctx.fillText(`RGB  ${r} / ${g} / ${b}`,W*0.47+20,105);
+  ctx.fillText(`HEX  #${[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase()}`,W*0.47+20,132);
+  ctx.fillText(de,W*0.47+20,160);
+  ctx.beginPath(); ctx.arc(W*0.47+210,H/2,82,0,Math.PI*2);
+  ctx.fillStyle=`rgb(${r},${g},${b})`; ctx.fill();
+  ctx.strokeStyle='rgba(240,192,64,.6)'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='rgba(74,96,128,0.85)'; ctx.font='13px monospace';
+  ctx.fillText('PR Eye Bespoke Photography · Oxfordshire',W*0.47+20,H-28);
+  ctx.fillText(new Date().toLocaleDateString('en-GB'),W*0.47+20,H-52);
+  cvs.toBlob(async blob=>{
+    const file=new File([blob],'pr-eye-pantone.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({title:'PR Eye — '+name,text:num,files:[file]});}
+      catch(e){if(e.name!=='AbortError')dlCanvas(cvs);}
+    } else dlCanvas(cvs);
+  },'image/png');
+}
+function dlCanvas(c){const a=document.createElement('a');a.href=c.toDataURL();a.download='pr-eye-pantone.png';a.click();}
+
+// ═══════════════════════════════════════════
+// SWATCHES — IndexedDB
+// ═══════════════════════════════════════════
+async function saveSwatch(){
+  if(!currentReading)return;
+  const{r,g,b,k}=currentReading;
+  const pan=nearestPantones(r,g,b,1)[0];
+  const sw={r,g,b,k,pan:pan.n+' ('+pan.p+')',time:new Date().toLocaleTimeString(),date:new Date().toLocaleDateString('en-GB')};
+  try{
+    await dbPut('swatches',sw);
+    showModal('Saved ✓',`Swatch saved to device — ${k.toLocaleString()}K · ${pan.n}`);
+  }catch(e){
+    // IndexedDB failed — fall back to localStorage
+    const arr=JSON.parse(localStorage.getItem('preye_sw')||'[]');
+    arr.unshift(sw); if(arr.length>30)arr.pop();
+    localStorage.setItem('preye_sw',JSON.stringify(arr));
+    showModal('Saved ✓',`Swatch saved (localStorage) — ${k.toLocaleString()}K · ${pan.n}`);
+  }
+}
+async function renderSwatches(){
+  let swatches=[];
+  try{ swatches=await dbGetAll('swatches'); swatches.reverse(); }
+  catch(e){ swatches=JSON.parse(localStorage.getItem('preye_sw')||'[]'); }
+  const grid=document.getElementById('swatchGrid');
+  if(!swatches.length){
+    grid.innerHTML='<div class="sw-empty"><span style="font-size:34px">🗂</span><br>No swatches yet.<br>Start Kelvin camera and tap Save Swatch.</div>';
+    return;
+  }
+  grid.innerHTML=swatches.map(s=>`
+    <div class="sw-card">
+      <div class="sw-color" style="background:rgb(${s.r},${s.g},${s.b})"></div>
+      <div class="sw-info">
+        <div class="sw-k">${s.k.toLocaleString()}K</div>
+        <div class="sw-p">${s.pan}</div>
+        <div class="sw-t">${s.date||''} ${s.time||''}</div>
+      </div>
+    </div>`).join('');
+}
+async function clearSwatches(){
+  if(!confirm('Clear all saved swatches from your device?'))return;
+  try{await dbClear('swatches');}catch(e){localStorage.removeItem('preye_sw');}
+  renderSwatches();
+}
+
+// ═══════════════════════════════════════════
+
+// ═══════════════════════════════════════════
+// RELEASE WIZARD — full 6-step
+// ═══════════════════════════════════════════
+let rPage=0; const R_PAGES=6;
+let rPhotoData=null; let rIsMinor=false;
+const rSigCtx={};
+
+function rGoTo(p){
+  if(p<0||p>=R_PAGES) return;
+  if(p>rPage&&!rValidate(rPage)) return;
+  if(p===5) rGenPreview();
+  document.getElementById('rpg-'+rPage).classList.remove('active');
+  document.getElementById('rpg-'+p).classList.add('active');
+  rPage=p; rUpdateNav(); rSave();
+  document.getElementById('page-release').scrollTo(0,0);
+}
+function rGoNext(){rGoTo(rPage+1);}
+function rGoBack(){rGoTo(rPage-1);}
+
+function rUpdateNav(){
+  const pct=((rPage+1)/R_PAGES)*100;
+  document.getElementById('rProgFill').style.width=pct+'%';
+  for(let i=0;i<R_PAGES;i++){
+    const s=document.getElementById('rst'+i);
+    s.className='rp-step'+(i===rPage?' active':i<rPage?' done':'');
+  }
+  const back=document.getElementById('rBtnBack'), next=document.getElementById('rBtnNext');
+  back.style.opacity=rPage===0?'0.3':'1'; back.disabled=rPage===0;
+  if(rPage===R_PAGES-1){next.textContent='✉️ Email';next.onclick=rSendEmail;}
+  else{next.textContent='Next →';next.onclick=rGoNext;}
+}
+
+function rValidate(p){
+  const v=id=>(document.getElementById(id)||{}).value||'';
+  if(p===0){
+    if(!v('rDate')){showModal('Required','Please enter the shoot date.');return false;}
+    if(!v('rLoc').trim()){showModal('Required','Please enter the shoot location.');return false;}
+  }
+  if(p===1){
+    if(!v('rFirst').trim()){showModal('Required','Please enter the model\'s first name.');return false;}
+    if(!v('rLast').trim()){showModal('Required','Please enter the model\'s last name.');return false;}
+    if(!v('rEmail').includes('@')){showModal('Required','Please enter a valid email address.');return false;}
+    if(!v('rDOB')){showModal('Required','Please enter the model\'s date of birth.');return false;}
+    if(rIsMinor&&!v('rGName').trim()){showModal('Required','Guardian consent required — please enter the guardian\'s full name.');return false;}
+  }
+  if(p===4){
+    const can=document.getElementById('wSigModel');
+    const d=can.getContext('2d').getImageData(0,0,can.width,can.height).data;
+    if(!Array.from(d).some(v=>v<250)){showModal('Signature Required','The model must sign the signature pad.');return false;}
+  }
+  return true;
+}
+
+function rCheckMinor(){
+  const dob=document.getElementById('rDOB').value;
+  rIsMinor=dob&&((new Date()-new Date(dob))/(365.25*24*3600*1000))<18;
+  document.getElementById('rMinorCard').style.display=rIsMinor?'block':'none';
+  document.getElementById('rGSigCard').style.display=rIsMinor?'block':'none';
+}
+
+function rHandlePhoto(input){
+  const f=input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    rPhotoData=e.target.result;
+    const img=document.getElementById('rPhImg'); img.src=rPhotoData; img.classList.add('show');
+    document.getElementById('rPhPH').style.display='none'; rSave();
+  };
+  reader.readAsDataURL(f);
+}
+function rClearPhoto(){
+  rPhotoData=null;
+  const img=document.getElementById('rPhImg'); img.src=''; img.classList.remove('show');
+  document.getElementById('rPhPH').style.display='block'; rSave();
+}
+
+function rInitSigPad(id){
+  const can=document.getElementById(id); if(!can||rSigCtx[id]) return;
+  const ctx=can.getContext('2d');
+  ctx.strokeStyle='#000'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  let drawing=false,lx=0,ly=0;
+  const pos=e=>{const r=can.getBoundingClientRect();const sc=can.width/r.width;const src=e.touches?e.touches[0]:e;return{x:(src.clientX-r.left)*sc,y:(src.clientY-r.top)*(can.height/r.height)};};
+  const dn=e=>{e.preventDefault();drawing=true;const p=pos(e);lx=p.x;ly=p.y;ctx.beginPath();ctx.arc(p.x,p.y,1.2,0,Math.PI*2);ctx.fill();};
+  const mv=e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(p.x,p.y);ctx.stroke();lx=p.x;ly=p.y;};
+  const up=e=>{e.preventDefault();drawing=false;rSave();};
+  can.addEventListener('mousedown',dn);can.addEventListener('mousemove',mv);can.addEventListener('mouseup',up);
+  can.addEventListener('touchstart',dn,{passive:false});can.addEventListener('touchmove',mv,{passive:false});can.addEventListener('touchend',up,{passive:false});
+  rSigCtx[id]=ctx;
+}
+function rClearSig(id){
+  const can=document.getElementById(id);
+  can.getContext('2d').clearRect(0,0,can.width,can.height); rSave();
+}
+
+function rSave(){
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const gc=id=>!!(document.getElementById(id)||{}).checked;
+  try{localStorage.setItem('preye_form2',JSON.stringify({
+    page:rPage,photo:rPhotoData,minor:rIsMinor,
+    rDate:g('rDate'),rPhotog:g('rPhotog'),rLoc:g('rLoc'),rProj:g('rProj'),rComp:g('rComp'),
+    rFirst:g('rFirst'),rLast:g('rLast'),rDOB:g('rDOB'),rPhone:g('rPhone'),rEmail:g('rEmail'),rAddr:g('rAddr'),
+    rGName:g('rGName'),rGRel:g('rGRel'),rGPhone:g('rGPhone'),rGEmail:g('rGEmail'),
+    tCommercial:gc('tCommercial'),tSocial:gc('tSocial'),tPrint:gc('tPrint'),tTV:gc('tTV'),tEdit:gc('tEdit'),tName:gc('tName'),tAI:gc('tAI'),tCopyright:gc('tCopyright'),tPerp:gc('tPerp'),
+    rSMName:g('rSMName'),rSMDate:g('rSMDate'),rSGName:g('rSGName'),rSGDate:g('rSGDate'),
+    rSWName:g('rSWName'),rSWAddr:g('rSWAddr'),rSWDate:g('rSWDate'),rSPDate:g('rSPDate')
+  }));}catch(e){}
+}
+function rLoad(){
+  try{
+    const data=JSON.parse(localStorage.getItem('preye_form2')||'null'); if(!data) return;
+    const s=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
+    const sc=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v;};
+    s('rDate',data.rDate);s('rPhotog',data.rPhotog);s('rLoc',data.rLoc);s('rProj',data.rProj);s('rComp',data.rComp);
+    s('rFirst',data.rFirst);s('rLast',data.rLast);s('rDOB',data.rDOB);s('rPhone',data.rPhone);s('rEmail',data.rEmail);s('rAddr',data.rAddr);
+    s('rGName',data.rGName);s('rGRel',data.rGRel);s('rGPhone',data.rGPhone);s('rGEmail',data.rGEmail);
+    sc('tCommercial',data.tCommercial);sc('tSocial',data.tSocial);sc('tPrint',data.tPrint);sc('tTV',data.tTV);sc('tEdit',data.tEdit);sc('tName',data.tName);sc('tAI',data.tAI);sc('tCopyright',data.tCopyright);sc('tPerp',data.tPerp);
+    s('rSMName',data.rSMName);s('rSMDate',data.rSMDate);s('rSGName',data.rSGName);s('rSGDate',data.rSGDate);
+    s('rSWName',data.rSWName);s('rSWAddr',data.rSWAddr);s('rSWDate',data.rSWDate);s('rSPDate',data.rSPDate);
+    if(data.photo){rPhotoData=data.photo;const img=document.getElementById('rPhImg');img.src=rPhotoData;img.classList.add('show');document.getElementById('rPhPH').style.display='none';}
+    if(data.minor){rIsMinor=true;document.getElementById('rMinorCard').style.display='block';document.getElementById('rGSigCard').style.display='block';}
+  }catch(e){}
+}
+function rResetRelease(){
+  if(!confirm('Clear all release data and start again?')) return;
+  localStorage.removeItem('preye_form2');
+  rPhotoData=null; rIsMinor=false; rPage=0;
+  ['wSigModel','wSigGuardian','wSigWitness','wSigPhotog'].forEach(id=>{
+    const can=document.getElementById(id); if(can) can.getContext('2d').clearRect(0,0,can.width,can.height); delete rSigCtx[id];
+  });
+  document.querySelectorAll('#page-release .finp').forEach(el=>el.value='');
+  document.querySelectorAll('#page-release .tgl input').forEach(el=>el.checked=el.defaultChecked);
+  const ph=document.getElementById('rPhotog'); if(ph) ph.value='Digby Oldridge';
+  const img=document.getElementById('rPhImg'); if(img){img.src='';img.classList.remove('show');}
+  const ph2=document.getElementById('rPhPH'); if(ph2) ph2.style.display='block';
+  document.getElementById('rMinorCard').style.display='none';
+  document.getElementById('rGSigCard').style.display='none';
+  for(let i=0;i<R_PAGES;i++) document.getElementById('rpg-'+i).classList.remove('active');
+  document.getElementById('rpg-0').classList.add('active');
+  rUpdateNav();
+}
+
+function rRightsText(){
+  const T=id=>!!(document.getElementById(id)||{}).checked;
+  const r=[];
+  if(T('tCommercial'))r.push('commercial advertising and marketing');
+  if(T('tSocial'))r.push('digital and social media');
+  if(T('tPrint'))r.push('print and publications');
+  if(T('tTV'))r.push('television and film');
+  if(T('tEdit'))r.push('image editing and manipulation');
+  if(T('tName'))r.push("use of model's name and likeness");
+  if(T('tAI'))r.push('AI training and generative AI');
+  return r.length?r.join(', '):'(none granted)';
+}
+function rSigURL(id){try{return document.getElementById(id).toDataURL();}catch(e){return '';}}
+
+function rGenPreview(){
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const T=id=>!!(document.getElementById(id)||{}).checked;
+  const first=g('rFirst'),last=g('rLast'),email=g('rEmail'),phone=g('rPhone'),addr=g('rAddr');
+  const date=g('rDate'),loc=g('rLoc'),proj=g('rProj'),comp=g('rComp'),photog=g('rPhotog')||'Digby Oldridge';
+  const gName=g('rGName'),gRel=g('rGRel');
+  const perp=T('tPerp')?'irrevocable, worldwide, royalty-free, and perpetual':'non-exclusive';
+  const own=T('tCopyright')?'All copyright and intellectual property rights in the Images vest exclusively in PR Eye Ltd.':'';
+  const mSigURL=rSigURL('wSigModel'),gSigURL=rSigURL('wSigGuardian'),wSigURL=rSigURL('wSigWitness'),pSigURL=rSigURL('wSigPhotog');
+  const hasImg=url=>url&&url.length>200;
+  const html=`
+<h1>MODEL RELEASE</h1>
+<div class="rpd-sub">PR Eye Ltd · Longcot · Oxfordshire · SN7 7UT · info@preye.co.uk · pr-eye.co.uk</div>
+<h2>Date &amp; Location</h2>
+<p><span class="fld">Shoot Date:</span> ${date||'—'} &nbsp;|&nbsp; <span class="fld">Location:</span> ${loc||'—'}${proj?' &nbsp;|&nbsp; <span class="fld">Project:</span> '+proj:''}</p>
+<p><span class="fld">Photographer:</span> ${photog} (PR Eye Ltd)${comp?' &nbsp;|&nbsp; <span class="fld">Compensation:</span> '+comp:''}</p>
+<h2>Parties</h2>
+<p><span class="fld">Photographer:</span> PR Eye Ltd, Longcot, Oxfordshire SN7 7UT</p>
+<p><span class="fld">Model:</span> ${first||'—'} ${last||'—'}${rIsMinor?' (minor)':''}${phone?', '+phone:''}${email?', '+email:''}${addr?', '+addr:''}</p>
+${rIsMinor?`<p><span class="fld">Parent/Guardian:</span> ${gName||'—'}${gRel?', '+gRel:''}</p>`:''}
+<h2>Grant of Rights</h2>
+<p>The Model grants to the Photographer a ${perp} licence to use the photographic images and video footage taken at this session for: ${rRightsText()}.</p>
+${own?`<p>${own}</p>`:''}
+<h2>Warranties</h2>
+<p>The Model warrants: (a) they are 18+ or parental consent has been obtained; (b) they have full authority to enter this agreement; (c) the Photographer may use the Images as specified without further consent or payment.</p>
+<h2>Governing Law</h2>
+<p>This agreement is governed by the laws of England and Wales. Disputes are subject to the exclusive jurisdiction of the courts of England and Wales.</p>
+${rPhotoData?`<div style="text-align:center;margin:10px 0"><img src="${rPhotoData}" style="max-height:120px;max-width:200px;border-radius:5px;border:1px solid #ccc;object-fit:cover"></div>`:''}
+<div class="rpd-sig-row">
+  <div class="rpd-sig-blk">
+    ${hasImg(mSigURL)?`<img src="${mSigURL}">`:'<div style="height:40px;border-bottom:1px solid #333;margin-bottom:3px"></div>'}
+    <div class="rpd-sl">Model: ${g('rSMName')||first+' '+last}<br>Date: ${g('rSMDate')||'—'}</div>
+  </div>
+  ${rIsMinor?`<div class="rpd-sig-blk">
+    ${hasImg(gSigURL)?`<img src="${gSigURL}">`:'<div style="height:40px;border-bottom:1px solid #333;margin-bottom:3px"></div>'}
+    <div class="rpd-sl">Guardian: ${g('rSGName')||gName}<br>Date: ${g('rSGDate')||'—'}</div>
+  </div>`:''}
+  <div class="rpd-sig-blk">
+    ${hasImg(wSigURL)?`<img src="${wSigURL}">`:'<div style="height:40px;border-bottom:1px solid #333;margin-bottom:3px"></div>'}
+    <div class="rpd-sl">Witness: ${g('rSWName')||'—'}<br>${g('rSWAddr')||''}<br>Date: ${g('rSWDate')||'—'}</div>
+  </div>
+  <div class="rpd-sig-blk">
+    ${hasImg(pSigURL)?`<img src="${pSigURL}">`:'<div style="height:40px;border-bottom:1px solid #333;margin-bottom:3px"></div>'}
+    <div class="rpd-sl">${photog}<br>PR Eye Ltd<br>Date: ${g('rSPDate')||'—'}</div>
+  </div>
+</div>`;
+  document.getElementById('rPreviewDoc').innerHTML=html;
+  rRenderLog();
+}
+
+function rSendEmail(){
+  rGenPreview();
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const email=g('rEmail'); if(!email.includes('@')){showModal('Email Required','Please enter the model\'s email (Step 2).');return;}
+  const subj=encodeURIComponent(`Model Release — ${g('rFirst')} ${g('rLast')} — ${g('rProj')||g('rDate')}`);
+  const body=encodeURIComponent(`Dear ${g('rFirst')},\n\nPlease find your completed model release for the shoot on ${g('rDate')||'—'} at ${g('rLoc')||'—'}.\nProject: ${g('rProj')||'—'}\n\nThis release grants the rights as agreed on the day. Please retain a copy for your records.\n\nBest regards,\n${g('rPhotog')||'Digby Oldridge'}\nPR Eye Ltd\ninfo@preye.co.uk\npr-eye.co.uk`);
+  window.location.href=`mailto:${email}?cc=info@preye.co.uk&subject=${subj}&body=${body}`;
+}
+
+function rSaveHTML(){
+  rGenPreview();
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const content=document.getElementById('rPreviewDoc').innerHTML;
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Model Release — ${g('rFirst')} ${g('rLast')}</title>
+<style>body{font-family:Georgia,serif;max-width:780px;margin:40px auto;padding:20px;color:#222;line-height:1.75;font-size:14px}h1{font-size:22px;text-align:center}h2{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:13px 0 4px;color:#333;border-top:1px solid #ddd;padding-top:9px}.rpd-sub{text-align:center;font-size:11px;color:#666;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid #ccc}.fld{font-weight:bold}.rpd-sig-row{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;border-top:1px solid #ccc;padding-top:14px}.rpd-sig-blk{flex:1;min-width:100px;text-align:center}.rpd-sig-blk img{max-height:52px;max-width:150px;margin:0 auto 4px;display:block}.rpd-sl{font-size:9px;color:#555;line-height:1.4;border-top:1px solid #333;padding-top:3px;margin-top:2px}@media print{body{margin:20px}}</style></head><body>
+${content}
+<p style="font-size:10px;color:#aaa;margin-top:24px;border-top:1px solid #eee;padding-top:8px">Generated by PR Eye Ltd Photography Toolkit — ${new Date().toLocaleDateString('en-GB')}</p>
+</body></html>`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=`model-release-${(g('rFirst')+'-'+g('rLast')).replace(/\s/g,'-').toLowerCase()}-${(g('rDate')||'').replace(/-/g,'')}.html`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function rGetLog(){try{return JSON.parse(localStorage.getItem('preye_rel_log')||'[]');}catch(e){return[];}}
+function rSetLog(arr){try{localStorage.setItem('preye_rel_log',JSON.stringify(arr));}catch(e){}}
+function rSaveRecord(){
+  rGenPreview();
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const rec={id:Date.now(),date:g('rDate'),model:g('rFirst')+' '+g('rLast'),email:g('rEmail'),loc:g('rLoc'),proj:g('rProj'),saved:new Date().toLocaleString(),preview:document.getElementById('rPreviewDoc').innerHTML};
+  const arr=rGetLog(); arr.unshift(rec); if(arr.length>50)arr.pop(); rSetLog(arr);
+  rRenderLog(); showModal('Saved to Log','Release for '+rec.model+' saved.');
+}
+function rRenderLog(){
+  const arr=rGetLog();
+  const ct=document.getElementById('rLogCt'); if(ct) ct.textContent=arr.length?'('+arr.length+')':'';
+  const list=document.getElementById('rLogList'); if(!list) return;
+  if(!arr.length){list.innerHTML='<p style="font-size:14px;color:var(--muted)">No saved releases yet.</p>';return;}
+  list.innerHTML=arr.map(r=>`<div style="background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:16px;color:var(--text)">${r.model||'Unnamed'}</div><div style="font-size:13px;color:var(--muted);margin-top:2px">${r.date||'—'} · ${r.loc||'—'}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Saved ${r.saved||'—'}</div></div><button class="btn sm" onclick="rViewRecord(${r.id})" style="flex-shrink:0;width:auto;padding:9px 14px">View</button></div>`).join('');
+}
+function rViewRecord(id){const rec=rGetLog().find(r=>r.id===id);if(!rec)return;showModal(rec.model+' — '+rec.date,'<div style="background:#fff;color:#222;border-radius:8px;padding:13px;font-size:12px;line-height:1.7;max-height:55vh;overflow-y:auto">'+(rec.preview||'No preview.')+'</div>');}
+function rClearLog(){if(!confirm('Clear all release records?'))return;rSetLog([]);rRenderLog();}
+
+// ═══════════════════════════════════════════
+// GUIDES & MODALS
+// ═══════════════════════════════════════════
+function showLocalGuide(){
+  showModal('Fix Camera Access',`<p><strong style="color:var(--gold)">Option A — Chrome Flags (Android)</strong></p><ol><li>Address bar: <code>chrome://flags</code></li><li>Search: <code>unsafely-treat-insecure-origin-as-secure</code></li><li>Enter: <code>file://</code></li><li>Set to <strong>Enabled</strong></li><li>Tap <strong>Relaunch</strong></li></ol><p><strong style="color:var(--gold)">Option B — HTTP Server app (recommended)</strong></p><ol><li>Install <strong>HTTP Server by Phlox</strong> (Play Store, free)</li><li>Point at Downloads folder → Start</li><li>Chrome: <code>http://localhost:8080/pr-eye-master-v4.html</code></li></ol><p><strong style="color:var(--gold)">Option C — iOS</strong></p><ol><li>Install <strong>a-Shell</strong> (App Store, free)</li><li>Run: <code>python -m http.server 8080</code></li><li>Safari: <code>http://localhost:8080</code></li></ol><p>📷 <strong>Native Camera buttons always work</strong> — no setup needed.</p>`);
+}
+function showOpenCameraGuide(){
+  showModal('Locking White Balance',`<p><strong style="color:var(--gold)">Open Camera (Android, free)</strong><br>Settings → White balance → choose a fixed K value (e.g. Daylight 5500K).</p><p><strong style="color:var(--gold)">Built-in calibration</strong><br>Point at grey card → tap Set Ref. Normalises all readings.</p><p><strong style="color:var(--gold)">Dual zone (most reliable)</strong><br>AWB shifts both zones equally — the difference remains accurate without WB lock.</p>`);
+}
+
+function showModal(title,html){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load',async()=>{
+  checkSecureContext();
+  setKMode('single');
+  await openDB().catch(()=>{});
+  // Init sig pads when release tab is first opened
+  const releaseTab=document.querySelectorAll('.tab')[4];
+  if(releaseTab) releaseTab.addEventListener('click',()=>{
+    ['wSigModel','wSigGuardian','wSigWitness','wSigPhotog'].forEach(id=>rInitSigPad(id));
+    rRenderLog();
+  });
+  // FIX 3: Load saved release data
+  rLoad();
+  // Set today as default dates
+  const today=new Date().toISOString().split('T')[0];
+  ['rDate','rSMDate','rSGDate','rSWDate','rSPDate'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
+  // Init nav
+  rUpdateNav();
+  // PWA install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault(); deferredPrompt=e;
+    const btn=document.createElement('button');
+    btn.className='btn sm'; btn.style='position:fixed;bottom:14px;right:14px;width:auto;z-index:50;background:var(--navy2)';
+    btn.textContent='📲 Install App';
+    btn.onclick=async()=>{deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;if(outcome==='accepted')btn.remove();};
+    document.body.appendChild(btn);
+  });
+});
+</script>
 </body>
 </html>
