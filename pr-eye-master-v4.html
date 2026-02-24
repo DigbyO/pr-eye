@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v8 — Pro Toolkit</title>
+    <title>PR Eye v9 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,19 +23,28 @@
         .hdr { background: var(--navy2); border-bottom: 1px solid var(--gold); padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 1px; }
         
-        .main-content { flex: 1; overflow-y: auto; position: relative; }
-        .page { display: none; padding: 15px; padding-bottom: 80px; }
-        .page.active { display: block; animation: fadeIn 0.2s; }
+        .main-content { flex: 1; overflow-y: auto; position: relative; padding: 15px; padding-bottom: 80px; }
+        .page { display: none; animation: fadeIn 0.2s; }
+        .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* CAMERA & METER */
-        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px;}
+        /* SHARED CAMERA AREA */
+        #persistent-cam-area { margin-bottom: 15px; display: block; }
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 10px;}
         video, #captured-img { width: 100%; height: 100%; object-fit: cover; }
         #captured-img { display: none; }
         .meter-zone { position: absolute; border: 2px dashed var(--gold); pointer-events: none; display: none; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
         #zone-spot { width: 10%; height: 10%; border-radius: 50%; }
         #zone-centre { width: 40%; height: 40%; }
         
+        /* ACTION ROW (Directly under camera) */
+        .action-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn { padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn.solid { background: var(--gold); color: var(--navy); }
+        .btn.sm { padding: 8px; font-size: 11px; }
+        #capture-btn { flex: 1; font-size: 16px; font-weight: bold; }
+        #cam-flip-btn, #sound-toggle-btn { flex: 0 0 auto; width: 50px; font-size: 18px; }
+
         .ctrl-panel { background: var(--navy2); border-radius: 8px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
         .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
         .col { flex: 1; }
@@ -54,19 +63,15 @@
         .expo-val { font-size: 16px; font-weight: 500; width: 40px; text-align: center; }
         .expo-val.over { color: var(--red); } .expo-val.under { color: var(--text); } .expo-val.good { color: var(--green); }
 
-        .btn { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;}
-        .btn.solid { background: var(--gold); color: var(--navy); }
-        .btn.sm { padding: 8px; font-size: 11px; }
-
-        /* PANTONE GRID */
+        /* LIVE PANTONE GRID */
         .pan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; }
-        .pan-swatch { width: 40%; }
+        .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 80px; }
+        .pan-swatch { width: 40%; transition: background-color 0.3s; }
         .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
         .pan-code { font-family: 'Cormorant Garamond'; font-size: 16px; color: var(--gold); font-weight: 700; line-height: 1.2; }
-        .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; }
+        .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase;}
 
-        /* RELEASE FORM SPECIFICS */
+        /* RELEASE FORM */
         .release-section { border-left: 2px solid var(--gold); padding-left: 10px; margin-bottom: 20px; }
         .legal-text { font-family: sans-serif; font-size: 10px; color: var(--muted); line-height: 1.4; max-height: 150px; overflow-y: auto; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px;}
         .signature-pad { background: #fff; border-radius: 4px; width: 100%; border: 2px dashed var(--muted); touch-action: none; margin-bottom: 5px;}
@@ -76,7 +81,7 @@
         /* BOTTOM NAV */
         .nav { background: var(--navy2); border-top: 1px solid var(--gold); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-top: 3px solid transparent; transition: 0.2s; }
-        .nav-item.active { color: var(--gold); border-top-color: var(--gold); }
+        .nav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
         .nav-icon { display: block; font-size: 18px; margin-bottom: 4px; }
 
         #hidden-pdf-render { position: absolute; top: -9999px; left: -9999px; width: 800px; background: #fff; color: #000; padding: 40px; font-family: sans-serif; }
@@ -85,22 +90,27 @@
 <body>
 
     <div class="hdr">
-        <div class="brand">PR EYE v8</div>
-        <div style="font-size: 12px; color: var(--gold);">WB: <span id="hdr-wb">---</span></div>
+        <div class="brand">PR EYE v9</div>
+        <div style="font-size: 12px; color: var(--gold);">LIVE WB: <span id="hdr-wb">---</span></div>
     </div>
 
     <div class="main-content">
         
-        <div id="page-meter" class="page active">
+        <div id="persistent-cam-area">
             <div class="cam-container" id="cam-wrapper">
                 <video id="video" autoplay playsinline webkit-playsinline></video>
                 <img id="captured-img">
                 <div id="zone-spot" class="meter-zone"></div>
                 <div id="zone-centre" class="meter-zone"></div>
             </div>
-            
-            <button id="cam-flip-btn" class="btn sm" style="width: 120px; margin: 0 auto 15px auto;">🔄 Flip Cam</button>
+            <div class="action-row">
+                <button id="cam-flip-btn" class="btn" aria-label="Flip Camera">🔄</button>
+                <button id="capture-btn" class="btn solid">📸 Capture & Save</button>
+                <button id="sound-toggle-btn" class="btn" aria-label="Toggle Sound">🔊</button>
+            </div>
+        </div>
 
+        <div id="page-meter" class="page active">
             <div class="ctrl-panel">
                 <div class="row">
                     <div class="col">
@@ -132,20 +142,21 @@
                     <span class="expo-val over">+3</span>
                 </div>
             </div>
-
-            <button id="analyse-btn" class="btn solid">📸 Analyse & Auto-Save</button>
         </div>
 
         <div id="page-color" class="page">
-            <h3>Pantone Extraction</h3>
-            <p style="color:var(--muted);">Analysed from latest meter reading.</p>
-            <div class="pan-grid" id="pan-results">
-                </div>
+            <h3 style="margin-bottom: 5px;">Live Colour Extraction</h3>
+            <p style="color:var(--muted); font-size: 12px; margin-bottom: 10px;">Move camera to update. Tap 'Capture & Save' to generate a colour report.</p>
+            <div class="pan-grid" id="live-pan-results">
+                <div class="pan-item"><div class="pan-swatch" id="ps1" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn1">---</div><div class="pan-hex" id="ph1">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" id="ps2" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn2">---</div><div class="pan-hex" id="ph2">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" id="ps3" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn3">---</div><div class="pan-hex" id="ph3">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" id="ps4" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn4">---</div><div class="pan-hex" id="ph4">---</div></div></div>
+            </div>
         </div>
 
         <div id="page-release" class="page">
             <h3>Model Release Form</h3>
-            
             <div class="release-section">
                 <h4>Shoot Details</h4>
                 <div class="row">
@@ -182,7 +193,7 @@
                 <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
                 <span class="label-txt">Guardian Signature</span>
                 <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
-                <button class="btn sm" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
+                <button class="btn sm" style="width:100%;" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
             </div>
 
             <div class="release-section">
@@ -201,7 +212,7 @@
                 <h4>Signatures</h4>
                 <span class="label-txt">Model Signature</span>
                 <canvas id="sig-model" class="signature-pad" height="100"></canvas>
-                <button class="btn sm" onclick="clearPad('sig-model')">Clear Model Sig</button>
+                <button class="btn sm" style="width:100%;" onclick="clearPad('sig-model')">Clear Model Sig</button>
 
                 <div style="margin-top: 20px;">
                     <span class="label-txt">Witness Details (Must be 18+, Independent)</span>
@@ -209,35 +220,33 @@
                     <input type="text" id="r-w-address" placeholder="Witness Address">
                     <span class="label-txt">Witness Signature</span>
                     <canvas id="sig-witness" class="signature-pad" height="100"></canvas>
-                    <button class="btn sm" onclick="clearPad('sig-witness')">Clear Witness Sig</button>
+                    <button class="btn sm" style="width:100%;" onclick="clearPad('sig-witness')">Clear Witness Sig</button>
                 </div>
                 
                 <div style="margin-top: 20px;">
                     <span class="label-txt">Photographer Signature</span>
                     <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
-                    <button class="btn sm" onclick="clearPad('sig-photog')">Clear Photog Sig</button>
+                    <button class="btn sm" style="width:100%;" onclick="clearPad('sig-photog')">Clear Photog Sig</button>
                 </div>
             </div>
 
-            <button id="gen-pdf-btn" class="btn solid" style="min-height: 60px;">1. Generate PDF</button>
-            <button id="email-pdf-btn" class="btn" style="min-height: 60px;">2. Email PDF</button>
-
+            <button id="gen-pdf-btn" class="btn solid" style="width:100%; min-height: 60px;">1. Generate PDF</button>
+            <button id="email-pdf-btn" class="btn" style="width:100%; min-height: 60px;">2. Email PDF</button>
         </div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active" data-target="page-meter"><span class="nav-icon">📷</span>Meter</div>
-        <div class="nav-item" data-target="page-color"><span class="nav-icon">🎨</span>Pantone</div>
-        <div class="nav-item" data-target="page-release"><span class="nav-icon">📝</span>Release</div>
+        <div class="nav-item active" data-target="page-meter" data-cam="true"><span class="nav-icon">📷</span>Meter</div>
+        <div class="nav-item" data-target="page-color" data-cam="true"><span class="nav-icon">🎨</span>Pantone</div>
+        <div class="nav-item" data-target="page-release" data-cam="false"><span class="nav-icon">📝</span>Release</div>
     </div>
 
     <canvas id="canvas" style="display:none;"></canvas>
     <canvas id="composite-canvas" width="1200" height="1600" style="display:none;"></canvas>
-    
     <div id="hidden-pdf-render"></div>
 
 <script>
-    // --- CORE VARIABLES ---
+    // --- CORE & AUDIO SETUP ---
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -245,14 +254,33 @@
     let currentFacingMode = 'environment';
     let measuredEV = 0;
     let isAutoExpo = true;
+    let currentTab = 'page-meter';
+    
+    // Web Audio Shutter Sound
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let soundEnabled = true;
+    document.getElementById('sound-toggle-btn').addEventListener('click', (e) => {
+        soundEnabled = !soundEnabled;
+        e.target.innerText = soundEnabled ? '🔊' : '🔇';
+    });
+    function playShutter() {
+        if(!soundEnabled) return;
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    }
 
+    // --- PANTONE DATABASE ---
     const pantoneDb = [
         {n:"PMS 100 C",h:"#F6E23B"},{n:"PMS 109 C",h:"#FFD100"},{n:"PMS 123 C",h:"#FFC72C"},
         {n:"PMS 186 C",h:"#C8102E"},{n:"PMS 200 C",h:"#BA0C2F"},{n:"PMS 286 C",h:"#0032A0"},
         {n:"PMS 300 C",h:"#005EB8"},{n:"PMS 354 C",h:"#00B140"},{n:"PMS 368 C",h:"#78BE20"},
         {n:"Black 6 C",h:"#101820"},{n:"Cool Gray 9",h:"#75787B"}
     ];
-
     const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
     const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x,16));
     function findNearestPantone(hex) {
@@ -270,25 +298,20 @@
         document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
         document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
         n.classList.add('active');
-        document.getElementById(n.dataset.target).classList.add('active');
+        currentTab = n.dataset.target;
+        document.getElementById(currentTab).classList.add('active');
         
-        // Hide/Show camera to prevent tab bleed and save battery
-        if(n.dataset.target === 'page-meter') {
-            document.getElementById('cam-wrapper').style.display = 'block';
-        } else {
-            document.getElementById('cam-wrapper').style.display = 'none';
-        }
+        // Hide/Show persistent camera area
+        document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'block' : 'none';
     }));
 
-    // --- CAMERA FLIP FIX ---
+    // --- CAMERA ENGINE ---
     async function startCamera() {
-        if(stream) {
-            stream.getTracks().forEach(t => t.stop());
-            await new Promise(r => setTimeout(r, 100)); // allow hardware to release
-        }
+        if(stream) { stream.getTracks().forEach(t => t.stop()); await new Promise(r => setTimeout(r, 100)); }
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
             video.srcObject = stream;
+            requestAnimationFrame(liveLoop); // Start the live analysis loop
         } catch(e) { console.log("Cam Error", e); }
     }
     document.getElementById('cam-flip-btn').addEventListener('click', ()=>{
@@ -296,7 +319,49 @@
         startCamera();
     });
 
-    // --- METERING LOGIC ---
+    // --- LIVE ANALYSIS LOOP (Meter & Pantone) ---
+    let lastPanExtraction = [];
+    function liveLoop() {
+        if(video.readyState === 4 && document.getElementById('persistent-cam-area').style.display !== 'none') {
+            // 1. Live Temp (Celsius primary, Kelvin secondary)
+            canvas.width = 100; canvas.height = 100;
+            ctx.drawImage(video, video.videoWidth/2 - 50, video.videoHeight/2 - 50, 100, 100, 0,0,100,100);
+            const d = ctx.getImageData(0,0,100,100).data;
+            let r=0,b=0, c=0; for(let i=0; i<d.length; i+=4) { r+=d[i]; b+=d[i+2]; c++; }
+            const k = Math.round(5500 * ((b/c)/(r/c)));
+            if(!isNaN(k)) {
+                const cel = Math.round(k - 273.15);
+                document.getElementById('hdr-wb').innerText = `${cel}°C (${k}K)`;
+            }
+
+            // 2. Live Pantone (Only run if on Pantone tab to save battery)
+            if(currentTab === 'page-color') {
+                canvas.width = 100; canvas.height = 100; // Fast downsample
+                ctx.drawImage(video, 0, 0, 100, 100);
+                const fullD = ctx.getImageData(0,0,100,100).data;
+                const w = 100, h = 100;
+                lastPanExtraction = [];
+                [ {x:0,y:0}, {x:w/2,y:0}, {x:0,y:h/2}, {x:w/2,y:h/2} ].forEach((q, idx) => {
+                    let tr=0,tg=0,tb=0,tc=0;
+                    for(let iy=q.y; iy<q.y+h/2; iy+=5) { for(let ix=q.x; ix<q.x+w/2; ix+=5) {
+                        const i = (Math.floor(iy)*w + Math.floor(ix))*4;
+                        tr+=fullD[i]; tg+=fullD[i+1]; tb+=fullD[i+2]; tc++;
+                    }}
+                    const hex = rgbToHex(Math.round(tr/tc), Math.round(tg/tc), Math.round(tb/tc));
+                    const pan = findNearestPantone(hex);
+                    lastPanExtraction.push({ hex, pan });
+                    
+                    // Update UI live
+                    document.getElementById(`ps${idx+1}`).style.backgroundColor = hex;
+                    document.getElementById(`pn${idx+1}`).innerText = pan.n;
+                    document.getElementById(`ph${idx+1}`).innerText = hex;
+                });
+            }
+        }
+        requestAnimationFrame(liveLoop);
+    }
+
+    // --- METERING SETTINGS LOGIC ---
     document.getElementById('expo-auto').addEventListener('click', ()=>{
         isAutoExpo=true; document.getElementById('expo-auto').classList.add('active'); document.getElementById('expo-manual').classList.remove('active');
         document.getElementById('manual-controls').style.opacity = '0.5'; document.getElementById('manual-controls').style.pointerEvents = 'none';
@@ -322,8 +387,15 @@
         document.getElementById('expo-marker').style.left = `${percent}%`;
     }
 
-    // --- ANALYSIS & SQUASH FIX ---
-    document.getElementById('analyse-btn').addEventListener('click', () => {
+    // --- CAPTURE & SAVE ROUTING ---
+    document.getElementById('capture-btn').addEventListener('click', () => {
+        playShutter();
+        if(currentTab === 'page-meter') processMeterCapture();
+        else if(currentTab === 'page-color') processPantoneCapture();
+    });
+
+    // Sub-routine: Meter Report
+    function processMeterCapture() {
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         ctx.drawImage(video, 0,0);
         const data = ctx.getImageData(0,0,canvas.width, canvas.height);
@@ -334,10 +406,8 @@
             rT += data.data[i]; bT += data.data[i+2]; count++;
         }
         measuredEV = Math.log2(((lum/count)/255) * 100 / 12.5);
-        
         const k = Math.round(5500 * ((bT/count)/(rT/count)));
-        const c = Math.round(k - 273.15); // Strict Celsius inclusion
-        document.getElementById('hdr-wb').innerText = `${k}K (${c}°C)`;
+        const cel = Math.round(k - 273.15);
 
         if(isAutoExpo) {
             document.getElementById('set-iso').value = "400"; document.getElementById('set-shutter').value = "60";
@@ -347,179 +417,83 @@
         }
         updateExpoBar();
 
-        // Extract Pantones
-        const panC = document.getElementById('pan-results'); panC.innerHTML = '';
-        const w = canvas.width, h = canvas.height;
-        [ {x:0,y:0}, {x:w/2,y:0}, {x:0,y:h/2}, {x:w/2,y:h/2} ].forEach(q => {
-            let tr=0,tg=0,tb=0,tc=0;
-            for(let iy=q.y; iy<q.y+h/2; iy+=10) { for(let ix=q.x; ix<q.x+w/2; ix+=10) {
-                const idx = (Math.floor(iy)*w + Math.floor(ix))*4;
-                tr+=data.data[idx]; tg+=data.data[idx+1]; tb+=data.data[idx+2]; tc++;
-            }}
-            const hex = rgbToHex(Math.round(tr/tc), Math.round(tg/tc), Math.round(tb/tc));
-            const pan = findNearestPantone(hex);
-            panC.innerHTML += `<div class="pan-item"><div class="pan-swatch" style="background:${hex}"></div><div class="pan-data"><div class="pan-code">${pan.n}</div><div class="pan-hex">${hex}</div></div></div>`;
+        generateComposite(canvas.toDataURL('image/jpeg'), "METER ANALYSED REPORT", (cCtx) => {
+            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
+            cCtx.fillText(`WB: ${cel}°C (${k}K)`, 600, 1250);
+            cCtx.fillText(`SETTINGS: ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
         });
+    }
 
-        // Anti-Squash Image Generation
-        const cCan = document.getElementById('composite-canvas');
-        const cCtx = cCan.getContext('2d');
+    // Sub-routine: Pantone Report
+    function processPantoneCapture() {
+        if(lastPanExtraction.length < 4) return alert("Waiting for colour data...");
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0,0);
         const imgUri = canvas.toDataURL('image/jpeg');
+        const snapData = [...lastPanExtraction]; // Clone current state
+
+        generateComposite(imgUri, "COLOUR PALETTE REPORT", (cCtx) => {
+            cCtx.font = 'bold 36px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            // Draw 4 colour blocks
+            const blocks = [ {x: 100, y: 1200}, {x: 600, y: 1200}, {x: 100, y: 1350}, {x: 600, y: 1350} ];
+            snapData.forEach((col, idx) => {
+                cCtx.fillStyle = col.hex; cCtx.fillRect(blocks[idx].x, blocks[idx].y, 100, 100);
+                cCtx.fillStyle = '#e6edf5';
+                cCtx.fillText(col.pan.n, blocks[idx].x + 130, blocks[idx].y + 45);
+                cCtx.font = '28px DM Mono'; cCtx.fillStyle = '#6c829c';
+                cCtx.fillText(col.hex, blocks[idx].x + 130, blocks[idx].y + 85);
+                cCtx.font = 'bold 36px DM Mono';
+            });
+        });
+    }
+
+    // Shared Image Generation Logic (Prevents Squashing)
+    function generateComposite(imgUri, title, renderDataFn) {
+        const cCan = document.getElementById('composite-canvas'); const cCtx = cCan.getContext('2d');
         const bgImg = new Image();
         bgImg.onload = () => {
             cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0,0,1200,1600);
-            
-            // Object-fit: cover math to prevent squashing
-            const targetW = 1200, targetH = 900;
-            const imgRatio = bgImg.width / bgImg.height;
-            const targetRatio = targetW / targetH;
+            const targetW = 1200, targetH = 900; const imgRatio = bgImg.width / bgImg.height; const targetRatio = targetW / targetH;
             let drawW, drawH, drawX, drawY;
-            
-            if (imgRatio > targetRatio) {
-                drawH = targetH; drawW = targetH * imgRatio;
-                drawX = (targetW - drawW) / 2; drawY = 200;
-            } else {
-                drawW = targetW; drawH = targetW / imgRatio;
-                drawX = 0; drawY = 200 + (targetH - drawH) / 2;
-            }
+            if (imgRatio > targetRatio) { drawH = targetH; drawW = targetH * imgRatio; drawX = (targetW - drawW) / 2; drawY = 200; } 
+            else { drawW = targetW; drawH = targetW / imgRatio; drawX = 0; drawY = 200 + (targetH - drawH) / 2; }
             cCtx.drawImage(bgImg, drawX, drawY, drawW, drawH);
             
-            // Overlay borders to hide bleed
-            cCtx.fillStyle = '#0d1b2a';
-            cCtx.fillRect(0, 0, 1200, 200); cCtx.fillRect(0, 1100, 1200, 500);
-
-            cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040'; cCtx.fillText("PR EYE ANALYSED REPORT", 50, 100);
+            cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0, 0, 1200, 200); cCtx.fillRect(0, 1100, 1200, 500);
+            cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040'; cCtx.fillText(title, 50, 100);
             cCtx.fillStyle = '#142438'; cCtx.fillRect(50, 1150, 1100, 400);
             cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
-            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
-            cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
-            cCtx.fillText(`WB: ${k}K (${c}°C)`, 600, 1250);
-            cCtx.fillText(`SETTINGS: ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
+            
+            renderDataFn(cCtx); // Inject specific data
             
             const link = document.createElement('a'); link.download = `PREye_Report_${Date.now()}.jpg`;
             link.href = cCan.toDataURL('image/jpeg', 0.9); link.click();
         };
         bgImg.src = imgUri;
-    });
-
-    // --- RELEASE FORM LOGIC ---
-    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
-    
-    // Guardian Toggle
-    document.getElementById('tog-adult').addEventListener('click', () => {
-        document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active');
-        document.getElementById('guardian-section').style.display = 'none';
-    });
-    document.getElementById('tog-minor').addEventListener('click', () => {
-        document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active');
-        document.getElementById('guardian-section').style.display = 'block';
-    });
-
-    // Photo Input
-    document.getElementById('r-photo-input').addEventListener('change', (e) => {
-        if(e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                document.getElementById('r-photo-preview').src = ev.target.result;
-                document.getElementById('r-photo-preview').style.display = 'block';
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-
-    // Signature Pads
-    function initPad(id) {
-        const can = document.getElementById(id), c = can.getContext('2d');
-        can.width = can.offsetWidth;
-        let drawing = false;
-        can.addEventListener('touchstart', e=>{drawing=true; c.moveTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); e.preventDefault();});
-        can.addEventListener('touchmove', e=>{if(!drawing)return; c.lineTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); c.stroke(); e.preventDefault();});
-        can.addEventListener('touchend', ()=>drawing=false);
     }
+
+    // --- RELEASE FORM LOGIC (Unchanged from V8) ---
+    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('tog-adult').addEventListener('click', () => { document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active'); document.getElementById('guardian-section').style.display = 'none'; });
+    document.getElementById('tog-minor').addEventListener('click', () => { document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active'); document.getElementById('guardian-section').style.display = 'block'; });
+    document.getElementById('r-photo-input').addEventListener('change', (e) => { if(e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('r-photo-preview').src = ev.target.result; document.getElementById('r-photo-preview').style.display = 'block'; }; reader.readAsDataURL(e.target.files[0]); } });
+
+    function initPad(id) { const can = document.getElementById(id), c = can.getContext('2d'); can.width = can.offsetWidth; let drawing = false; can.addEventListener('touchstart', e=>{drawing=true; c.moveTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); e.preventDefault();}); can.addEventListener('touchmove', e=>{if(!drawing)return; c.lineTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); c.stroke(); e.preventDefault();}); can.addEventListener('touchend', ()=>drawing=false); }
     ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(initPad);
     window.clearPad = (id) => { const c = document.getElementById(id); c.getContext('2d').clearRect(0,0,c.width,c.height); };
 
-    // --- PDF GENERATION ---
     document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
         const renderDiv = document.getElementById('hidden-pdf-render');
-        
-        // Build HTML for the PDF
-        let html = `
-            <div style="margin-bottom: 20px;">
-                <h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1>
-                <p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p>
-                <p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk</p>
-                <hr>
-                <div style="display:flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p>
-                        <p><strong>Address:</strong> ${document.getElementById('r-address').value}</p>
-                        <p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p>
-                        <p><strong>Compensation (if any):</strong> ${document.getElementById('r-comp').value}</p>
-                    </div>
-                    ${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}
-                </div>
-                <hr>
-                <p style="font-size: 11px; text-align: justify; line-height: 1.2;">
-                    <strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br>
-                    <strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br>
-                    <strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br>
-                    <strong>REPRESENTATIONS & WARRANTIES:</strong> I represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.<br><br>
-                    <strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.<br><br>
-                    <strong>GENERAL PROVISIONS:</strong> This Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.
-                </p>
-                <p style="font-size: 11px;"><strong>ACKNOWLEDGMENT:</strong> By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release, and understand this is a binding legal agreement with irrevocable rights.</p>
-                <hr>
-            </div>
-            
-            <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
-                <tr>
-                    <td style="width: 50%; padding-bottom: 20px;">
-                        <strong>MODEL SIGNATURE:</strong><br>
-                        <img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;">
-                        <strong>Name (Print):</strong> ${document.getElementById('r-name').value}
-                    </td>
-                    <td style="width: 50%; padding-bottom: 20px;">
-                        <strong>PHOTOGRAPHER SIGNATURE:</strong><br>
-                        <img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;">
-                        <strong>Date:</strong> ${document.getElementById('r-date').value}
-                    </td>
-                </tr>
-                ${document.getElementById('guardian-section').style.display === 'block' ? `
-                <tr>
-                    <td colspan="2" style="padding-bottom: 20px;">
-                        <p style="font-size: 11px;"><strong>PARENTAL/GUARDIAN CONSENT:</strong> I, ${document.getElementById('r-g-name').value}, am the parent/legal guardian of the above Model and consent to this Release on their behalf.</p>
-                        <strong>GUARDIAN SIGNATURE:</strong><br>
-                        <img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;">
-                    </td>
-                </tr>` : ''}
-                <tr>
-                    <td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;">
-                        <strong>WITNESS SIGNATURE:</strong> (Must be 18+, independent)<br>
-                        <img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;">
-                        <strong>Witness Name:</strong> ${document.getElementById('r-w-name').value} &nbsp;&nbsp;&nbsp; <strong>Address:</strong> ${document.getElementById('r-w-address').value}
-                    </td>
-                </tr>
-            </table>
-        `;
-        
+        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p><p><strong>Compensation (if any):</strong> ${document.getElementById('r-comp').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS & WARRANTIES:</strong> I represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.<br><br><strong>GENERAL PROVISIONS:</strong> This Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.</p><p style="font-size: 11px;"><strong>ACKNOWLEDGMENT:</strong> By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release, and understand this is a binding legal agreement with irrevocable rights.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Name (Print):</strong> ${document.getElementById('r-name').value}</td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Date:</strong> ${document.getElementById('r-date').value}</td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><p style="font-size: 11px;"><strong>PARENTAL/GUARDIAN CONSENT:</strong> I, ${document.getElementById('r-g-name').value}, am the parent/legal guardian of the above Model and consent to this Release on their behalf.</p><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong> (Must be 18+, independent)<br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value} &nbsp;&nbsp;&nbsp; <strong>Address:</strong> ${document.getElementById('r-w-address').value}</td></tr></table>`;
         renderDiv.innerHTML = html;
-        
-        const cCanvas = await html2canvas(renderDiv, { scale: 2 });
-        const imgData = cCanvas.toDataURL('image/jpeg');
-        
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (cCanvas.height * pdfWidth) / cCanvas.width;
-        
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
+        const cCanvas = await html2canvas(renderDiv, { scale: 2 }); const imgData = cCanvas.toDataURL('image/jpeg');
+        const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (cCanvas.height * pdfWidth) / cCanvas.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight); pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
     });
 
     document.getElementById('email-pdf-btn').addEventListener('click', () => {
-        const email = document.getElementById('r-email').value;
-        const ref = document.getElementById('r-loc').value || "Shoot";
+        const email = document.getElementById('r-email').value; const ref = document.getElementById('r-loc').value || "Shoot";
         window.location.href = `mailto:${email}?subject=Model Release form: ${ref}&body=Hi ${document.getElementById('r-name').value},%0D%0A%0D%0APlease find the signed model release form attached.%0D%0A%0D%0ABest regards,%0D%0ADigby Oldridge`;
         alert("Please attach the PDF you just downloaded to the email draft.");
     });
