@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.1 — Pro Toolkit</title>
+    <title>PR Eye v2.1 — Professional Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,7 +13,7 @@
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --gold-dim: rgba(212, 194, 161, 0.15);
             --text: #f0f4f8; --muted: #8b9bb4;
-            --red: #ff4d4d; --green: #4dff4d; --whatsapp: #25d366;
+            --red: #ff4d4d; --green: #4dff4d; --blue: #4d4dff; --whatsapp: #25d366;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -24,7 +24,7 @@
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
         
         .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
-        .tel-item { font-size: 11px; font-weight: 500; letter-spacing: 1px;}
+        .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px;}
 
         .main-content { flex: 1; overflow-y: auto; padding: 0 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
@@ -32,38 +32,44 @@
         .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        #fc-layer { display: none; opacity: 0.8; z-index: 2; }
+        #ui-layer { z-index: 5; pointer-events: auto; }
         
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: 0.2s; font-size: 12px;}
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: 0.2s; font-size: 11px;}
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 600;}
-        .btn.whatsapp { background: var(--whatsapp); color: #fff; border: none; margin-top: 10px;}
+        .btn.active-toggle { background: var(--gold-dim); border-color: var(--gold); }
         
         .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
         input, select, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
 
+        .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
+        .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; }
+        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 16px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
+
         .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
-        .pan-swatch { width: 35%; }
+        .pan-swatch { width: 35%; transition: background-color 0.3s; }
         .pan-data { width: 65%; padding: 5px; display: flex; flex-direction: column; justify-content: center; font-size: 10px;}
 
         .signature-pad { background: #fff; border-radius: 4px; width: 100%; touch-action: none; margin-bottom: 5px;}
 
         .nav { background: rgba(9, 18, 28, 0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; }
-        .nav-item.active { color: var(--gold); background: radial-gradient(circle at top, rgba(212, 194, 161, 0.1) 0%, transparent 70%); }
+        .nav-item.active { color: var(--gold); }
 
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.1</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.1 PRO</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item">EV <span id="val-ev" style="color:var(--green)">0.0</span></div>
             <div class="tel-item">GOLDEN <span id="val-golden" style="color:var(--gold)">--:--</span></div>
-            <div class="tel-item">GPS <span id="val-gps">WAIT</span></div>
+            <div class="tel-item">TILT <span id="val-tilt">0°</span></div>
         </div>
     </div>
 
@@ -71,26 +77,51 @@
         <div id="cam-section">
             <div class="cam-container">
                 <video id="video" autoplay playsinline></video>
+                <canvas id="fc-layer" class="overlay"></canvas>
                 <canvas id="scout-layer" class="overlay"></canvas>
+                <canvas id="level-layer" class="overlay"></canvas>
                 <canvas id="ui-layer" class="overlay"></canvas>
             </div>
-            <button id="capture-btn" class="btn solid">CAPTURE IMAGE</button>
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <button id="btn-fc" class="btn">False Color</button>
+                <button id="btn-level" class="btn">Horizon</button>
+                <button id="capture-btn" class="btn solid">CAPTURE</button>
+            </div>
+        </div>
+
+        <div id="page-meter" class="page active">
+            <div class="ctrl-panel">
+                <h4>Metering Controls</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>800</option><option>3200</option></select></div>
+                    <div><span class="label-txt">f/</span><select id="set-aperture"><option>1.4</option><option>2.8</option><option selected>5.6</option><option>16</option></select></div>
+                </div>
+                <div class="expo-meter-readout"><span>-3</span><div class="expo-scale"><div class="expo-marker" id="expo-marker"></div></div><span>+3</span></div>
+            </div>
         </div>
 
         <div id="page-color" class="page">
             <div class="ctrl-panel">
-                <h4>Color Match (Pantone)</h4>
+                <h4>Color Rule (60-30-10)</h4>
                 <div class="pan-grid">
                     <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><b id="cn1">---</b><span id="ch1">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><b id="cn2">---</b><span id="ch2">---</span></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><b id="cn3">---</b><span id="ch3">---</span></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><b id="cn4">---</b><span id="ch4">---</span></div></div>
                 </div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-top:15px;">
+                    <div id="rule-60" style="width: 60%; background: #333;"></div>
+                    <div id="rule-30" style="width: 30%; background: #555;"></div>
+                    <div id="rule-10" style="width: 10%; background: #777;"></div>
+                </div>
+                <p style="font-size:10px; color:var(--muted); margin-top:10px;">TAP VIDEO TO MANUALLY SAMPLE COLOR</p>
             </div>
         </div>
 
         <div id="page-scout" class="page">
             <div class="ctrl-panel">
-                <h4>Location Data</h4>
-                <div id="scout-map-live" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
+                <h4>Ephemeris Map</h4>
+                <div id="scout-map-live" style="height:180px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
                 <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunrise</span><span id="txt-sunrise">--:--</span></div>
                 <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunset</span><span id="txt-sunset">--:--</span></div>
             </div>
@@ -98,35 +129,20 @@
 
         <div id="page-legal" class="page">
             <div class="ctrl-panel">
-                <h4>Shoot Info</h4>
-                <input type="date" id="r-date">
-                <input type="text" id="r-loc" placeholder="Location">
-                
-                <h4>Model Details</h4>
-                <input type="text" id="r-name" placeholder="Full Legal Name">
-                <input type="text" id="r-dob" placeholder="Date of Birth">
-                <input type="text" id="r-address" placeholder="Residential Address">
-                <input type="tel" id="r-phone" placeholder="Phone">
-                <input type="email" id="r-email" placeholder="Email">
-                <input type="text" id="r-comp" placeholder="Compensation (if any)">
-
+                <h4>Model Release</h4>
+                <input type="text" id="r-name" placeholder="Model Full Name">
+                <input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)">
                 <select id="r-age"><option value="adult">Adult (18+)</option><option value="minor">Minor (Under 18)</option></select>
                 
                 <div id="guardian-box" style="display:none;">
-                    <h4>Guardian Consent</h4>
-                    <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
-                    <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
+                    <span class="label-txt">Guardian Name</span><input type="text" id="r-g-name">
+                    <canvas id="sig-guardian" class="signature-pad" height="80"></canvas>
                 </div>
 
-                <h4>Witness & Signatures</h4>
-                <input type="text" id="r-w-name" placeholder="Witness Name">
-                <input type="text" id="r-w-addr" placeholder="Witness Address">
                 <span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="80"></canvas>
                 <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="80"></canvas>
-                <span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
-
+                <span class="label-txt">Photog Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
                 <button id="gen-pdf" class="btn solid">EXPORT PDF RELEASE</button>
-                <button id="btn-wa" class="btn whatsapp">WHATSAPP SUMMARY</button>
             </div>
         </div>
     </div>
@@ -150,19 +166,21 @@
     const video = document.getElementById('video');
     const uiCtx = document.getElementById('ui-layer').getContext('2d');
     const scoutCtx = document.getElementById('scout-layer').getContext('2d');
+    const lvlCtx = document.getElementById('level-layer').getContext('2d');
+    const fcCtx = document.getElementById('fc-layer').getContext('2d');
     const procCtx = document.getElementById('proc-canvas').getContext('2d');
-    let stream, currentHeading = 0, currentLat, currentLon, goldenHour;
-    let pantoneDb = [{n:"Process Yellow C",rgb:[255,242,0]},{n:"Warm Red C",rgb:[249,66,58]},{n:"Reflex Blue C",rgb:[0,20,137]},{n:"Black 6 C",rgb:[10,10,10]}];
+
+    let currentLat, currentLon, goldenHour, currentHeading = 0;
+    let fcActive = false, levelActive = false, tapPoint = null;
+    let pantoneDb = [{n:"Cool Gray 11 C",rgb:[99,102,106]},{n:"Warm Red C",rgb:[249,66,58]},{n:"PMS 286 C",rgb:[0,51,160]},{n:"PMS 123 C",rgb:[255,199,44]}];
 
     async function init() {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = stream;
         navigator.geolocation.getCurrentPosition(pos => {
             currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
-            document.getElementById('val-gps').innerText = "OK";
             document.getElementById('scout-map-live').innerHTML = `<iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed"></iframe>`;
             fetchTimes();
-            // Pre-load static map for export
             const mapImg = new Image(); mapImg.crossOrigin = "anonymous";
             mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
             mapImg.onload = () => window._staticMap = mapImg;
@@ -173,102 +191,113 @@
     async function fetchTimes() {
         const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
         const data = await res.json();
-        const sunrise = new Date(data.results.sunrise);
         const sunset = new Date(data.results.sunset);
-        goldenHour = new Date(sunset.getTime() - (60 * 60 * 1000));
-        document.getElementById('txt-sunrise').innerText = sunrise.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        goldenHour = new Date(sunset.getTime() - (3600000));
+        document.getElementById('txt-sunrise').innerText = new Date(data.results.sunrise).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         document.getElementById('txt-sunset').innerText = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     }
-
-    setInterval(() => {
-        if(!goldenHour) return;
-        const diff = goldenHour - new Date();
-        if(diff > 0) {
-            const m = Math.floor(diff / 60000); const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('val-golden').innerText = `${m}m ${s}s`;
-        } else { document.getElementById('val-golden').innerText = "ACTIVE"; }
-    }, 1000);
 
     function liveLoop() {
         if(video.readyState === 4) {
             procCtx.drawImage(video, 0, 0, 150, 200);
-            const pix = procCtx.getImageData(0,0,150,200).data;
-            let lum = 0; for(let i=0; i<pix.length; i+=4) lum += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
-            document.getElementById('val-ev').innerText = (Math.log2(lum/30000)).toFixed(1);
+            const imgData = procCtx.getImageData(0,0,150,200);
+            const pix = imgData.data;
 
-            const sw = scoutCtx.canvas.width = video.offsetWidth;
-            const sh = scoutCtx.canvas.height = video.offsetHeight;
-            scoutCtx.clearRect(0,0,sw,sh);
-            scoutCtx.save();
-            scoutCtx.translate(sw/2, sh/2);
-            scoutCtx.rotate(-currentHeading * Math.PI/180);
-            scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)';
-            scoutCtx.beginPath(); scoutCtx.arc(0,0,80,0,Math.PI*2); scoutCtx.stroke();
-            scoutCtx.fillStyle = '#ffb347';
-            scoutCtx.beginPath(); scoutCtx.arc(0, -80, 6, 0, Math.PI*2); scoutCtx.fill();
-            scoutCtx.font = '10px DM Mono'; scoutCtx.fillText("SUN", 10, -75);
-            scoutCtx.restore();
+            // False Color Engine
+            if(fcActive) {
+                const fcOutput = new Uint8ClampedArray(pix.length);
+                for(let i=0; i<pix.length; i+=4) {
+                    let lum = (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+                    if(lum > 240) { fcOutput[i]=255; fcOutput[i+1]=0; fcOutput[i+2]=0; } // Clip
+                    else if(lum > 120 && lum < 140) { fcOutput[i]=0; fcOutput[i+1]=255; fcOutput[i+2]=0; } // Mid
+                    else { fcOutput[i]=lum; fcOutput[i+1]=lum; fcOutput[i+2]=lum; }
+                    fcOutput[i+3]=255;
+                }
+                fcCtx.canvas.width = video.offsetWidth; fcCtx.canvas.height = video.offsetHeight;
+                const tmpCanvas = document.createElement('canvas'); tmpCanvas.width=150; tmpCanvas.height=200;
+                tmpCanvas.getContext('2d').putImageData(new ImageData(fcOutput, 150, 200), 0,0);
+                fcCtx.clearRect(0,0,fcCtx.canvas.width, fcCtx.canvas.height);
+                fcCtx.drawImage(tmpCanvas, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
+            }
 
-            // Color Samples
-            [1,2].forEach(i => {
-                const p = procCtx.getImageData(i*40, 100, 1, 1).data;
+            // Metering
+            let lumAvg = 0; for(let i=0; i<pix.length; i+=4) lumAvg += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+            const ev = (Math.log2(lumAvg/30000));
+            document.getElementById('val-ev').innerText = ev.toFixed(1);
+            const diff = ev - (Math.log2((5.6*5.6)/(1/60)) - Math.log2(400/100));
+            document.getElementById('expo-marker').style.left = Math.min(95, Math.max(5, 50 + (diff * 15))) + "%";
+
+            // Level / Horizon
+            lvlCtx.canvas.width = video.offsetWidth; lvlCtx.canvas.height = video.offsetHeight;
+            lvlCtx.clearRect(0,0,lvlCtx.canvas.width, lvlCtx.canvas.height);
+            if(levelActive) {
+                lvlCtx.strokeStyle = Math.abs(currentHeading % 90) < 2 ? "var(--green)" : "var(--gold)";
+                lvlCtx.lineWidth = 2; lvlCtx.beginPath();
+                lvlCtx.moveTo(video.offsetWidth/2 - 50, video.offsetHeight/2);
+                lvlCtx.lineTo(video.offsetWidth/2 + 50, video.offsetHeight/2); lvlCtx.stroke();
+            }
+
+            // Color Rule
+            [1,2,3,4].forEach(i => {
+                let p;
+                if(i === 1 && tapPoint) p = procCtx.getImageData(tapPoint.x * 150, tapPoint.y * 200, 1, 1).data;
+                else p = procCtx.getImageData(i*30, 100, 1, 1).data;
                 const hex = "#" + ((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
                 document.getElementById(`cs${i}`).style.background = hex;
                 document.getElementById(`ch${i}`).innerText = hex;
-                document.getElementById(`cn${i}`).innerText = pantoneDb[i].n;
             });
         }
         requestAnimationFrame(liveLoop);
     }
+
+    document.getElementById('ui-layer').onclick = (e) => {
+        const r = e.target.getBoundingClientRect();
+        tapPoint = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+    };
+
+    document.getElementById('btn-fc').onclick = (e) => { fcActive = !fcActive; e.target.classList.toggle('active-toggle'); document.getElementById('fc-layer').style.display = fcActive ? 'block' : 'none'; };
+    document.getElementById('btn-level').onclick = (e) => { levelActive = !levelActive; e.target.classList.toggle('active-toggle'); };
 
     document.getElementById('capture-btn').onclick = () => {
         const can = document.getElementById('comp-canvas'); const ctx = can.getContext('2d');
         ctx.fillStyle = "#f8f8f8"; ctx.fillRect(0,0,1000,1500);
         ctx.drawImage(video, 50, 50, 900, 1150);
         if(window._staticMap) ctx.drawImage(window._staticMap, 50, 1220, 900, 180);
-        ctx.fillStyle = "#1a1a1a"; ctx.font = "22px Permanent Marker";
-        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)} | RISE: ${document.getElementById('txt-sunrise').innerText}`, 70, 1430);
+        ctx.fillStyle = "#1a1a1a"; ctx.font = "24px Permanent Marker";
+        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1430);
         document.getElementById('result-img').src = can.toDataURL();
         document.getElementById('result-overlay').style.display = 'flex';
     };
 
-    document.getElementById('r-age').onchange = (e) => document.getElementById('guardian-box').style.display = e.target.value === 'minor' ? 'block' : 'none';
-
     document.getElementById('gen-pdf').onclick = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const v = id => document.getElementById(id).value || "_______";
-        doc.setFontSize(16); doc.text("MODEL RELEASE FORM", 105, 20, {align:'center'});
-        doc.setFontSize(8); doc.text("Photographer: Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot | Tel: 07879 403 618", 105, 26, {align:'center'});
-        doc.setFontSize(10);
-        doc.text(`Date: ${v('r-date')}  Location: ${v('r-loc')}`, 20, 40);
-        doc.text(`Model: ${v('r-name')}  DOB: ${v('r-dob')}`, 20, 50);
-        doc.text(`Address: ${v('r-address')}`, 20, 60);
-        
-        const legal = doc.splitTextToSize("GRANT OF RIGHTS: I hereby grant to the Photographer the irrevocable, perpetual, worldwide right to use photographs and recordings of me for any lawful purpose including commercial use and AI applications. PERMISSIONS: I agree Content may be digitally altered and Photographer owns all copyright. DATA PROTECTION: Information processed in accordance with UK GDPR.", 170);
-        doc.text(legal, 20, 75);
-
-        doc.text("Model Signature:", 20, 110); doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 112, 50, 15);
-        doc.text("Photographer Signature:", 120, 110); doc.addImage(document.getElementById('sig-photog').toDataURL(), 'PNG', 120, 112, 50, 15);
-        
-        doc.save(`Release_${v('r-name')}.pdf`);
+        doc.setFontSize(16); doc.text("MODEL RELEASE FORM - PR EYE LTD", 105, 20, {align:'center'});
+        doc.setFontSize(10); doc.text(`Model: ${document.getElementById('r-name').value}`, 20, 40);
+        doc.text("GRANT OF RIGHTS: I hereby grant to the Photographer the irrevocable, perpetual, worldwide right to use Content taken of me for any lawful purpose including commercial use and AI applications.", 20, 60, {maxWidth: 170});
+        doc.text("Signatures:", 20, 100);
+        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 105, 50, 15);
+        doc.save("Release.pdf");
     };
 
-    const pads = ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(id => {
-        const can = document.getElementById(id); const ctx = can.getContext('2d');
-        can.width = can.offsetWidth; let drawing = false;
-        can.onpointerdown = (e) => { drawing = true; ctx.moveTo(e.offsetX, e.offsetY); };
-        can.onpointermove = (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
-        can.onpointerup = () => drawing = false;
-    });
-
     document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
-        document.querySelectorAll('.page, #cam-section').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(n.dataset.target).classList.add('active');
-        if(n.dataset.target === 'cam-section' || n.dataset.target === 'page-color' || n.dataset.target === 'page-scout') document.getElementById('cam-section').classList.add('active');
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); n.classList.add('active');
     });
 
-    window.ondeviceorientation = e => currentHeading = e.alpha || 0;
+    const setupPad = id => {
+        const can = document.getElementById(id); const ctx = can.getContext('2d');
+        can.width = can.offsetWidth; let draw = false;
+        can.onpointerdown = e => { draw = true; ctx.moveTo(e.offsetX, e.offsetY); };
+        can.onpointermove = e => { if(draw) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+        can.onpointerup = () => draw = false;
+    };
+    ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(setupPad);
+
+    window.ondeviceorientation = e => {
+        currentHeading = e.alpha || 0;
+        document.getElementById('val-tilt').innerText = Math.round(e.beta || 0) + "°";
+    };
     init();
 </script>
 </body>
