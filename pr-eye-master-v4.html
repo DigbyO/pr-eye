@@ -3,377 +3,468 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye — Bespoke Photography Toolkit</title>
+    <title>PR Eye v7 — Pro Meter</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --navy: #0d1b2a; --navy2: #112233; --navy3: #1a2f45;
-            --gold: #f0c040; --gold2: #c89a18;
-            --text: #d4e0ec; --muted: #5a7090; --border: #1e3a52;
-            --red: #e05050; --green: #40c080;
-            --base: 16px;
+            --navy: #0d1b2a; --navy2: #142438; --border: #1e3a52;
+            --gold: #f0c040; --gold-dim: rgba(240,192,64,0.3);
+            --text: #e6edf5; --muted: #6c829c;
+            --red: #ff5555; --green: #55ff55;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: var(--base); display: flex; flex-direction: column; height: 100dvh; }
+        body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; }
+        h1, h2, h3 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-weight: 700; }
+        select, input, button { font-family: inherit; font-size: inherit; }
 
-        /* HEADER (Restored) */
-        .hdr { background: var(--navy2); border-bottom: 2px solid var(--gold); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: relative; }
-        .hdr::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(240,192,64,.4), transparent); }
-        .brand-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: .06em; line-height: 1; }
-        .brand-sub { font-size: 10px; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; margin-top: 4px; }
-        
-        .hdr-local-btn { background: transparent; border: 1px solid var(--border); color: var(--gold); font-size: 12px; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 5px; }
+        /* COMPACT HEADER */
+        .hdr { background: var(--navy2); border-bottom: 1px solid var(--gold); padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 1px; }
+        .live-wb-readout { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px;}
+        .live-indicator { width: 8px; height: 8px; background: var(--red); border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-        /* TABS (Restored bottom nav) */
-        .tabs { display: flex; background: var(--navy2); border-top: 1px solid var(--border); flex-shrink: 0; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
-        .tab { flex: 1; padding: 12px 0; text-align: center; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-top: 2px solid transparent; transition: all .2s; }
-        .tab.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
-
-        /* PAGES */
-        .pages { flex: 1; overflow-y: auto; position: relative; padding: 15px; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s; }
+        /* MAIN LAYOUT */
+        .main-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .page { display: none; padding: 15px; flex: 1; }
+        .page.active { display: flex; flex-direction: column; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* CAMERA & MEDIA */
-        .cam-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; }
-        .cam-wrap video, .cam-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .cam-wrap img { display: none; }
-        .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 40px; height: 40px; border: 1px solid rgba(240,192,64,0.5); pointer-events: none; }
+        /* CAMERA VIEW */
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; margin-bottom: 15px;}
+        video, #captured-img { width: 100%; height: 100%; object-fit: cover; }
+        #captured-img { display: none; }
+        /* Metering overlays */
+        .meter-zone { position: absolute; border: 2px dashed var(--gold); pointer-events: none; display: none; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
+        #zone-spot { width: 10%; height: 10%; border-radius: 50%; }
+        #zone-centre { width: 40%; height: 40%; }
+        
+        /* UI CONTROLS */
+        .ctrl-panel { background: var(--navy2); border-radius: 8px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .row.tight { margin-bottom: 5px; }
+        .col { flex: 1; }
+        .label-txt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+
+        /* TOGGLES & INPUTS */
+        .toggle-switch { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .toggle-opt { flex: 1; text-align: center; padding: 8px; background: var(--navy); color: var(--muted); cursor: pointer; transition: 0.2s; font-size: 12px; }
+        .toggle-opt.active { background: var(--gold); color: var(--navy); font-weight: 500; }
+        
+        select, input[type="number"], input[type="text"], input[type="date"], input[type="email"] {
+            width: 100%; background: var(--navy); border: 1px solid var(--border); color: var(--gold); padding: 10px; border-radius: 4px; outline: none;
+        }
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27292.4%27%20height%3D%27292.4%27%3E%3Cpath%20fill%3D%27%23f0c040%27%20d%3D%27M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20128c3.6%203.6%208%205.4%2013%205.4s9.3-1.8%2013-5.4l128-128c3.6-3.6%205.4-8%205.4-13%200-5-1.8-9.3-5.4-13z%27%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
+
+        /* EXPOSURE METER READOUT */
+        .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-top: 10px; }
+        .expo-scale { flex: 1; height: 4px; background: #333; margin: 0 15px; position: relative; }
+        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 12px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.3s ease-out; }
+        .expo-val { font-size: 16px; font-weight: 500; width: 40px; text-align: center; }
+        .expo-val.over { color: var(--red); } .expo-val.under { color: var(--text); } .expo-val.good { color: var(--green); }
 
         /* BUTTONS */
-        .btn { display: flex; align-items: center; justify-content: center; padding: 15px; min-height: 55px; border: 1.5px solid var(--gold); background: transparent; color: var(--gold); font-family: 'DM Mono', monospace; font-size: 15px; font-weight: bold; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 12px; }
+        .btn { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn.solid { background: var(--gold); color: var(--navy); }
-        .btn-row { display: flex; gap: 10px; }
+        .btn.sm { padding: 8px; font-size: 11px; }
         
-        /* DATA DISPLAYS */
-        .reading-box { background: var(--navy2); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .reading-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 5px; }
-        .reading-value { font-size: 2em; font-weight: bold; color: var(--gold); }
+        /* PANTONE GRID */
+        .pan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: auto; }
+        .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; }
+        .pan-swatch { width: 40%; }
+        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+        .pan-code { font-family: 'Cormorant Garamond'; font-size: 16px; color: var(--gold); font-weight: 700; line-height: 1.2; }
+        .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-        /* 4-COLOR PANTONE GRID (Restored) */
-        .pan4-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .pan-chip { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; }
-        .pan-color { height: 60px; width: 100%; }
-        .pan-info { background: var(--navy2); padding: 8px; text-align: center; font-size: 11px; }
-        .pan-info strong { display: block; color: var(--gold); font-size: 14px; margin-bottom: 2px; }
+        /* BOTTOM NAV */
+        .nav { background: var(--navy2); border-top: 1px solid var(--gold); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-top: 3px solid transparent; transition: 0.2s; }
+        .nav-item.active { color: var(--gold); border-top-color: var(--gold); }
+        .nav-icon { display: block; font-size: 18px; margin-bottom: 4px; }
 
-        /* FORMS */
-        input, textarea { width: 100%; padding: 15px; margin-bottom: 12px; background: var(--navy2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-family: inherit; font-size: 16px; }
-        .signature-pad { border: 2px dashed var(--muted); background: #fff; touch-action: none; border-radius: 8px; width: 100%; margin-bottom: 10px; }
-
-        /* NATIVE CAMERA BACKUP */
-        .native-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
-        .native-wrapper input[type=file] { position: absolute; top: 0; right: 0; min-width: 100%; min-height: 100%; opacity: 0; outline: none; background: white; cursor: inherit; display: block; }
-        
-        /* COMPOSITE SHARE */
-        #composite-share-container { position: fixed; top: -9999px; left: -9999px; width: 1200px; height: 630px; display: flex; background: var(--navy); z-index: -1; }
-        #composite-photo { flex: 1; background-size: cover; background-position: center; }
-        #composite-details { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; background: var(--navy2); border-left: 4px solid var(--gold); }
-        .c-swatch-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .c-swatch { flex: 1; height: 100px; border-radius: 8px; }
-        .c-title { font-family: 'Cormorant Garamond'; font-size: 50px; color: var(--gold); margin-bottom: 10px;}
+        /* HIDDEN UTILS */
+        #canvas, #composite-canvas { display: none; }
+        .signature-pad { background: #fff; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="hdr">
-        <div>
-            <div class="brand-name">PR EYE</div>
-            <div class="brand-sub">Bespoke Photography Toolkit</div>
-        </div>
-        <div class="hdr-right">
-            <button id="cam-switch-btn" class="hdr-local-btn">🔄 Flip Cam</button>
+        <div class="brand">PR EYE v7</div>
+        <div class="live-wb-readout">
+            <div class="live-indicator"></div>
+            <span id="live-k-val">WAITING...</span>
         </div>
     </div>
 
-    <div class="pages">
+    <div class="main-content">
         
         <div id="page-meter" class="page active">
-            <div class="cam-wrap">
+            <div class="cam-container">
                 <video id="video" autoplay playsinline webkit-playsinline></video>
-                <img id="captured-img" alt="Captured Frame">
-                <canvas id="canvas" style="display:none;"></canvas>
-                <div class="crosshair"></div>
+                <img id="captured-img">
+                <div id="zone-spot" class="meter-zone"></div>
+                <div id="zone-centre" class="meter-zone"></div>
             </div>
 
-            <div class="btn-row">
-                <button id="analyze-btn" class="btn solid" style="flex:2;">Analyze Light</button>
-            </div>
-            
-            <div class="native-wrapper">
-                 <button class="btn">📷 Manual Photo Fallback</button>
-                 <input type="file" id="native-camera" accept="image/*" capture="environment">
-            </div>
-
-            <div class="btn-row">
-                <div class="reading-box" style="flex:1;">
-                    <span class="reading-label">Kelvin Temp</span>
-                    <span id="kelvin-val" class="reading-value">--- K</span>
+            <div class="ctrl-panel">
+                <div class="row tight">
+                    <div class="col">
+                        <span class="label-txt">Metering Mode</span>
+                        <select id="meter-mode">
+                            <option value="multi">Multi (Matrix)</option>
+                            <option value="centre">Centre-Weighted</option>
+                            <option value="spot">Spot</option>
+                        </select>
+                    </div>
+                    <div class="col" style="flex: 0 0 auto;">
+                        <span class="label-txt">Exposure</span>
+                        <div class="toggle-switch">
+                            <div class="toggle-opt active" id="expo-auto">AUTO</div>
+                            <div class="toggle-opt" id="expo-manual">MANUAL</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="reading-box" style="flex:1;">
-                    <span class="reading-label">Exposure Value</span>
-                    <span id="ev-val" class="reading-value">--- EV</span>
+
+                <div class="row tight" id="manual-controls" style="opacity: 0.5; pointer-events: none;">
+                    <div class="col">
+                        <span class="label-txt">ISO</span>
+                        <select id="set-iso">
+                            <option value="100">100</option><option value="200">200</option><option value="400" selected>400</option>
+                            <option value="800">800</option><option value="1600">1600</option><option value="3200">3200</option>
+                            <option value="6400">6400</option><option value="12800">12800</option><option value="25600">25600</option>
+                            <option value="51200">51200</option><option value="64000">64000</option>
+                        </select>
+                    </div>
+                     <div class="col">
+                        <span class="label-txt">Aperture (f/)</span>
+                        <select id="set-aperture">
+                            <option value="1.4">1.4</option><option value="2.0">2.0</option><option value="2.8">2.8</option>
+                            <option value="4.0">4.0</option><option value="5.6" selected>5.6</option><option value="8.0">8.0</option>
+                            <option value="11">11</option><option value="16">16</option><option value="22">22</option>
+                        </select>
+                    </div>
+                     <div class="col">
+                        <span class="label-txt">Shutter (1/x)</span>
+                        <select id="set-shutter">
+                            <option value="30">30</option><option value="60" selected>60</option><option value="125">125</option>
+                            <option value="250">250</option><option value="500">500</option><option value="1000">1000</option>
+                            <option value="2000">2000</option><option value="4000">4000</option>
+                        </select>
+                    </div>
                 </div>
+
+                <div class="expo-meter-readout">
+                    <span class="expo-val under">-3</span>
+                    <div class="expo-scale">
+                        <div class="expo-marker" id="expo-marker" style="left: 50%;"></div>
+                    </div>
+                    <span class="expo-val over">+3</span>
+                </div>
+                 <div style="text-align: center; font-size: 11px; margin-top: 5px; color: var(--muted);">Measured Scene EV: <span id="scene-ev">--</span></div>
             </div>
-            <div class="reading-box">
-                <span class="reading-label">Godox Recommendation</span>
-                <div id="godox-rec" style="color: var(--gold); font-size: 1.2em;">Awaiting Analysis...</div>
+
+            <button id="analyse-btn" class="btn solid">
+                <span>📸 Analyse Light & Auto-Save</span>
+            </button>
+             <div style="text-align: center; margin-top: 10px;">
+                <button id="cam-flip-btn" class="btn sm" style="display:inline-flex; width:auto;">🔄 Flip Cam</button>
+            </div>
+
+        </div>
+
+         <div id="page-color" class="page">
+            <h3>Pantone Extraction</h3>
+            <p style="color:var(--muted); margin-bottom: 20px;">Analyse image in Meter tab first.</p>
+             <div class="pan-grid" id="pan-results">
+                <div class="pan-item"><div class="pan-swatch" style="background:#ccc"></div><div class="pan-data"><div class="pan-code">---</div><div class="pan-hex">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" style="background:#ccc"></div><div class="pan-data"><div class="pan-code">---</div><div class="pan-hex">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" style="background:#ccc"></div><div class="pan-data"><div class="pan-code">---</div><div class="pan-hex">---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" style="background:#ccc"></div><div class="pan-data"><div class="pan-code">---</div><div class="pan-hex">---</div></div></div>
             </div>
         </div>
 
-        <div id="page-color" class="page">
-            <button id="extract-palette-btn" class="btn solid">Extract 4-Color Palette</button>
-            
-            <div id="palette-grid" class="pan4-grid" style="display:none;">
-                <div class="pan-chip"><div class="pan-color" id="pan-c1"></div><div class="pan-info"><strong id="pan-n1">--</strong><span id="pan-h1">--</span></div></div>
-                <div class="pan-chip"><div class="pan-color" id="pan-c2"></div><div class="pan-info"><strong id="pan-n2">--</strong><span id="pan-h2">--</span></div></div>
-                <div class="pan-chip"><div class="pan-color" id="pan-c3"></div><div class="pan-info"><strong id="pan-n3">--</strong><span id="pan-h3">--</span></div></div>
-                <div class="pan-chip"><div class="pan-color" id="pan-c4"></div><div class="pan-info"><strong id="pan-n4">--</strong><span id="pan-h4">--</span></div></div>
-            </div>
-
-            <button id="share-composite-btn" class="btn" style="display:none;">Share Match Composite</button>
-        </div>
-
-        <div id="page-release" class="page">
-            <h2 style="color:var(--gold); margin-bottom: 15px;">Model Release Form</h2>
-            <input type="text" id="r-shoot" placeholder="Shoot Reference">
-            <input type="date" id="r-date">
-            <input type="text" id="r-name" placeholder="Model Full Name">
-            <input type="email" id="r-email" placeholder="Model Email">
-            
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">Model Signature:</p>
-            <canvas id="sig-model" class="signature-pad" height="150"></canvas>
-            <button class="btn sm" id="clear-sig-model" style="min-height: 40px;">Clear Model Sig</button>
-
-            <p style="font-size: 12px; color: var(--muted); margin-top: 20px; margin-bottom: 10px;">Witness Details & Signature:</p>
-            <input type="text" id="r-witness" placeholder="Witness Full Name">
-            <canvas id="sig-witness" class="signature-pad" height="150"></canvas>
-            <button class="btn sm" id="clear-sig-witness" style="min-height: 40px;">Clear Witness Sig</button>
-
-            <button id="btn-pdf" class="btn solid" style="margin-top: 20px;">1. Download PDF</button>
-            <button id="btn-email" class="btn">2. Open Email Draft</button>
+         <div id="page-release" class="page">
+             <h3>Model Release Form</h3>
+             <div class="ctrl-panel">
+                <input type="text" id="r-ref" placeholder="Shoot Reference">
+                <input type="text" id="r-name" placeholder="Model Name">
+                <input type="email" id="r-email" placeholder="Model Email">
+                <span class="label-txt" style="margin-top:10px;">Model Signature</span>
+                <canvas id="sig-model" class="signature-pad" height="100"></canvas>
+                <button class="btn sm" id="clear-model">Clear</button>
+             </div>
+             <button id="gen-pdf-btn" class="btn solid">Download PDF</button>
         </div>
 
     </div>
 
-    <div class="tabs">
-        <div class="tab active" data-target="page-meter"><span style="font-size: 20px; display:block; margin-bottom: 4px;">📷</span> Meter</div>
-        <div class="tab" data-target="page-color"><span style="font-size: 20px; display:block; margin-bottom: 4px;">🎨</span> Pantone</div>
-        <div class="tab" data-target="page-release"><span style="font-size: 20px; display:block; margin-bottom: 4px;">📝</span> Release</div>
-    </div>
-
-    <div id="composite-share-container">
-        <div id="composite-photo"></div>
-        <div id="composite-details">
-            <div class="c-title">PR EYE: Palette Extraction</div>
-            <div class="c-swatch-row">
-                <div class="c-swatch" id="cs1"></div><div class="c-swatch" id="cs2"></div>
-            </div>
-            <div class="c-swatch-row">
-                <div class="c-swatch" id="cs3"></div><div class="c-swatch" id="cs4"></div>
-            </div>
-            <div style="font-size: 24px; color: var(--muted);">Generated by PR Eye Pro</div>
+    <div class="nav">
+        <div class="nav-item active" data-target="page-meter">
+            <span class="nav-icon">📷</span>Meter
+        </div>
+        <div class="nav-item" data-target="page-color">
+            <span class="nav-icon">🎨</span>Pantone
+        </div>
+        <div class="nav-item" data-target="page-release">
+            <span class="nav-icon">📝</span>Release
         </div>
     </div>
 
-<script>
-    // --- State & Elements ---
+    <canvas id="canvas"></canvas>
+    <canvas id="composite-canvas" width="1200" height="1600"></canvas> <script>
+    // --- CORE VARIABLES ---
     const video = document.getElementById('video');
     const imgDisplay = document.getElementById('captured-img');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    
     let stream = null;
-    let currentFacingMode = 'environment';
-    let lastImageURI = null;
-    let extractedPalette = []; // Stores the 4 colors
+    let facingMode = 'environment';
+    let liveMeterInterval = null;
+    let measuredEV = 0;
+    let lastAnalysisData = null;
 
-    // --- Tab Navigation ---
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.target).classList.add('active');
-        });
-    });
-
-    // --- Camera System (With Switcher) ---
-    async function startCamera() {
-        if (stream) stream.getTracks().forEach(track => track.stop());
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: currentFacingMode, width: { ideal: 1280 } } 
-            });
-            video.srcObject = stream;
-            video.style.display = 'block';
-            imgDisplay.style.display = 'none';
-        } catch (err) {
-            console.warn("Camera fallback needed.");
-        }
-    }
-
-    document.getElementById('cam-switch-btn').addEventListener('click', () => {
-        currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-        startCamera();
-    });
-
-    document.getElementById('native-camera').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (stream) stream.getTracks().forEach(track => track.stop());
-            video.style.display = 'none';
-            imgDisplay.style.display = 'block';
-            const reader = new FileReader();
-            reader.onload = (event) => { imgDisplay.src = event.target.result; };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // --- Light Meter Analysis ---
-    document.getElementById('analyze-btn').addEventListener('click', () => {
-        const source = video.style.display !== 'none' ? video : imgDisplay;
-        if (!source.srcObject && !source.src) return alert("No image source.");
-        
-        canvas.width = source.videoWidth || source.naturalWidth;
-        canvas.height = source.videoHeight || source.naturalHeight;
-        ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-        lastImageURI = canvas.toDataURL('image/jpeg', 0.8);
-
-        // Simple Center Analysis for Meter
-        const frameData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        let r=0, b=0, l=0, count=0;
-        for(let i=0; i<frameData.length; i+=40) { // check every 10th pixel for speed
-            r += frameData[i]; b += frameData[i+2];
-            l += (0.299*frameData[i] + 0.587*frameData[i+1] + 0.114*frameData[i+2]);
-            count++;
-        }
-        const kelvin = 5500 * ((b/count) / (r/count));
-        const ev = Math.log2(((l/count) / 255) * 100 / 12.5);
-
-        document.getElementById('kelvin-val').innerText = `${Math.round(kelvin)} K`;
-        document.getElementById('ev-val').innerText = ev.toFixed(1);
-        
-        let rec = "Neutral / Daylight";
-        if (kelvin < 3500) rec = "Warm: Add CTO Gel";
-        if (kelvin > 6500) rec = "Cool: Add CTB Gel";
-        document.getElementById('godox-rec').innerText = rec;
-        
-        alert("Reading captured! Check Pantone tab to extract palette.");
-    });
-
-    // --- 4-Color Pantone Logic (Restored) ---
+    // --- PANTONE DB (Expanded) ---
     const pantoneDb = [
-        { n: "PMS 123 C", hex: "#FFC72C" }, { n: "PMS 186 C", hex: "#C8102E" },
-        { n: "PMS 286 C", hex: "#0032A0" }, { n: "Cool Gray 9", hex: "#75787B" },
-        { n: "PMS 354 C", hex: "#00B140" }, { n: "PMS 258 C", hex: "#8246AF" }
+        {n:"PMS 100 C",h:"#F6E23B"},{n:"PMS 109 C",h:"#FFD100"},{n:"PMS 123 C",h:"#FFC72C"},
+        {n:"PMS 186 C",h:"#C8102E"},{n:"PMS 200 C",h:"#BA0C2F"},{n:"PMS 286 C",h:"#0032A0"},
+        {n:"PMS 300 C",h:"#005EB8"},{n:"PMS 354 C",h:"#00B140"},{n:"PMS 368 C",h:"#78BE20"},
+        {n:"Black 6 C",h:"#101820"},{n:"Cool Gray 9",h:"#75787B"},{n:"Warm Gray 7",h:"#968F8A"}
     ];
 
-    function getHex(r,g,b) { return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase(); }
-    function hexToRgb(hex) { const m=hex.match(/\w\w/g); return [parseInt(m[0],16),parseInt(m[1],16),parseInt(m[2],16)]; }
-    
-    function findClosestPantone(hex) {
+    // --- UTILS ---
+    const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
+    const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x,16));
+    function findNearestPantone(hex) {
         const target = hexToRgb(hex);
         let closest = pantoneDb[0], minD = Infinity;
-        pantoneDb.forEach(p => {
-            const rgb = hexToRgb(p.hex);
-            const d = Math.pow(target[0]-rgb[0],2) + Math.pow(target[1]-rgb[1],2) + Math.pow(target[2]-rgb[2],2);
+        for(let p of pantoneDb) {
+            const rgb = hexToRgb(p.h);
+            const d = (target[0]-rgb[0])**2 + (target[1]-rgb[1])**2 + (target[2]-rgb[2])**2;
             if(d < minD) { minD = d; closest = p; }
-        });
+        }
         return closest;
     }
 
-    document.getElementById('extract-palette-btn').addEventListener('click', () => {
-        if (!lastImageURI) return alert("Please capture an image in the Meter tab first.");
-        
-        // Quick & dirty 4-quadrant extraction to simulate clustering
-        const w = canvas.width, h = canvas.height;
-        const qData = [
-            ctx.getImageData(0,0,w/2,h/2).data, ctx.getImageData(w/2,0,w/2,h/2).data,
-            ctx.getImageData(0,h/2,w/2,h/2).data, ctx.getImageData(w/2,h/2,w/2,h/2).data
-        ];
-        
-        extractedPalette = qData.map(data => {
-            let r=0,g=0,b=0;
-            for(let i=0; i<data.length; i+=40) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; }
-            const len = data.length/40;
-            return getHex(Math.round(r/len), Math.round(g/len), Math.round(b/len));
-        });
-
-        extractedPalette.forEach((hex, i) => {
-            const pan = findClosestPantone(hex);
-            document.getElementById(`pan-c${i+1}`).style.backgroundColor = hex;
-            document.getElementById(`pan-n${i+1}`).innerText = pan.n;
-            document.getElementById(`pan-h${i+1}`).innerText = hex;
-            document.getElementById(`cs${i+1}`).style.backgroundColor = hex; // For share composite
-        });
-
-        document.getElementById('palette-grid').style.display = 'grid';
-        document.getElementById('share-composite-btn').style.display = 'block';
-    });
-
-    // --- Composite Share (v5 functionality) ---
-    document.getElementById('share-composite-btn').addEventListener('click', async () => {
-        if (!navigator.share) return alert("Sharing not supported here.");
-        const btn = document.getElementById('share-composite-btn');
-        btn.innerText = "Generating...";
-        
-        document.getElementById('composite-photo').style.backgroundImage = `url(${lastImageURI})`;
-        const container = document.getElementById('composite-share-container');
-        
-        const cCanvas = await html2canvas(container, { scale: 1 });
-        cCanvas.toBlob(async (blob) => {
-            const file = new File([blob], "pr-eye-palette.png", { type: "image/png" });
-            try { await navigator.share({ files: [file], title: 'PR Eye Palette' }); } catch(e){}
-            btn.innerText = "Share Match Composite";
-        });
-    });
-
-    // --- PDF Model Release (v5 functionality) ---
-    function setupPad(id, btnId) {
-        const can = document.getElementById(id), c = can.getContext('2d');
-        can.width = can.offsetWidth; can.height = 150;
-        let drawing = false;
-        const pos = e => { const r = can.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return {x: t.clientX - r.left, y: t.clientY - r.top}; };
-        ['mousedown','touchstart'].forEach(e => can.addEventListener(e, ev => { drawing=true; c.beginPath(); const p=pos(ev); c.moveTo(p.x,p.y); ev.preventDefault(); }));
-        ['mousemove','touchmove'].forEach(e => can.addEventListener(e, ev => { if(!drawing)return; const p=pos(ev); c.lineTo(p.x,p.y); c.stroke(); ev.preventDefault(); }));
-        ['mouseup','touchend'].forEach(e => can.addEventListener(e, () => drawing=false));
-        document.getElementById(btnId).addEventListener('click', () => c.clearRect(0,0,can.width,can.height));
+    // --- CAMERA & LIVE METERING ---
+    async function startCamera() {
+        if(stream) stream.getTracks().forEach(t=>t.stop());
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode, width: {ideal:1280}, height: {ideal:960} } });
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+               if(liveMeterInterval) clearInterval(liveMeterInterval);
+               liveMeterInterval = setInterval(runLiveMetering, 500); // Run twice a second
+            };
+        } catch(e) { console.log("Camera failed", e); document.getElementById('live-k-val').innerText = "CAM ERROR"; }
     }
-    setupPad('sig-model', 'clear-sig-model');
-    setupPad('sig-witness', 'clear-sig-witness');
 
-    document.getElementById('btn-pdf').addEventListener('click', () => {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFontSize(22); doc.text("Model Release Form", 20, 20);
-        doc.setFontSize(12);
-        doc.text(`Shoot: ${document.getElementById('r-shoot').value}`, 20, 40);
-        doc.text(`Date: ${document.getElementById('r-date').value}`, 20, 50);
-        doc.text(`Model Name: ${document.getElementById('r-name').value}`, 20, 60);
-        doc.text(`Model Email: ${document.getElementById('r-email').value}`, 20, 70);
-        doc.text(`Witness Name: ${document.getElementById('r-witness').value}`, 20, 80);
-        
-        doc.text("Model Signature:", 20, 100);
-        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 105, 80, 40);
-        doc.text("Witness Signature:", 20, 160);
-        doc.addImage(document.getElementById('sig-witness').toDataURL(), 'PNG', 20, 165, 80, 40);
-        
-        doc.save(`Release_${document.getElementById('r-name').value || 'Draft'}.pdf`);
+    document.getElementById('cam-flip-btn').addEventListener('click', ()=>{
+        facingMode = facingMode==='environment'?'user':'environment'; startCamera();
     });
 
-    document.getElementById('btn-email').addEventListener('click', () => {
-        const email = document.getElementById('r-email').value;
-        window.location.href = `mailto:${email}?subject=Model Release&body=Please find the attached PDF release.`;
+    function runLiveMetering() {
+        if(video.style.display === 'none' || video.readyState !== 4) return;
+        // Sample small center area for live Kelvin
+        canvas.width = 100; canvas.height = 100;
+        ctx.drawImage(video, video.videoWidth/2 - 50, video.videoHeight/2 - 50, 100, 100, 0,0,100,100);
+        const data = ctx.getImageData(0,0,100,100).data;
+        let r=0,b=0, count=0;
+        for(let i=0; i<data.length; i+=4) { r+=data[i]; b+=data[i+2]; count++; }
+        const k = Math.round(5500 * ((b/count) / (r/count)));
+        document.getElementById('live-k-val').innerText = isNaN(k) ? "..." : `${k}K`;
+    }
+
+    // --- METERING UI LOGIC ---
+    let isAutoExpo = true;
+    document.getElementById('expo-auto').addEventListener('click', ()=>{
+        isAutoExpo=true; toggleManualControls(false); updateExpoReadout();
+    });
+    document.getElementById('expo-manual').addEventListener('click', ()=>{
+        isAutoExpo=false; toggleManualControls(true); updateExpoReadout();
+    });
+    
+    function toggleManualControls(enable) {
+        document.getElementById('expo-auto').classList.toggle('active', !enable);
+        document.getElementById('expo-manual').classList.toggle('active', enable);
+        document.getElementById('manual-controls').style.opacity = enable ? '1' : '0.5';
+        document.getElementById('manual-controls').style.pointerEvents = enable ? 'all' : 'none';
+    }
+
+    // Show/Hide metering zones on video
+    document.getElementById('meter-mode').addEventListener('change', (e)=>{
+        document.getElementById('zone-spot').style.display = e.target.value === 'spot' ? 'block' : 'none';
+        document.getElementById('zone-centre').style.display = e.target.value === 'centre' ? 'block' : 'none';
     });
 
-    // Boot
-    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+    // Update exposure marker based on settings vs measured EV
+    ['set-iso', 'set-aperture', 'set-shutter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateExpoReadout);
+    });
+
+    function updateExpoReadout() {
+        if(measuredEV === 0) return;
+        // Calculate EV from manual settings: EV = log2(N^2 / t) - log2(ISO/100)
+        const N = parseFloat(document.getElementById('set-aperture').value);
+        const t = 1 / parseInt(document.getElementById('set-shutter').value);
+        const ISO = parseInt(document.getElementById('set-iso').value);
+        
+        const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100);
+        const diff = measuredEV - settingsEV; // Positive means settings are too dark (underexposed)
+        
+        // Map diff (-3 to +3) to percentage (0% to 100%). 0 diff = 50%.
+        let percent = 50 + (diff * (50/3)); 
+        percent = Math.max(5, Math.min(95, percent)); // Clamp inside bar
+
+        const marker = document.getElementById('expo-marker');
+        marker.style.left = `${percent}%`;
+        marker.style.background = (percent < 40 || percent > 60) ? 'var(--red)' : 'var(--gold)';
+    }
+
+
+    // --- MAIN ANALYSIS & AUTO-SAVE ---
+    document.getElementById('analyse-btn').addEventListener('click', performAnalysis);
+
+    async function performAnalysis() {
+        const source = video;
+        canvas.width = source.videoWidth; canvas.height = source.videoHeight;
+        ctx.drawImage(source, 0,0);
+        const fullData = ctx.getImageData(0,0,canvas.width, canvas.height);
+
+        // 1. Determine metering area based on mode
+        const mode = document.getElementById('meter-mode').value;
+        let meterData;
+        if(mode === 'spot') {
+            const size = Math.min(canvas.width, canvas.height) * 0.1;
+            meterData = ctx.getImageData((canvas.width-size)/2, (canvas.height-size)/2, size, size);
+        } else if (mode === 'centre') {
+             const size = Math.min(canvas.width, canvas.height) * 0.4;
+            meterData = ctx.getImageData((canvas.width-size)/2, (canvas.height-size)/2, size, size);
+        } else {
+            meterData = fullData; // Multi/Matrix uses whole frame
+        }
+
+        // 2. Calculate EV of scene
+        let lumTotal=0;
+        for(let i=0; i<meterData.data.length; i+=4) {
+            lumTotal += (0.299*meterData.data[i] + 0.587*meterData.data[i+1] + 0.114*meterData.data[i+2]);
+        }
+        const avgLum = lumTotal / (meterData.data.length/4);
+        // Calibration constant K=12.5
+        measuredEV = Math.log2((avgLum/255) * 100 / 12.5);
+        document.getElementById('scene-ev').innerText = measuredEV.toFixed(1);
+
+        // 3. Get final settings (Auto suggests, Manual uses inputs)
+        if(isAutoExpo) {
+            // Simple auto logic: prioritize 1/60 shutter, ISO 400, calculate f-stop
+            document.getElementById('set-iso').value = "400";
+            document.getElementById('set-shutter').value = "60";
+            // target f-stop = sqrt(2^(EV + log2(ISO/100)) * shutter_time)
+            const targetF = Math.sqrt(Math.pow(2, measuredEV + Math.log2(4)) * (1/60));
+            // Find closest standard f-stop in dropdown
+            const fOpts = Array.from(document.getElementById('set-aperture').options).map(o=>parseFloat(o.value));
+            const closestF = fOpts.reduce((prev, curr) => Math.abs(curr - targetF) < Math.abs(prev - targetF) ? curr : prev);
+            document.getElementById('set-aperture').value = closestF.toString();
+        }
+        updateExpoReadout(); // Update the bar
+
+        // 4. Calculate Final Kelvin for the record
+        let rT=0, bT=0, cT=0;
+        for(let i=0; i<fullData.data.length; i+=40) { rT+=fullData.data[i]; bT+=fullData.data[i+2]; cT++; }
+        const finalK = Math.round(5500 * ((bT/cT)/(rT/cT)));
+
+        // 5. Extract Pantones (for the other tab)
+        extractPantones(fullData);
+
+        // 6. GENERATE AND AUTO-SAVE IMAGE
+        saveCompositeImage(canvas.toDataURL('image/jpeg'), finalK, measuredEV.toFixed(1));
+    }
+
+    function extractPantones(imgData) {
+        const d = imgData.data;
+        const w = imgData.width, h = imgData.height;
+        // Sample 4 distinct quadrants
+        const samples = [
+            getAvgHex(d, w, 0, 0, w/2, h/2), getAvgHex(d, w, w/2, 0, w/2, h/2),
+            getAvgHex(d, w, 0, h/2, w/2, h/2), getAvgHex(d, w, w/2, h/2, w/2, h/2)
+        ];
+        const panContainer = document.getElementById('pan-results');
+        panContainer.innerHTML = '';
+        samples.forEach(hex => {
+            const pan = findNearestPantone(hex);
+            panContainer.innerHTML += `
+            <div class="pan-item"><div class="pan-swatch" style="background:${hex}"></div>
+            <div class="pan-data"><div class="pan-code">${pan.n}</div><div class="pan-hex">${hex}</div></div></div>`;
+        });
+    }
+    function getAvgHex(data, fullW, x, y, w, h) {
+        let r=0,g=0,b=0,c=0;
+        for(let iy=y; iy<y+h; iy+=10) { for(let ix=x; ix<x+w; ix+=10) {
+            const i = (iy*fullW + ix)*4; r+=data[i]; g+=data[i+1]; b+=data[i+2]; c++;
+        }}
+        return rgbToHex(Math.round(r/c), Math.round(g/c), Math.round(b/c));
+    }
+
+    // --- AUTO-SAVE COMPOSITE IMAGE ---
+    function saveCompositeImage(imgUri, k, ev) {
+        const cCan = document.getElementById('composite-canvas');
+        const cCtx = cCan.getContext('2d');
+        const bgImg = new Image();
+        bgImg.onload = () => {
+            // Draw Portrait Background
+            cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0,0,1200,1600);
+            // Draw Photo
+            cCtx.drawImage(bgImg, 0, 200, 1200, 900);
+            // Draw Header Text
+            cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040';
+            cCtx.fillText("PR EYE ANALYSED REPORT", 50, 100);
+            // Draw Data Box
+            cCtx.fillStyle = '#142438'; cCtx.fillRect(50, 1150, 1100, 400);
+            cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
+            
+            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            const iso = document.getElementById('set-iso').value;
+            const f = document.getElementById('set-aperture').value;
+            const s = document.getElementById('set-shutter').value;
+            
+            cCtx.fillText(`SCENE EV: ${ev}`, 100, 1250);
+            cCtx.fillText(`WHITE BALANCE: ${k}K`, 600, 1250);
+            cCtx.fillText(`SETTINGS: ISO ${iso} | f/${f} | 1/${s}s`, 100, 1350);
+            cCtx.fillText(`METER MODE: ${document.getElementById('meter-mode').value.toUpperCase()}`, 100, 1450);
+
+            // Trigger Download
+            const link = document.createElement('a');
+            link.download = `PREye_Report_${Date.now()}.jpg`;
+            link.href = cCan.toDataURL('image/jpeg', 0.9);
+            link.click();
+        };
+        bgImg.src = imgUri;
+    }
+
+
+    // --- NAVIGATION & STARTUP ---
+    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        n.classList.add('active');
+        document.getElementById(n.dataset.target).classList.add('active');
+    }));
+
+    // Signature Pad stub for Release form
+    const sigCan = document.getElementById('sig-model');
+    const sigCtx = sigCan.getContext('2d');
+    sigCan.width = sigCan.offsetWidth;
+    let drawing=false;
+    sigCan.addEventListener('touchstart',e=>{drawing=true; const r=sigCan.getBoundingClientRect(); sigCtx.moveTo(e.touches[0].clientX-r.left, e.touches[0].clientY-r.top); e.preventDefault();});
+    sigCan.addEventListener('touchmove',e=>{if(!drawing)return; const r=sigCan.getBoundingClientRect(); sigCtx.lineTo(e.touches[0].clientX-r.left, e.touches[0].clientY-r.top); sigCtx.stroke(); e.preventDefault();});
+    sigCan.addEventListener('touchend',()=>drawing=false);
+    document.getElementById('clear-model').addEventListener('click',()=>sigCtx.clearRect(0,0,sigCan.width,sigCan.height));
+
     startCamera();
 </script>
 </body>
