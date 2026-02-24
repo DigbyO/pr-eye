@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.2 — Pro Toolkit</title>
+    <title>PR Eye v2.3 — Ultra Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,49 +16,50 @@
             --red: #ff4d4d; --green: #4dff4d; --blue: #4d4dff; --whatsapp: #25d366;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
+        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
         h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
-        /* HEADER */
         .hdr { padding: 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
+        
         .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px;}
 
-        /* MAIN */
         .main-content { flex: 1; overflow-y: auto; padding: 0 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        /* CAMERA */
-        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        #ui-layer { z-index: 10; pointer-events: auto; }
-        #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 8; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 4px; width: 100px; height: 60px; }
+        #ui-layer { pointer-events: auto; z-index: 10; }
+        #fc-layer { z-index: 2; opacity: 0.8; display: none; }
+        #grid-layer { z-index: 3; display: none; }
+        #level-layer { z-index: 4; display: none; }
+        #histogram-canvas { position: absolute; bottom: 8px; right: 8px; z-index: 8; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 4px; width: 100px; height: 60px; pointer-events: none; display: none; }
 
-        /* UI ELEMENTS */
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; font-size: 10px; transition: 0.2s; }
+        .action-row { display: flex; gap: 6px; margin-bottom: 15px; }
+        .btn { padding: 10px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; font-size: 9px; transition: 0.2s; }
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 600;}
-        .btn.active-toggle { background: var(--gold); color: #09121c; }
-        .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800;}
+        .btn.active-toggle { background: var(--gold); color: #09121c; border-color: var(--gold); }
+        .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800; font-size: 14px; }
+        .btn.whatsapp { background: var(--whatsapp); color: #fff; border: none; font-weight: 600; font-size: 11px;}
         
-        .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
-        .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-        input, select { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
+        .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
+        .label-txt { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
+        input, select, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
 
         .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
-        .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; }
+        .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; border-radius: 2px;}
         .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 16px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
 
-        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
-        .pan-swatch { width: 35%; transition: 0.3s; }
-        .pan-data { width: 65%; padding: 5px; display: flex; flex-direction: column; justify-content: center; font-size: 9px;}
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 50px; }
+        .pan-swatch { width: 30%; transition: 0.1s; }
+        .pan-data { width: 70%; padding: 4px; display: flex; flex-direction: column; justify-content: center; font-size: 8px;}
 
-        .signature-pad { background: #fff; border-radius: 4px; width: 100%; touch-action: none; margin-bottom: 5px;}
+        .signature-pad { background: #fff; border-radius: 4px; width: 100%; touch-action: none; margin-bottom: 8px;}
 
-        /* NAV */
         .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; color: var(--muted); font-size: 8px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px; }
         .nav-item.active { color: var(--gold); }
@@ -68,7 +69,7 @@
         @keyframes strobeRedBlue { 0% { background: rgba(255,0,0,0.8); } 50% { background: rgba(0,40,255,0.8); } }
 
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #result-img { max-width: 100%; max-height: 75vh; border-radius: 4px; border: 1px solid var(--border); }
+        #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -76,17 +77,17 @@
     <div id="sos-flash-overlay"></div>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.2</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.3</div><button id="cam-flip" class="btn" style="max-width:40px; border-radius:8px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item">EV <span id="val-ev" style="color:var(--green)">0.0</span></div>
-            <div class="tel-item">GOLDEN <span id="val-golden" style="color:var(--gold)">--:--</span></div>
+            <div class="tel-item">WB <span id="val-wb" style="color:var(--gold)">5500K</span></div>
             <div class="tel-item">TILT <span id="val-tilt">0°</span></div>
         </div>
     </div>
 
     <div class="main-content">
         <div id="cam-section">
-            <div class="cam-container" id="v-wrap">
+            <div class="cam-container">
                 <video id="video" autoplay playsinline></video>
                 <canvas id="fc-layer" class="overlay"></canvas>
                 <canvas id="grid-layer" class="overlay"></canvas>
@@ -95,40 +96,42 @@
                 <canvas id="ui-layer" class="overlay"></canvas>
                 <canvas id="histogram-canvas"></canvas>
             </div>
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
-                <button id="btn-fc" class="btn">False Color</button>
+            <div class="action-row">
+                <button id="btn-fc" class="btn">False Col</button>
                 <button id="btn-grid" class="btn">Grid</button>
                 <button id="btn-level" class="btn">Horizon</button>
-                <button id="capture-btn" class="btn solid">CAPTURE</button>
+                <button id="btn-hist" class="btn">Hist</button>
             </div>
+            <button id="capture-btn" class="btn solid" style="width:100%; margin-bottom:15px; font-size:14px; padding:15px;">CAPTURE FRAME</button>
         </div>
 
         <div id="page-meter" class="page active">
             <div class="ctrl-panel">
-                <h4>Metering / Flash Peak</h4>
+                <h4>Pro Metering</h4>
                 <div style="display:flex; border-radius:50px; border:1px solid var(--border); overflow:hidden; margin-bottom:15px; background:rgba(0,0,0,0.2);">
-                    <div id="m-live" class="btn active-toggle" style="border:none;">LIVE</div>
-                    <div id="m-flash" class="btn" style="border:none;">FLASH SYNC</div>
+                    <div id="m-live" class="btn active-toggle" style="border:none; border-radius:0;">LIVE</div>
+                    <div id="m-flash" class="btn" style="border:none; border-radius:0;">FLASH PEAK</div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>3200</option></select></div>
-                    <div><span class="label-txt">f/</span><select id="set-aperture"><option>1.4</option><option selected>5.6</option><option>16</option></select></div>
+                    <div><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>800</option><option>1600</option><option>3200</option></select></div>
+                    <div><span class="label-txt">f/</span><select id="set-aperture"><option>1.4</option><option>2.8</option><option selected>5.6</option><option>8</option><option>11</option><option>16</option></select></div>
                 </div>
                 <div class="expo-meter-readout"><span>-3</span><div class="expo-scale"><div class="expo-marker" id="expo-marker"></div></div><span>+3</span></div>
-                <button id="reset-peak" class="btn" style="width:100%; margin-top:10px; display:none;">RESET PEAK</button>
+                <button id="reset-peak" class="btn" style="width:100%; margin-top:10px; display:none;">Reset Peak Meter</button>
             </div>
         </div>
 
         <div id="page-color" class="page">
             <div class="ctrl-panel">
-                <h4>60-30-10 Pantone Palette</h4>
+                <h4>Color Palette Match</h4>
+                <p style="font-size:9px; color:var(--muted); margin-bottom:10px; text-align:center;">TAP VIDEO FEED TO SET SWATCH #1</p>
                 <div class="pan-grid">
                     <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><b id="cn1">---</b><span id="ch1">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><b id="cn2">---</b><span id="ch2">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><b id="cn3">---</b><span id="ch3">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><b id="cn4">---</b><span id="ch4">---</span></div></div>
                 </div>
-                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-top:15px; border:1px solid var(--border);">
+                <div style="display:flex; height:12px; border-radius:10px; overflow:hidden; margin-top:15px; border:1px solid var(--border);">
                     <div id="rule-60" style="width: 60%; background: #222;"></div>
                     <div id="rule-30" style="width: 30%; background: #444;"></div>
                     <div id="rule-10" style="width: 10%; background: #666;"></div>
@@ -140,205 +143,449 @@
             <div class="ctrl-panel">
                 <h4>Ephemeris Scout</h4>
                 <div id="scout-map-live" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
-                <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunrise</span><span id="txt-sunrise">--:--</span></div>
-                <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunset</span><span id="txt-sunset">--:--</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span class="label-txt">GPS Data</span><span id="txt-gps" style="font-size:10px;">WAIT</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span class="label-txt">Sunrise</span><span id="txt-sunrise" style="font-size:10px;">--:--</span></div>
+                <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunset</span><span id="txt-sunset" style="font-size:10px;">--:--</span></div>
+            </div>
+        </div>
+
+        <div id="page-tools" class="page">
+            <div class="ctrl-panel" style="border-color: rgba(255, 77, 77, 0.4);">
+                <h4 style="color: var(--red);">Local & Emergency</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn" onclick="openSOS('hospital+OR+A%26E')" style="border-color:var(--red); color:var(--red);">🏥 Nearest A&E</button>
+                    <button class="btn" onclick="openSOS('taxi+rank')">🚕 Taxi Firm</button>
+                    <button class="btn" onclick="openSOS('restaurant')">🍽️ Restaurant</button>
+                    <button class="btn" onclick="openSOS('petrol+station')">⛽ Petrol Station</button>
+                </div>
+            </div>
+            <div class="ctrl-panel">
+                <h4>Shoot Notes & Weather</h4>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="label-txt">Live Temp</span><span id="tool-temp" style="font-size:12px; color:var(--gold);">-- °C</span>
+                </div>
+                <textarea id="shoot-notes" rows="4" placeholder="Shot lists, location notes, gear list..."></textarea>
+                <button class="btn solid" id="btn-email-notes" style="width:100%;">EMAIL NOTES</button>
             </div>
         </div>
 
         <div id="page-rave" class="page">
             <div class="ctrl-panel" style="text-align:center;">
-                <h4 style="color:#ff00ff;">Field Tools</h4>
-                <button id="btn-rave-start" class="btn solid" style="background:#ff00ff; color:#fff; border:none; margin-bottom:10px; width:100%;">START RAVE MODE</button>
-                <button id="btn-no-rave" class="btn" style="width:100%; margin-bottom:10px; font-size:9px;">No, I don't want to rave</button>
+                <h4 style="color:#ff00ff;">Field Utilities</h4>
+                <button id="btn-rave-start" class="btn solid" style="background:#ff00ff; color:#fff; border:none; margin-bottom:10px; width:100%; padding:15px;">START AUDIO STROBE</button>
+                <button id="btn-no-rave" class="btn" style="width:100%; margin-bottom:20px; font-size:9px;">No, I don't want to rave</button>
                 <hr style="border:0; border-top:1px dashed var(--border); margin:15px 0;">
-                <button id="btn-sos-trigger" class="btn danger" style="width:100%; height:60px; font-size:16px;">EMERGENCY SOS</button>
+                <button id="btn-sos-trigger" class="btn danger" style="width:100%; height:60px;">EMERGENCY SOS</button>
             </div>
         </div>
 
         <div id="page-legal" class="page">
             <div class="ctrl-panel">
-                <h4>Model Release</h4>
-                <input type="text" id="r-name" placeholder="Model Full Name">
-                <input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)">
-                <select id="r-age"><option value="adult">Adult (18+)</option><option value="minor">Minor (Under 18)</option></select>
-                <div id="guardian-box" style="display:none;">
-                    <input type="text" id="r-g-name" placeholder="Guardian Name">
-                    <canvas id="sig-guardian" class="signature-pad" height="80"></canvas>
+                <h4>Digital Model Release</h4>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><span class="label-txt">Date</span><input type="date" id="r-date"></div>
+                    <div style="flex:1;"><span class="label-txt">Loc</span><input type="text" id="r-loc" placeholder="Shoot Loc"></div>
                 </div>
-                <span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="80"></canvas>
+                
+                <input type="text" id="r-name" placeholder="Model Full Legal Name">
+                <input type="text" id="r-address" placeholder="Residential Address">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div>
+                    <div style="flex:1;"><input type="tel" id="r-phone" placeholder="Phone"></div>
+                </div>
+                <input type="email" id="r-email" placeholder="Email">
+                <input type="text" id="r-comp" placeholder="Compensation (if any)">
+
+                <select id="r-age"><option value="adult">Adult (18+)</option><option value="minor">Minor (Under 18)</option></select>
+                
+                <div id="guardian-box" style="display:none; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; margin-bottom:10px;">
+                    <span class="label-txt">Guardian Name</span><input type="text" id="r-g-name">
+                    <span class="label-txt">Guardian Signature</span><canvas id="sig-guardian" class="signature-pad" height="80"></canvas>
+                </div>
+
+                <div style="border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; margin-bottom:15px;">
+                    <span class="label-txt">Witness Name</span><input type="text" id="r-w-name">
+                    <span class="label-txt">Witness Address</span><input type="text" id="r-w-addr">
+                    <span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="80"></canvas>
+                </div>
+
                 <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="80"></canvas>
-                <span class="label-txt">Photog Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
-                <button id="gen-pdf" class="btn solid">EXPORT PDF RELEASE</button>
+                <span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
+                
+                <button id="gen-pdf" class="btn solid" style="width:100%; margin-top:10px;">GENERATE PDF RELEASE</button>
+                <button id="btn-wa" class="btn whatsapp" style="width:100%; margin-top:10px;">WHATSAPP SUMMARY TO CLIENT</button>
             </div>
         </div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active" data-target="cam-section">Meter</div>
+        <div class="nav-item active" data-target="page-meter">Meter</div>
         <div class="nav-item" data-target="page-color">Color</div>
         <div class="nav-item" data-target="page-scout">Scout</div>
+        <div class="nav-item" data-target="page-tools">Tools</div>
         <div class="nav-item" data-target="page-rave">Rave</div>
         <div class="nav-item" data-target="page-legal">Legal</div>
     </div>
 
     <div id="result-overlay">
         <img id="result-img">
-        <button class="btn solid" style="margin-top:15px; width:200px;" onclick="document.getElementById('result-overlay').style.display='none'">CLOSE</button>
+        <div style="display:flex; gap:10px; width:100%; margin-top:15px; max-width: 300px;">
+            <button class="btn solid" id="btn-share-export">Share Image</button>
+            <button class="btn" onclick="document.getElementById('result-overlay').style.display='none'">Close</button>
+        </div>
     </div>
 
     <canvas id="proc-canvas" width="150" height="200" style="display:none;"></canvas>
+    <canvas id="fc-proc" width="150" height="200" style="display:none;"></canvas>
     <canvas id="comp-canvas" width="1000" height="1500" style="display:none;"></canvas>
 
 <script>
+    // --- APP STATE ---
     const video = document.getElementById('video');
-    const fcCtx = document.getElementById('fc-layer').getContext('2d');
-    const gridCtx = document.getElementById('grid-layer').getContext('2d');
-    const lvlCtx = document.getElementById('level-layer').getContext('2d');
-    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
-    const uiCtx = document.getElementById('ui-layer').getContext('2d');
+    const canvases = ['fc-layer','grid-layer','level-layer','scout-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
+    const [fcCtx, gridCtx, lvlCtx, scoutCtx, uiCtx] = canvases;
     const histCtx = document.getElementById('histogram-canvas').getContext('2d');
     const procCtx = document.getElementById('proc-canvas').getContext('2d', {willReadFrequently: true});
+    const fcProcCtx = document.getElementById('fc-proc').getContext('2d');
 
-    let stream, currentLat, currentLon, goldenHour, currentHeading = 0;
-    let fcActive = false, levelActive = false, gridActive = false, flashMode = false, peakEV = -99;
-    let raveActive = false, sosActive = false, audioCtx, raveAnalyser;
-    let pantoneDb = [{n:"Process Yellow C",rgb:[255,242,0]},{n:"Warm Red C",rgb:[249,66,58]},{n:"Reflex Blue C",rgb:[0,20,137]},{n:"Black 6 C",rgb:[10,10,10]}];
+    let stream, currentLat = 0, currentLon = 0, goldenHour, currentHeading = 0, tapPoint = null;
+    let fcActive = false, lvlActive = false, gridActive = false, histActive = false;
+    let flashMode = false, peakEV = -99;
+    let raveActive = false, sosActive = false, audioCtx, raveAnalyser, sosAudioCtx, sirenOsc1, sirenOsc2;
+    
+    // Extended Pantone DB
+    let pantoneDb = [
+        {n:"Process Yellow C",rgb:[255,242,0]},{n:"Warm Red C",rgb:[249,66,58]},{n:"Reflex Blue C",rgb:[0,20,137]},
+        {n:"Black 6 C",rgb:[10,10,10]},{n:"PMS 123 C",rgb:[255,199,44]},{n:"PMS 286 C",rgb:[0,51,160]},
+        {n:"Cool Gray 5 C",rgb:[172,174,175]},{n:"PMS 485 C",rgb:[218,41,28]},{n:"Green C",rgb:[0,172,61]},
+        {n:"PMS 354 C",rgb:[0,177,64]},{n:"Purple C",rgb:[187,41,187]},{n:"White",rgb:[255,255,255]}
+    ];
 
+    // --- INIT ---
     async function init() {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            const r = video.getBoundingClientRect();
-            [fcCtx, gridCtx, lvlCtx, scoutCtx, uiCtx].forEach(c => { c.canvas.width = r.width; c.canvas.height = r.height; });
-            requestAnimationFrame(liveLoop);
-        };
-        navigator.geolocation.getCurrentPosition(pos => {
-            currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
-            document.getElementById('scout-map-live').innerHTML = `<iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed"></iframe>`;
-            fetchTimes();
-            const mapImg = new Image(); mapImg.crossOrigin = "anonymous";
-            mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
-            mapImg.onload = () => window._staticMap = mapImg;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 } } });
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                const r = video.getBoundingClientRect();
+                [fcCtx, gridCtx, lvlCtx, scoutCtx, uiCtx].forEach(c => { c.canvas.width = r.width; c.canvas.height = r.height; });
+                requestAnimationFrame(liveLoop);
+            };
+        } catch(e) { alert("Camera Access Required."); }
+
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
+                document.getElementById('txt-gps').innerText = `${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
+                document.getElementById('scout-map-live').innerHTML = `<iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed"></iframe>`;
+                fetchTimesAndWeather();
+                
+                // Fetch static map for export bridge
+                const mapImg = new Image(); mapImg.crossOrigin = "anonymous";
+                mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
+                mapImg.onload = () => window._staticMap = mapImg;
+            });
+        }
+        
+        // Setup Shoot Notes 
+        if(localStorage.getItem('preye_notes')) {
+            document.getElementById('shoot-notes').value = localStorage.getItem('preye_notes');
+        }
+        document.getElementById('shoot-notes').addEventListener('input', (e) => {
+            localStorage.setItem('preye_notes', e.target.value);
         });
+
+        document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
     }
 
-    async function fetchTimes() {
-        const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
-        const data = await res.json();
-        const sunset = new Date(data.results.sunset);
-        goldenHour = new Date(sunset.getTime() - 3600000);
-        document.getElementById('txt-sunrise').innerText = new Date(data.results.sunrise).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        document.getElementById('txt-sunset').innerText = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    async function fetchTimesAndWeather() {
+        try {
+            // Sun Times
+            const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
+            const data = await res.json();
+            const sunset = new Date(data.results.sunset);
+            goldenHour = new Date(sunset.getTime() - 3600000);
+            document.getElementById('txt-sunrise').innerText = new Date(data.results.sunrise).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('txt-sunset').innerText = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            // Weather
+            const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
+            const wData = await wRes.json();
+            document.getElementById('tool-temp').innerText = `${wData.current_weather.temperature} °C`;
+        } catch(e) { console.log("API Error"); }
     }
 
+    // --- GOLDEN HOUR TICKER ---
+    setInterval(() => {
+        if(!goldenHour) return;
+        const diff = goldenHour - new Date();
+        if(diff > 0) {
+            const m = Math.floor(diff / 60000); const s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('val-golden').innerText = `${m}m ${s}s`;
+            document.getElementById('val-golden').style.color = "var(--text)";
+        } else {
+            document.getElementById('val-golden').innerText = "ACTIVE";
+            document.getElementById('val-golden').style.color = "var(--gold)";
+        }
+    }, 1000);
+
+    // --- LIVE LOOP ENGINE ---
     function liveLoop() {
-        if(video.readyState === 4) {
+        if(video.readyState === 4 && video.videoWidth > 0) {
             procCtx.drawImage(video, 0, 0, 150, 200);
-            const pix = procCtx.getImageData(0,0,150,200).data;
+            const imgData = procCtx.getImageData(0,0,150,200);
+            const pix = imgData.data;
 
-            // Metering
-            let lumAvg = 0; for(let i=0; i<pix.length; i+=4) lumAvg += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
-            const ev = Math.log2(lumAvg/30000);
+            // 1. Exposure & WB
+            let r=0, g=0, b=0, lumTot=0;
+            for(let i=0; i<pix.length; i+=4) { 
+                r+=pix[i]; g+=pix[i+1]; b+=pix[i+2]; 
+                lumTot += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+            }
+            const ev = Math.log2(lumTot/30000);
+            const wb = Math.round(5500 * ((b/pix.length)/(r/pix.length)));
+            
             if(flashMode) { if(ev > peakEV) peakEV = ev; document.getElementById('val-ev').innerText = "PK " + peakEV.toFixed(1); }
             else { document.getElementById('val-ev').innerText = ev.toFixed(1); }
-            const diff = (flashMode?peakEV:ev) - (Math.log2(5.6**2/(1/60)) - Math.log2(400/100));
+            document.getElementById('val-wb').innerText = wb + "K";
+
+            const targetEV = Math.log2(parseFloat(document.getElementById('set-aperture').value)**2 / (1/60)) - Math.log2(parseInt(document.getElementById('set-iso').value)/100);
+            const diff = (flashMode ? peakEV : ev) - targetEV;
             document.getElementById('expo-marker').style.left = Math.min(95, Math.max(5, 50 + (diff * 15))) + "%";
 
-            // Histogram
-            histCtx.clearRect(0,0,100,60);
-            const bins = new Array(25).fill(0);
-            for(let i=0; i<pix.length; i+=4) bins[Math.floor((0.299*pix[i]+0.587*pix[i+1]+0.114*pix[i+2])/256*25)]++;
-            const max = Math.max(...bins);
-            histCtx.fillStyle = "rgba(212,194,161,0.7)";
-            bins.forEach((b,i) => histCtx.fillRect(i*4, 60, 3, -(b/max*50)));
-
-            // Horizon
-            lvlCtx.clearRect(0,0,lvlCtx.canvas.width, lvlCtx.canvas.height);
-            if(levelActive) {
-                lvlCtx.strokeStyle = Math.abs(currentHeading % 90) < 1 ? "var(--green)" : "var(--gold)";
-                lvlCtx.lineWidth = 2; lvlCtx.beginPath();
-                lvlCtx.moveTo(video.offsetWidth/2-50, video.offsetHeight/2); lvlCtx.lineTo(video.offsetWidth/2+50, video.offsetHeight/2); lvlCtx.stroke();
+            // 2. Histogram
+            if(histActive) {
+                histCtx.clearRect(0,0,100,60);
+                const bins = new Array(25).fill(0);
+                for(let i=0; i<pix.length; i+=4) bins[Math.floor((0.299*pix[i]+0.587*pix[i+1]+0.114*pix[i+2])/256*25)]++;
+                const max = Math.max(...bins);
+                histCtx.fillStyle = "rgba(212,194,161,0.7)";
+                bins.forEach((bin, idx) => histCtx.fillRect(idx*4, 60, 3, -(bin/max*50)));
             }
 
-            // Pantone
+            // 3. False Color IRE
+            if(fcActive) {
+                const fcOut = new Uint8ClampedArray(pix.length);
+                for(let i=0; i<pix.length; i+=4) {
+                    let y = (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+                    if(y > 240) { fcOut[i]=255; fcOut[i+1]=0; fcOut[i+2]=0; } // Red Clip
+                    else if(y > 115 && y < 135) { fcOut[i]=0; fcOut[i+1]=255; fcOut[i+2]=0; } // Green Skin
+                    else { fcOut[i]=y; fcOut[i+1]=y; fcOut[i+2]=y; }
+                    fcOut[i+3]=255;
+                }
+                fcProcCtx.putImageData(new ImageData(fcOut, 150, 200), 0,0);
+                fcCtx.clearRect(0,0,fcCtx.canvas.width, fcCtx.canvas.height);
+                fcCtx.drawImage(document.getElementById('fc-proc'), 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
+            }
+
+            // 4. Horizon
+            lvlCtx.clearRect(0,0,lvlCtx.canvas.width, lvlCtx.canvas.height);
+            if(lvlActive) {
+                lvlCtx.strokeStyle = Math.abs(currentHeading % 90) < 1.5 ? "var(--green)" : "var(--gold)";
+                lvlCtx.lineWidth = 2; lvlCtx.beginPath();
+                lvlCtx.moveTo(lvlCtx.canvas.width/2-60, lvlCtx.canvas.height/2); lvlCtx.lineTo(lvlCtx.canvas.width/2+60, lvlCtx.canvas.height/2); lvlCtx.stroke();
+            }
+
+            // 5. Pantone Processing (Store globally for export)
+            uiCtx.clearRect(0,0,uiCtx.canvas.width, uiCtx.canvas.height);
+            window._livePantones = [];
             [1,2,3,4].forEach(i => {
-                const s = procCtx.getImageData(i*30, 100, 1, 1).data;
-                const hex = "#" + ((1<<24)+(s[0]<<16)+(s[1]<<8)+s[2]).toString(16).slice(1).toUpperCase();
+                let coords = (tapPoint && i === 1) ? {x: tapPoint.x*150, y: tapPoint.y*200} : {x: i*30, y: 100};
+                const p = procCtx.getImageData(coords.x, coords.y, 1, 1).data;
+                const hex = "#" + ((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
+                
+                let closest = pantoneDb[0], minD = Infinity;
+                pantoneDb.forEach(pan => {
+                    const d = Math.sqrt((p[0]-pan.rgb[0])**2 + (p[1]-pan.rgb[1])**2 + (p[2]-pan.rgb[2])**2);
+                    if(d < minD) { minD = d; closest = pan; }
+                });
+
+                window._livePantones.push({hex: hex, name: closest.n});
+
                 document.getElementById(`cs${i}`).style.background = hex;
+                document.getElementById(`ch${i}`).innerText = hex;
+                document.getElementById(`cn${i}`).innerText = closest.n;
                 if(i < 4) document.getElementById(`rule-${i===1?'60':i===2?'30':'10'}`).style.backgroundColor = hex;
+                
+                if(i===1 && tapPoint) {
+                    uiCtx.strokeStyle = "var(--gold)"; uiCtx.lineWidth=2; uiCtx.beginPath();
+                    uiCtx.arc(tapPoint.x*uiCtx.canvas.width, tapPoint.y*uiCtx.canvas.height, 15, 0, Math.PI*2); uiCtx.stroke();
+                }
             });
         }
         requestAnimationFrame(liveLoop);
     }
 
-    // RAVE LOGIC
+    // --- CAPTURE ENGINE ---
+    document.getElementById('capture-btn').onclick = () => {
+        const can = document.getElementById('comp-canvas'); const ctx = can.getContext('2d');
+        ctx.fillStyle = "#f8f8f8"; ctx.fillRect(0,0,1000,1500);
+        
+        // Image
+        ctx.drawImage(video, 50, 50, 900, 1100);
+        
+        // Map Bridge
+        if(window._staticMap) {
+            ctx.drawImage(window._staticMap, 50, 1170, 900, 180);
+            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth=2; ctx.strokeRect(50, 1170, 900, 180);
+        }
+        
+        // Telemetry Data
+        ctx.fillStyle = "#1a1a1a"; ctx.font = "24px Permanent Marker";
+        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)} | EV: ${document.getElementById('val-ev').innerText} | WB: ${document.getElementById('val-wb').innerText}`, 70, 1390);
+        
+        // Pantone Swatches on Export
+        if(window._livePantones) {
+            ctx.font = "18px DM Mono";
+            window._livePantones.forEach((p, idx) => {
+                ctx.fillStyle = p.hex; ctx.fillRect(70 + (idx*220), 1420, 30, 30);
+                ctx.fillStyle = "#1a1a1a"; ctx.fillText(p.name, 110 + (idx*220), 1442);
+            });
+        }
+
+        const dataUrl = can.toDataURL('image/jpeg', 0.9);
+        document.getElementById('result-img').src = dataUrl;
+        document.getElementById('result-overlay').style.display = 'flex';
+
+        // Share API
+        document.getElementById('btn-share-export').onclick = async () => {
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], `PREye_Capture_${Date.now()}.jpg`, {type: 'image/jpeg'});
+            if(navigator.canShare && navigator.canShare({files: [file]})) {
+                navigator.share({files: [file], title: 'PR Eye Capture'});
+            } else {
+                const link = document.createElement('a'); link.download = file.name; link.href = dataUrl; link.click();
+            }
+        };
+    };
+
+    // --- TOOLS TAB LOGIC ---
+    window.openSOS = (query) => {
+        if(!currentLat) { alert("Awaiting GPS..."); return; }
+        window.open(`https://www.google.com/maps/search/${query}/@${currentLat},${currentLon},14z`, '_blank');
+    };
+    
+    document.getElementById('btn-email-notes').onclick = () => {
+        const body = encodeURIComponent(document.getElementById('shoot-notes').value);
+        window.location.href = `mailto:?subject=PR Eye Shoot Notes&body=${body}`;
+    };
+
+    // --- RAVE & FIELD TOOLS ---
     document.getElementById('btn-rave-start').onclick = async () => {
         if(!audioCtx) audioCtx = new AudioContext();
-        if(raveActive) { raveActive = false; document.body.style.backgroundColor = ""; document.getElementById('btn-rave-start').innerText = "START RAVE MODE"; return; }
-        const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
-        raveAnalyser = audioCtx.createAnalyser(); audioCtx.createMediaStreamSource(mic).connect(raveAnalyser);
-        raveActive = true; document.getElementById('btn-rave-start').innerText = "STOP RAVE";
-        const data = new Uint8Array(raveAnalyser.frequencyBinCount);
-        let avg = 0;
-        function pulse() {
-            if(!raveActive) return;
-            raveAnalyser.getByteFrequencyData(data);
-            let bass = data.slice(0,10).reduce((a,b)=>a+b)/10;
-            avg = (avg * 0.9) + (bass * 0.1);
-            if(bass > avg * 1.5 && bass > 50) document.body.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
-            else document.body.style.backgroundColor = "#09121c";
-            requestAnimationFrame(pulse);
+        if(raveActive) { 
+            raveActive = false; document.body.style.backgroundColor = ""; 
+            document.getElementById('btn-rave-start').innerText = "START AUDIO STROBE"; return; 
         }
-        pulse();
+        try {
+            const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+            raveAnalyser = audioCtx.createAnalyser(); audioCtx.createMediaStreamSource(mic).connect(raveAnalyser);
+            raveActive = true; document.getElementById('btn-rave-start').innerText = "STOP AUDIO STROBE";
+            const data = new Uint8Array(raveAnalyser.frequencyBinCount);
+            let avg = 0;
+            function pulse() {
+                if(!raveActive) return;
+                raveAnalyser.getByteFrequencyData(data);
+                let bass = data.slice(0,10).reduce((a,b)=>a+b)/10;
+                avg = (avg * 0.9) + (bass * 0.1);
+                if(bass > avg * 1.5 && bass > 50) document.body.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+                else document.body.style.backgroundColor = "var(--navy)";
+                requestAnimationFrame(pulse);
+            }
+            pulse();
+        } catch(e) { alert("Mic required for audio strobe."); }
     };
 
     document.getElementById('btn-sos-trigger').onclick = () => {
         sosActive = !sosActive;
         document.getElementById('sos-flash-overlay').classList.toggle('strobe-active', sosActive);
+        if(sosActive) {
+            if(!sosAudioCtx) sosAudioCtx = new AudioContext();
+            sirenOsc1 = sosAudioCtx.createOscillator(); sirenOsc1.type = 'square'; sirenOsc1.frequency.value = 800;
+            sirenOsc2 = sosAudioCtx.createOscillator(); sirenOsc2.type = 'square'; sirenOsc2.frequency.value = 1200;
+            const g1 = sosAudioCtx.createGain(); const g2 = sosAudioCtx.createGain();
+            sirenOsc1.connect(g1); g1.connect(sosAudioCtx.destination); sirenOsc2.connect(g2); g2.connect(sosAudioCtx.destination);
+            sirenOsc1.start(); sirenOsc2.start();
+            let toggle = true;
+            window._sosInt = setInterval(() => { if(toggle){g1.gain.value=1;g2.gain.value=0;}else{g1.gain.value=0;g2.gain.value=1;} toggle=!toggle; }, 400);
+        } else {
+            clearInterval(window._sosInt); if(sirenOsc1) sirenOsc1.stop(); if(sirenOsc2) sirenOsc2.stop();
+        }
     };
+    document.getElementById('btn-no-rave').onclick = () => alert("Wise choice. Back to work.");
 
-    document.getElementById('btn-no-rave').onclick = () => alert("Wise choice. Let's get back to work.");
-
-    // PDF & CAPTURE
-    document.getElementById('capture-btn').onclick = () => {
-        const can = document.getElementById('comp-canvas'); const ctx = can.getContext('2d');
-        ctx.fillStyle = "#f8f8f8"; ctx.fillRect(0,0,1000,1500);
-        ctx.drawImage(video, 50, 50, 900, 1150);
-        if(window._staticMap) ctx.drawImage(window._staticMap, 50, 1220, 900, 180);
-        ctx.fillStyle = "#1a1a1a"; ctx.font = "22px Permanent Marker";
-        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1430);
-        document.getElementById('result-img').src = can.toDataURL();
-        document.getElementById('result-overlay').style.display = 'flex';
+    // --- BUTTON CONTROLS ---
+    document.getElementById('btn-fc').onclick = e => { fcActive = !fcActive; e.target.classList.toggle('active-toggle'); document.getElementById('fc-layer').style.display = fcActive ? 'block' : 'none'; };
+    document.getElementById('btn-level').onclick = e => { lvlActive = !lvlActive; e.target.classList.toggle('active-toggle'); document.getElementById('level-layer').style.display = lvlActive ? 'block' : 'none';};
+    document.getElementById('btn-hist').onclick = e => { histActive = !histActive; e.target.classList.toggle('active-toggle'); document.getElementById('histogram-canvas').style.display = histActive ? 'block' : 'none'; };
+    document.getElementById('btn-grid').onclick = e => { 
+        gridActive = !gridActive; e.target.classList.toggle('active-toggle');
+        gridCtx.clearRect(0,0,gridCtx.canvas.width, gridCtx.canvas.height);
+        document.getElementById('grid-layer').style.display = gridActive ? 'block' : 'none';
+        if(gridActive) {
+            gridCtx.strokeStyle = "rgba(212,194,161,0.5)"; gridCtx.lineWidth = 1;
+            const w = gridCtx.canvas.width, h = gridCtx.canvas.height;
+            gridCtx.beginPath();
+            for(let i=1; i<3; i++) { gridCtx.moveTo(w/3*i, 0); gridCtx.lineTo(w/3*i, h); gridCtx.moveTo(0, h/3*i); gridCtx.lineTo(w, h/3*i); }
+            gridCtx.stroke();
+        }
     };
+    document.getElementById('ui-layer').onclick = e => { const r = e.target.getBoundingClientRect(); tapPoint = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height }; };
+    
+    document.getElementById('m-flash').onclick = () => { flashMode = true; peakEV = -99; document.getElementById('m-flash').classList.add('active-toggle'); document.getElementById('m-live').classList.remove('active-toggle'); document.getElementById('reset-peak').style.display='block'; };
+    document.getElementById('m-live').onclick = () => { flashMode = false; document.getElementById('m-live').classList.add('active-toggle'); document.getElementById('m-flash').classList.remove('active-toggle'); document.getElementById('reset-peak').style.display='none'; };
+    document.getElementById('reset-peak').onclick = () => peakEV = -99;
+
+    document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        if(n.dataset.target) document.getElementById(n.dataset.target).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); n.classList.add('active');
+        // Hide Camera for text-heavy tabs
+        document.getElementById('cam-section').style.display = (['page-rave','page-tools','page-legal'].includes(n.dataset.target)) ? 'none' : 'block';
+    });
+
+    // --- LEGAL & PDF ENGINE ---
+    const setupPad = id => {
+        const can = document.getElementById(id); const ctx = can.getContext('2d');
+        setTimeout(() => can.width = can.offsetWidth, 100);
+        let draw = false;
+        can.onpointerdown = e => { draw = true; ctx.moveTo(e.offsetX, e.offsetY); };
+        can.onpointermove = e => { if(draw) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+        can.onpointerup = () => draw = false; can.onpointerout = () => draw = false;
+    };
+    ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(setupPad);
+
+    document.getElementById('r-age').onchange = e => document.getElementById('guardian-box').style.display = e.target.value === 'minor' ? 'block' : 'none';
 
     document.getElementById('gen-pdf').onclick = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFontSize(18); doc.text("MODEL RELEASE - PR EYE LTD", 105, 20, {align:'center'});
-        doc.setFontSize(8); doc.text("Digby Oldridge | Downs Cottage, Fernham Rd, Longcot", 105, 26, {align:'center'});
-        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 100, 50, 15);
-        doc.save("Release.pdf");
+        const n = document.getElementById('r-name').value || "Model";
+        
+        doc.setFontSize(16); doc.text("MODEL RELEASE FORM", 105, 15, {align:'center'});
+        doc.setFontSize(8); doc.text("PHOTOGRAPHER: Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk", 105, 22, {align:'center'});
+        doc.setFontSize(10); doc.text(`Model: ${n} | DOB: ${document.getElementById('r-dob').value}`, 20, 35);
+        
+        const legal = `GRANT OF RIGHTS\nI hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.\n\nPERMISSIONS & OWNERSHIP\nI agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.\n\nRELEASE OF CLAIMS\nI release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.\n\nREPRESENTATIONS & WARRANTIES\nI represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.\n\nDATA PROTECTION\nMy personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.\n\nGENERAL PROVISIONS\nThis Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.`;
+        doc.setFontSize(8); doc.text(legal, 20, 45, {maxWidth: 170});
+
+        let y = 175;
+        if(document.getElementById('r-age').value === 'minor') {
+            doc.text(`PARENTAL/GUARDIAN CONSENT: ${document.getElementById('r-g-name').value}`, 20, y);
+            doc.text("Guardian Signature:", 20, y+10); doc.addImage(document.getElementById('sig-guardian').toDataURL(), 'PNG', 20, y+12, 40, 15);
+            y += 35;
+        }
+
+        doc.text("Model Signature:", 20, y); doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, y+2, 40, 15);
+        doc.text("Witness Signature:", 80, y); doc.addImage(document.getElementById('sig-witness').toDataURL(), 'PNG', 80, y+2, 40, 15);
+        doc.text("Photog Signature:", 140, y); doc.addImage(document.getElementById('sig-photog').toDataURL(), 'PNG', 140, y+2, 40, 15);
+        
+        doc.save(`ModelRelease_${n.replace(/\s+/g, '_')}.pdf`);
     };
 
-    // NAV
-    document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(n.dataset.target).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); n.classList.add('active');
-        document.getElementById('cam-section').style.display = (['page-rave','page-legal'].includes(n.dataset.target)) ? 'none' : 'block';
-    });
-
-    // PADS
-    ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(id => {
-        const can = document.getElementById(id); const ctx = can.getContext('2d');
-        can.width = can.offsetWidth; let draw = false;
-        can.onpointerdown = e => { draw = true; ctx.moveTo(e.offsetX, e.offsetY); };
-        can.onpointermove = e => { if(draw) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
-        can.onpointerup = () => draw = false;
-    });
-
-    document.getElementById('m-flash').onclick = () => { flashMode = true; peakEV = -99; document.getElementById('reset-peak').style.display='block'; };
-    document.getElementById('m-live').onclick = () => { flashMode = false; document.getElementById('reset-peak').style.display='none'; };
-    document.getElementById('reset-peak').onclick = () => peakEV = -99;
+    document.getElementById('btn-wa').onclick = () => {
+        const msg = encodeURIComponent(`PR EYE v2.3 Shoot Summary\nDate: ${document.getElementById('r-date').value}\nLoc: ${document.getElementById('r-loc').value}\nModel: ${document.getElementById('r-name').value}\nPhotog: Digby Oldridge (PR Eye Ltd)\n\nRelease signed and securely stored.`);
+        window.open(`https://wa.me/?text=${msg}`);
+    };
 
     window.ondeviceorientation = e => { currentHeading = e.alpha || 0; document.getElementById('val-tilt').innerText = Math.round(e.beta || 0) + "°"; };
     init();
