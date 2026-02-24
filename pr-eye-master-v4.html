@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v9 — Pro Toolkit</title>
+    <title>PR Eye v10 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,7 +14,7 @@
             --navy: #0d1b2a; --navy2: #142438; --border: #1e3a52;
             --gold: #f0c040; --gold-dim: rgba(240,192,64,0.3);
             --text: #e6edf5; --muted: #6c829c;
-            --red: #ff5555; --green: #55ff55;
+            --red: #ff5555; --blue: #5555ff; --green: #55ff55;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
@@ -33,17 +33,30 @@
         .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 10px;}
         video, #captured-img { width: 100%; height: 100%; object-fit: cover; }
         #captured-img { display: none; }
+        
+        /* Overlays */
         .meter-zone { position: absolute; border: 2px dashed var(--gold); pointer-events: none; display: none; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
         #zone-spot { width: 10%; height: 10%; border-radius: 50%; }
         #zone-centre { width: 40%; height: 40%; }
         
-        /* ACTION ROW (Directly under camera) */
-        .action-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn { padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .grid-overlay { position: absolute; inset: 0; pointer-events: none; display: none; 
+            background-image: linear-gradient(to right, transparent 33.3%, rgba(240,192,64,0.4) 33.3%, rgba(240,192,64,0.4) 33.8%, transparent 33.8%), 
+                              linear-gradient(to right, transparent 66.6%, rgba(240,192,64,0.4) 66.6%, rgba(240,192,64,0.4) 67.1%, transparent 67.1%), 
+                              linear-gradient(to bottom, transparent 33.3%, rgba(240,192,64,0.4) 33.3%, rgba(240,192,64,0.4) 33.8%, transparent 33.8%), 
+                              linear-gradient(to bottom, transparent 66.6%, rgba(240,192,64,0.4) 66.6%, rgba(240,192,64,0.4) 67.1%, transparent 67.1%); 
+        }
+        .grid-overlay.active { display: block; }
+        
+        #fc-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.7; display: none; }
+        #fc-overlay.active { display: block; }
+        
+        /* ACTION ROW */
+        .action-row { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; justify-content: space-between; }
+        .btn { padding: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; flex: 1;}
         .btn.solid { background: var(--gold); color: var(--navy); }
-        .btn.sm { padding: 8px; font-size: 11px; }
-        #capture-btn { flex: 1; font-size: 16px; font-weight: bold; }
-        #cam-flip-btn, #sound-toggle-btn { flex: 0 0 auto; width: 50px; font-size: 18px; }
+        .btn.icon-only { flex: 0 0 auto; width: 45px; font-size: 16px; padding: 0;}
+        .btn.active-toggle { background: var(--gold-dim); border-color: var(--gold); }
+        #capture-btn { flex: 2; font-size: 14px; font-weight: bold; min-width: 140px; }
 
         .ctrl-panel { background: var(--navy2); border-radius: 8px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
         .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
@@ -59,11 +72,11 @@
 
         .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-top: 10px; }
         .expo-scale { flex: 1; height: 4px; background: #333; margin: 0 15px; position: relative; }
-        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 12px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.3s ease-out; }
+        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 14px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
         .expo-val { font-size: 16px; font-weight: 500; width: 40px; text-align: center; }
-        .expo-val.over { color: var(--red); } .expo-val.under { color: var(--text); } .expo-val.good { color: var(--green); }
+        .expo-val.over { color: var(--red); } .expo-val.under { color: var(--text); }
 
-        /* LIVE PANTONE GRID */
+        /* PANTONE GRID */
         .pan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 80px; }
         .pan-swatch { width: 40%; transition: background-color 0.3s; }
@@ -90,8 +103,8 @@
 <body>
 
     <div class="hdr">
-        <div class="brand">PR EYE v9</div>
-        <div style="font-size: 12px; color: var(--gold);">LIVE WB: <span id="hdr-wb">---</span></div>
+        <div class="brand">PR EYE v10</div>
+        <div style="font-size: 12px; color: var(--gold);">WB: <span id="hdr-wb">---</span></div>
     </div>
 
     <div class="main-content">
@@ -102,11 +115,16 @@
                 <img id="captured-img">
                 <div id="zone-spot" class="meter-zone"></div>
                 <div id="zone-centre" class="meter-zone"></div>
+                <div id="grid-overlay" class="grid-overlay"></div>
+                <canvas id="fc-overlay"></canvas>
             </div>
+            
             <div class="action-row">
-                <button id="cam-flip-btn" class="btn" aria-label="Flip Camera">🔄</button>
+                <button id="cam-flip-btn" class="btn icon-only" aria-label="Flip Camera">🔄</button>
+                <button id="grid-toggle-btn" class="btn icon-only" aria-label="Toggle Grid">▦</button>
+                <button id="fc-toggle-btn" class="btn icon-only" aria-label="Toggle False Colour" style="color: var(--red);">◐</button>
                 <button id="capture-btn" class="btn solid">📸 Capture & Save</button>
-                <button id="sound-toggle-btn" class="btn" aria-label="Toggle Sound">🔊</button>
+                <button id="sound-toggle-btn" class="btn icon-only" aria-label="Toggle Sound">🔊</button>
             </div>
         </div>
 
@@ -141,6 +159,7 @@
                     <div class="expo-scale"><div class="expo-marker" id="expo-marker" style="left: 50%;"></div></div>
                     <span class="expo-val over">+3</span>
                 </div>
+                 <div style="text-align: center; font-size: 11px; margin-top: 5px; color: var(--muted);">Live EV: <span id="live-ev-txt">--</span></div>
             </div>
         </div>
 
@@ -159,77 +178,29 @@
             <h3>Model Release Form</h3>
             <div class="release-section">
                 <h4>Shoot Details</h4>
-                <div class="row">
-                    <div class="col"><input type="date" id="r-date"></div>
-                    <div class="col"><input type="text" id="r-loc" placeholder="Location"></div>
-                </div>
+                <div class="row"><div class="col"><input type="date" id="r-date"></div><div class="col"><input type="text" id="r-loc" placeholder="Location"></div></div>
             </div>
-
             <div class="release-section">
                 <h4>Model Details</h4>
                 <input type="text" id="r-name" placeholder="Full Name">
-                <div class="row">
-                    <div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div>
-                    <div class="col"><input type="tel" id="r-phone" placeholder="Phone"></div>
-                </div>
+                <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone"></div></div>
                 <input type="email" id="r-email" placeholder="Email Address">
                 <textarea id="r-address" placeholder="Full Address" rows="2"></textarea>
                 <input type="text" id="r-comp" placeholder="Compensation (if any)">
-                
-                <div style="margin: 15px 0;">
-                    <span class="label-txt">Model Photo (Optional)</span>
-                    <input type="file" id="r-photo-input" accept="image/*" capture="environment" style="padding: 5px;">
-                    <img id="r-photo-preview" class="photo-preview">
-                </div>
-
-                <div class="toggle-switch" style="margin-bottom: 15px;">
-                    <div class="toggle-opt active" id="tog-adult">Model is 18+</div>
-                    <div class="toggle-opt" id="tog-minor">Model is Under 18</div>
-                </div>
+                <div style="margin: 15px 0;"><span class="label-txt">Model Photo (Optional)</span><input type="file" id="r-photo-input" accept="image/*" capture="environment" style="padding: 5px;"><img id="r-photo-preview" class="photo-preview"></div>
+                <div class="toggle-switch" style="margin-bottom: 15px;"><div class="toggle-opt active" id="tog-adult">Model is 18+</div><div class="toggle-opt" id="tog-minor">Model is Under 18</div></div>
             </div>
-
             <div id="guardian-section" class="release-section">
                 <h4>Parent/Guardian Consent</h4>
                 <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
-                <span class="label-txt">Guardian Signature</span>
-                <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
-                <button class="btn sm" style="width:100%;" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
+                <span class="label-txt">Guardian Signature</span><canvas id="sig-guardian" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
             </div>
-
-            <div class="release-section">
-                <h4>Terms & Conditions</h4>
-                <div class="legal-text">
-                    <strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br>
-                    <strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br>
-                    <strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br>
-                    <strong>REPRESENTATIONS & WARRANTIES:</strong> I represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.<br><br>
-                    <strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.<br><br>
-                    <strong>GENERAL PROVISIONS:</strong> This Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.
-                </div>
-            </div>
-
             <div class="release-section">
                 <h4>Signatures</h4>
-                <span class="label-txt">Model Signature</span>
-                <canvas id="sig-model" class="signature-pad" height="100"></canvas>
-                <button class="btn sm" style="width:100%;" onclick="clearPad('sig-model')">Clear Model Sig</button>
-
-                <div style="margin-top: 20px;">
-                    <span class="label-txt">Witness Details (Must be 18+, Independent)</span>
-                    <input type="text" id="r-w-name" placeholder="Witness Name">
-                    <input type="text" id="r-w-address" placeholder="Witness Address">
-                    <span class="label-txt">Witness Signature</span>
-                    <canvas id="sig-witness" class="signature-pad" height="100"></canvas>
-                    <button class="btn sm" style="width:100%;" onclick="clearPad('sig-witness')">Clear Witness Sig</button>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <span class="label-txt">Photographer Signature</span>
-                    <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
-                    <button class="btn sm" style="width:100%;" onclick="clearPad('sig-photog')">Clear Photog Sig</button>
-                </div>
+                <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-model')">Clear Model Sig</button>
+                <div style="margin-top: 20px;"><span class="label-txt">Witness Details (Must be 18+, Independent)</span><input type="text" id="r-w-name" placeholder="Witness Name"><input type="text" id="r-w-address" placeholder="Witness Address"><span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-witness')">Clear Witness Sig</button></div>
+                <div style="margin-top: 20px;"><span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-photog')">Clear Photog Sig</button></div>
             </div>
-
             <button id="gen-pdf-btn" class="btn solid" style="width:100%; min-height: 60px;">1. Generate PDF</button>
             <button id="email-pdf-btn" class="btn" style="width:100%; min-height: 60px;">2. Email PDF</button>
         </div>
@@ -250,22 +221,26 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    // False Colour Setup
+    const fcCanvas = document.getElementById('fc-overlay');
+    const fcCtx = fcCanvas.getContext('2d', { willReadFrequently: true });
+    let isFalseColour = false;
+    
     let stream = null;
     let currentFacingMode = 'environment';
     let measuredEV = 0;
     let isAutoExpo = true;
     let currentTab = 'page-meter';
     
-    // Web Audio Shutter Sound
+    // Audio Shutter
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let soundEnabled = true;
     document.getElementById('sound-toggle-btn').addEventListener('click', (e) => {
-        soundEnabled = !soundEnabled;
-        e.target.innerText = soundEnabled ? '🔊' : '🔇';
+        soundEnabled = !soundEnabled; e.target.innerText = soundEnabled ? '🔊' : '🔇';
     });
     function playShutter() {
-        if(!soundEnabled) return;
-        if(audioCtx.state === 'suspended') audioCtx.resume();
+        if(!soundEnabled) return; if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
@@ -300,18 +275,25 @@
         n.classList.add('active');
         currentTab = n.dataset.target;
         document.getElementById(currentTab).classList.add('active');
-        
-        // Hide/Show persistent camera area
         document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'block' : 'none';
     }));
 
-    // --- CAMERA ENGINE ---
+    // --- CAMERA ENGINE (Fix for Rear camera stickiness) ---
     async function startCamera() {
-        if(stream) { stream.getTracks().forEach(t => t.stop()); await new Promise(r => setTimeout(r, 100)); }
+        if(stream) {
+            stream.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+            await new Promise(r => setTimeout(r, 100)); // Force hardware release
+        }
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
+            // Use exact facing mode on mobile to force the lens switch
+            const constraints = { 
+                video: { facingMode: currentFacingMode === 'environment' ? { ideal: 'environment' } : { ideal: 'user' } } 
+            };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = stream;
-            requestAnimationFrame(liveLoop); // Start the live analysis loop
+            video.play();
+            requestAnimationFrame(liveLoop); 
         } catch(e) { console.log("Cam Error", e); }
     }
     document.getElementById('cam-flip-btn').addEventListener('click', ()=>{
@@ -319,43 +301,80 @@
         startCamera();
     });
 
-    // --- LIVE ANALYSIS LOOP (Meter & Pantone) ---
+    // --- TOGGLES (Grid & False Colour) ---
+    document.getElementById('grid-toggle-btn').addEventListener('click', (e) => {
+        const grid = document.getElementById('grid-overlay');
+        grid.classList.toggle('active');
+        e.target.classList.toggle('active-toggle');
+    });
+
+    document.getElementById('fc-toggle-btn').addEventListener('click', (e) => {
+        isFalseColour = !isFalseColour;
+        fcCanvas.classList.toggle('active', isFalseColour);
+        e.target.classList.toggle('active-toggle');
+    });
+
+    // --- LIVE ANALYSIS LOOP (Live EV, Temp, Pantone, False Colour) ---
     let lastPanExtraction = [];
     function liveLoop() {
         if(video.readyState === 4 && document.getElementById('persistent-cam-area').style.display !== 'none') {
-            // 1. Live Temp (Celsius primary, Kelvin secondary)
+            
+            // Fast downsample for Light & Temp
             canvas.width = 100; canvas.height = 100;
-            ctx.drawImage(video, video.videoWidth/2 - 50, video.videoHeight/2 - 50, 100, 100, 0,0,100,100);
+            ctx.drawImage(video, 0, 0, 100, 100);
             const d = ctx.getImageData(0,0,100,100).data;
-            let r=0,b=0, c=0; for(let i=0; i<d.length; i+=4) { r+=d[i]; b+=d[i+2]; c++; }
+            
+            let r=0, b=0, lumT=0, c=0; 
+            for(let i=0; i<d.length; i+=4) { 
+                r+=d[i]; b+=d[i+2]; 
+                lumT += (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]);
+                c++; 
+            }
+            
+            // 1. Live EV & Slider Update
+            measuredEV = Math.log2(((lumT/c)/255) * 100 / 12.5);
+            document.getElementById('live-ev-txt').innerText = measuredEV.toFixed(1);
+            if(currentTab === 'page-meter') updateExpoBar();
+
+            // 2. Live Temp (Celsius primary, Kelvin secondary)
             const k = Math.round(5500 * ((b/c)/(r/c)));
             if(!isNaN(k)) {
                 const cel = Math.round(k - 273.15);
                 document.getElementById('hdr-wb').innerText = `${cel}°C (${k}K)`;
             }
 
-            // 2. Live Pantone (Only run if on Pantone tab to save battery)
+            // 3. Live Pantone
             if(currentTab === 'page-color') {
-                canvas.width = 100; canvas.height = 100; // Fast downsample
-                ctx.drawImage(video, 0, 0, 100, 100);
-                const fullD = ctx.getImageData(0,0,100,100).data;
-                const w = 100, h = 100;
-                lastPanExtraction = [];
+                const w = 100, h = 100; lastPanExtraction = [];
                 [ {x:0,y:0}, {x:w/2,y:0}, {x:0,y:h/2}, {x:w/2,y:h/2} ].forEach((q, idx) => {
                     let tr=0,tg=0,tb=0,tc=0;
                     for(let iy=q.y; iy<q.y+h/2; iy+=5) { for(let ix=q.x; ix<q.x+w/2; ix+=5) {
                         const i = (Math.floor(iy)*w + Math.floor(ix))*4;
-                        tr+=fullD[i]; tg+=fullD[i+1]; tb+=fullD[i+2]; tc++;
+                        tr+=d[i]; tg+=d[i+1]; tb+=d[i+2]; tc++;
                     }}
                     const hex = rgbToHex(Math.round(tr/tc), Math.round(tg/tc), Math.round(tb/tc));
                     const pan = findNearestPantone(hex);
-                    lastPanExtraction.push({ hex, pan });
+                    lastPanExtraction.push({ hex, pan, quad: idx+1 });
                     
-                    // Update UI live
                     document.getElementById(`ps${idx+1}`).style.backgroundColor = hex;
                     document.getElementById(`pn${idx+1}`).innerText = pan.n;
                     document.getElementById(`ph${idx+1}`).innerText = hex;
                 });
+            }
+
+            // 4. False Colour Exposure Mapping (Zebra)
+            if(isFalseColour) {
+                fcCanvas.width = 160; fcCanvas.height = 120; // low res for performance
+                fcCtx.drawImage(video, 0, 0, 160, 120);
+                const fcData = fcCtx.getImageData(0,0,160,120);
+                const px = fcData.data;
+                for(let i=0; i<px.length; i+=4) {
+                    let l = 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2];
+                    if(l > 240) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } // RED Overexposed
+                    else if(l < 15) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } // BLUE Underexposed
+                    else { px[i+3]=0; } // Transparent midtones
+                }
+                fcCtx.putImageData(fcData, 0, 0);
             }
         }
         requestAnimationFrame(liveLoop);
@@ -384,7 +403,11 @@
         const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100);
         let percent = 50 + ((measuredEV - settingsEV) * (50/3)); 
         percent = Math.max(5, Math.min(95, percent));
-        document.getElementById('expo-marker').style.left = `${percent}%`;
+        
+        const marker = document.getElementById('expo-marker');
+        marker.style.left = `${percent}%`;
+        // Turn red if vastly over/under exposed
+        marker.style.background = (percent < 20 || percent > 80) ? 'var(--red)' : 'var(--gold)';
     }
 
     // --- CAPTURE & SAVE ROUTING ---
@@ -398,49 +421,59 @@
     function processMeterCapture() {
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         ctx.drawImage(video, 0,0);
-        const data = ctx.getImageData(0,0,canvas.width, canvas.height);
         
-        let lum=0, rT=0, bT=0, count=0;
-        for(let i=0; i<data.data.length; i+=40) { 
-            lum += (0.299*data.data[i] + 0.587*data.data[i+1] + 0.114*data.data[i+2]);
-            rT += data.data[i]; bT += data.data[i+2]; count++;
-        }
-        measuredEV = Math.log2(((lum/count)/255) * 100 / 12.5);
-        const k = Math.round(5500 * ((bT/count)/(rT/count)));
-        const cel = Math.round(k - 273.15);
-
         if(isAutoExpo) {
             document.getElementById('set-iso').value = "400"; document.getElementById('set-shutter').value = "60";
             const tF = Math.sqrt(Math.pow(2, measuredEV + Math.log2(4)) * (1/60));
             const fOpts = Array.from(document.getElementById('set-aperture').options).map(o=>parseFloat(o.value));
             document.getElementById('set-aperture').value = fOpts.reduce((p, c) => Math.abs(c-tF) < Math.abs(p-tF) ? c : p).toString();
+            updateExpoBar();
         }
-        updateExpoBar();
 
+        const wbText = document.getElementById('hdr-wb').innerText;
         generateComposite(canvas.toDataURL('image/jpeg'), "METER ANALYSED REPORT", (cCtx) => {
             cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
             cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
-            cCtx.fillText(`WB: ${cel}°C (${k}K)`, 600, 1250);
+            cCtx.fillText(`WB: ${wbText}`, 600, 1250);
             cCtx.fillText(`SETTINGS: ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
         });
     }
 
-    // Sub-routine: Pantone Report
+    // Sub-routine: Pantone Report (Now with Target Crosshairs)
     function processPantoneCapture() {
         if(lastPanExtraction.length < 4) return alert("Waiting for colour data...");
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         ctx.drawImage(video, 0,0);
         const imgUri = canvas.toDataURL('image/jpeg');
-        const snapData = [...lastPanExtraction]; // Clone current state
+        const snapData = [...lastPanExtraction];
 
-        generateComposite(imgUri, "COLOUR PALETTE REPORT", (cCtx) => {
+        generateComposite(imgUri, "COLOUR PALETTE REPORT", (cCtx, drawX, drawY, drawW, drawH) => {
+            
+            // 1. Draw Target Markers on the Photo
+            const targets = [
+                {x: 0.25, y: 0.25}, {x: 0.75, y: 0.25},
+                {x: 0.25, y: 0.75}, {x: 0.75, y: 0.75}
+            ];
+            targets.forEach((t, i) => {
+                const tx = drawX + (drawW * t.x);
+                const ty = drawY + (drawH * t.y);
+                
+                // Draw crosshair/circle
+                cCtx.strokeStyle = snapData[i].hex; cCtx.lineWidth = 6;
+                cCtx.beginPath(); cCtx.arc(tx, ty, 30, 0, Math.PI*2); cCtx.stroke();
+                
+                // Draw Label Number
+                cCtx.fillStyle = '#fff'; cCtx.font = 'bold 30px DM Mono';
+                cCtx.fillText(i+1, tx+40, ty-40);
+            });
+
+            // 2. Draw Data Blocks below
             cCtx.font = 'bold 36px DM Mono'; cCtx.fillStyle = '#e6edf5';
-            // Draw 4 colour blocks
             const blocks = [ {x: 100, y: 1200}, {x: 600, y: 1200}, {x: 100, y: 1350}, {x: 600, y: 1350} ];
             snapData.forEach((col, idx) => {
                 cCtx.fillStyle = col.hex; cCtx.fillRect(blocks[idx].x, blocks[idx].y, 100, 100);
                 cCtx.fillStyle = '#e6edf5';
-                cCtx.fillText(col.pan.n, blocks[idx].x + 130, blocks[idx].y + 45);
+                cCtx.fillText(`${idx+1}. ${col.pan.n}`, blocks[idx].x + 130, blocks[idx].y + 45);
                 cCtx.font = '28px DM Mono'; cCtx.fillStyle = '#6c829c';
                 cCtx.fillText(col.hex, blocks[idx].x + 130, blocks[idx].y + 85);
                 cCtx.font = 'bold 36px DM Mono';
@@ -448,7 +481,7 @@
         });
     }
 
-    // Shared Image Generation Logic (Prevents Squashing)
+    // Shared Image Generation Logic (Passes image bounds to render callback)
     function generateComposite(imgUri, title, renderDataFn) {
         const cCan = document.getElementById('composite-canvas'); const cCtx = cCan.getContext('2d');
         const bgImg = new Image();
@@ -456,6 +489,8 @@
             cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0,0,1200,1600);
             const targetW = 1200, targetH = 900; const imgRatio = bgImg.width / bgImg.height; const targetRatio = targetW / targetH;
             let drawW, drawH, drawX, drawY;
+            
+            // Object Fit: Cover Math
             if (imgRatio > targetRatio) { drawH = targetH; drawW = targetH * imgRatio; drawX = (targetW - drawW) / 2; drawY = 200; } 
             else { drawW = targetW; drawH = targetW / imgRatio; drawX = 0; drawY = 200 + (targetH - drawH) / 2; }
             cCtx.drawImage(bgImg, drawX, drawY, drawW, drawH);
@@ -465,7 +500,7 @@
             cCtx.fillStyle = '#142438'; cCtx.fillRect(50, 1150, 1100, 400);
             cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
             
-            renderDataFn(cCtx); // Inject specific data
+            renderDataFn(cCtx, drawX, drawY, drawW, drawH); 
             
             const link = document.createElement('a'); link.download = `PREye_Report_${Date.now()}.jpg`;
             link.href = cCan.toDataURL('image/jpeg', 0.9); link.click();
@@ -473,7 +508,7 @@
         bgImg.src = imgUri;
     }
 
-    // --- RELEASE FORM LOGIC (Unchanged from V8) ---
+    // --- RELEASE FORM LOGIC ---
     document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('tog-adult').addEventListener('click', () => { document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active'); document.getElementById('guardian-section').style.display = 'none'; });
     document.getElementById('tog-minor').addEventListener('click', () => { document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active'); document.getElementById('guardian-section').style.display = 'block'; });
@@ -483,6 +518,7 @@
     ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(initPad);
     window.clearPad = (id) => { const c = document.getElementById(id); c.getContext('2d').clearRect(0,0,c.width,c.height); };
 
+    // PDF Generation
     document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
         const renderDiv = document.getElementById('hidden-pdf-render');
         let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p><p><strong>Compensation (if any):</strong> ${document.getElementById('r-comp').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS & WARRANTIES:</strong> I represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.<br><br><strong>GENERAL PROVISIONS:</strong> This Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.</p><p style="font-size: 11px;"><strong>ACKNOWLEDGMENT:</strong> By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release, and understand this is a binding legal agreement with irrevocable rights.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Name (Print):</strong> ${document.getElementById('r-name').value}</td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Date:</strong> ${document.getElementById('r-date').value}</td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><p style="font-size: 11px;"><strong>PARENTAL/GUARDIAN CONSENT:</strong> I, ${document.getElementById('r-g-name').value}, am the parent/legal guardian of the above Model and consent to this Release on their behalf.</p><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong> (Must be 18+, independent)<br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value} &nbsp;&nbsp;&nbsp; <strong>Address:</strong> ${document.getElementById('r-w-address').value}</td></tr></table>`;
