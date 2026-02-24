@@ -3,813 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v5 Professional</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/json;base64,ewogICAgIm5hbWUiOiAiUFIgRXllIFBybyIsCiAgICAic2hvcnRfbmFtZSI6ICJQUiEyeSIsCiAgICAic3RhcnRfdXJsIjogIi4iLAogICAgImRpc3BsYXkiOiAiYnJvd3NlciIsCiAgICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWEyZjQ1IiwKICAgICJ0aGVtZV9jb2xvciI6ICIjMWEyZjQ1IiwKICAgICJpY29ucyI6IFt7CiAgICAgICAgInNyYyI6ICJodHRwczovL2RpZ2J5by5naXRodWIuaW8vcHItZXllL2ljb24tMTkyLnBuZyIsCiAgICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0sIHsKICAgICAgICAic3JjIjogImh0dHBzOi8vZGlnYnlvLmdpdGh1Yi5pby9wci1leWUvaWNvbi01MTIucG5nIiwKICAgICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfV0KfQ==">
+    <title>PR Eye — Bespoke Photography Toolkit</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #1a2f45;
-            --text-color: #d4e0ec;
-            --accent-color: #f0c040;
-            --secondary-bg: #243b55;
-            --danger-color: #ff6b6b;
+            --navy: #0d1b2a; --navy2: #112233; --navy3: #1a2f45;
+            --gold: #f0c040; --gold2: #c89a18;
+            --text: #d4e0ec; --muted: #5a7090; --border: #1e3a52;
+            --red: #e05050; --green: #40c080;
+            --base: 16px;
         }
-        body {
-            font-family: sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 15px;
-            line-height: 1.5;
-            font-size: 18px; /* Base font size increased for readability */
-            padding-bottom: 80px; /* Space for fixed nav */
-        }
-        h1, h2, h3 { color: var(--accent-color); margin-bottom: 15px; }
-        h1 { font-size: 1.8em; text-align: center; }
-        
-        /* Navigation */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--secondary-bg);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-            z-index: 100;
-        }
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0.7;
-        }
-        .nav-btn.active { opacity: 1; color: var(--accent-color); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; }
-        
-        /* Sections */
-        .section { display: none; margin-bottom: 30px; background: var(--secondary-bg); padding: 20px; border-radius: 12px; }
-        .section.active { display: block; }
-        
-        /* Camera & Video */
-        #camera-container { position: relative; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        #video, #captured-image-display { width: 100%; height: auto; display: block; }
-        #captured-image-display { display: none; }
-        
-        /* Overlays */
-        .overlay-toggle {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10;
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #grid-overlay, #histogram-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: none;
-        }
-        #grid-overlay.active, #histogram-overlay.active { display: block; }
-        #grid-overlay {
-            background-image: linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
-            background-size: 33.3% 33.3%;
-        }
-        #histogram-canvas {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 100px;
-            height: 60px;
-            background: rgba(0,0,0,0.5);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: var(--base); display: flex; flex-direction: column; height: 100dvh; }
 
-        /* Buttons & Inputs */
-        .btn, button, input[type="file"]::-webkit-file-upload-button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            min-height: 60px; /* Increased touch target */
-        }
-        .btn-primary { background-color: var(--accent-color); color: var(--bg-color); }
-        .btn-secondary { background-color: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
-        .btn-danger { background-color: var(--danger-color); color: white; }
+        /* HEADER (Restored) */
+        .hdr { background: var(--navy2); border-bottom: 2px solid var(--gold); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: relative; }
+        .hdr::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(240,192,64,.4), transparent); }
+        .brand-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: .06em; line-height: 1; }
+        .brand-sub { font-size: 10px; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; margin-top: 4px; }
         
-        /* Native Camera Fallback Styling */
-        .native-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-        .native-input-wrapper input[type=file] {
-            position: absolute;
-            top: 0; right: 0; min-width: 100%; min-height: 100%;
-            font-size: 100px; text-align: right; filter: alpha(opacity=0); opacity: 0; outline: none; background: white; cursor: inherit; display: block;
-        }
-        .native-input-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--secondary-bg);
-            border: 3px solid var(--accent-color);
-            color: var(--accent-color);
-        }
+        .hdr-local-btn { background: transparent; border: 1px solid var(--border); color: var(--gold); font-size: 12px; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 5px; }
 
-        /* Flex layouts */
-        .row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .col { flex: 1; }
+        /* TABS (Restored bottom nav) */
+        .tabs { display: flex; background: var(--navy2); border-top: 1px solid var(--border); flex-shrink: 0; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex: 1; padding: 12px 0; text-align: center; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-top: 2px solid transparent; transition: all .2s; }
+        .tab.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
+
+        /* PAGES */
+        .pages { flex: 1; overflow-y: auto; position: relative; padding: 15px; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CAMERA & MEDIA */
+        .cam-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; }
+        .cam-wrap video, .cam-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cam-wrap img { display: none; }
+        .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 40px; height: 40px; border: 1px solid rgba(240,192,64,0.5); pointer-events: none; }
+
+        /* BUTTONS */
+        .btn { display: flex; align-items: center; justify-content: center; padding: 15px; min-height: 55px; border: 1.5px solid var(--gold); background: transparent; color: var(--gold); font-family: 'DM Mono', monospace; font-size: 15px; font-weight: bold; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 12px; }
+        .btn.solid { background: var(--gold); color: var(--navy); }
+        .btn-row { display: flex; gap: 10px; }
         
-        /* Readings Display */
-        .reading-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .reading-label { font-size: 0.9em; opacity: 0.8; display: block; margin-bottom: 5px; }
-        .reading-value { font-size: 2em; font-weight: 900; color: var(--accent-color); display: block;}
+        /* DATA DISPLAYS */
+        .reading-box { background: var(--navy2); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .reading-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 5px; }
+        .reading-value { font-size: 2em; font-weight: bold; color: var(--gold); }
+
+        /* 4-COLOR PANTONE GRID (Restored) */
+        .pan4-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .pan-chip { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .pan-color { height: 60px; width: 100%; }
+        .pan-info { background: var(--navy2); padding: 8px; text-align: center; font-size: 11px; }
+        .pan-info strong { display: block; color: var(--gold); font-size: 14px; margin-bottom: 2px; }
+
+        /* FORMS */
+        input, textarea { width: 100%; padding: 15px; margin-bottom: 12px; background: var(--navy2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-family: inherit; font-size: 16px; }
+        .signature-pad { border: 2px dashed var(--muted); background: #fff; touch-action: none; border-radius: 8px; width: 100%; margin-bottom: 10px; }
+
+        /* NATIVE CAMERA BACKUP */
+        .native-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
+        .native-wrapper input[type=file] { position: absolute; top: 0; right: 0; min-width: 100%; min-height: 100%; opacity: 0; outline: none; background: white; cursor: inherit; display: block; }
         
-        /* Forms */
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: var(--bg-color);
-            border: 1px solid var(--accent-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .signature-pad {
-            border: 2px dashed var(--accent-color);
-            background: #fff;
-            touch-action: none;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        /* Swatches */
-        #swatch-display { height: 100px; border-radius: 8px; margin-bottom: 15px; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-size: 1.2em;}
-        #saved-swatches-list { max-height: 300px; overflow-y: auto; }
-        .saved-swatch-item { display: flex; align-items: center; margin-bottom: 10px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; }
-        .swatch-color-block { width: 50px; height: 50px; border-radius: 4px; margin-right: 15px; border: 1px solid #fff; }
-
-        /* Hidden Composite Container for Sharing */
-        #composite-share-container {
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 1200px; /* Fixed high res width */
-            height: 630px;
-            display: flex;
-            background-color: var(--bg-color);
-            z-index: -1;
-        }
-        #composite-photo {
-            flex: 1;
-            background-size: cover;
-            background-position: center;
-        }
-        #composite-details {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: var(--text-color);
-            background: var(--secondary-bg);
-            border-left: 4px solid var(--accent-color);
-        }
-        .composite-swatch-block {
-            width: 100%;
-            height: 150px;
-            border-radius: 12px;
-            border: 4px solid #fff;
-            margin-bottom: 30px;
-        }
-        #composite-details h2 { font-size: 3em; margin: 0; color: var(--accent-color);}
-        #composite-details p { font-size: 2em; margin: 10px 0; }
-        .pr-eye-branding { margin-top: auto; font-size: 1.5em; opacity: 0.7; text-align: right;}
-
+        /* COMPOSITE SHARE */
+        #composite-share-container { position: fixed; top: -9999px; left: -9999px; width: 1200px; height: 630px; display: flex; background: var(--navy); z-index: -1; }
+        #composite-photo { flex: 1; background-size: cover; background-position: center; }
+        #composite-details { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; background: var(--navy2); border-left: 4px solid var(--gold); }
+        .c-swatch-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .c-swatch { flex: 1; height: 100px; border-radius: 8px; }
+        .c-title { font-family: 'Cormorant Garamond'; font-size: 50px; color: var(--gold); margin-bottom: 10px;}
     </style>
 </head>
 <body>
 
-    <h1>PR Eye Pro</h1>
-
-    <div id="meter-section" class="section active">
-        <div id="camera-container">
-            <video id="video" autoplay playsinline webkit-playsinline></video>
-            <img id="captured-image-display" alt="Captured analysis frame">
-            <canvas id="canvas" style="display:none;"></canvas>
-            <div class="overlay-toggle" id="overlay-toggle">Grid: Off</div>
-            <div id="grid-overlay"></div>
-            <div id="histogram-overlay"><canvas id="histogram-canvas"></canvas></div>
+    <div class="hdr">
+        <div>
+            <div class="brand-name">PR EYE</div>
+            <div class="brand-sub">Bespoke Photography Toolkit</div>
         </div>
-
-        <div class="row">
-            <button id="capture-btn" class="btn btn-primary col">Analyze Live View</button>
-            <button id="torch-toggle" class="btn btn-secondary col" style="display:none;">🔦 Torch</button>
-        </div>
-        
-        <div class="native-input-wrapper btn" style="padding:0; border:none; margin-top:0;">
-             <button class="btn native-input-btn">📷 Manual Camera Capture</button>
-             <input type="file" id="native-camera-input" accept="image/*" capture="environment">
-        </div>
-        <p style="font-size: 0.9em; text-align: center; opacity: 0.8; margin-top: -5px;">Use if live view is blocked or for higher quality</p>
-
-        <div class="row" style="margin-top: 20px;">
-            <div class="reading-box col">
-                <span class="reading-label">Kelvin Temp</span>
-                <span id="kelvin-val" class="reading-value">--- K</span>
-            </div>
-            <div class="reading-box col">
-                <span class="reading-label">Exposure Value</span>
-                <span id="ev-val" class="reading-value">--- EV</span>
-            </div>
-        </div>
-        <div class="reading-box">
-             <span class="reading-label">Godox Recommendation</span>
-             <div id="godox-rec" style="font-weight: bold; color: var(--accent-color); font-size: 1.2em;">---</div>
+        <div class="hdr-right">
+            <button id="cam-switch-btn" class="hdr-local-btn">🔄 Flip Cam</button>
         </div>
     </div>
 
-    <div id="color-section" class="section">
-        <h2>Pantone Matcher</h2>
-        <button id="sample-color-btn" class="btn btn-primary">Sample Center Color</button>
+    <div class="pages">
         
-        <div id="swatch-wrapper" style="display:none; margin-top: 20px;">
-            <div id="swatch-display"></div>
+        <div id="page-meter" class="page active">
+            <div class="cam-wrap">
+                <video id="video" autoplay playsinline webkit-playsinline></video>
+                <img id="captured-img" alt="Captured Frame">
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div class="crosshair"></div>
+            </div>
+
+            <div class="btn-row">
+                <button id="analyze-btn" class="btn solid" style="flex:2;">Analyze Light</button>
+            </div>
+            
+            <div class="native-wrapper">
+                 <button class="btn">📷 Manual Photo Fallback</button>
+                 <input type="file" id="native-camera" accept="image/*" capture="environment">
+            </div>
+
+            <div class="btn-row">
+                <div class="reading-box" style="flex:1;">
+                    <span class="reading-label">Kelvin Temp</span>
+                    <span id="kelvin-val" class="reading-value">--- K</span>
+                </div>
+                <div class="reading-box" style="flex:1;">
+                    <span class="reading-label">Exposure Value</span>
+                    <span id="ev-val" class="reading-value">--- EV</span>
+                </div>
+            </div>
             <div class="reading-box">
-                <span class="reading-label">Closest Pantone</span>
-                <span id="pantone-name" class="reading-value" style="font-size: 1.5em;">---</span>
-            </div>
-            <div class="row">
-                <button id="save-swatch-btn" class="btn btn-secondary col">Save to List</button>
-                 <button id="share-swatch-btn" class="btn btn-primary col">Share Composite</button>
+                <span class="reading-label">Godox Recommendation</span>
+                <div id="godox-rec" style="color: var(--gold); font-size: 1.2em;">Awaiting Analysis...</div>
             </div>
         </div>
 
-        <h3>Saved Swatches</h3>
-        <div id="saved-swatches-list"></div>
-        <button id="clear-swatches-btn" class="btn btn-danger">Clear All Saved</button>
-    </div>
-
-    <div id="release-section" class="section">
-        <h2>Model Release</h2>
-        <form id="release-form">
-            <h3>Shoot Details</h3>
-            <input type="text" id="shoot-name" placeholder="Shoot Name / Reference">
-            <input type="date" id="shoot-date">
+        <div id="page-color" class="page">
+            <button id="extract-palette-btn" class="btn solid">Extract 4-Color Palette</button>
             
-            <h3>Model Details</h3>
-            <input type="text" id="model-name" placeholder="Full Name">
-            <input type="email" id="model-email" placeholder="Email Address">
-            <input type="tel" id="model-phone" placeholder="Phone Number">
-            <textarea id="model-address" placeholder="Address" rows="3"></textarea>
-            
-            <h3>Terms</h3>
-            <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 15px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
-                I hereby give permission to [Photographer Name] to use my image for commercial and promotional purposes. I understand I will receive no further compensation.
+            <div id="palette-grid" class="pan4-grid" style="display:none;">
+                <div class="pan-chip"><div class="pan-color" id="pan-c1"></div><div class="pan-info"><strong id="pan-n1">--</strong><span id="pan-h1">--</span></div></div>
+                <div class="pan-chip"><div class="pan-color" id="pan-c2"></div><div class="pan-info"><strong id="pan-n2">--</strong><span id="pan-h2">--</span></div></div>
+                <div class="pan-chip"><div class="pan-color" id="pan-c3"></div><div class="pan-info"><strong id="pan-n3">--</strong><span id="pan-h3">--</span></div></div>
+                <div class="pan-chip"><div class="pan-color" id="pan-c4"></div><div class="pan-info"><strong id="pan-n4">--</strong><span id="pan-h4">--</span></div></div>
             </div>
 
-            <h3>Model Signature</h3>
-            <canvas id="signature-pad" class="signature-pad" width="300" height="150"></canvas>
-            <button type="button" id="clear-sig-btn" class="btn btn-secondary" style="min-height: 40px; font-size: 14px; padding: 8px;">Clear Signature</button>
+            <button id="share-composite-btn" class="btn" style="display:none;">Share Match Composite</button>
+        </div>
 
-            <h3 style="margin-top: 30px;">Witness Details</h3>
-            <input type="text" id="witness-name" placeholder="Witness Full Name">
-             <input type="email" id="witness-email" placeholder="Witness Email Address">
-             
-            <h3>Witness Signature</h3>
-            <canvas id="witness-signature-pad" class="signature-pad" width="300" height="150"></canvas>
-            <button type="button" id="clear-witness-sig-btn" class="btn btn-secondary" style="min-height: 40px; font-size: 14px; padding: 8px;">Clear Witness Sig</button>
+        <div id="page-release" class="page">
+            <h2 style="color:var(--gold); margin-bottom: 15px;">Model Release Form</h2>
+            <input type="text" id="r-shoot" placeholder="Shoot Reference">
+            <input type="date" id="r-date">
+            <input type="text" id="r-name" placeholder="Model Full Name">
+            <input type="email" id="r-email" placeholder="Model Email">
             
-            <div style="margin-top: 30px;">
-                <button type="button" id="generate-pdf-btn" class="btn btn-primary">1. Download as PDF</button>
-                <button type="button" id="send-email-btn" class="btn btn-secondary">2. Send Email (Attach PDF)</button>
-            </div>
-        </form>
+            <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">Model Signature:</p>
+            <canvas id="sig-model" class="signature-pad" height="150"></canvas>
+            <button class="btn sm" id="clear-sig-model" style="min-height: 40px;">Clear Model Sig</button>
+
+            <p style="font-size: 12px; color: var(--muted); margin-top: 20px; margin-bottom: 10px;">Witness Details & Signature:</p>
+            <input type="text" id="r-witness" placeholder="Witness Full Name">
+            <canvas id="sig-witness" class="signature-pad" height="150"></canvas>
+            <button class="btn sm" id="clear-sig-witness" style="min-height: 40px;">Clear Witness Sig</button>
+
+            <button id="btn-pdf" class="btn solid" style="margin-top: 20px;">1. Download PDF</button>
+            <button id="btn-email" class="btn">2. Open Email Draft</button>
+        </div>
+
     </div>
 
-    <div class="nav-bar">
-        <button class="nav-btn active" data-target="meter-section">
-            <span class="nav-icon">📷</span>Light Meter
-        </button>
-        <button class="nav-btn" data-target="color-section">
-            <span class="nav-icon">🎨</span>Color Picker
-        </button>
-        <button class="nav-btn" data-target="release-section">
-            <span class="nav-icon">📝</span>Release Form
-        </button>
+    <div class="tabs">
+        <div class="tab active" data-target="page-meter"><span style="font-size: 20px; display:block; margin-bottom: 4px;">📷</span> Meter</div>
+        <div class="tab" data-target="page-color"><span style="font-size: 20px; display:block; margin-bottom: 4px;">🎨</span> Pantone</div>
+        <div class="tab" data-target="page-release"><span style="font-size: 20px; display:block; margin-bottom: 4px;">📝</span> Release</div>
     </div>
 
     <div id="composite-share-container">
         <div id="composite-photo"></div>
         <div id="composite-details">
-            <div id="composite-swatch-block" class="composite-swatch-block"></div>
-            <h2 id="composite-pantone-title">PMS 123 C</h2>
-            <p id="composite-rgb-vals">RGB: 255, 200, 0</p>
-            <div class="pr-eye-branding">Generated by PR Eye Pro</div>
+            <div class="c-title">PR EYE: Palette Extraction</div>
+            <div class="c-swatch-row">
+                <div class="c-swatch" id="cs1"></div><div class="c-swatch" id="cs2"></div>
+            </div>
+            <div class="c-swatch-row">
+                <div class="c-swatch" id="cs3"></div><div class="c-swatch" id="cs4"></div>
+            </div>
+            <div style="font-size: 24px; color: var(--muted);">Generated by PR Eye Pro</div>
         </div>
     </div>
 
-
 <script>
-    // --- Global Variables ---
+    // --- State & Elements ---
     const video = document.getElementById('video');
+    const imgDisplay = document.getElementById('captured-img');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const capturedImageDisplay = document.getElementById('captured-image-display');
+    
     let stream = null;
-    let currentRGB = { r: 0, g: 0, b: 0 };
-    let currentHex = "#000000";
-    let lastCapturedImageURI = null; // To store the photo for the composite share
+    let currentFacingMode = 'environment';
+    let lastImageURI = null;
+    let extractedPalette = []; // Stores the 4 colors
 
-    // --- Navigation Logic ---
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.target).classList.add('active');
-            if (btn.dataset.target === 'meter-section') startCamera(); else stopCamera();
+    // --- Tab Navigation ---
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
         });
     });
 
-    // --- Camera & Manual Capture Handling ---
+    // --- Camera System (With Switcher) ---
     async function startCamera() {
+        if (stream) stream.getTracks().forEach(track => track.stop());
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } });
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: currentFacingMode, width: { ideal: 1280 } } 
+            });
             video.srcObject = stream;
             video.style.display = 'block';
-            capturedImageDisplay.style.display = 'none';
-            checkTorchCapability();
+            imgDisplay.style.display = 'none';
         } catch (err) {
-            console.warn("Camera access blocked or failed. Using fallback.", err);
-            alert("Live camera blocked. Please use the 'Manual Camera Capture' button below.");
-            stopCamera();
+            console.warn("Camera fallback needed.");
         }
     }
 
-    function stopCamera() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            video.srcObject = null;
-        }
-    }
-
-    // Torch Support
-    async function checkTorchCapability() {
-        if (!stream) return;
-        const track = stream.getVideoTracks()[0];
-        try {
-            const capabilities = track.getCapabilities();
-            if (capabilities.torch) {
-                document.getElementById('torch-toggle').style.display = 'block';
-            }
-        } catch (e) { console.log("Torch capability check failed"); }
-    }
-
-    let torchState = false;
-    document.getElementById('torch-toggle').addEventListener('click', async () => {
-        if (!stream) return;
-        const track = stream.getVideoTracks()[0];
-        torchState = !torchState;
-        await track.applyConstraints({ advanced: [{ torch: torchState }] });
-        document.getElementById('torch-toggle').classList.toggle('btn-primary', torchState);
-        document.getElementById('torch-toggle').classList.toggle('btn-secondary', !torchState);
+    document.getElementById('cam-switch-btn').addEventListener('click', () => {
+        currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+        startCamera();
     });
 
-    // Manual Capture Input
-    document.getElementById('native-camera-input').addEventListener('change', (e) => {
+    document.getElementById('native-camera').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            stopCamera();
+            if (stream) stream.getTracks().forEach(track => track.stop());
             video.style.display = 'none';
-            capturedImageDisplay.style.display = 'block';
+            imgDisplay.style.display = 'block';
             const reader = new FileReader();
-            reader.onload = (event) => {
-                capturedImageDisplay.src = event.target.result;
-                // Wait for image to load before analyzing
-                capturedImageDisplay.onload = () => {
-                    processImageForReadings(capturedImageDisplay);
-                };
-            };
+            reader.onload = (event) => { imgDisplay.src = event.target.result; };
             reader.readAsDataURL(file);
         }
     });
 
-    document.getElementById('capture-btn').addEventListener('click', () => {
-        if (video.style.display !== 'none' && stream && video.readyState === 4) {
-            processImageForReadings(video);
-        } else if (capturedImageDisplay.src) {
-            processImageForReadings(capturedImageDisplay);
-        } else {
-            alert("No image source available. Start camera or capture an image.");
-        }
-    });
-
-
-    // --- Core Analysis Logic ---
-    function processImageForReadings(source) {
+    // --- Light Meter Analysis ---
+    document.getElementById('analyze-btn').addEventListener('click', () => {
+        const source = video.style.display !== 'none' ? video : imgDisplay;
+        if (!source.srcObject && !source.src) return alert("No image source.");
+        
         canvas.width = source.videoWidth || source.naturalWidth;
         canvas.height = source.videoHeight || source.naturalHeight;
         ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-        
-        // Store for sharing later
-        lastCapturedImageURI = canvas.toDataURL('image/jpeg', 0.8);
+        lastImageURI = canvas.toDataURL('image/jpeg', 0.8);
 
-        const frameData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const kelvin = calculateKelvin(frameData.data);
-        const ev = calculateEV(frameData.data);
+        // Simple Center Analysis for Meter
+        const frameData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let r=0, b=0, l=0, count=0;
+        for(let i=0; i<frameData.length; i+=40) { // check every 10th pixel for speed
+            r += frameData[i]; b += frameData[i+2];
+            l += (0.299*frameData[i] + 0.587*frameData[i+1] + 0.114*frameData[i+2]);
+            count++;
+        }
+        const kelvin = 5500 * ((b/count) / (r/count));
+        const ev = Math.log2(((l/count) / 255) * 100 / 12.5);
 
         document.getElementById('kelvin-val').innerText = `${Math.round(kelvin)} K`;
         document.getElementById('ev-val').innerText = ev.toFixed(1);
-        document.getElementById('godox-rec').innerText = getGodoxSuggestion(kelvin, ev);
         
-        // Also update center color for picker if it's active
-        const centerX = Math.floor(canvas.width / 2);
-        const centerY = Math.floor(canvas.height / 2);
-        const centerPixel = ctx.getImageData(centerX, centerY, 1, 1).data;
-        currentRGB = { r: centerPixel[0], g: centerPixel[1], b: centerPixel[2] };
-        currentHex = rgbToHex(currentRGB.r, currentRGB.g, currentRGB.b);
+        let rec = "Neutral / Daylight";
+        if (kelvin < 3500) rec = "Warm: Add CTO Gel";
+        if (kelvin > 6500) rec = "Cool: Add CTB Gel";
+        document.getElementById('godox-rec').innerText = rec;
         
-        if(document.getElementById('color-section').classList.contains('active')) {
-             updateSwatchDisplay();
-        }
-    }
+        alert("Reading captured! Check Pantone tab to extract palette.");
+    });
 
-    // --- Calculations (Simplified for brevity, assuming v4 logic is good) ---
-    function calculateKelvin(data) {
-        let rTotal = 0, bTotal = 0, count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            rTotal += data[i]; bTotal += data[i + 2]; count++;
-        }
-        const avgR = rTotal / count; const avgB = bTotal / count;
-        // Simple empirical approx for example. Replace with your complex logic if needed.
-        const ratio = avgB / avgR;
-        return 5500 * ratio; 
-    }
-
-    function calculateEV(data) {
-        let luminanceTotal = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            // Perceived luminance
-            luminanceTotal += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-        }
-        const avgLuminance = luminanceTotal / (data.length / 4);
-        // Calibration constant K=12.5, ISO=100
-        return Math.log2((avgLuminance / 255) * 100 / 12.5); 
-    }
-
-    function getGodoxSuggestion(k, ev) {
-        if (ev < 5) return "Too Dark for Accurate Reading";
-        if (k < 3500) return "Warm: Use CTO Gels (1/2 or Full)";
-        if (k > 6500) return "Cool: Use CTB Gels (1/2 or Full)";
-        return "Neutral: Daylight Balanced";
-    }
-
-
-    // --- Color Picker Logic ---
-    // Limited Pantone Subset for demo
+    // --- 4-Color Pantone Logic (Restored) ---
     const pantoneDb = [
-        { name: "PMS 123 C", r: 255, g: 199, b: 44 },
-        { name: "PMS 186 C", r: 200, g: 16, b: 46 },
-        { name: "PMS 286 C", r: 0, g: 50, b: 160 },
-        { name: "PMS Black 6 C", r: 16, g: 24, b: 32 },
-        { name: "Cool Gray 9 C", r: 117, g: 120, b: 123 },
+        { n: "PMS 123 C", hex: "#FFC72C" }, { n: "PMS 186 C", hex: "#C8102E" },
+        { n: "PMS 286 C", hex: "#0032A0" }, { n: "Cool Gray 9", hex: "#75787B" },
+        { n: "PMS 354 C", hex: "#00B140" }, { n: "PMS 258 C", hex: "#8246AF" }
     ];
 
-    function rgbToHex(r, g, b) {
-        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
-
-    function findClosestPantone(rgb) {
-        let minDiff = Infinity;
-        let closest = null;
-        pantoneDb.forEach(p => {
-            // Euclidean distance in RGB space
-            const diff = Math.sqrt(Math.pow(p.r - rgb.r, 2) + Math.pow(p.g - rgb.g, 2) + Math.pow(p.b - rgb.b, 2));
-            if (diff < minDiff) { minDiff = diff; closest = p; }
-        });
-        return closest ? closest.name : "Unknown";
-    }
-
-    document.getElementById('sample-color-btn').addEventListener('click', () => {
-        // Ensure we have the latest data from the meter section
-        if(!lastCapturedImageURI) { alert("Please capture an image in the Light Meter section first."); return; }
-        updateSwatchDisplay();
-        document.getElementById('swatch-wrapper').style.display = 'block';
-    });
-
-    function updateSwatchDisplay() {
-        const swatch = document.getElementById('swatch-display');
-        swatch.style.backgroundColor = currentHex;
-        swatch.innerText = currentHex.toUpperCase();
-        // Determine text color for contrast
-        const brightness = (currentRGB.r * 299 + currentRGB.g * 587 + currentRGB.b * 114) / 1000;
-        swatch.style.color = brightness > 125 ? 'black' : 'white';
-        
-        document.getElementById('pantone-name').innerText = findClosestPantone(currentRGB);
-    }
-
-    // Local Storage for Swatches
-    let savedSwatches = JSON.parse(localStorage.getItem('prEyeSwatches')) || [];
-    function renderSavedSwatches() {
-        const list = document.getElementById('saved-swatches-list');
-        list.innerHTML = '';
-        savedSwatches.slice().reverse().forEach(s => {
-            const item = document.createElement('div');
-            item.className = 'saved-swatch-item';
-            item.innerHTML = `<div class="swatch-color-block" style="background:${s.hex}"></div><div><strong>${s.pantone}</strong><br>${s.hex}</div>`;
-            list.appendChild(item);
-        });
-    }
-    document.getElementById('save-swatch-btn').addEventListener('click', () => {
-        savedSwatches.push({ hex: currentHex, pantone: document.getElementById('pantone-name').innerText, date: new Date().toISOString() });
-        localStorage.setItem('prEyeSwatches', JSON.stringify(savedSwatches));
-        renderSavedSwatches();
-    });
-    document.getElementById('clear-swatches-btn').addEventListener('click', () => {
-        if(confirm("Clear all saved swatches?")) {
-            savedSwatches = [];
-            localStorage.removeItem('prEyeSwatches');
-            renderSavedSwatches();
-        }
-    });
-    renderSavedSwatches();
-
-    // --- NEW: Composite Image Sharing ---
-    document.getElementById('share-swatch-btn').addEventListener('click', async () => {
-        if (!navigator.share) { alert("Web Share API not supported on this browser."); return; }
-        if (!lastCapturedImageURI) { alert("No source image captured yet."); return; }
-
-        const shareBtn = document.getElementById('share-swatch-btn');
-        shareBtn.innerText = "Generating...";
-        shareBtn.disabled = true;
-
-        try {
-            // 1. Populate hidden container data
-            document.getElementById('composite-photo').style.backgroundImage = `url(${lastCapturedImageURI})`;
-            document.getElementById('composite-swatch-block').style.backgroundColor = currentHex;
-            document.getElementById('composite-pantone-title').innerText = document.getElementById('pantone-name').innerText;
-            document.getElementById('composite-rgb-vals').innerText = `RGB: ${currentRGB.r}, ${currentRGB.g}, ${currentRGB.b}`;
-            
-            // 2. Use html2canvas to create the image
-            const container = document.getElementById('composite-share-container');
-            const compositeCanvas = await html2canvas(container, {
-                useCORS: true, // Important if using external images, though we are using data URIs here
-                scale: 1 // Default scale
-            });
-
-            // 3. Convert to Blob
-            compositeCanvas.toBlob(async (blob) => {
-                 const file = new File([blob], "pr-eye-swatch.png", { type: "image/png" });
-                 // 4. Share
-                 try {
-                     await navigator.share({
-                         files: [file],
-                         title: 'PR Eye Swatch Match',
-                         text: `Matched Pantone: ${document.getElementById('pantone-name').innerText} (${currentHex})`
-                     });
-                 } catch (shareError) {
-                     if(shareError.name !== 'AbortError') console.error("Share failed:", shareError);
-                 }
-                 shareBtn.innerText = "Share Composite";
-                 shareBtn.disabled = false;
-            }, 'image/png');
-
-        } catch (err) {
-            console.error("Composite generation failed:", err);
-            alert("Failed to generate composite image.");
-            shareBtn.innerText = "Share Composite";
-            shareBtn.disabled = false;
-        }
-    });
-
-
-    // --- Model Release & PDF Logic ---
+    function getHex(r,g,b) { return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase(); }
+    function hexToRgb(hex) { const m=hex.match(/\w\w/g); return [parseInt(m[0],16),parseInt(m[1],16),parseInt(m[2],16)]; }
     
-    // Signature Pads Setup
-    function setupSignaturePad(canvasId, clearBtnId) {
-        const padCanvas = document.getElementById(canvasId);
-        const padCtx = padCanvas.getContext('2d');
-        let isDrawing = false;
-
-        // High DPI fix
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        padCanvas.width = padCanvas.offsetWidth * ratio;
-        padCanvas.height = padCanvas.offsetHeight * ratio;
-        padCtx.scale(ratio, ratio);
-        padCtx.lineWidth = 2;
-        padCtx.strokeStyle = '#000';
-
-        function getPos(e) {
-            const rect = padCanvas.getBoundingClientRect();
-            const touch = e.touches ? e.touches[0] : e;
-            return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-        }
-
-        ['mousedown', 'touchstart'].forEach(ev => padCanvas.addEventListener(ev, (e) => {
-            isDrawing = true; const pos = getPos(e); padCtx.beginPath(); padCtx.moveTo(pos.x, pos.y); e.preventDefault();
-        }));
-        ['mousemove', 'touchmove'].forEach(ev => padCanvas.addEventListener(ev, (e) => {
-            if (!isDrawing) return; const pos = getPos(e); padCtx.lineTo(pos.x, pos.y); padCtx.stroke(); e.preventDefault();
-        }));
-        ['mouseup', 'touchend'].forEach(ev => padCanvas.addEventListener(ev, () => isDrawing = false));
-        
-        document.getElementById(clearBtnId).addEventListener('click', () => {
-             padCtx.clearRect(0, 0, padCanvas.width / ratio, padCanvas.height / ratio);
+    function findClosestPantone(hex) {
+        const target = hexToRgb(hex);
+        let closest = pantoneDb[0], minD = Infinity;
+        pantoneDb.forEach(p => {
+            const rgb = hexToRgb(p.hex);
+            const d = Math.pow(target[0]-rgb[0],2) + Math.pow(target[1]-rgb[1],2) + Math.pow(target[2]-rgb[2],2);
+            if(d < minD) { minD = d; closest = p; }
         });
+        return closest;
     }
 
-    setupSignaturePad('signature-pad', 'clear-sig-btn');
-    setupSignaturePad('witness-signature-pad', 'clear-witness-sig-btn');
-
-
-    // PDF Generation Function
-    async function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    document.getElementById('extract-palette-btn').addEventListener('click', () => {
+        if (!lastImageURI) return alert("Please capture an image in the Meter tab first.");
         
-        const marginX = 20;
-        let currentY = 20;
-
-        // Helper for adding text and advancing Y
-        function addText(text, fontSize = 12, isBold = false) {
-            doc.setFontSize(fontSize);
-            doc.setFont("helvetica", isBold ? "bold" : "normal");
-            
-            // Handle multi-line text (like addresses)
-            const splitText = doc.splitTextToSize(text, 170); // A4 width minus margins
-            doc.text(splitText, marginX, currentY);
-            currentY += (splitText.length * fontSize * 0.5); // Approximate line height spacing
-        }
+        // Quick & dirty 4-quadrant extraction to simulate clustering
+        const w = canvas.width, h = canvas.height;
+        const qData = [
+            ctx.getImageData(0,0,w/2,h/2).data, ctx.getImageData(w/2,0,w/2,h/2).data,
+            ctx.getImageData(0,h/2,w/2,h/2).data, ctx.getImageData(w/2,h/2,w/2,h/2).data
+        ];
         
-        // --- PDF Content Building ---
-        addText("Model Release Form", 24, true);
-        currentY += 10;
+        extractedPalette = qData.map(data => {
+            let r=0,g=0,b=0;
+            for(let i=0; i<data.length; i+=40) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; }
+            const len = data.length/40;
+            return getHex(Math.round(r/len), Math.round(g/len), Math.round(b/len));
+        });
 
-        addText(`Shoot Reference: ${document.getElementById('shoot-name').value || 'N/A'}`, 14);
-        addText(`Date: ${document.getElementById('shoot-date').value || 'N/A'}`, 14);
-        currentY += 10;
+        extractedPalette.forEach((hex, i) => {
+            const pan = findClosestPantone(hex);
+            document.getElementById(`pan-c${i+1}`).style.backgroundColor = hex;
+            document.getElementById(`pan-n${i+1}`).innerText = pan.n;
+            document.getElementById(`pan-h${i+1}`).innerText = hex;
+            document.getElementById(`cs${i+1}`).style.backgroundColor = hex; // For share composite
+        });
 
-        addText("Model Details:", 16, true);
-        addText(`Name: ${document.getElementById('model-name').value}`);
-        addText(`Email: ${document.getElementById('model-email').value}`);
-        addText(`Phone: ${document.getElementById('model-phone').value}`);
-        addText(`Address: ${document.getElementById('model-address').value}`);
-        currentY += 10;
-
-        addText("Terms of Agreement:", 16, true);
-        addText("I hereby give permission to the photographer to use my image for commercial and promotional purposes. I understand I will receive no further compensation. I confirm I am over 18 years of age.", 11);
-        currentY += 15;
-
-        // Add Model Signature Image
-        addText("Model Signature:", 14, true);
-        const modelSigCanvas = document.getElementById('signature-pad');
-        // Only add if drawn on (simple check if canvas isn't blank)
-        if(modelSigCanvas.getContext('2d').getImageData(0,0,modelSigCanvas.width, modelSigCanvas.height).data.some(channel => channel !== 0)) {
-             const modelSigImg = modelSigCanvas.toDataURL('image/png');
-             doc.addImage(modelSigImg, 'PNG', marginX, currentY, 80, 40);
-             currentY += 45;
-        } else {
-             addText("[No Signature Provided]");
-             currentY += 10;
-        }
-        
-        currentY += 10; // Space before witness
-
-        // Add Witness Details & Signature
-        addText("Witness Details:", 16, true);
-        addText(`Name: ${document.getElementById('witness-name').value}`);
-        addText(`Email: ${document.getElementById('witness-email').value}`);
-        
-        currentY += 5;
-        addText("Witness Signature:", 14, true);
-        const witnessSigCanvas = document.getElementById('witness-signature-pad');
-        if(witnessSigCanvas.getContext('2d').getImageData(0,0,witnessSigCanvas.width, witnessSigCanvas.height).data.some(channel => channel !== 0)) {
-             const witnessSigImg = witnessSigCanvas.toDataURL('image/png');
-             doc.addImage(witnessSigImg, 'PNG', marginX, currentY, 80, 40);
-        } else {
-             addText("[No Witness Signature]");
-        }
-
-        // Finalize and save
-        const fileName = `ModelRelease_${document.getElementById('model-name').value.replace(/\s+/g, '_') || 'Draft'}.pdf`;
-        doc.save(fileName);
-        return fileName;
-    }
-
-    document.getElementById('generate-pdf-btn').addEventListener('click', generatePDF);
-
-    // Email Button (Instructions to attach)
-    document.getElementById('send-email-btn').addEventListener('click', () => {
-        const modelEmail = document.getElementById('model-email').value;
-        const shootName = document.getElementById('shoot-name').value;
-        
-        const subject = encodeURIComponent(`Model Release: ${shootName}`);
-        const body = encodeURIComponent(`Hi ${document.getElementById('model-name').value},\n\nPlease find the signed model release attached to this email.\n\nBest regards,\n[Photographer Name]`);
-        
-        alert("IMPORTANT: Your PDF has been downloaded. Please attach it manually to the email that is about to open.");
-        window.location.href = `mailto:${modelEmail}?subject=${subject}&body=${body}`;
+        document.getElementById('palette-grid').style.display = 'grid';
+        document.getElementById('share-composite-btn').style.display = 'block';
     });
 
-
-    // --- Overlays ---
-    const gridOverlay = document.getElementById('grid-overlay');
-    const histogramOverlay = document.getElementById('histogram-overlay');
-    let overlayState = 0; // 0: Off, 1: Grid, 2: Histogram
-    document.getElementById('overlay-toggle').addEventListener('click', () => {
-        overlayState = (overlayState + 1) % 3;
-        gridOverlay.classList.toggle('active', overlayState === 1);
-        histogramOverlay.classList.toggle('active', overlayState === 2);
-        document.getElementById('overlay-toggle').innerText = 
-            overlayState === 0 ? "Grid: Off" : (overlayState === 1 ? "Grid: On" : "Histogram");
-        if (overlayState === 2) drawHistogram();
+    // --- Composite Share (v5 functionality) ---
+    document.getElementById('share-composite-btn').addEventListener('click', async () => {
+        if (!navigator.share) return alert("Sharing not supported here.");
+        const btn = document.getElementById('share-composite-btn');
+        btn.innerText = "Generating...";
+        
+        document.getElementById('composite-photo').style.backgroundImage = `url(${lastImageURI})`;
+        const container = document.getElementById('composite-share-container');
+        
+        const cCanvas = await html2canvas(container, { scale: 1 });
+        cCanvas.toBlob(async (blob) => {
+            const file = new File([blob], "pr-eye-palette.png", { type: "image/png" });
+            try { await navigator.share({ files: [file], title: 'PR Eye Palette' }); } catch(e){}
+            btn.innerText = "Share Match Composite";
+        });
     });
 
-    function drawHistogram() {
-        if (overlayState !== 2 || video.style.display === 'none') return;
-        const hCanvas = document.getElementById('histogram-canvas');
-        const hCtx = hCanvas.getContext('2d');
-        hCanvas.width = 100; hCanvas.height = 60;
-        hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
-
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 100; tempCanvas.height = 100; // small sample
-        tempCanvas.getContext('2d').drawImage(video, 0, 0, 100, 100);
-        const data = tempCanvas.getContext('2d').getImageData(0, 0, 100, 100).data;
-        
-        let histR = new Array(256).fill(0), histG = new Array(256).fill(0), histB = new Array(256).fill(0);
-        for (let i = 0; i < data.length; i += 4) {
-            histR[data[i]]++; histG[data[i+1]]++; histB[data[i+2]]++;
-        }
-        const max = Math.max(...histR, ...histG, ...histB);
-
-        hCtx.globalCompositeOperation = 'screen';
-        [['#ff0000', histR], ['#00ff00', histG], ['#0000ff', histB]].forEach(([color, hist]) => {
-            hCtx.fillStyle = color; hCtx.beginPath(); hCtx.moveTo(0, 60);
-            for (let i = 0; i < 256; i++) {
-                const h = (hist[i] / max) * 60;
-                hCtx.lineTo(i * (100/256), 60 - h);
-            }
-            hCtx.lineTo(100, 60); hCtx.fill();
-        });
-        requestAnimationFrame(drawHistogram);
+    // --- PDF Model Release (v5 functionality) ---
+    function setupPad(id, btnId) {
+        const can = document.getElementById(id), c = can.getContext('2d');
+        can.width = can.offsetWidth; can.height = 150;
+        let drawing = false;
+        const pos = e => { const r = can.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return {x: t.clientX - r.left, y: t.clientY - r.top}; };
+        ['mousedown','touchstart'].forEach(e => can.addEventListener(e, ev => { drawing=true; c.beginPath(); const p=pos(ev); c.moveTo(p.x,p.y); ev.preventDefault(); }));
+        ['mousemove','touchmove'].forEach(e => can.addEventListener(e, ev => { if(!drawing)return; const p=pos(ev); c.lineTo(p.x,p.y); c.stroke(); ev.preventDefault(); }));
+        ['mouseup','touchend'].forEach(e => can.addEventListener(e, () => drawing=false));
+        document.getElementById(btnId).addEventListener('click', () => c.clearRect(0,0,can.width,can.height));
     }
+    setupPad('sig-model', 'clear-sig-model');
+    setupPad('sig-witness', 'clear-sig-witness');
 
-    // Initial setup
+    document.getElementById('btn-pdf').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.setFontSize(22); doc.text("Model Release Form", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Shoot: ${document.getElementById('r-shoot').value}`, 20, 40);
+        doc.text(`Date: ${document.getElementById('r-date').value}`, 20, 50);
+        doc.text(`Model Name: ${document.getElementById('r-name').value}`, 20, 60);
+        doc.text(`Model Email: ${document.getElementById('r-email').value}`, 20, 70);
+        doc.text(`Witness Name: ${document.getElementById('r-witness').value}`, 20, 80);
+        
+        doc.text("Model Signature:", 20, 100);
+        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 105, 80, 40);
+        doc.text("Witness Signature:", 20, 160);
+        doc.addImage(document.getElementById('sig-witness').toDataURL(), 'PNG', 20, 165, 80, 40);
+        
+        doc.save(`Release_${document.getElementById('r-name').value || 'Draft'}.pdf`);
+    });
+
+    document.getElementById('btn-email').addEventListener('click', () => {
+        const email = document.getElementById('r-email').value;
+        window.location.href = `mailto:${email}?subject=Model Release&body=Please find the attached PDF release.`;
+    });
+
+    // Boot
+    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
     startCamera();
-
 </script>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        // Create a blob for the service worker code to avoid external file dependency
-        const swCode = `
-            const CACHE_NAME = 'pr-eye-v5-cache';
-            // Cache necessary external libraries for offline use
-            const urlsToCache = [
-                '.',
-                'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-                'https://html2canvas.hertzen.com/dist/html2canvas.min.js'
-            ];
-            self.addEventListener('install', event => {
-                event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-            });
-            self.addEventListener('fetch', event => {
-                event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
-            });
-        `;
-        const blob = new Blob([swCode], {type: 'text/javascript'});
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl)
-            .then(() => console.log('Service Worker registered for offline use'))
-            .catch(err => console.error('SW registration failed', err));
-    }
-</script>
-
 </body>
 </html>
