@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v18 — Pro Toolkit</title>
+    <title>PR Eye v19 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -104,12 +104,12 @@
 
     <div class="hdr">
         <div class="hdr-top">
-            <div class="brand">PR EYE v18</div>
+            <div class="brand">PR EYE v19</div>
             <button id="cam-flip-btn" class="btn icon-only" style="height: 30px; border-color: transparent;">🔄</button>
         </div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV: <span class="ev-good">0.0</span></div>
-            <div class="tel-item" style="color:var(--gold)">WB: <span id="tel-wb">-- °C</span></div>
+            <div class="tel-item" style="color:var(--gold)">WB: <span id="tel-wb">-- K</span></div>
             <div class="tel-item" style="color:var(--muted)">GPS: <span id="tel-gps">--</span></div>
         </div>
     </div>
@@ -181,7 +181,9 @@
         <div id="page-scout" class="page">
             <div class="ctrl-panel">
                 <h4>Location Scout Data</h4>
-                <p style="color: var(--muted); font-size: 11px; margin-bottom: 10px;">The live view shows a compass and sun path overlay based on current time and orientation.</p>
+                <div id="scout-map-container" style="width: 100%; height: 200px; background: #000; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px;">
+                    <span style="color:var(--muted); display:flex; height:100%; align-items:center; justify-content:center;">Awaiting GPS...</span>
+                </div>
                 <div class="data-card">
                     <div class="data-row"><span>Heading:</span><span class="data-val" id="scout-heading">--°</span></div>
                     <div class="data-row"><span>Sunrise:</span><span class="data-val" id="loc-sunrise">--:--</span></div>
@@ -275,7 +277,7 @@
 
     <canvas id="proc-canvas" width="150" height="200"></canvas>
     <canvas id="fc-internal-canvas" width="150" height="200"></canvas>
-    <canvas id="composite-canvas" width="1200" height="1600"></canvas>
+    <canvas id="composite-canvas" width="1200" height="2000"></canvas>
     <div id="hidden-pdf-render"></div>
 
 <script>
@@ -294,7 +296,7 @@
     const mapCtx = mapCan.getContext('2d', { willReadFrequently: true });
 
     let stream = null; let currentFacingMode = 'environment';
-    let measuredEV = 0; let liveTempC = 0; let currentLat = null; let currentLon = null; let currentWeatherDesc = "";
+    let measuredEV = 0; let liveTempK = 0; let currentLat = null; let currentLon = null; let currentWeatherDesc = "";
     let currentTab = 'page-meter';
     let fcState = 0; let levelActive = false;
     let goldenHourTime = null; let sunriseTime = null; let sunsetTime = null;
@@ -304,11 +306,20 @@
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try {
-            const constraints = { video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 3840 }, height: { ideal: 2160 } } };
+            // Simplified constraints to maximize compatibility across Android/iOS devices without overconstraining resolution
+            const constraints = { video: { facingMode: currentFacingMode } };
             stream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = stream; video.play();
             video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
-        } catch(e) { console.log("Cam Error", e); }
+        } catch(e) { 
+            console.log("Cam Error", e); 
+            try {
+                // Ultimate fallback if exact facing mode is blocked
+                stream = await navigator.mediaDevices.getUserMedia({video: true});
+                video.srcObject = stream; video.play();
+                video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
+            } catch(fallbackErr) { console.log("Fallback Error", fallbackErr); }
+        }
     }
     document.getElementById('cam-flip-btn').addEventListener('click', ()=>{ currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; startCamera(); });
 
@@ -527,7 +538,7 @@
             updateExpoBar();
 
             const k = Math.round(5500 * ((bT/c)/(rT/c)));
-            if(!isNaN(k) && k > 0) { liveTempC = Math.round(k - 273.15); document.getElementById('tel-wb').innerText = `${liveTempC}°C`; }
+            if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); document.getElementById('tel-wb').innerText = `${liveTempK} K`; }
 
             const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch);
             const swCtx = scoutCtx.canvas.width; const shCtx = scoutCtx.canvas.height; scoutCtx.clearRect(0,0,swCtx,shCtx);
@@ -571,15 +582,13 @@
                     const now = new Date();
                     const dayDuration = sunsetTime - sunriseTime;
                     const timeSinceRise = now - sunriseTime;
-                    let sunProgress = timeSinceRise / dayDuration; // 0 to 1
+                    let sunProgress = timeSinceRise / dayDuration; 
                     sunProgress = Math.max(0, Math.min(1, sunProgress));
                     
-                    // Arc from East (-90deg) to West (+90deg) relative to North, adjusted for current heading
                     const startAngle = (-90 - currentHeading) * Math.PI/180;
                     const endAngle = (90 - currentHeading) * Math.PI/180;
                     scoutCtx.beginPath(); scoutCtx.arc(0,0, 120, startAngle, endAngle); scoutCtx.setLineDash([5, 5]); scoutCtx.stroke(); scoutCtx.setLineDash([]);
                     
-                    // Current Sun Position
                     const currentSunAngle = startAngle + (sunProgress * (endAngle - startAngle));
                     const sx = 120 * Math.cos(currentSunAngle); const sy = 120 * Math.sin(currentSunAngle);
                     scoutCtx.fillStyle = '#ff9900'; scoutCtx.beginPath(); scoutCtx.arc(sx, sy, 8, 0, Math.PI*2); scoutCtx.fill();
@@ -600,168 +609,4 @@
                         else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; }
                         else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; }
                         else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; }
-                        else { px[i]=l; px[i+1]=l; px[i+2]=l; px[i+3]=255; }
-                    } else if (fcState === 2) { 
-                        if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; }
-                        else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; }
-                        else { px[i+3]=0; }
-                    }
-                }
-                fcInternalCtx.putImageData(fcData, 0, 0);
-                fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height);
-                fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
-            }
-        }
-        requestAnimationFrame(liveLoop);
-    }
-
-    // --- CAPTURE ENGINE ---
-    document.getElementById('capture-btn').addEventListener('click', () => {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.value = 800;
-        gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        
-        const hrCan = document.getElementById('composite-canvas'); const cCtx = hrCan.getContext('2d');
-        const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
-        let sx, sy, sw, sh;
-        if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
-        else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
-        
-        cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0,0,1200,1600);
-        cCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 1200, 1600);
-        
-        if(document.getElementById('set-grid').value !== 'off') { cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 0,0, 1200,1600); }
-        if(currentTab === 'page-scout') { cCtx.drawImage(document.getElementById('scout-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 0,0, 1200,1600); }
-
-        cCtx.fillStyle = 'rgba(20, 36, 56, 0.9)'; cCtx.fillRect(50, 1150, 1100, 400);
-        cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
-
-        let title = "METER REPORT";
-        if(currentTab === 'page-color') {
-            title = "COLOUR PALETTE";
-            const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
-            pts.forEach((t, i) => {
-                if(!lastPanExtraction[i]) return;
-                const tx = t.x * 1200; const ty = t.y * 1600;
-                cCtx.strokeStyle = lastPanExtraction[i].hex; cCtx.lineWidth = 8; cCtx.beginPath(); cCtx.arc(tx, ty, 40, 0, Math.PI*2); cCtx.stroke();
-                cCtx.fillStyle = '#fff'; cCtx.font = 'bold 40px DM Mono'; cCtx.fillText(i+1, tx+50, ty-50);
-            });
-            cCtx.font = 'bold 36px DM Mono'; cCtx.fillStyle = '#e6edf5';
-            const blocks = [ {x: 100, y: 1200}, {x: 600, y: 1200}, {x: 100, y: 1350}, {x: 600, y: 1350} ];
-            lastPanExtraction.forEach((col, idx) => {
-                cCtx.fillStyle = col.hex; cCtx.fillRect(blocks[idx].x, blocks[idx].y, 100, 100);
-                cCtx.fillStyle = '#e6edf5'; cCtx.fillText(`${idx+1}. ${col.pan.n}`, blocks[idx].x + 130, blocks[idx].y + 45);
-                cCtx.font = '28px DM Mono'; cCtx.fillStyle = '#6c829c'; cCtx.fillText(col.hex, blocks[idx].x + 130, blocks[idx].y + 85);
-                cCtx.font = 'bold 36px DM Mono';
-            });
-        } else if (currentTab === 'page-scout') {
-            title = "LOCATION SCOUT";
-            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
-            cCtx.fillText(`HEADING: ${Math.round(currentHeading)}°`, 100, 1250);
-            cCtx.fillText(`SUNRISE: ${document.getElementById('loc-sunrise').innerText} | SUNSET: ${document.getElementById('loc-sunset').innerText}`, 100, 1320);
-            cCtx.fillText(`GOLDEN HOUR IN: ${document.getElementById('loc-golden').innerText}`, 100, 1390);
-        } else {
-            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
-            cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
-            cCtx.fillText(`WB: ${liveTempC}°C`, 600, 1250);
-            cCtx.fillText(`ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
-        }
-        cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040'; cCtx.fillText(title, 50, 100);
-
-        cCtx.font = '24px DM Mono'; cCtx.fillStyle = '#6c829c';
-        let footer = new Date().toLocaleString();
-        if(currentLat && currentLon) footer += ` | GPS: ${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
-        if(currentWeatherDesc) footer += ` | ${currentWeatherDesc}, ${liveTempC}°C`;
-        cCtx.fillText(footer, 100, 1520);
-
-        const link = document.createElement('a'); link.download = `PREye_Capture_${Date.now()}.jpg`;
-        link.href = hrCan.toDataURL('image/jpeg', 0.9); link.click();
-    });
-
-    // --- GPS & EPHEMERIS ---
-    setInterval(() => {
-        if(goldenHourTime) {
-            const diff = goldenHourTime - new Date();
-            if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); document.getElementById('loc-golden').innerText = `${h}h ${m}m ${s}s`; } 
-            else { document.getElementById('loc-golden').innerText = "Now active"; }
-        }
-    }, 1000);
-
-    const fetchLocData = () => {
-        if(navigator.geolocation) {
-            document.getElementById('tool-temp').innerText = "Locating...";
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; document.getElementById('tel-gps').innerText = "OK";
-                try {
-                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true`);
-                    const wData = await wRes.json(); 
-                    document.getElementById('tool-temp').innerText = `${wData.current_weather.temperature}°C`;
-                    currentWeatherDesc = wCodes[wData.current_weather.weathercode] || ""; document.getElementById('tool-weather').innerText = currentWeatherDesc;
-                    
-                    const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
-                    const sData = await sRes.json(); 
-                    sunriseTime = new Date(sData.results.sunrise); sunsetTime = new Date(sData.results.sunset);
-                    goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset); 
-                    document.getElementById('loc-sunrise').innerText = sunriseTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    document.getElementById('loc-sunset').innerText = sunsetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                } catch(e) { document.getElementById('tool-temp').innerText = "API Error"; }
-            }, () => document.getElementById('tool-temp').innerText = "Denied");
-        }
-    };
-    document.getElementById('btn-fetch-loc-scout').addEventListener('click', fetchLocData);
-    document.getElementById('btn-fetch-loc-tools').addEventListener('click', fetchLocData);
-
-    const wCodes = { 0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast", 45:"Fog", 48:"Depositing rime fog", 51:"Drizzle: Light", 53:"Drizzle: Moderate", 55:"Drizzle: Dense intensity", 56:"Freezing drizzle: Light", 57:"Freezing drizzle: Heavy", 61:"Rain: Slight", 63:"Rain: Moderate", 65:"Rain: Heavy intensity", 66:"Freezing rain: Light", 67:"Freezing rain: Heavy", 71:"Snow fall: Slight", 72:"Snow fall: Moderate", 73:"Snow fall: Moderate", 74:"Snow fall: Heavy", 75:"Snow fall: Heavy intensity", 77:"Snow grains", 80:"Rain showers: Slight", 81:"Rain showers: Moderate", 82:"Rain showers: Violent", 85:"Snow showers: Slight", 86:"Snow showers: Heavy", 95:"Thunderstorm: Slight or moderate", 96:"Thunderstorm with slight hail", 99:"Thunderstorm with slight and heavy hail" };
-
-    // --- RELEASE LOGIC ---
-    let padsInit = false;
-    document.getElementById('nav-release').addEventListener('click', () => {
-        if(!padsInit) {
-            ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(id => {
-                const can = document.getElementById(id); const c = can.getContext('2d'); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false;
-                can.style.touchAction = 'none';
-                can.addEventListener('pointerdown', e=>{drawing=true; const r = can.getBoundingClientRect(); c.beginPath(); c.moveTo(e.clientX-r.left, e.clientY-r.top); e.preventDefault();});
-                can.addEventListener('pointermove', e=>{if(!drawing)return; const r = can.getBoundingClientRect(); c.lineTo(e.clientX-r.left, e.clientY-r.top); c.stroke(); e.preventDefault();});
-                can.addEventListener('pointerup', ()=>drawing=false);
-                can.addEventListener('pointerleave', ()=>drawing=false);
-            });
-            padsInit = true;
-        }
-    });
-
-    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('tog-adult').addEventListener('click', () => { document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active'); document.getElementById('guardian-section').style.display = 'none'; });
-    document.getElementById('tog-minor').addEventListener('click', () => { document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active'); document.getElementById('guardian-section').style.display = 'block'; });
-    document.getElementById('r-photo-input').addEventListener('change', (e) => { if(e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('r-photo-preview').src = ev.target.result; document.getElementById('r-photo-preview').style.display = 'block'; }; reader.readAsDataURL(e.target.files[0]); } });
-    window.clearPad = (id) => { const c = document.getElementById(id); c.getContext('2d').clearRect(0,0,c.width,c.height); };
-
-    // PDF Engine
-    document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
-        const renderDiv = document.getElementById('hidden-pdf-render');
-        renderDiv.style.display = 'block'; renderDiv.style.left = '0px'; renderDiv.style.top = '0px'; 
-        
-        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release. I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong><br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value}</td></tr></table>`;
-        renderDiv.innerHTML = html;
-        
-        try {
-            const cCanvas = await html2canvas(renderDiv, { scale: 2 }); const imgData = cCanvas.toDataURL('image/jpeg');
-            const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (cCanvas.height * pdfWidth) / cCanvas.width;
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight); pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
-        } catch(e) { alert("PDF Error"); }
-        
-        renderDiv.style.left = '-9999px'; renderDiv.style.top = '-9999px'; 
-    });
-
-    document.getElementById('email-pdf-btn').addEventListener('click', () => {
-        alert("Browser security blocks automatic file attachments.\n\nPlease MANUALLY ATTACH the PDF you just downloaded to the email draft that will open.");
-        window.location.href = `mailto:${document.getElementById('r-email').value}?subject=Model Release - ${document.getElementById('r-name').value}&body=Hi ${document.getElementById('r-name').value},%0D%0A%0D%0APlease find the signed model release form attached.%0D%0A%0D%0ABest regards,%0D%0ADigby Oldridge`;
-    });
-
-    // --- INIT ---
-    startCamera();
-</script>
-</body>
-</html>
+                        else { px[i]=l; px[i+1]=l; px[i+2]=l; px[i+3]=25
