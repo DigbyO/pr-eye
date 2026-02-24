@@ -1,142 +1,767 @@
-You are fixing a single-file HTML/CSS/JS progressive web app called "PR Eye v18" — a professional photography toolkit. Below I'll describe every confirmed bug. Fix all of them in the code, then return the complete corrected file.
----
-### BUG 1 — CRITICAL: rgbToHex() generates 7-digit hex codes
-Current code:
-  const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).padStart(6,'0').toUpperCase();
-Problem: (1<<24) forces a 7-hex-digit result. padStart(6) doesn't truncate, so every hex is 7 chars. CSS ignores 7-digit hex, so all colour swatches are invisible/black.
-Fix — replace with:
-  const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
----
-### BUG 2 — CRITICAL: fetchLocData() crashes due to missing element id
-Current code inside fetchLocData():
-  document.getElementById('loc-temp').innerText = "Locating...";
-  ...
-  document.getElementById('loc-temp').innerText = `${wData.current_weather.temperature}°C`;
-Problem: There is no element with id="loc-temp" in the HTML. The correct element in the Tools tab is id="tool-temp". This TypeError crash silently breaks ALL GPS, weather, sunrise/sunset, and golden-hour fetching from both the Scout and Tools "Refresh" buttons.
-Fix — delete both 'loc-temp' lines entirely. The temperature is already set correctly on the 'tool-temp' element on the next line.
----
-### BUG 3 — CRITICAL: Signature pads only work on touchscreen, not desktop
-Current code in the nav-release click initialisation block:
-  can.addEventListener('touchstart', ...)
-  can.addEventListener('touchmove', ...)
-  can.addEventListener('touchend', ...)
-Problem: No mouse or pointer events are registered. Desktop users cannot draw signatures.
-Fix — replace all four canvas event bindings (sig-model, sig-guardian, sig-witness, sig-photog) with pointer events that work on both touch and mouse:
-  can.addEventListener('pointerdown', e => {
-    drawing = true;
-    const r = can.getBoundingClientRect();
-    c.beginPath();
-    c.moveTo(e.clientX - r.left, e.clientY - r.top);
-    e.preventDefault();
-  });
-  can.addEventListener('pointermove', e => {
-    if (!drawing) return;
-    const r = can.getBoundingClientRect();
-    c.lineTo(e.clientX - r.left, e.clientY - r.top);
-    c.stroke();
-    e.preventDefault();
-  });
-  can.addEventListener('pointerup', () => drawing = false);
-  can.addEventListener('pointerleave', () => drawing = false);
-Also add `can.style.touchAction = 'none';` to prevent scroll-interference on mobile.
----
-### BUG 4: White Balance displayed in wrong units (°C instead of K)
-Current code:
-  const k = Math.round(5500 * ((bT/c)/(rT/c)));
-  if(!isNaN(k)) {
-    liveTempC = Math.round(k - 273.15);
-    document.getElementById('tel-wb').innerText = `${liveTempC}°C`;
-  }
-And in capture:
-  cCtx.fillText(`WB: ${liveTempC}°C`, 600, 1250);
-Problem: Colour temperature is always expressed in Kelvin, never Celsius. Subtracting 273.15 produces a wrong value (273K too low). The label "°C" is incorrect.
-Fix:
-- Remove the `- 273.15` subtraction.
-- Rename variable `liveTempC` → `liveTempK` everywhere it appears.
-- Change the display unit from `°C` to `K` everywhere: in `tel-wb`, in the capture overlay text, and in the weather/footer string that references it.
-Also add a NaN/zero guard before the log to prevent division-by-zero: `if (!isNaN(k) && k > 0)`.
----
-### BUG 5: Timelapse Calculator never shows results with default values
-Current code:
-  ['tl-event', 'tl-video', 'tl-fps'].forEach(id =>
-    document.getElementById(id).addEventListener('input', () => { ... })
-  );
-Problem: The inputs have default values (2, 15, 24) but the calculation only fires on user input. On page load the results show "-- s" / "--" even though valid defaults are present.
-Fix — extract the calculation into a named function and call it once at init:
-  function calcTimelapse() {
-    const evHrs = parseFloat(document.getElementById('tl-event').value) || 0;
-    const vidSec = parseFloat(document.getElementById('tl-video').value) || 0;
-    const fps = parseFloat(document.getElementById('tl-fps').value) || 1;
-    const totalFrames = vidSec * fps;
-    const interval = totalFrames > 0 ? ((evHrs * 3600) / totalFrames) : 0;
-    document.getElementById('tl-interval').innerText = interval > 0 ? interval.toFixed(1) + ' s' : '-- s';
-    document.getElementById('tl-frames').innerText = totalFrames > 0 ? Math.round(totalFrames) : '--';
-  }
-  ['tl-event', 'tl-video', 'tl-fps'].forEach(id =>
-    document.getElementById(id).addEventListener('input', calcTimelapse)
-  );
-  calcTimelapse(); // run on load with defaults
----
-### BUG 6: EV exposure indicator class names are inverted
-Current code in updateExpoBar():
-  if(Math.abs(diff) < 1) evSpan.className = 'ev-good';
-  else if(diff > 0) evSpan.className = 'ev-under';   // <-- wrong
-  else evSpan.className = 'ev-over';                  // <-- wrong
-Where diff = measuredEV - settingsEV.
-Problem: When diff > 0, the scene is brighter than your settings, meaning the image will be OVEREXPOSED. But the code labels this 'ev-under'. Conventions should be: diff > 0 → image overexposed → 'ev-over' (red). diff < 0 → image underexposed → 'ev-under' (blue).
-Fix:
-  if(Math.abs(diff) < 1) evSpan.className = 'ev-good';
-  else if(diff > 0) evSpan.className = 'ev-over';
-  else evSpan.className = 'ev-under';
----
-### BUG 7: False colour canvas is extremely pixelated
-Current code:
-  // fc-internal-canvas is 150×200, fc-layer is full viewport (~1085×1447)
-  fcInternalCtx.putImageData(fcData, 0, 0);
-  fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
-Problem: Scaling 150×200 up to 1085×1447 in one step produces very blocky, pixelated output.
-Fix — make fc-internal-canvas the same size as the display canvas. In resizeCanvases(), also resize fc-internal-canvas:
-  const fcInternal = document.getElementById('fc-internal-canvas');
-  fcInternal.width = rect.width;
-  fcInternal.height = rect.height;
-Then in liveLoop, draw the video directly into fcInternalCtx at full canvas size (instead of using the 150×200 proc-canvas data), run the false-colour pixel transform on that, then putImageData back.
----
-### BUG 8: EV reading crashes to -Infinity on black/very dark scenes
-Current code:
-  measuredEV = Math.log2(((lumT/c)/255) * 100 / 12.5);
-Problem: If the scene is completely black, lumT/c → 0, and Math.log2(0) = -Infinity, which then propagates as "NaN" or "-Infinity" into the display and updateExpoBar.
-Fix — clamp the luminance before taking the log:
-  const avgLum = Math.max(1, lumT / c); // clamp to minimum of 1
-  measuredEV = Math.log2((avgLum / 255) * 100 / 12.5);
----
-### BUG 9: WMO weather code map is missing many standard codes
-Current wCodes object is missing codes: 2, 56, 57, 66, 67, 72, 74, 77, 80, 81, 82, 85, 86, 96.
-Fix — add the missing entries to the wCodes object:
-  2: "Partly cloudy",
-  56: "Freezing drizzle: Light",
-  57: "Freezing drizzle: Heavy",
-  66: "Freezing rain: Light",
-  67: "Freezing rain: Heavy",
-  72: "Snow fall: Moderate",
-  74: "Snow fall: Heavy",
-  77: "Snow grains",
-  80: "Rain showers: Slight",
-  81: "Rain showers: Moderate",
-  82: "Rain showers: Violent",
-  85: "Snow showers: Slight",
-  86: "Snow showers: Heavy",
-  96: "Thunderstorm with slight hail",
----
-### BUG 10: Camera requests no resolution — often gets low quality
-Current constraints:
-  const constraints = { video: { facingMode: { ideal: currentFacingMode } } };
-Fix — request the highest practical resolution as ideal:
-  const constraints = {
-    video: {
-      facingMode: { ideal: currentFacingMode },
-      width: { ideal: 3840 },
-      height: { ideal: 2160 }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PR Eye v18 — Pro Toolkit</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --navy: #0d1b2a; --navy2: #142438; --border: #1e3a52;
+            --gold: #f0c040; --gold-dim: rgba(240,192,64,0.3);
+            --text: #e6edf5; --muted: #6c829c;
+            --red: #ff3333; --blue: #3333ff; --green: #33ff33;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-weight: 700; margin-bottom: 8px;}
+        
+        .hdr { background: var(--navy2); border-bottom: 1px solid var(--gold); padding: 10px 15px; display: flex; flex-direction: column; flex-shrink: 0; z-index: 10; }
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 1px; }
+        
+        .telemetry-bar { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 8px; border-radius: 6px; margin-top: 10px; border: 1px solid var(--border); }
+        .tel-item { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .ev-good { color: var(--green); } .ev-over { color: var(--red); } .ev-under { color: var(--blue); }
+
+        .main-content { flex: 1; overflow-y: auto; position: relative; padding: 15px; padding-bottom: 80px; }
+        .page { display: none; animation: fadeIn 0.2s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CAMERA & OVERLAYS */
+        #persistent-cam-area { margin-bottom: 15px; display: block; position: relative;}
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 10px;}
+        video { width: 100%; height: 100%; object-fit: cover; }
+        canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        #matte-layer { position: absolute; inset: 0; pointer-events: none; border: 0 solid #000; transition: border-width 0.3s ease; z-index: 4;}
+        #ui-layer { pointer-events: auto; z-index: 5;} 
+        #grid-layer { z-index: 2; }
+        #fc-layer { z-index: 1; opacity: 0.8; display: none;}
+        #level-layer { z-index: 6; display: none; }
+        #scout-layer { z-index: 7; display: none; }
+        
+        .floating-panel { display: none; background: var(--navy2); padding: 10px; border: 1px solid var(--gold); border-radius: 6px; margin-bottom: 10px; }
+        .floating-panel.active { display: block; }
+
+        /* CONTROLS */
+        .action-row { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn { padding: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1;}
+        .btn.solid { background: var(--gold); color: var(--navy); font-weight: 700;}
+        .btn.icon-only { flex: 0 0 auto; width: 42px; font-size: 16px; padding: 0;}
+        .btn.active-toggle { background: var(--gold-dim); border-color: var(--gold); }
+        .btn.sm { padding: 6px 10px; font-size: 11px; }
+        
+        .ctrl-panel { background: var(--navy2); border-radius: 8px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .col { flex: 1; }
+        .label-txt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+
+        .toggle-switch { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 10px;}
+        .toggle-opt { flex: 1; text-align: center; padding: 8px; background: var(--navy); color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 600;}
+        .toggle-opt.active { background: var(--gold); color: var(--navy); }
+        
+        select, input, textarea { width: 100%; background: var(--navy); border: 1px solid var(--border); color: var(--gold); padding: 10px; border-radius: 4px; outline: none; font-family: inherit; margin-bottom: 10px;}
+        select { appearance: none; }
+
+        .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-top: 10px; margin-bottom: 15px;}
+        .expo-scale { flex: 1; height: 4px; background: #333; margin: 0 15px; position: relative; }
+        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 14px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
+
+        /* PANTONE UI */
+        .pan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 80px; }
+        .pan-swatch { width: 40%; transition: background-color 0.3s; }
+        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+        .pan-code { font-family: 'Cormorant Garamond'; font-size: 16px; color: var(--gold); font-weight: 700; line-height: 1.2; }
+        .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase;}
+        
+        /* DATA CARDS */
+        .data-card { background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-bottom: 10px; }
+        .data-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; border-bottom: 1px dashed #1e3a52; padding-bottom: 4px;}
+        .data-val { color: var(--gold); font-weight: 700; }
+
+        /* RELEASE FORM UI */
+        .release-section { border-left: 2px solid var(--gold); padding-left: 10px; margin-bottom: 20px; }
+        .legal-text { font-family: sans-serif; font-size: 11px; color: #a0b4c8; line-height: 1.5; max-height: 150px; overflow-y: auto; background: #000; padding: 12px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px;}
+        .signature-pad { background: #fff; border-radius: 4px; width: 100%; border: 2px dashed var(--muted); touch-action: none; margin-bottom: 5px;}
+        .photo-preview { width: 100px; height: 100px; border-radius: 4px; object-fit: cover; display: none; border: 1px solid var(--gold); margin-bottom: 10px; }
+
+        /* NAV */
+        .nav { background: var(--navy2); border-top: 1px solid var(--gold); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; cursor: pointer; border-top: 3px solid transparent; }
+        .nav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
+
+        #composite-canvas, #proc-canvas, #fc-internal-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
+        #hidden-pdf-render { position: absolute; top: -9999px; left: -9999px; width: 800px; background: #fff; color: #000; padding: 40px; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div class="hdr">
+        <div class="hdr-top">
+            <div class="brand">PR EYE v18</div>
+            <button id="cam-flip-btn" class="btn icon-only" style="height: 30px; border-color: transparent;">🔄</button>
+        </div>
+        <div class="telemetry-bar">
+            <div class="tel-item" id="tel-ev">EV: <span class="ev-good">0.0</span></div>
+            <div class="tel-item" style="color:var(--gold)">WB: <span id="tel-wb">-- °C</span></div>
+            <div class="tel-item" style="color:var(--muted)">GPS: <span id="tel-gps">--</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="persistent-cam-area">
+            
+            <div class="floating-panel" id="grid-menu">
+                <div class="row" style="margin-bottom:0;">
+                    <div class="col"><span class="label-txt">Matte</span><select id="set-matte"><option value="none">None</option><option value="2.39">2.39:1 Scope</option><option value="1.85">1.85:1 Flat</option><option value="4:3">4:3 Classic</option><option value="9:16">9:16 Vertical</option></select></div>
+                    <div class="col"><span class="label-txt">Grid</span><select id="set-grid"><option value="off">Off</option><option value="thirds">Thirds</option><option value="phi">Golden Phi</option><option value="spiral">Spiral</option></select></div>
+                </div>
+            </div>
+
+            <div class="cam-container" id="cam-wrapper">
+                <video id="video" autoplay playsinline webkit-playsinline></video>
+                <div id="matte-layer"></div>
+                <canvas id="fc-layer" class="overlay"></canvas>
+                <canvas id="grid-layer" class="overlay"></canvas>
+                <canvas id="level-layer" class="overlay"></canvas>
+                <canvas id="scout-layer" class="overlay"></canvas>
+                <canvas id="ui-layer" class="overlay"></canvas>
+            </div>
+            
+            <div class="action-row">
+                <button id="grid-toggle-btn" class="btn icon-only" aria-label="Toggle Grids">▦</button>
+                <button id="fc-toggle-btn" class="btn icon-only" aria-label="Toggle False Colour">◐</button>
+                <button id="level-toggle-btn" class="btn icon-only" aria-label="Toggle Level">⚖</button>
+                <button id="capture-btn" class="btn solid">📸 CAPTURE</button>
+            </div>
+        </div>
+
+        <div id="page-meter" class="page active">
+            <div class="ctrl-panel">
+                <div class="row">
+                    <div class="col"><span class="label-txt">Shutter Mode</span><select id="shutter-mode"><option value="speed">Speed (Fraction)</option><option value="angle">Cinematic Angle</option></select></div>
+                    <div class="col"><span class="label-txt">ND Filter</span><select id="set-nd"><option value="0">Clear</option><option value="1">ND 0.3 (1 Stop)</option><option value="2">ND 0.6 (2 Stop)</option><option value="3">ND 0.9 (3 Stop)</option><option value="4">ND 1.2 (4 Stop)</option><option value="5">ND 1.5 (5 Stop)</option><option value="6">ND 1.8 (6 Stop)</option><option value="7">ND 2.1 (7 Stop)</option></select></div>
+                </div>
+                <div class="row" id="manual-controls">
+                    <div class="col"><span class="label-txt">ISO</span><select id="set-iso"><option value="100">100</option><option value="200">200</option><option value="400" selected>400</option><option value="800">800</option><option value="1600">1600</option><option value="3200">3200</option><option value="6400">6400</option></select></div>
+                    <div class="col"><span class="label-txt">f/</span><select id="set-aperture"><option value="1.4">1.4</option><option value="2.0">2.0</option><option value="2.8">2.8</option><option value="4.0">4.0</option><option value="5.6" selected>5.6</option><option value="8.0">8.0</option><option value="11">11</option><option value="16">16</option></select></div>
+                    <div class="col"><span class="label-txt" id="lbl-shutter">1/s</span><select id="set-shutter"><option value="24">24</option><option value="30">30</option><option value="50">50</option><option value="60" selected>60</option><option value="125">125</option><option value="250">250</option><option value="500">500</option><option value="1000">1000</option></select></div>
+                    <div class="col" id="col-fps" style="display:none;"><span class="label-txt">FPS</span><select id="set-fps"><option value="24">24</option><option value="25">25</option><option value="30">30</option><option value="60">60</option></select></div>
+                </div>
+                <div class="expo-meter-readout">
+                    <span class="expo-val under">-3</span>
+                    <div class="expo-scale"><div class="expo-marker" id="expo-marker" style="left: 50%;"></div></div>
+                    <span class="expo-val over">+3</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-color" class="page">
+            <div class="ctrl-panel">
+                <div class="toggle-switch">
+                    <div class="toggle-opt active" id="pan-auto">AUTO TRACKING</div>
+                    <div class="toggle-opt" id="pan-manual">MANUAL (TAP CAM)</div>
+                </div>
+                <div class="pan-grid" id="live-pan-results">
+                    <div class="pan-item"><div class="pan-swatch" id="ps1" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn1">---</div><div class="pan-hex" id="ph1">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps2" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn2">---</div><div class="pan-hex" id="ph2">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps3" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn3">---</div><div class="pan-hex" id="ph3">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps4" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn4">---</div><div class="pan-hex" id="ph4">---</div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-scout" class="page">
+            <div class="ctrl-panel">
+                <h4>Location Scout Data</h4>
+                <p style="color: var(--muted); font-size: 11px; margin-bottom: 10px;">The live view shows a compass and sun path overlay based on current time and orientation.</p>
+                <div class="data-card">
+                    <div class="data-row"><span>Heading:</span><span class="data-val" id="scout-heading">--°</span></div>
+                    <div class="data-row"><span>Sunrise:</span><span class="data-val" id="loc-sunrise">--:--</span></div>
+                    <div class="data-row"><span>Sunset:</span><span class="data-val" id="loc-sunset">--:--</span></div>
+                    <div class="data-row"><span>Golden Hour In:</span><span class="data-val" id="loc-golden" style="color:#ff9900;">--:--:--</span></div>
+                </div>
+                <button class="btn sm" id="btn-fetch-loc-scout" style="width: 100%;">Refresh GPS & Sun Data</button>
+            </div>
+        </div>
+
+        <div id="page-tools" class="page">
+             <div class="ctrl-panel">
+                <h4>Live Conditions</h4>
+                <div class="data-card">
+                     <div class="data-row"><span>Weather:</span><span class="data-val" id="tool-weather">--</span></div>
+                    <div class="data-row"><span>Temp:</span><span class="data-val" id="tool-temp">-- °C</span></div>
+                    <div class="data-row"><span>Compass:</span><span class="data-val" id="tool-heading">--°</span></div>
+                </div>
+                <button class="btn sm" id="btn-fetch-loc-tools" style="width: 100%;">Refresh Data</button>
+            </div>
+
+            <div class="ctrl-panel">
+                <h4>Timelapse Calculator</h4>
+                <div class="row">
+                    <div class="col"><span class="label-txt">Event (Hrs)</span><input type="number" id="tl-event" value="2" step="0.5"></div>
+                    <div class="col"><span class="label-txt">Video (Sec)</span><input type="number" id="tl-video" value="15"></div>
+                    <div class="col"><span class="label-txt">FPS</span><input type="number" id="tl-fps" value="24"></div>
+                </div>
+                <div class="data-card" style="margin-top: 5px; padding: 10px;">
+                    <div class="data-row"><span>Capture Interval:</span><span class="data-val" id="tl-interval">-- s</span></div>
+                    <div class="data-row" style="border:none; margin-bottom:0; padding-bottom:0;"><span>Total Frames:</span><span class="data-val" id="tl-frames">--</span></div>
+                </div>
+            </div>
+
+            <div class="ctrl-panel">
+                <h4>Shoot Notes</h4>
+                <textarea id="shoot-notes" rows="5" placeholder="Type location notes, gear requirements, or shot lists here..."></textarea>
+                <button class="btn" id="btn-email-notes" style="width: 100%;">Email Notes</button>
+            </div>
+        </div>
+
+        <div id="page-release" class="page">
+            <h3>Model Release Form</h3>
+            <div class="release-section">
+                <h4>Shoot Details</h4>
+                <div class="row"><div class="col"><input type="date" id="r-date"></div><div class="col"><input type="text" id="r-loc" placeholder="Location"></div></div>
+            </div>
+            <div class="release-section">
+                <h4>Model Details</h4>
+                <input type="text" id="r-name" placeholder="Full Name">
+                <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone"></div></div>
+                <input type="email" id="r-email" placeholder="Email Address">
+                <textarea id="r-address" placeholder="Full Address" rows="2"></textarea>
+                <div style="margin: 15px 0;"><span class="label-txt">Model Photo (Optional)</span><input type="file" id="r-photo-input" accept="image/*" capture="environment" style="padding: 5px;"><img id="r-photo-preview" class="photo-preview"></div>
+                <div class="toggle-switch"><div class="toggle-opt active" id="tog-adult">Model is 18+</div><div class="toggle-opt" id="tog-minor">Model is Under 18</div></div>
+            </div>
+            <div id="guardian-section" class="release-section" style="display:none;">
+                <h4>Parent/Guardian Consent</h4>
+                <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
+                <span class="label-txt">Guardian Signature</span><canvas id="sig-guardian" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
+            </div>
+            <div class="release-section">
+                <h4>Terms & Conditions</h4>
+                <div class="legal-text">
+                    <strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br>
+                    <strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted.<br><br>
+                    <strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content.<br><br>
+                    <strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release. I am signing voluntarily after having the opportunity to seek legal advice.<br><br>
+                    <strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018.
+                </div>
+            </div>
+            <div class="release-section">
+                <h4>Signatures</h4>
+                <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-model')">Clear Model Sig</button>
+                <div style="margin-top: 20px;"><span class="label-txt">Witness Details (Must be 18+, Independent)</span><input type="text" id="r-w-name" placeholder="Witness Name"><span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-witness')">Clear Witness Sig</button></div>
+                <div style="margin-top: 20px;"><span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-photog')">Clear Photog Sig</button></div>
+            </div>
+            <button id="gen-pdf-btn" class="btn solid" style="width:100%; margin-bottom:10px;">1. Generate PDF</button>
+            <button id="email-pdf-btn" class="btn" style="width:100%;">2. Email PDF</button>
+        </div>
+
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" data-target="page-meter" data-cam="true">📷<br>Meter</div>
+        <div class="nav-item" data-target="page-color" data-cam="true">🎨<br>Color</div>
+        <div class="nav-item" data-target="page-scout" data-cam="true">🧭<br>Scout</div>
+        <div class="nav-item" data-target="page-tools" data-cam="true">🛠<br>Tools</div>
+        <div class="nav-item" data-target="page-release" data-cam="false" id="nav-release">📝<br>Legal</div>
+    </div>
+
+    <canvas id="proc-canvas" width="150" height="200"></canvas>
+    <canvas id="fc-internal-canvas" width="150" height="200"></canvas>
+    <canvas id="composite-canvas" width="1200" height="1600"></canvas>
+    <div id="hidden-pdf-render"></div>
+
+<script>
+    // --- CORE STATE & SETUP ---
+    const video = document.getElementById('video');
+    const gridCtx = document.getElementById('grid-layer').getContext('2d');
+    const uiCtx = document.getElementById('ui-layer').getContext('2d');
+    const fcCtx = document.getElementById('fc-layer').getContext('2d');
+    const fcInternalCtx = document.getElementById('fc-internal-canvas').getContext('2d', { willReadFrequently: true });
+    const lvlCtx = document.getElementById('level-layer').getContext('2d');
+    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
+    const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
+    
+    // Persistent offscreen canvas for Pantone tracking
+    const mapCan = document.createElement('canvas');
+    const mapCtx = mapCan.getContext('2d', { willReadFrequently: true });
+
+    let stream = null; let currentFacingMode = 'environment';
+    let measuredEV = 0; let liveTempC = 0; let currentLat = null; let currentLon = null; let currentWeatherDesc = "";
+    let currentTab = 'page-meter';
+    let fcState = 0; let levelActive = false;
+    let goldenHourTime = null; let sunriseTime = null; let sunsetTime = null;
+    let currentHeading = 0;
+
+    // --- CAMERA ENGINE ---
+    async function startCamera() {
+        if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
+        try {
+            const constraints = { video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 3840 }, height: { ideal: 2160 } } };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream; video.play();
+            video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
+        } catch(e) { console.log("Cam Error", e); }
     }
-  };
----
-Please apply all 10 fixes to the complete source file and return the corrected version. Do not change any logic, styling, layout, or features beyond what is specified above.
+    document.getElementById('cam-flip-btn').addEventListener('click', ()=>{ currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; startCamera(); });
+
+    function resizeCanvases() {
+        const rect = video.getBoundingClientRect(); if(rect.width===0) return;
+        ['grid-layer', 'ui-layer', 'fc-layer', 'level-layer', 'scout-layer'].forEach(id => {
+            const c = document.getElementById(id); c.width = rect.width; c.height = rect.height;
+        });
+        const fcInternal = document.getElementById('fc-internal-canvas');
+        fcInternal.width = rect.width;
+        fcInternal.height = rect.height;
+        drawGrid();
+    }
+    window.addEventListener('resize', resizeCanvases);
+
+    // --- NAVIGATION ---
+    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        n.classList.add('active'); currentTab = n.dataset.target;
+        document.getElementById(currentTab).classList.add('active');
+        document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'block' : 'none';
+        resizeCanvases();
+    }));
+
+    // --- PRO COLOR SCIENCE (sRGB -> XYZ -> CIELAB CIE94) ---
+    function srgbToXyz(r, g, b) {
+        let R = r / 255, G = g / 255, B = b / 255;
+        R = R > 0.04045 ? Math.pow(((R + 0.055) / 1.055), 2.4) : R / 12.92;
+        G = G > 0.04045 ? Math.pow(((G + 0.055) / 1.055), 2.4) : G / 12.92;
+        B = B > 0.04045 ? Math.pow(((B + 0.055) / 1.055), 2.4) : B / 12.92;
+        R *= 100; G *= 100; B *= 100;
+        const X = R * 0.4124 + G * 0.3576 + B * 0.1805;
+        const Y = R * 0.2126 + G * 0.7152 + B * 0.0722;
+        const Z = R * 0.0193 + G * 0.1192 + B * 0.9505;
+        return [X, Y, Z];
+    }
+
+    function xyzToLab(x, y, z) {
+        const refX = 95.047, refY = 100.000, refZ = 108.883;
+        let X = x / refX, Y = y / refY, Z = z / refZ;
+        X = X > 0.008856 ? Math.pow(X, 1 / 3) : (7.787 * X) + (16 / 116);
+        Y = Y > 0.008856 ? Math.pow(Y, 1 / 3) : (7.787 * Y) + (16 / 116);
+        Z = Z > 0.008856 ? Math.pow(Z, 1 / 3) : (7.787 * Z) + (16 / 116);
+        const L = (116 * Y) - 16; const a = 500 * (X - Y); const b = 200 * (Y - Z);
+        return [L, a, b];
+    }
+
+    function deltaE94(labA, labB) {
+        const L1 = labA[0], a1 = labA[1], b1 = labA[2];
+        const L2 = labB[0], a2 = labB[1], b2 = labB[2];
+        const dL = L1 - L2;
+        const C1 = Math.sqrt(a1*a1 + b1*b1);
+        const C2 = Math.sqrt(a2*a2 + b2*b2);
+        const dC = C1 - C2;
+        let da = a1 - a2; let db = b1 - b2;
+        let dH = Math.sqrt(Math.max(0, da*da + db*db - dC*dC));
+        const SL = 1, SC = 1 + 0.045 * C1, SH = 1 + 0.015 * C1;
+        const dE = Math.sqrt(Math.pow(dL/SL, 2) + Math.pow(dC/SC, 2) + Math.pow(dH/SH, 2));
+        return dE;
+    }
+
+    const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
+    
+    const pantoneDb = [
+        {n:"Process Yellow C",rgb:[255,242,0]}, {n:"Yellow 012 C",rgb:[255,215,0]}, {n:"Orange 021 C",rgb:[254,80,0]}, {n:"Warm Red C",rgb:[249,66,58]},
+        {n:"Red 032 C",rgb:[239,51,64]}, {n:"Rubine Red C",rgb:[206,0,88]}, {n:"Purple C",rgb:[187,41,187]}, {n:"Reflex Blue C",rgb:[0,20,137]},
+        {n:"Process Blue C",rgb:[0,133,202]}, {n:"Green C",rgb:[0,171,132]}, {n:"Black 6 C",rgb:[16,24,32]}, {n:"Cool Gray 9 C",rgb:[117,120,123]},
+        {n:"Warm Gray 5 C",rgb:[172,163,154]}, {n:"PMS 155 C",rgb:[234,203,169]}, {n:"PMS 469 C",rgb:[100,51,21]}, {n:"White",rgb:[255,255,255]},
+        {n:"Black C",rgb:[45,41,38]}, {n:"PMS 286 C",rgb:[0,51,160]}, {n:"PMS 186 C",rgb:[200,16,46]}, {n:"PMS 354 C",rgb:[0,177,64]}
+    ];
+    // Pre-calculate LAB for DB
+    pantoneDb.forEach(p => { const xyz = srgbToXyz(p.rgb[0], p.rgb[1], p.rgb[2]); p.lab = xyzToLab(xyz[0], xyz[1], xyz[2]); });
+
+    function findClosestPantone(r, g, b) {
+        const targetXyz = srgbToXyz(r,g,b); const targetLab = xyzToLab(targetXyz[0], targetXyz[1], targetXyz[2]);
+        let closest = pantoneDb[0], minD = Infinity;
+        pantoneDb.forEach(p => { const d = deltaE94(targetLab, p.lab); if(d < minD) { minD = d; closest = p; } });
+        return closest;
+    }
+
+    // --- OVERLAYS & GRIDS ---
+    document.getElementById('grid-toggle-btn').addEventListener('click', (e) => {
+        document.getElementById('grid-menu').classList.toggle('active'); e.target.classList.toggle('active-toggle');
+    });
+
+    document.getElementById('set-matte').addEventListener('change', (e) => {
+        const m = document.getElementById('matte-layer'); const val = e.target.value;
+        if(val === '2.39') m.style.borderWidth = '12% 0'; else if(val === '1.85') m.style.borderWidth = '5% 0';
+        else if(val === '4:3') m.style.borderWidth = '0 12%'; else if(val === '9:16') m.style.borderWidth = '0 25%'; else m.style.borderWidth = '0';
+    });
+
+    document.getElementById('set-grid').addEventListener('change', drawGrid);
+    function drawGrid() {
+        const type = document.getElementById('set-grid').value; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height;
+        gridCtx.clearRect(0,0,w,h); if(type === 'off') return;
+        
+        gridCtx.strokeStyle = `rgba(240, 192, 64, 0.6)`; gridCtx.lineWidth = 2; gridCtx.beginPath();
+        if(type === 'thirds') {
+            gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h);
+            gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3);
+        } else if (type === 'phi') {
+            gridCtx.moveTo(w*0.382, 0); gridCtx.lineTo(w*0.382, h); gridCtx.moveTo(w*0.618, 0); gridCtx.lineTo(w*0.618, h);
+            gridCtx.moveTo(0, h*0.382); gridCtx.lineTo(w, h*0.382); gridCtx.moveTo(0, h*0.618); gridCtx.lineTo(w, h*0.618);
+        } else if (type === 'spiral') {
+            let cw = w, ch = h, cx = 0, cy = 0;
+            for(let i=0; i<6; i++) { gridCtx.rect(cx, cy, cw, ch); gridCtx.moveTo(cx+cw, cy); gridCtx.arc(cx+cw, cy, cw, Math.PI, Math.PI/2, true); let nw = ch, nh = cw * 0.618; cy += ch - nh; cw = nw; ch = nh; }
+        }
+        gridCtx.stroke();
+    }
+
+    // --- FALSE COLOUR & SPIRIT LEVEL ---
+    document.getElementById('fc-toggle-btn').addEventListener('click', (e) => {
+        fcState = (fcState + 1) % 3; const btn = e.target;
+        if(fcState === 0) { btn.innerText = '◐'; btn.classList.remove('active-toggle'); document.getElementById('fc-layer').style.display='none'; }
+        if(fcState === 1) { btn.innerText = '🌈'; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; }
+        if(fcState === 2) { btn.innerText = '🔴'; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; }
+    });
+
+    document.getElementById('level-toggle-btn').addEventListener('click', (e) => {
+        levelActive = !levelActive;
+        document.getElementById('level-layer').style.display = levelActive ? 'block' : 'none';
+        e.target.classList.toggle('active-toggle', levelActive);
+    });
+
+    window.addEventListener('deviceorientation', (e) => {
+        currentHeading = e.alpha || 0;
+        document.getElementById('tool-heading').innerText = Math.round(currentHeading) + '°';
+        document.getElementById('scout-heading').innerText = Math.round(currentHeading) + '°';
+
+        if(levelActive) {
+            const w = lvlCtx.canvas.width; const h = lvlCtx.canvas.height; lvlCtx.clearRect(0,0,w,h);
+            let roll = e.gamma || 0; let pitch = e.beta || 0;
+            if(window.orientation === 90 || window.orientation === -90) { roll = e.beta; pitch = e.gamma; }
+            const isLevel = Math.abs(roll) < 2 && Math.abs(pitch) < 2;
+            lvlCtx.strokeStyle = isLevel ? 'var(--green)' : 'var(--gold)'; lvlCtx.lineWidth = 4;
+            lvlCtx.save(); lvlCtx.translate(w/2, h/2); lvlCtx.rotate(roll * Math.PI / 180);
+            lvlCtx.beginPath(); lvlCtx.moveTo(-100, 0); lvlCtx.lineTo(100, 0); lvlCtx.stroke();
+            lvlCtx.fillStyle = isLevel ? 'var(--green)' : 'rgba(255,51,51,0.8)';
+            lvlCtx.beginPath(); lvlCtx.arc(0, pitch * 2, 8, 0, Math.PI*2); lvlCtx.fill();
+            lvlCtx.restore();
+        }
+    });
+
+    // --- EXPOSURE & TIMELAPSE MATH ---
+    document.getElementById('shutter-mode').addEventListener('change', (e) => {
+        const isAngle = e.target.value === 'angle';
+        document.getElementById('lbl-shutter').innerText = isAngle ? 'Angle (°)' : '1/s';
+        document.getElementById('col-fps').style.display = isAngle ? 'block' : 'none';
+        const sel = document.getElementById('set-shutter');
+        sel.innerHTML = isAngle ? '<option value="360">360°</option><option value="180" selected>180°</option><option value="90">90°</option><option value="45">45°</option>' : '<option value="24">24</option><option value="30">30</option><option value="50">50</option><option value="60" selected>60</option><option value="125">125</option><option value="250">250</option><option value="500">500</option><option value="1000">1000</option>';
+        updateExpoBar();
+    });
+
+    ['set-iso', 'set-aperture', 'set-shutter', 'set-fps', 'set-nd'].forEach(id => document.getElementById(id).addEventListener('change', updateExpoBar));
+    function updateExpoBar() {
+        if(!measuredEV) return;
+        const N = parseFloat(document.getElementById('set-aperture').value); const ISO = parseInt(document.getElementById('set-iso').value); const ndStops = parseFloat(document.getElementById('set-nd').value);
+        let t = document.getElementById('shutter-mode').value === 'speed' ? 1 / parseFloat(document.getElementById('set-shutter').value) : 1 / (parseFloat(document.getElementById('set-fps').value) * (360 / parseFloat(document.getElementById('set-shutter').value)));
+        
+        const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100) + ndStops;
+        let diff = measuredEV - settingsEV;
+        let percent = 50 + (diff * (50/3)); percent = Math.max(5, Math.min(95, percent));
+        
+        document.getElementById('expo-marker').style.left = `${percent}%`;
+        document.getElementById('expo-marker').style.background = (percent < 20 || percent > 80) ? 'var(--red)' : 'var(--gold)';
+        
+        const evSpan = document.querySelector('#tel-ev span');
+        if(Math.abs(diff) < 1) evSpan.className = 'ev-good'; else if(diff > 0) evSpan.className = 'ev-over'; else evSpan.className = 'ev-under';
+    }
+
+    function calcTimelapse() {
+        const evHrs = parseFloat(document.getElementById('tl-event').value) || 0;
+        const vidSec = parseFloat(document.getElementById('tl-video').value) || 0;
+        const fps = parseFloat(document.getElementById('tl-fps').value) || 1;
+        const totalFrames = vidSec * fps;
+        const interval = totalFrames > 0 ? ((evHrs * 3600) / totalFrames) : 0;
+        document.getElementById('tl-interval').innerText = interval > 0 ? interval.toFixed(1) + ' s' : '-- s';
+        document.getElementById('tl-frames').innerText = totalFrames > 0 ? Math.round(totalFrames) : '--';
+    }
+    ['tl-event', 'tl-video', 'tl-fps'].forEach(id => document.getElementById(id).addEventListener('input', calcTimelapse));
+    calcTimelapse();
+
+    document.getElementById('btn-email-notes').addEventListener('click', () => {
+        window.location.href = `mailto:?subject=PR Eye Shoot Notes&body=${encodeURIComponent(document.getElementById('shoot-notes').value)}`;
+    });
+
+    // --- PANTONE MANUAL SELECTION ---
+    let panMode = 'auto'; let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}]; let manualIndex = 0; let lastPanExtraction = [];
+    document.getElementById('pan-auto').addEventListener('click', () => { panMode = 'auto'; document.getElementById('pan-auto').classList.add('active'); document.getElementById('pan-manual').classList.remove('active'); });
+    document.getElementById('pan-manual').addEventListener('click', () => { panMode = 'manual'; document.getElementById('pan-manual').classList.add('active'); document.getElementById('pan-auto').classList.remove('active'); });
+    document.getElementById('ui-layer').addEventListener('pointerdown', (e) => {
+        if(currentTab === 'page-color' && panMode === 'manual') {
+            const rect = e.target.getBoundingClientRect();
+            manualPoints[manualIndex] = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height };
+            manualIndex = (manualIndex + 1) % 4;
+        }
+    });
+
+    // --- LIVE LOOP ---
+    function liveLoop() {
+        if(video.readyState === 4 && video.videoWidth > 0 && document.getElementById('persistent-cam-area').style.display !== 'none') {
+            const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
+            let sx, sy, sw, sh;
+            if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
+            else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
+            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200);
+            
+            const viewData = procCtx.getImageData(0,0,150,200).data;
+            let rT=0, bT=0, lumT=0, c=0; 
+            for(let i=0; i<viewData.length; i+=4) { rT+=viewData[i]; bT+=viewData[i+2]; lumT += (0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]); c++; }
+            
+            const avgLum = Math.max(1, lumT / c);
+            measuredEV = Math.log2((avgLum / 255) * 100 / 12.5);
+            document.querySelector('#tel-ev span').innerText = measuredEV > 0 ? `+${measuredEV.toFixed(1)}` : measuredEV.toFixed(1);
+            updateExpoBar();
+
+            const k = Math.round(5500 * ((bT/c)/(rT/c)));
+            if(!isNaN(k) && k > 0) { liveTempC = Math.round(k - 273.15); document.getElementById('tel-wb').innerText = `${liveTempC}°C`; }
+
+            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch);
+            const swCtx = scoutCtx.canvas.width; const shCtx = scoutCtx.canvas.height; scoutCtx.clearRect(0,0,swCtx,shCtx);
+            
+            if(currentTab === 'page-color') {
+                lastPanExtraction = [];
+                if(mapCan.width !== cw || mapCan.height !== ch) { mapCan.width = cw; mapCan.height = ch; }
+                mapCtx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+                
+                const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+                pts.forEach((p, idx) => {
+                    const cX = Math.floor(p.x * cw); const cY = Math.floor(p.y * ch);
+                    const sX = Math.max(0, cX - 2); const sY = Math.max(0, cY - 2);
+                    const pxd = mapCtx.getImageData(sX, sY, 5, 5).data;
+                    let tr=0,tg=0,tb=0,pc=0;
+                    for(let i=0;i<pxd.length;i+=4){ tr+=pxd[i]; tg+=pxd[i+1]; tb+=pxd[i+2]; pc++; }
+                    if(pc>0) { tr=Math.round(tr/pc); tg=Math.round(tg/pc); tb=Math.round(tb/pc); }
+                    
+                    const hex = rgbToHex(tr,tg,tb); const pan = findClosestPantone(tr,tg,tb);
+                    lastPanExtraction.push({ hex, pan });
+                    
+                    document.getElementById(`ps${idx+1}`).style.backgroundColor = hex;
+                    document.getElementById(`pn${idx+1}`).innerText = pan.n;
+                    document.getElementById(`ph${idx+1}`).innerText = hex;
+
+                    uiCtx.strokeStyle = hex; uiCtx.lineWidth = 3; uiCtx.beginPath(); uiCtx.arc(cX, cY, 20, 0, Math.PI*2); uiCtx.stroke();
+                    uiCtx.fillStyle = '#fff'; uiCtx.font = '16px DM Mono'; uiCtx.fillText(idx+1, cX+25, cY-25);
+                });
+            }
+
+            // Scout Overlay
+            if(currentTab === 'page-scout') {
+                 // Compass Rose
+                scoutCtx.save(); scoutCtx.translate(swCtx/2, shCtx/2); scoutCtx.rotate(-currentHeading * Math.PI / 180);
+                scoutCtx.strokeStyle = 'rgba(240,192,64,0.5)'; scoutCtx.lineWidth = 2;
+                scoutCtx.beginPath(); scoutCtx.moveTo(0, -50); scoutCtx.lineTo(-10, -30); scoutCtx.lineTo(10, -30); scoutCtx.closePath(); scoutCtx.stroke(); // North Arrow
+                scoutCtx.fillStyle = 'var(--gold)'; scoutCtx.font = '14px DM Mono'; scoutCtx.fillText('N', -5, -60); scoutCtx.fillText('S', -5, 70); scoutCtx.fillText('E', 60, 5); scoutCtx.fillText('W', -70, 5);
+                
+                // Sun Path Arc
+                if(sunriseTime && sunsetTime) {
+                    const now = new Date();
+                    const dayDuration = sunsetTime - sunriseTime;
+                    const timeSinceRise = now - sunriseTime;
+                    let sunProgress = timeSinceRise / dayDuration; // 0 to 1
+                    sunProgress = Math.max(0, Math.min(1, sunProgress));
+                    
+                    // Arc from East (-90deg) to West (+90deg) relative to North, adjusted for current heading
+                    const startAngle = (-90 - currentHeading) * Math.PI/180;
+                    const endAngle = (90 - currentHeading) * Math.PI/180;
+                    scoutCtx.beginPath(); scoutCtx.arc(0,0, 120, startAngle, endAngle); scoutCtx.setLineDash([5, 5]); scoutCtx.stroke(); scoutCtx.setLineDash([]);
+                    
+                    // Current Sun Position
+                    const currentSunAngle = startAngle + (sunProgress * (endAngle - startAngle));
+                    const sx = 120 * Math.cos(currentSunAngle); const sy = 120 * Math.sin(currentSunAngle);
+                    scoutCtx.fillStyle = '#ff9900'; scoutCtx.beginPath(); scoutCtx.arc(sx, sy, 8, 0, Math.PI*2); scoutCtx.fill();
+                }
+                scoutCtx.restore();
+            }
+
+            if(fcState > 0) {
+                fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
+                const fcData = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
+                const px = fcData.data;
+                for(let i=0; i<px.length; i+=4) {
+                    let l = 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]; let ire = (l / 255) * 100;
+                    if (fcState === 1) { 
+                        if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; }
+                        else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; }
+                        else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; }
+                        else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; }
+                        else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; }
+                        else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; }
+                        else { px[i]=l; px[i+1]=l; px[i+2]=l; px[i+3]=255; }
+                    } else if (fcState === 2) { 
+                        if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; }
+                        else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; }
+                        else { px[i+3]=0; }
+                    }
+                }
+                fcInternalCtx.putImageData(fcData, 0, 0);
+                fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height);
+                fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
+            }
+        }
+        requestAnimationFrame(liveLoop);
+    }
+
+    // --- CAPTURE ENGINE ---
+    document.getElementById('capture-btn').addEventListener('click', () => {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        
+        const hrCan = document.getElementById('composite-canvas'); const cCtx = hrCan.getContext('2d');
+        const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
+        let sx, sy, sw, sh;
+        if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
+        else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
+        
+        cCtx.fillStyle = '#0d1b2a'; cCtx.fillRect(0,0,1200,1600);
+        cCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 1200, 1600);
+        
+        if(document.getElementById('set-grid').value !== 'off') { cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 0,0, 1200,1600); }
+        if(currentTab === 'page-scout') { cCtx.drawImage(document.getElementById('scout-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 0,0, 1200,1600); }
+
+        cCtx.fillStyle = 'rgba(20, 36, 56, 0.9)'; cCtx.fillRect(50, 1150, 1100, 400);
+        cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
+
+        let title = "METER REPORT";
+        if(currentTab === 'page-color') {
+            title = "COLOUR PALETTE";
+            const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+            pts.forEach((t, i) => {
+                if(!lastPanExtraction[i]) return;
+                const tx = t.x * 1200; const ty = t.y * 1600;
+                cCtx.strokeStyle = lastPanExtraction[i].hex; cCtx.lineWidth = 8; cCtx.beginPath(); cCtx.arc(tx, ty, 40, 0, Math.PI*2); cCtx.stroke();
+                cCtx.fillStyle = '#fff'; cCtx.font = 'bold 40px DM Mono'; cCtx.fillText(i+1, tx+50, ty-50);
+            });
+            cCtx.font = 'bold 36px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            const blocks = [ {x: 100, y: 1200}, {x: 600, y: 1200}, {x: 100, y: 1350}, {x: 600, y: 1350} ];
+            lastPanExtraction.forEach((col, idx) => {
+                cCtx.fillStyle = col.hex; cCtx.fillRect(blocks[idx].x, blocks[idx].y, 100, 100);
+                cCtx.fillStyle = '#e6edf5'; cCtx.fillText(`${idx+1}. ${col.pan.n}`, blocks[idx].x + 130, blocks[idx].y + 45);
+                cCtx.font = '28px DM Mono'; cCtx.fillStyle = '#6c829c'; cCtx.fillText(col.hex, blocks[idx].x + 130, blocks[idx].y + 85);
+                cCtx.font = 'bold 36px DM Mono';
+            });
+        } else if (currentTab === 'page-scout') {
+            title = "LOCATION SCOUT";
+            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            cCtx.fillText(`HEADING: ${Math.round(currentHeading)}°`, 100, 1250);
+            cCtx.fillText(`SUNRISE: ${document.getElementById('loc-sunrise').innerText} | SUNSET: ${document.getElementById('loc-sunset').innerText}`, 100, 1320);
+            cCtx.fillText(`GOLDEN HOUR IN: ${document.getElementById('loc-golden').innerText}`, 100, 1390);
+        } else {
+            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
+            cCtx.fillText(`WB: ${liveTempC}°C`, 600, 1250);
+            cCtx.fillText(`ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
+        }
+        cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040'; cCtx.fillText(title, 50, 100);
+
+        cCtx.font = '24px DM Mono'; cCtx.fillStyle = '#6c829c';
+        let footer = new Date().toLocaleString();
+        if(currentLat && currentLon) footer += ` | GPS: ${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
+        if(currentWeatherDesc) footer += ` | ${currentWeatherDesc}, ${liveTempC}°C`;
+        cCtx.fillText(footer, 100, 1520);
+
+        const link = document.createElement('a'); link.download = `PREye_Capture_${Date.now()}.jpg`;
+        link.href = hrCan.toDataURL('image/jpeg', 0.9); link.click();
+    });
+
+    // --- GPS & EPHEMERIS ---
+    setInterval(() => {
+        if(goldenHourTime) {
+            const diff = goldenHourTime - new Date();
+            if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); document.getElementById('loc-golden').innerText = `${h}h ${m}m ${s}s`; } 
+            else { document.getElementById('loc-golden').innerText = "Now active"; }
+        }
+    }, 1000);
+
+    const fetchLocData = () => {
+        if(navigator.geolocation) {
+            document.getElementById('tool-temp').innerText = "Locating...";
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; document.getElementById('tel-gps').innerText = "OK";
+                try {
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true`);
+                    const wData = await wRes.json(); 
+                    document.getElementById('tool-temp').innerText = `${wData.current_weather.temperature}°C`;
+                    currentWeatherDesc = wCodes[wData.current_weather.weathercode] || ""; document.getElementById('tool-weather').innerText = currentWeatherDesc;
+                    
+                    const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
+                    const sData = await sRes.json(); 
+                    sunriseTime = new Date(sData.results.sunrise); sunsetTime = new Date(sData.results.sunset);
+                    goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset); 
+                    document.getElementById('loc-sunrise').innerText = sunriseTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('loc-sunset').innerText = sunsetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                } catch(e) { document.getElementById('tool-temp').innerText = "API Error"; }
+            }, () => document.getElementById('tool-temp').innerText = "Denied");
+        }
+    };
+    document.getElementById('btn-fetch-loc-scout').addEventListener('click', fetchLocData);
+    document.getElementById('btn-fetch-loc-tools').addEventListener('click', fetchLocData);
+
+    const wCodes = { 0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast", 45:"Fog", 48:"Depositing rime fog", 51:"Drizzle: Light", 53:"Drizzle: Moderate", 55:"Drizzle: Dense intensity", 56:"Freezing drizzle: Light", 57:"Freezing drizzle: Heavy", 61:"Rain: Slight", 63:"Rain: Moderate", 65:"Rain: Heavy intensity", 66:"Freezing rain: Light", 67:"Freezing rain: Heavy", 71:"Snow fall: Slight", 72:"Snow fall: Moderate", 73:"Snow fall: Moderate", 74:"Snow fall: Heavy", 75:"Snow fall: Heavy intensity", 77:"Snow grains", 80:"Rain showers: Slight", 81:"Rain showers: Moderate", 82:"Rain showers: Violent", 85:"Snow showers: Slight", 86:"Snow showers: Heavy", 95:"Thunderstorm: Slight or moderate", 96:"Thunderstorm with slight hail", 99:"Thunderstorm with slight and heavy hail" };
+
+    // --- RELEASE LOGIC ---
+    let padsInit = false;
+    document.getElementById('nav-release').addEventListener('click', () => {
+        if(!padsInit) {
+            ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(id => {
+                const can = document.getElementById(id); const c = can.getContext('2d'); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false;
+                can.style.touchAction = 'none';
+                can.addEventListener('pointerdown', e=>{drawing=true; const r = can.getBoundingClientRect(); c.beginPath(); c.moveTo(e.clientX-r.left, e.clientY-r.top); e.preventDefault();});
+                can.addEventListener('pointermove', e=>{if(!drawing)return; const r = can.getBoundingClientRect(); c.lineTo(e.clientX-r.left, e.clientY-r.top); c.stroke(); e.preventDefault();});
+                can.addEventListener('pointerup', ()=>drawing=false);
+                can.addEventListener('pointerleave', ()=>drawing=false);
+            });
+            padsInit = true;
+        }
+    });
+
+    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('tog-adult').addEventListener('click', () => { document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active'); document.getElementById('guardian-section').style.display = 'none'; });
+    document.getElementById('tog-minor').addEventListener('click', () => { document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active'); document.getElementById('guardian-section').style.display = 'block'; });
+    document.getElementById('r-photo-input').addEventListener('change', (e) => { if(e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('r-photo-preview').src = ev.target.result; document.getElementById('r-photo-preview').style.display = 'block'; }; reader.readAsDataURL(e.target.files[0]); } });
+    window.clearPad = (id) => { const c = document.getElementById(id); c.getContext('2d').clearRect(0,0,c.width,c.height); };
+
+    // PDF Engine
+    document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
+        const renderDiv = document.getElementById('hidden-pdf-render');
+        renderDiv.style.display = 'block'; renderDiv.style.left = '0px'; renderDiv.style.top = '0px'; 
+        
+        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release. I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong><br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value}</td></tr></table>`;
+        renderDiv.innerHTML = html;
+        
+        try {
+            const cCanvas = await html2canvas(renderDiv, { scale: 2 }); const imgData = cCanvas.toDataURL('image/jpeg');
+            const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (cCanvas.height * pdfWidth) / cCanvas.width;
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight); pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
+        } catch(e) { alert("PDF Error"); }
+        
+        renderDiv.style.left = '-9999px'; renderDiv.style.top = '-9999px'; 
+    });
+
+    document.getElementById('email-pdf-btn').addEventListener('click', () => {
+        alert("Browser security blocks automatic file attachments.\n\nPlease MANUALLY ATTACH the PDF you just downloaded to the email draft that will open.");
+        window.location.href = `mailto:${document.getElementById('r-email').value}?subject=Model Release - ${document.getElementById('r-name').value}&body=Hi ${document.getElementById('r-name').value},%0D%0A%0D%0APlease find the signed model release form attached.%0D%0A%0D%0ABest regards,%0D%0ADigby Oldridge`;
+    });
+
+    // --- INIT ---
+    startCamera();
+</script>
+</body>
+</html>
