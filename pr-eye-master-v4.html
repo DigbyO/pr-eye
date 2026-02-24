@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v23 — Pro Toolkit</title>
+    <title>PR Eye v24 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,7 +18,7 @@
             --red: #ff4d4d; --blue: #4d4dff; --green: #4dff4d;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: #09121c; color: #f0f4f8; font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        body { background-color: #09121c; color: #f0f4f8; font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
         h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-weight: 400; letter-spacing: 0.5px; margin-bottom: 8px;}
         
         .glass-panel { background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
@@ -113,7 +113,7 @@
                     <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
                     <line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>
                 </svg>
-                PR EYE v23
+                PR EYE v24
             </div>
             <div style="display:flex; gap:5px;">
                 <button id="toggle-sound" class="btn icon-only active-toggle" style="height:32px; width:32px; font-size:14px;" title="Toggle Sound">🔊</button>
@@ -345,17 +345,14 @@
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try { 
-            // Tier 1: Ideal rear camera with HD resolution
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } }); 
         } 
         catch(e1) {
             try { 
-                // Tier 2: Basic environmental requirement
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } }); 
             }
             catch(e2) { 
                 try { 
-                    // Tier 3: Anything available
                     stream = await navigator.mediaDevices.getUserMedia({ video: true }); 
                 } catch(e3) { 
                     alert("Camera access failed. Check permissions."); return; 
@@ -540,7 +537,8 @@
                 cCtx.fillStyle = '#000'; cCtx.fillRect(50, 50, 900, 1200); cCtx.fillStyle = '#fff'; cCtx.font = '24px DM Mono'; cCtx.fillText('Camera feed unavailable', 350, 600);
             }
             
-            if(document.getElementById('set-grid').value !== 'off') cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
+            // THE FIX: Safe reference to the grid array instead of the non-existent DOM element
+            if(gridOptions[currentGridIdx] !== 'off') cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
             if(currentTab === 'page-scout') cCtx.drawImage(document.getElementById('scout-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
 
             cCtx.fillStyle = '#1a1a1a'; cCtx.font = '40px "Permanent Marker", cursive, sans-serif';
@@ -566,13 +564,12 @@
                 document.getElementById('result-img').src = url;
                 document.getElementById('result-overlay').style.display = 'flex';
                 
-                // Overlay Actions
                 document.getElementById('btn-share-result').onclick = async () => {
                     const file = new File([blob], `PREye_Polaroid_${Date.now()}.jpg`, { type: 'image/jpeg' });
                     if (navigator.share && navigator.canShare({ files: [file] })) {
                         try { await navigator.share({ files: [file], title: 'PR Eye Capture' }); } catch(err) { console.log(err); }
                     } else {
-                        const a = document.createElement('a'); a.href = url; a.download = file.name; a.click(); // Fallback for desktop
+                        const a = document.createElement('a'); a.href = url; a.download = file.name; a.click(); 
                     }
                 };
                 document.getElementById('btn-close-result').onclick = () => { document.getElementById('result-overlay').style.display = 'none'; URL.revokeObjectURL(url); };
@@ -607,32 +604,42 @@
     document.getElementById('btn-fetch-loc-scout').addEventListener('click', fetchLocData); document.getElementById('btn-fetch-loc-tools').addEventListener('click', fetchLocData);
     const wCodes = { 0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast", 45:"Fog", 48:"Depositing rime fog", 51:"Drizzle", 53:"Drizzle", 55:"Heavy Drizzle", 61:"Light Rain", 63:"Moderate Rain", 65:"Heavy Rain", 71:"Light Snow", 73:"Moderate Snow", 75:"Heavy Snow", 95:"Thunderstorm" };
 
+    // THE FIX: Clean Google Maps URI Scheme
     window.openSOS = (query) => {
-        if(!currentLat) { alert("GPS coordinates not yet loaded. Please tap 'Fetch GPS Info' first."); return; }
-        window.open(`https://www.google.com/maps/search/$${query}/@${currentLat},${currentLon},14z`);
+        if(!currentLat) { alert("GPS coordinates not yet loaded. Please tap 'Refresh GPS Data' first."); return; }
+        window.open(`https://www.google.com/maps/search/${query}/@${currentLat},${currentLon},14z`, '_blank');
     };
 
-    // --- RAVE & SIREN FIXES ---
+    // --- RAVE FIXES ---
     let raveAudioCtx = null; let raveAnalyser = null; let raveMic = null; let raveInterval = null; let raveActive = false;
     document.getElementById('btn-start-rave').addEventListener('click', async () => {
         if(raveActive) {
             clearInterval(raveInterval); if(raveMic) raveMic.disconnect(); if(raveAudioCtx) raveAudioCtx.close(); raveActive = false;
-            document.body.style.background = '#09121c'; document.getElementById('btn-start-rave').innerText = "Start Rave Mode";
+            document.body.style.setProperty('background-color', '#09121c', 'important'); 
+            document.getElementById('btn-start-rave').innerText = "Start Rave Mode";
             return;
         }
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            await raveAudioCtx.resume(); // THE FIX: Fulfills Safari/Chrome autoplay policy requirements
+            
             raveAnalyser = raveAudioCtx.createAnalyser(); raveAnalyser.fftSize = 256;
             raveMic = raveAudioCtx.createMediaStreamSource(stream); raveMic.connect(raveAnalyser);
             const dataArray = new Uint8Array(raveAnalyser.frequencyBinCount);
+            
             document.getElementById('btn-start-rave').innerText = "Stop Rave Mode"; raveActive = true;
+            
             raveInterval = setInterval(() => {
                 if(sosActive) return; 
                 raveAnalyser.getByteFrequencyData(dataArray);
+                // THE FIX: Lowered activation threshold to 80 (down from 140) to make it highly reactive to phone mics
                 let bassAvg = (dataArray[1] + dataArray[2] + dataArray[3] + dataArray[4] + dataArray[5]) / 5;
-                if(bassAvg > 140) { document.body.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`; } 
-                else { document.body.style.background = '#09121c'; }
+                if(bassAvg > 80) { 
+                    document.body.style.setProperty('background-color', `hsl(${Math.random() * 360}, 100%, 50%)`, 'important'); 
+                } else { 
+                    document.body.style.setProperty('background-color', '#09121c', 'important'); 
+                }
             }, 40);
         } catch(e) { alert("Microphone access denied or unavailable."); }
     });
@@ -643,9 +650,9 @@
             clearInterval(sosInterval); 
             if(sirenOsc1) { sirenOsc1.stop(); sirenOsc1.disconnect(); } if(sirenOsc2) { sirenOsc2.stop(); sirenOsc2.disconnect(); }
             if(sosAudioCtx) sosAudioCtx.close();
-            document.body.classList.remove('strobe-active'); document.body.style.background = '#09121c'; sosActive = false;
+            document.body.classList.remove('strobe-active'); document.body.style.setProperty('background-color', '#09121c', 'important'); sosActive = false;
         } else {
-            sosActive = true; document.body.style.background = 'red'; document.body.classList.add('strobe-active');
+            sosActive = true; document.body.classList.add('strobe-active');
             sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             sirenOsc1 = sosAudioCtx.createOscillator(); sirenOsc2 = sosAudioCtx.createOscillator();
             sirenGain1 = sosAudioCtx.createGain(); sirenGain2 = sosAudioCtx.createGain();
