@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.1 — Professional Toolkit</title>
+    <title>PR Eye v2.2 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,32 +16,36 @@
             --red: #ff4d4d; --green: #4dff4d; --blue: #4d4dff; --whatsapp: #25d366;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
         h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
+        /* HEADER */
         .hdr { padding: 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
         .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
-        
         .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px;}
 
+        /* MAIN */
         .main-content { flex: 1; overflow-y: auto; padding: 0 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; }
+        /* CAMERA */
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        #fc-layer { display: none; opacity: 0.8; z-index: 2; }
-        #ui-layer { z-index: 5; pointer-events: auto; }
-        
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: 0.2s; font-size: 11px;}
+        #ui-layer { z-index: 10; pointer-events: auto; }
+        #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 8; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 4px; width: 100px; height: 60px; }
+
+        /* UI ELEMENTS */
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; font-size: 10px; transition: 0.2s; }
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 600;}
-        .btn.active-toggle { background: var(--gold-dim); border-color: var(--gold); }
+        .btn.active-toggle { background: var(--gold); color: #09121c; }
+        .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800;}
         
         .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-        input, select, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
+        input, select { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
 
         .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
         .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; }
@@ -49,23 +53,30 @@
 
         .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
-        .pan-swatch { width: 35%; transition: background-color 0.3s; }
-        .pan-data { width: 65%; padding: 5px; display: flex; flex-direction: column; justify-content: center; font-size: 10px;}
+        .pan-swatch { width: 35%; transition: 0.3s; }
+        .pan-data { width: 65%; padding: 5px; display: flex; flex-direction: column; justify-content: center; font-size: 9px;}
 
         .signature-pad { background: #fff; border-radius: 4px; width: 100%; touch-action: none; margin-bottom: 5px;}
 
-        .nav { background: rgba(9, 18, 28, 0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; }
+        /* NAV */
+        .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; color: var(--muted); font-size: 8px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px; }
         .nav-item.active { color: var(--gold); }
 
+        #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
+        #sos-flash-overlay.strobe-active { display: block; animation: strobeRedBlue 0.4s infinite; }
+        @keyframes strobeRedBlue { 0% { background: rgba(255,0,0,0.8); } 50% { background: rgba(0,40,255,0.8); } }
+
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; }
+        #result-img { max-width: 100%; max-height: 75vh; border-radius: 4px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
+    <div id="sos-flash-overlay"></div>
+
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.1 PRO</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.2</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item">EV <span id="val-ev" style="color:var(--green)">0.0</span></div>
             <div class="tel-item">GOLDEN <span id="val-golden" style="color:var(--gold)">--:--</span></div>
@@ -75,15 +86,18 @@
 
     <div class="main-content">
         <div id="cam-section">
-            <div class="cam-container">
+            <div class="cam-container" id="v-wrap">
                 <video id="video" autoplay playsinline></video>
                 <canvas id="fc-layer" class="overlay"></canvas>
-                <canvas id="scout-layer" class="overlay"></canvas>
+                <canvas id="grid-layer" class="overlay"></canvas>
                 <canvas id="level-layer" class="overlay"></canvas>
+                <canvas id="scout-layer" class="overlay"></canvas>
                 <canvas id="ui-layer" class="overlay"></canvas>
+                <canvas id="histogram-canvas"></canvas>
             </div>
             <div style="display:flex; gap:5px; margin-bottom:10px;">
                 <button id="btn-fc" class="btn">False Color</button>
+                <button id="btn-grid" class="btn">Grid</button>
                 <button id="btn-level" class="btn">Horizon</button>
                 <button id="capture-btn" class="btn solid">CAPTURE</button>
             </div>
@@ -91,39 +105,53 @@
 
         <div id="page-meter" class="page active">
             <div class="ctrl-panel">
-                <h4>Metering Controls</h4>
+                <h4>Metering / Flash Peak</h4>
+                <div style="display:flex; border-radius:50px; border:1px solid var(--border); overflow:hidden; margin-bottom:15px; background:rgba(0,0,0,0.2);">
+                    <div id="m-live" class="btn active-toggle" style="border:none;">LIVE</div>
+                    <div id="m-flash" class="btn" style="border:none;">FLASH SYNC</div>
+                </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>800</option><option>3200</option></select></div>
-                    <div><span class="label-txt">f/</span><select id="set-aperture"><option>1.4</option><option>2.8</option><option selected>5.6</option><option>16</option></select></div>
+                    <div><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>3200</option></select></div>
+                    <div><span class="label-txt">f/</span><select id="set-aperture"><option>1.4</option><option selected>5.6</option><option>16</option></select></div>
                 </div>
                 <div class="expo-meter-readout"><span>-3</span><div class="expo-scale"><div class="expo-marker" id="expo-marker"></div></div><span>+3</span></div>
+                <button id="reset-peak" class="btn" style="width:100%; margin-top:10px; display:none;">RESET PEAK</button>
             </div>
         </div>
 
         <div id="page-color" class="page">
             <div class="ctrl-panel">
-                <h4>Color Rule (60-30-10)</h4>
+                <h4>60-30-10 Pantone Palette</h4>
                 <div class="pan-grid">
                     <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><b id="cn1">---</b><span id="ch1">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><b id="cn2">---</b><span id="ch2">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><b id="cn3">---</b><span id="ch3">---</span></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><b id="cn4">---</b><span id="ch4">---</span></div></div>
                 </div>
-                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-top:15px;">
-                    <div id="rule-60" style="width: 60%; background: #333;"></div>
-                    <div id="rule-30" style="width: 30%; background: #555;"></div>
-                    <div id="rule-10" style="width: 10%; background: #777;"></div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-top:15px; border:1px solid var(--border);">
+                    <div id="rule-60" style="width: 60%; background: #222;"></div>
+                    <div id="rule-30" style="width: 30%; background: #444;"></div>
+                    <div id="rule-10" style="width: 10%; background: #666;"></div>
                 </div>
-                <p style="font-size:10px; color:var(--muted); margin-top:10px;">TAP VIDEO TO MANUALLY SAMPLE COLOR</p>
             </div>
         </div>
 
         <div id="page-scout" class="page">
             <div class="ctrl-panel">
-                <h4>Ephemeris Map</h4>
-                <div id="scout-map-live" style="height:180px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
+                <h4>Ephemeris Scout</h4>
+                <div id="scout-map-live" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
                 <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunrise</span><span id="txt-sunrise">--:--</span></div>
                 <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunset</span><span id="txt-sunset">--:--</span></div>
+            </div>
+        </div>
+
+        <div id="page-rave" class="page">
+            <div class="ctrl-panel" style="text-align:center;">
+                <h4 style="color:#ff00ff;">Field Tools</h4>
+                <button id="btn-rave-start" class="btn solid" style="background:#ff00ff; color:#fff; border:none; margin-bottom:10px; width:100%;">START RAVE MODE</button>
+                <button id="btn-no-rave" class="btn" style="width:100%; margin-bottom:10px; font-size:9px;">No, I don't want to rave</button>
+                <hr style="border:0; border-top:1px dashed var(--border); margin:15px 0;">
+                <button id="btn-sos-trigger" class="btn danger" style="width:100%; height:60px; font-size:16px;">EMERGENCY SOS</button>
             </div>
         </div>
 
@@ -133,12 +161,10 @@
                 <input type="text" id="r-name" placeholder="Model Full Name">
                 <input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)">
                 <select id="r-age"><option value="adult">Adult (18+)</option><option value="minor">Minor (Under 18)</option></select>
-                
                 <div id="guardian-box" style="display:none;">
-                    <span class="label-txt">Guardian Name</span><input type="text" id="r-g-name">
+                    <input type="text" id="r-g-name" placeholder="Guardian Name">
                     <canvas id="sig-guardian" class="signature-pad" height="80"></canvas>
                 </div>
-
                 <span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="80"></canvas>
                 <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="80"></canvas>
                 <span class="label-txt">Photog Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
@@ -151,6 +177,7 @@
         <div class="nav-item active" data-target="cam-section">Meter</div>
         <div class="nav-item" data-target="page-color">Color</div>
         <div class="nav-item" data-target="page-scout">Scout</div>
+        <div class="nav-item" data-target="page-rave">Rave</div>
         <div class="nav-item" data-target="page-legal">Legal</div>
     </div>
 
@@ -164,19 +191,27 @@
 
 <script>
     const video = document.getElementById('video');
-    const uiCtx = document.getElementById('ui-layer').getContext('2d');
-    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
-    const lvlCtx = document.getElementById('level-layer').getContext('2d');
     const fcCtx = document.getElementById('fc-layer').getContext('2d');
-    const procCtx = document.getElementById('proc-canvas').getContext('2d');
+    const gridCtx = document.getElementById('grid-layer').getContext('2d');
+    const lvlCtx = document.getElementById('level-layer').getContext('2d');
+    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
+    const uiCtx = document.getElementById('ui-layer').getContext('2d');
+    const histCtx = document.getElementById('histogram-canvas').getContext('2d');
+    const procCtx = document.getElementById('proc-canvas').getContext('2d', {willReadFrequently: true});
 
-    let currentLat, currentLon, goldenHour, currentHeading = 0;
-    let fcActive = false, levelActive = false, tapPoint = null;
-    let pantoneDb = [{n:"Cool Gray 11 C",rgb:[99,102,106]},{n:"Warm Red C",rgb:[249,66,58]},{n:"PMS 286 C",rgb:[0,51,160]},{n:"PMS 123 C",rgb:[255,199,44]}];
+    let stream, currentLat, currentLon, goldenHour, currentHeading = 0;
+    let fcActive = false, levelActive = false, gridActive = false, flashMode = false, peakEV = -99;
+    let raveActive = false, sosActive = false, audioCtx, raveAnalyser;
+    let pantoneDb = [{n:"Process Yellow C",rgb:[255,242,0]},{n:"Warm Red C",rgb:[249,66,58]},{n:"Reflex Blue C",rgb:[0,20,137]},{n:"Black 6 C",rgb:[10,10,10]}];
 
     async function init() {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            const r = video.getBoundingClientRect();
+            [fcCtx, gridCtx, lvlCtx, scoutCtx, uiCtx].forEach(c => { c.canvas.width = r.width; c.canvas.height = r.height; });
+            requestAnimationFrame(liveLoop);
+        };
         navigator.geolocation.getCurrentPosition(pos => {
             currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
             document.getElementById('scout-map-live').innerHTML = `<iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed"></iframe>`;
@@ -185,14 +220,13 @@
             mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
             mapImg.onload = () => window._staticMap = mapImg;
         });
-        requestAnimationFrame(liveLoop);
     }
 
     async function fetchTimes() {
         const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
         const data = await res.json();
         const sunset = new Date(data.results.sunset);
-        goldenHour = new Date(sunset.getTime() - (3600000));
+        goldenHour = new Date(sunset.getTime() - 3600000);
         document.getElementById('txt-sunrise').innerText = new Date(data.results.sunrise).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         document.getElementById('txt-sunset').innerText = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     }
@@ -200,70 +234,78 @@
     function liveLoop() {
         if(video.readyState === 4) {
             procCtx.drawImage(video, 0, 0, 150, 200);
-            const imgData = procCtx.getImageData(0,0,150,200);
-            const pix = imgData.data;
-
-            // False Color Engine
-            if(fcActive) {
-                const fcOutput = new Uint8ClampedArray(pix.length);
-                for(let i=0; i<pix.length; i+=4) {
-                    let lum = (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
-                    if(lum > 240) { fcOutput[i]=255; fcOutput[i+1]=0; fcOutput[i+2]=0; } // Clip
-                    else if(lum > 120 && lum < 140) { fcOutput[i]=0; fcOutput[i+1]=255; fcOutput[i+2]=0; } // Mid
-                    else { fcOutput[i]=lum; fcOutput[i+1]=lum; fcOutput[i+2]=lum; }
-                    fcOutput[i+3]=255;
-                }
-                fcCtx.canvas.width = video.offsetWidth; fcCtx.canvas.height = video.offsetHeight;
-                const tmpCanvas = document.createElement('canvas'); tmpCanvas.width=150; tmpCanvas.height=200;
-                tmpCanvas.getContext('2d').putImageData(new ImageData(fcOutput, 150, 200), 0,0);
-                fcCtx.clearRect(0,0,fcCtx.canvas.width, fcCtx.canvas.height);
-                fcCtx.drawImage(tmpCanvas, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
-            }
+            const pix = procCtx.getImageData(0,0,150,200).data;
 
             // Metering
             let lumAvg = 0; for(let i=0; i<pix.length; i+=4) lumAvg += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
-            const ev = (Math.log2(lumAvg/30000));
-            document.getElementById('val-ev').innerText = ev.toFixed(1);
-            const diff = ev - (Math.log2((5.6*5.6)/(1/60)) - Math.log2(400/100));
+            const ev = Math.log2(lumAvg/30000);
+            if(flashMode) { if(ev > peakEV) peakEV = ev; document.getElementById('val-ev').innerText = "PK " + peakEV.toFixed(1); }
+            else { document.getElementById('val-ev').innerText = ev.toFixed(1); }
+            const diff = (flashMode?peakEV:ev) - (Math.log2(5.6**2/(1/60)) - Math.log2(400/100));
             document.getElementById('expo-marker').style.left = Math.min(95, Math.max(5, 50 + (diff * 15))) + "%";
 
-            // Level / Horizon
-            lvlCtx.canvas.width = video.offsetWidth; lvlCtx.canvas.height = video.offsetHeight;
+            // Histogram
+            histCtx.clearRect(0,0,100,60);
+            const bins = new Array(25).fill(0);
+            for(let i=0; i<pix.length; i+=4) bins[Math.floor((0.299*pix[i]+0.587*pix[i+1]+0.114*pix[i+2])/256*25)]++;
+            const max = Math.max(...bins);
+            histCtx.fillStyle = "rgba(212,194,161,0.7)";
+            bins.forEach((b,i) => histCtx.fillRect(i*4, 60, 3, -(b/max*50)));
+
+            // Horizon
             lvlCtx.clearRect(0,0,lvlCtx.canvas.width, lvlCtx.canvas.height);
             if(levelActive) {
-                lvlCtx.strokeStyle = Math.abs(currentHeading % 90) < 2 ? "var(--green)" : "var(--gold)";
+                lvlCtx.strokeStyle = Math.abs(currentHeading % 90) < 1 ? "var(--green)" : "var(--gold)";
                 lvlCtx.lineWidth = 2; lvlCtx.beginPath();
-                lvlCtx.moveTo(video.offsetWidth/2 - 50, video.offsetHeight/2);
-                lvlCtx.lineTo(video.offsetWidth/2 + 50, video.offsetHeight/2); lvlCtx.stroke();
+                lvlCtx.moveTo(video.offsetWidth/2-50, video.offsetHeight/2); lvlCtx.lineTo(video.offsetWidth/2+50, video.offsetHeight/2); lvlCtx.stroke();
             }
 
-            // Color Rule
+            // Pantone
             [1,2,3,4].forEach(i => {
-                let p;
-                if(i === 1 && tapPoint) p = procCtx.getImageData(tapPoint.x * 150, tapPoint.y * 200, 1, 1).data;
-                else p = procCtx.getImageData(i*30, 100, 1, 1).data;
-                const hex = "#" + ((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
+                const s = procCtx.getImageData(i*30, 100, 1, 1).data;
+                const hex = "#" + ((1<<24)+(s[0]<<16)+(s[1]<<8)+s[2]).toString(16).slice(1).toUpperCase();
                 document.getElementById(`cs${i}`).style.background = hex;
-                document.getElementById(`ch${i}`).innerText = hex;
+                if(i < 4) document.getElementById(`rule-${i===1?'60':i===2?'30':'10'}`).style.backgroundColor = hex;
             });
         }
         requestAnimationFrame(liveLoop);
     }
 
-    document.getElementById('ui-layer').onclick = (e) => {
-        const r = e.target.getBoundingClientRect();
-        tapPoint = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+    // RAVE LOGIC
+    document.getElementById('btn-rave-start').onclick = async () => {
+        if(!audioCtx) audioCtx = new AudioContext();
+        if(raveActive) { raveActive = false; document.body.style.backgroundColor = ""; document.getElementById('btn-rave-start').innerText = "START RAVE MODE"; return; }
+        const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+        raveAnalyser = audioCtx.createAnalyser(); audioCtx.createMediaStreamSource(mic).connect(raveAnalyser);
+        raveActive = true; document.getElementById('btn-rave-start').innerText = "STOP RAVE";
+        const data = new Uint8Array(raveAnalyser.frequencyBinCount);
+        let avg = 0;
+        function pulse() {
+            if(!raveActive) return;
+            raveAnalyser.getByteFrequencyData(data);
+            let bass = data.slice(0,10).reduce((a,b)=>a+b)/10;
+            avg = (avg * 0.9) + (bass * 0.1);
+            if(bass > avg * 1.5 && bass > 50) document.body.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+            else document.body.style.backgroundColor = "#09121c";
+            requestAnimationFrame(pulse);
+        }
+        pulse();
     };
 
-    document.getElementById('btn-fc').onclick = (e) => { fcActive = !fcActive; e.target.classList.toggle('active-toggle'); document.getElementById('fc-layer').style.display = fcActive ? 'block' : 'none'; };
-    document.getElementById('btn-level').onclick = (e) => { levelActive = !levelActive; e.target.classList.toggle('active-toggle'); };
+    document.getElementById('btn-sos-trigger').onclick = () => {
+        sosActive = !sosActive;
+        document.getElementById('sos-flash-overlay').classList.toggle('strobe-active', sosActive);
+    };
 
+    document.getElementById('btn-no-rave').onclick = () => alert("Wise choice. Let's get back to work.");
+
+    // PDF & CAPTURE
     document.getElementById('capture-btn').onclick = () => {
         const can = document.getElementById('comp-canvas'); const ctx = can.getContext('2d');
         ctx.fillStyle = "#f8f8f8"; ctx.fillRect(0,0,1000,1500);
         ctx.drawImage(video, 50, 50, 900, 1150);
         if(window._staticMap) ctx.drawImage(window._staticMap, 50, 1220, 900, 180);
-        ctx.fillStyle = "#1a1a1a"; ctx.font = "24px Permanent Marker";
+        ctx.fillStyle = "#1a1a1a"; ctx.font = "22px Permanent Marker";
         ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1430);
         document.getElementById('result-img').src = can.toDataURL();
         document.getElementById('result-overlay').style.display = 'flex';
@@ -271,33 +313,34 @@
 
     document.getElementById('gen-pdf').onclick = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFontSize(16); doc.text("MODEL RELEASE FORM - PR EYE LTD", 105, 20, {align:'center'});
-        doc.setFontSize(10); doc.text(`Model: ${document.getElementById('r-name').value}`, 20, 40);
-        doc.text("GRANT OF RIGHTS: I hereby grant to the Photographer the irrevocable, perpetual, worldwide right to use Content taken of me for any lawful purpose including commercial use and AI applications.", 20, 60, {maxWidth: 170});
-        doc.text("Signatures:", 20, 100);
-        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 105, 50, 15);
+        doc.setFontSize(18); doc.text("MODEL RELEASE - PR EYE LTD", 105, 20, {align:'center'});
+        doc.setFontSize(8); doc.text("Digby Oldridge | Downs Cottage, Fernham Rd, Longcot", 105, 26, {align:'center'});
+        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 100, 50, 15);
         doc.save("Release.pdf");
     };
 
+    // NAV
     document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(n.dataset.target).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); n.classList.add('active');
+        document.getElementById('cam-section').style.display = (['page-rave','page-legal'].includes(n.dataset.target)) ? 'none' : 'block';
     });
 
-    const setupPad = id => {
+    // PADS
+    ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(id => {
         const can = document.getElementById(id); const ctx = can.getContext('2d');
         can.width = can.offsetWidth; let draw = false;
         can.onpointerdown = e => { draw = true; ctx.moveTo(e.offsetX, e.offsetY); };
         can.onpointermove = e => { if(draw) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
         can.onpointerup = () => draw = false;
-    };
-    ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(setupPad);
+    });
 
-    window.ondeviceorientation = e => {
-        currentHeading = e.alpha || 0;
-        document.getElementById('val-tilt').innerText = Math.round(e.beta || 0) + "°";
-    };
+    document.getElementById('m-flash').onclick = () => { flashMode = true; peakEV = -99; document.getElementById('reset-peak').style.display='block'; };
+    document.getElementById('m-live').onclick = () => { flashMode = false; document.getElementById('reset-peak').style.display='none'; };
+    document.getElementById('reset-peak').onclick = () => peakEV = -99;
+
+    window.ondeviceorientation = e => { currentHeading = e.alpha || 0; document.getElementById('val-tilt').innerText = Math.round(e.beta || 0) + "°"; };
     init();
 </script>
 </body>
