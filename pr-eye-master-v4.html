@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v15 — Pro Toolkit</title>
+    <title>PR Eye v16 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,7 +20,6 @@
         body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
         h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-weight: 700; margin-bottom: 8px;}
         
-        /* HEADER */
         .hdr { background: var(--navy2); border-bottom: 1px solid var(--gold); padding: 10px 15px; display: flex; flex-direction: column; flex-shrink: 0; z-index: 10; }
         .hdr-top { display: flex; justify-content: space-between; align-items: center; }
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 1px; }
@@ -80,7 +79,7 @@
         .pan-code { font-family: 'Cormorant Garamond'; font-size: 16px; color: var(--gold); font-weight: 700; line-height: 1.2; }
         .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase;}
         
-        /* LENS DATA & SLATE */
+        /* DATA CARDS & SLATE */
         .data-card { background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-bottom: 10px; }
         .data-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; border-bottom: 1px dashed #1e3a52; padding-bottom: 4px;}
         .data-val { color: var(--gold); font-weight: 700; }
@@ -88,7 +87,7 @@
 
         /* RELEASE FORM UI */
         .release-section { border-left: 2px solid var(--gold); padding-left: 10px; margin-bottom: 20px; }
-        .legal-text { font-family: sans-serif; font-size: 12px; color: #a0b4c8; line-height: 1.5; max-height: 150px; overflow-y: auto; background: #000; padding: 12px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px;}
+        .legal-text { font-family: sans-serif; font-size: 11px; color: #a0b4c8; line-height: 1.5; max-height: 150px; overflow-y: auto; background: #000; padding: 12px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px;}
         .signature-pad { background: #fff; border-radius: 4px; width: 100%; border: 2px dashed var(--muted); touch-action: none; margin-bottom: 5px;}
         .photo-preview { width: 100px; height: 100px; border-radius: 4px; object-fit: cover; display: none; border: 1px solid var(--gold); margin-bottom: 10px; }
 
@@ -97,7 +96,7 @@
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; cursor: pointer; border-top: 3px solid transparent; }
         .nav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
 
-        #composite-canvas, #proc-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
+        #composite-canvas, #proc-canvas, #fc-internal-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
         #hidden-pdf-render { position: absolute; top: -9999px; left: -9999px; width: 800px; background: #fff; color: #000; padding: 40px; font-family: sans-serif; }
     </style>
 </head>
@@ -107,7 +106,7 @@
 
     <div class="hdr">
         <div class="hdr-top">
-            <div class="brand">PR EYE v15</div>
+            <div class="brand">PR EYE v16</div>
             <button id="cam-flip-btn" class="btn icon-only" style="height: 30px; border-color: transparent;">🔄</button>
         </div>
         <div class="telemetry-bar">
@@ -194,8 +193,8 @@
                 <h4>Timelapse Calculator</h4>
                 <div class="row">
                     <div class="col"><span class="label-txt">Event (Hours)</span><input type="number" id="tl-event" value="2" step="0.5"></div>
-                    <div class="col"><span class="label-txt">Target Video (Sec)</span><input type="number" id="tl-video" value="15"></div>
-                    <div class="col"><span class="label-txt">Video FPS</span><input type="number" id="tl-fps" value="24"></div>
+                    <div class="col"><span class="label-txt">Video (Sec)</span><input type="number" id="tl-video" value="15"></div>
+                    <div class="col"><span class="label-txt">FPS</span><input type="number" id="tl-fps" value="24"></div>
                 </div>
                 <div class="data-card" style="margin-top: 5px; padding: 10px;">
                     <div class="data-row"><span>Capture Interval:</span><span class="data-val" id="tl-interval">-- s</span></div>
@@ -245,7 +244,6 @@
                 <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone"></div></div>
                 <input type="email" id="r-email" placeholder="Email Address">
                 <textarea id="r-address" placeholder="Full Address" rows="2"></textarea>
-                <input type="text" id="r-comp" placeholder="Compensation (if any)">
                 <div style="margin: 15px 0;"><span class="label-txt">Model Photo (Optional)</span><input type="file" id="r-photo-input" accept="image/*" capture="environment" style="padding: 5px;"><img id="r-photo-preview" class="photo-preview"></div>
                 <div class="toggle-switch"><div class="toggle-opt active" id="tog-adult">Model is 18+</div><div class="toggle-opt" id="tog-minor">Model is Under 18</div></div>
             </div>
@@ -260,8 +258,8 @@
                     <strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br>
                     <strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted.<br><br>
                     <strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content.<br><br>
-                    <strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release.<br><br>
-                    <strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018.
+                    <strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release. I am signing voluntarily after having the opportunity to seek legal advice.<br><br>
+                    <strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.
                 </div>
             </div>
             <div class="release-section">
@@ -285,6 +283,8 @@
     </div>
 
     <canvas id="proc-canvas" width="150" height="200"></canvas>
+    <canvas id="fc-internal-canvas" width="150" height="200"></canvas>
+    <canvas id="composite-canvas" width="1200" height="1600"></canvas>
     <div id="hidden-pdf-render"></div>
 
 <script>
@@ -292,7 +292,8 @@
     const video = document.getElementById('video');
     const gridCtx = document.getElementById('grid-layer').getContext('2d');
     const uiCtx = document.getElementById('ui-layer').getContext('2d');
-    const fcCtx = document.getElementById('fc-layer').getContext('2d', { willReadFrequently: true });
+    const fcCtx = document.getElementById('fc-layer').getContext('2d');
+    const fcInternalCtx = document.getElementById('fc-internal-canvas').getContext('2d', { willReadFrequently: true });
     const lvlCtx = document.getElementById('level-layer').getContext('2d');
     const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
     
@@ -300,16 +301,15 @@
     let measuredEV = 0; let liveTempC = 0; let currentLat = null; let currentLon = null;
     let currentTab = 'page-meter';
     let fcState = 0; let levelActive = false;
-    let keyEV = null, fillEV = null;
-    let goldenHourTime = null;
+    let keyEV = null, fillEV = null; let goldenHourTime = null;
 
     // --- CAMERA ENGINE ---
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try {
-            // Broad fallback for rear camera compatibility
-            const constraints = { video: { facingMode: currentFacingMode } };
-            stream = await navigator.mediaDevices.getUserMedia(constraints).catch(() => navigator.mediaDevices.getUserMedia({video:true}));
+            // "ideal" allows safe fallback if the device rejects "exact"
+            const constraints = { video: { facingMode: { ideal: currentFacingMode } } };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = stream; video.play();
             video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
         } catch(e) { console.log("Cam Error", e); }
@@ -325,7 +325,7 @@
     }
     window.addEventListener('resize', resizeCanvases);
 
-    // --- NAVIGATION & TABS ---
+    // --- NAVIGATION ---
     document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
         document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -338,9 +338,7 @@
     // --- COLOUR SCIENCE (CIE94) ---
     function rgb2lab(r, g, b) {
         let r_ = r/255, g_ = g/255, b_ = b/255;
-        r_ = r_ > 0.04045 ? Math.pow((r_+0.055)/1.055, 2.4) : r_/12.92;
-        g_ = g_ > 0.04045 ? Math.pow((g_+0.055)/1.055, 2.4) : g_/12.92;
-        b_ = b_ > 0.04045 ? Math.pow((b_+0.055)/1.055, 2.4) : b_/12.92;
+        r_ = r_ > 0.04045 ? Math.pow((r_+0.055)/1.055, 2.4) : r_/12.92; g_ = g_ > 0.04045 ? Math.pow((g_+0.055)/1.055, 2.4) : g_/12.92; b_ = b_ > 0.04045 ? Math.pow((b_+0.055)/1.055, 2.4) : b_/12.92;
         let x = (r_*0.4124 + g_*0.3576 + b_*0.1805)/0.95047; let y = (r_*0.2126 + g_*0.7152 + b_*0.0722)/1.00000; let z = (r_*0.0193 + g_*0.1192 + b_*0.9505)/1.08883;
         x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787*x) + 16/116; y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787*y) + 16/116; z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787*z) + 16/116;
         return [(116*y)-16, 500*(x-y), 200*(y-z)];
@@ -362,13 +360,12 @@
     pantoneDb.forEach(p => p.lab = rgb2lab(p.rgb[0], p.rgb[1], p.rgb[2]));
 
     function findClosestPantone(r, g, b) {
-        const targetLab = rgb2lab(r, g, b);
-        let closest = pantoneDb[0], minD = Infinity;
+        const targetLab = rgb2lab(r, g, b); let closest = pantoneDb[0], minD = Infinity;
         pantoneDb.forEach(p => { const d = deltaE94(targetLab, p.lab); if(d < minD) { minD = d; closest = p; } });
         return closest;
     }
 
-    // --- OVERLAYS (GRIDS & MATTES) ---
+    // --- OVERLAYS & GRIDS ---
     document.getElementById('grid-toggle-btn').addEventListener('click', (e) => {
         document.getElementById('grid-menu').classList.toggle('active'); e.target.classList.toggle('active-toggle');
     });
@@ -418,42 +415,25 @@
         lvlCtx.clearRect(0,0,w,h);
         
         let roll = e.gamma || 0; let pitch = e.beta || 0;
-        // Landscape adjustments
         if(window.orientation === 90 || window.orientation === -90) { roll = e.beta; pitch = e.gamma; }
 
         const isLevel = Math.abs(roll) < 2 && Math.abs(pitch) < 2;
         lvlCtx.strokeStyle = isLevel ? 'var(--green)' : 'var(--gold)'; lvlCtx.lineWidth = 4;
         
-        lvlCtx.save();
-        lvlCtx.translate(w/2, h/2);
-        lvlCtx.rotate(roll * Math.PI / 180);
-        // Horizon Line
+        lvlCtx.save(); lvlCtx.translate(w/2, h/2); lvlCtx.rotate(roll * Math.PI / 180);
         lvlCtx.beginPath(); lvlCtx.moveTo(-100, 0); lvlCtx.lineTo(100, 0); lvlCtx.stroke();
-        // Pitch indicator
         lvlCtx.fillStyle = isLevel ? 'var(--green)' : 'rgba(255,51,51,0.8)';
         lvlCtx.beginPath(); lvlCtx.arc(0, pitch * 2, 8, 0, Math.PI*2); lvlCtx.fill();
         lvlCtx.restore();
     });
 
-    // --- EXPOSURE MATH ---
-    document.getElementById('shutter-mode').addEventListener('change', (e) => {
-        const isAngle = e.target.value === 'angle';
-        document.getElementById('lbl-shutter').innerText = isAngle ? 'Angle (°)' : '1/s';
-        document.getElementById('col-fps').style.display = isAngle ? 'block' : 'none';
-        const sel = document.getElementById('set-shutter');
-        sel.innerHTML = isAngle ? '<option value="360">360°</option><option value="180" selected>180°</option><option value="90">90°</option><option value="45">45°</option>' : '<option value="24">24</option><option value="30">30</option><option value="50">50</option><option value="60" selected>60</option><option value="125">125</option><option value="250">250</option><option value="500">500</option><option value="1000">1000</option>';
-        updateExpoBar();
-    });
-
+    // --- EXPOSURE & TIMELAPSE MATH ---
     ['set-iso', 'set-aperture', 'set-shutter', 'set-fps', 'set-nd'].forEach(id => document.getElementById(id).addEventListener('change', updateExpoBar));
-
     function updateExpoBar() {
         if(!measuredEV) return;
         const N = parseFloat(document.getElementById('set-aperture').value); const ISO = parseInt(document.getElementById('set-iso').value); const ndStops = parseFloat(document.getElementById('set-nd').value);
-        let t;
-        if(document.getElementById('shutter-mode').value === 'speed') { t = 1 / parseFloat(document.getElementById('set-shutter').value); } 
-        else { let fps = parseFloat(document.getElementById('set-fps').value); let angle = parseFloat(document.getElementById('set-shutter').value); t = 1 / (fps * (360 / angle)); }
-
+        let t = document.getElementById('shutter-mode').value === 'speed' ? 1 / parseFloat(document.getElementById('set-shutter').value) : 1 / (parseFloat(document.getElementById('set-fps').value) * (360 / parseFloat(document.getElementById('set-shutter').value)));
+        
         const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100) + ndStops;
         let diff = measuredEV - settingsEV;
         let percent = 50 + (diff * (50/3)); percent = Math.max(5, Math.min(95, percent));
@@ -465,31 +445,21 @@
         if(Math.abs(diff) < 1) evSpan.className = 'ev-good'; else if(diff > 0) evSpan.className = 'ev-under'; else evSpan.className = 'ev-over';
     }
 
-    // --- TIMELAPSE CALCULATOR ---
     ['tl-event', 'tl-video', 'tl-fps'].forEach(id => document.getElementById(id).addEventListener('input', () => {
-        const evHrs = parseFloat(document.getElementById('tl-event').value) || 0;
-        const vidSec = parseFloat(document.getElementById('tl-video').value) || 0;
-        const fps = parseFloat(document.getElementById('tl-fps').value) || 1;
-        
-        const totalFrames = vidSec * fps;
-        const eventSecs = evHrs * 3600;
-        const interval = totalFrames > 0 ? (eventSecs / totalFrames) : 0;
-        
+        const evHrs = parseFloat(document.getElementById('tl-event').value) || 0; const vidSec = parseFloat(document.getElementById('tl-video').value) || 0; const fps = parseFloat(document.getElementById('tl-fps').value) || 1;
+        const totalFrames = vidSec * fps; const interval = totalFrames > 0 ? ((evHrs * 3600) / totalFrames) : 0;
         document.getElementById('tl-interval').innerText = interval > 0 ? interval.toFixed(1) + ' s' : '-- s';
         document.getElementById('tl-frames').innerText = totalFrames > 0 ? Math.round(totalFrames) : '--';
     }));
 
-    // --- EMAIL NOTES ---
     document.getElementById('btn-email-notes').addEventListener('click', () => {
-        const notes = document.getElementById('shoot-notes').value;
-        window.location.href = `mailto:?subject=PR Eye Shoot Notes&body=${encodeURIComponent(notes)}`;
+        window.location.href = `mailto:?subject=PR Eye Shoot Notes&body=${encodeURIComponent(document.getElementById('shoot-notes').value)}`;
     });
 
     // --- PANTONE MANUAL SELECTION ---
     let panMode = 'auto'; let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}]; let manualIndex = 0; let lastPanExtraction = [];
     document.getElementById('pan-auto').addEventListener('click', () => { panMode = 'auto'; document.getElementById('pan-auto').classList.add('active'); document.getElementById('pan-manual').classList.remove('active'); });
     document.getElementById('pan-manual').addEventListener('click', () => { panMode = 'manual'; document.getElementById('pan-manual').classList.add('active'); document.getElementById('pan-auto').classList.remove('active'); });
-    
     document.getElementById('ui-layer').addEventListener('pointerdown', (e) => {
         if(currentTab === 'page-color' && panMode === 'manual') {
             const rect = e.target.getBoundingClientRect();
@@ -522,13 +492,14 @@
             
             if(currentTab === 'page-color') {
                 lastPanExtraction = [];
+                // Setup 1:1 map canvas to perfectly match current UI layout ignoring video CSS scaling
+                const mapCan = document.createElement('canvas'); mapCan.width = cw; mapCan.height = ch;
+                mapCan.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+                
                 const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
                 pts.forEach((p, idx) => {
-                    // Map target directly to raw video frame for true color extraction
-                    const vX = sx + (p.x * sw); const vY = sy + (p.y * sh);
-                    const tempCan = document.createElement('canvas'); tempCan.width=5; tempCan.height=5; const tCtx = tempCan.getContext('2d');
-                    tCtx.drawImage(video, vX-2, vY-2, 5, 5, 0, 0, 5, 5);
-                    const pxd = tCtx.getImageData(0,0,5,5).data;
+                    const cX = Math.floor(p.x * cw); const cY = Math.floor(p.y * ch);
+                    const pxd = mapCan.getContext('2d').getImageData(cX-2, cY-2, 5, 5).data;
                     let tr=0,tg=0,tb=0,pc=0;
                     for(let i=0;i<pxd.length;i+=4){ tr+=pxd[i]; tg+=pxd[i+1]; tb+=pxd[i+2]; pc++; }
                     tr=Math.round(tr/pc); tg=Math.round(tg/pc); tb=Math.round(tb/pc);
@@ -540,9 +511,8 @@
                     document.getElementById(`pn${idx+1}`).innerText = pan.n;
                     document.getElementById(`ph${idx+1}`).innerText = hex;
 
-                    const tx = p.x * cw; const ty = p.y * ch;
-                    uiCtx.strokeStyle = hex; uiCtx.lineWidth = 3; uiCtx.beginPath(); uiCtx.arc(tx, ty, 20, 0, Math.PI*2); uiCtx.stroke();
-                    uiCtx.fillStyle = '#fff'; uiCtx.font = '16px DM Mono'; uiCtx.fillText(idx+1, tx+25, ty-25);
+                    uiCtx.strokeStyle = hex; uiCtx.lineWidth = 3; uiCtx.beginPath(); uiCtx.arc(cX, cY, 20, 0, Math.PI*2); uiCtx.stroke();
+                    uiCtx.fillStyle = '#fff'; uiCtx.font = '16px DM Mono'; uiCtx.fillText(idx+1, cX+25, cY-25);
                 });
             }
 
@@ -563,17 +533,24 @@
                         else { px[i+3]=0; }
                     }
                 }
-                fcCtx.putImageData(fcData, 0, 0);
+                fcInternalCtx.putImageData(fcData, 0, 0);
+                fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height);
+                fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0, fcCtx.canvas.width, fcCtx.canvas.height);
             }
         }
         requestAnimationFrame(liveLoop);
     }
 
-    // --- CAPTURE & SAVE ENGINE ---
+    // --- CAPTURE ENGINE ---
     document.getElementById('capture-btn').addEventListener('click', () => {
-        playBeep(800, 0.1);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         
-        const hrCan = document.createElement('canvas'); hrCan.width = 1200; hrCan.height = 1600; const cCtx = hrCan.getContext('2d');
+        const hrCan = document.getElementById('composite-canvas'); const cCtx = hrCan.getContext('2d');
         const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
         let sx, sy, sw, sh;
         if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
@@ -613,10 +590,7 @@
             cCtx.fillText(`ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
         }
 
-        if(currentLat && currentLon) {
-            cCtx.font = '24px DM Mono'; cCtx.fillStyle = '#6c829c';
-            cCtx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 100, 1500);
-        }
+        if(currentLat && currentLon) { cCtx.font = '24px DM Mono'; cCtx.fillStyle = '#6c829c'; cCtx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 100, 1500); }
 
         const link = document.createElement('a'); link.download = `PREye_Capture_${Date.now()}.jpg`;
         link.href = hrCan.toDataURL('image/jpeg', 0.9); link.click();
@@ -626,10 +600,8 @@
     setInterval(() => {
         if(goldenHourTime) {
             const diff = goldenHourTime - new Date();
-            if(diff > 0) {
-                const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('loc-golden').innerText = `${h}h ${m}m ${s}s`;
-            } else { document.getElementById('loc-golden').innerText = "Now active"; }
+            if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); document.getElementById('loc-golden').innerText = `${h}h ${m}m ${s}s`; } 
+            else { document.getElementById('loc-golden').innerText = "Now active"; }
         }
     }, 1000);
 
@@ -637,16 +609,12 @@
         if(navigator.geolocation) {
             document.getElementById('loc-temp').innerText = "Locating...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
-                document.getElementById('tel-gps').innerText = "OK";
+                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; document.getElementById('tel-gps').innerText = "OK";
                 try {
                     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true`);
-                    const wData = await wRes.json();
-                    document.getElementById('loc-temp').innerText = `${wData.current_weather.temperature}°C`;
+                    const wData = await wRes.json(); document.getElementById('loc-temp').innerText = `${wData.current_weather.temperature}°C`;
                     const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
-                    const sData = await sRes.json();
-                    goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset);
-                    document.getElementById('loc-sunset').innerText = new Date(sData.results.sunset).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const sData = await sRes.json(); goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset); document.getElementById('loc-sunset').innerText = new Date(sData.results.sunset).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 } catch(e) { document.getElementById('loc-temp').innerText = "API Error"; }
             }, () => document.getElementById('loc-temp').innerText = "Denied");
         }
@@ -657,9 +625,7 @@
     document.getElementById('nav-release').addEventListener('click', () => {
         if(!padsInit) {
             ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(id => {
-                const can = document.getElementById(id); const c = can.getContext('2d');
-                can.width = can.parentElement.clientWidth; can.height = 100;
-                let drawing = false;
+                const can = document.getElementById(id); const c = can.getContext('2d'); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false;
                 can.addEventListener('touchstart', e=>{drawing=true; c.moveTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); e.preventDefault();});
                 can.addEventListener('touchmove', e=>{if(!drawing)return; c.lineTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); c.stroke(); e.preventDefault();});
                 can.addEventListener('touchend', ()=>drawing=false);
@@ -677,9 +643,10 @@
     // PDF Engine
     document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
         const renderDiv = document.getElementById('hidden-pdf-render');
-        renderDiv.style.display = 'block'; renderDiv.style.left = '0px'; renderDiv.style.top = '0px'; // Temporarily bring to screen for render
+        renderDiv.style.display = 'block'; renderDiv.style.left = '0px'; renderDiv.style.top = '0px'; 
         
-        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;">I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings taken of me in any media for any lawful purpose.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}</table>`;
+        // Full Agreement Text restored
+        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS:</strong> I represent that I am at least 18 years of age and have full legal capacity to execute this Release. I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"></td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong><br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value}</td></tr></table>`;
         renderDiv.innerHTML = html;
         
         try {
@@ -688,11 +655,12 @@
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight); pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
         } catch(e) { alert("PDF Error"); }
         
-        renderDiv.style.left = '-9999px'; renderDiv.style.top = '-9999px'; // Hide again
+        renderDiv.style.left = '-9999px'; renderDiv.style.top = '-9999px'; 
     });
 
     document.getElementById('email-pdf-btn').addEventListener('click', () => {
-        window.location.href = `mailto:${document.getElementById('r-email').value}?subject=Model Release&body=Please find the attached PDF.`;
+        alert("Browser security blocks automatic file attachments.\n\nPlease MANUALLY ATTACH the PDF you just downloaded to the email draft that will open.");
+        window.location.href = `mailto:${document.getElementById('r-email').value}?subject=Model Release - ${document.getElementById('r-name').value}&body=Hi ${document.getElementById('r-name').value},%0D%0A%0D%0APlease find the signed model release form attached.%0D%0A%0D%0ABest regards,%0D%0ADigby Oldridge`;
     });
 
     // --- INIT ---
