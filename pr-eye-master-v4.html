@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v12 — Pro Toolkit</title>
+    <title>PR Eye v13 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,7 +20,7 @@
         body { background: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
         h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-weight: 700; margin-bottom: 8px;}
         
-        /* HEADER & TELEMETRY */
+        /* HEADER */
         .hdr { background: var(--navy2); border-bottom: 1px solid var(--gold); padding: 10px 15px; display: flex; flex-direction: column; flex-shrink: 0; z-index: 10; }
         .hdr-top { display: flex; justify-content: space-between; align-items: center; }
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 1px; }
@@ -41,47 +41,62 @@
         .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 10px;}
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        #ui-layer { pointer-events: auto; } /* For manual Pantone tapping */
         
-        /* BUTTONS & CONTROLS */
+        /* CONTROLS */
         .action-row { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn { padding: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1;}
         .btn.solid { background: var(--gold); color: var(--navy); }
         .btn.icon-only { flex: 0 0 auto; width: 42px; font-size: 16px; padding: 0;}
+        .btn.active-toggle { background: var(--gold-dim); border-color: var(--gold); }
         
         .ctrl-panel { background: var(--navy2); border-radius: 8px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
         .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
         .col { flex: 1; }
         .label-txt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
 
-        .toggle-switch { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .toggle-switch { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 10px;}
         .toggle-opt { flex: 1; text-align: center; padding: 8px; background: var(--navy); color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 600;}
         .toggle-opt.active { background: var(--gold); color: var(--navy); }
         
-        select, input[type="range"] { width: 100%; background: var(--navy); border: 1px solid var(--border); color: var(--gold); padding: 8px; border-radius: 4px; outline: none; font-family: inherit; }
+        select, input, textarea { width: 100%; background: var(--navy); border: 1px solid var(--border); color: var(--gold); padding: 10px; border-radius: 4px; outline: none; font-family: inherit; margin-bottom: 10px;}
+        select { appearance: none; }
+
+        .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-top: 10px; }
+        .expo-scale { flex: 1; height: 4px; background: #333; margin: 0 15px; position: relative; }
+        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 14px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
 
         /* PANTONE UI */
-        .pan-readout { display: flex; background: #000; border-radius: 6px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; }
-        .pan-half { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
-        .pan-half.swatch { flex: 0 0 60px; }
-        .pan-code { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); font-weight: bold; }
-        .pan-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+        .pan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .pan-item { background: var(--navy2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 80px; }
+        .pan-swatch { width: 40%; transition: background-color 0.3s; }
+        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+        .pan-code { font-family: 'Cormorant Garamond'; font-size: 16px; color: var(--gold); font-weight: 700; line-height: 1.2; }
+        .pan-hex { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase;}
         
-        .history-strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
-        .hist-chip { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; }
+        .history-strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-top: 10px; }
+        .hist-chip { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+
+        /* RELEASE FORM UI */
+        .release-section { border-left: 2px solid var(--gold); padding-left: 10px; margin-bottom: 20px; }
+        .legal-text { font-family: sans-serif; font-size: 10px; color: var(--muted); line-height: 1.4; max-height: 120px; overflow-y: auto; background: #000; padding: 10px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px;}
+        .signature-pad { background: #fff; border-radius: 4px; width: 100%; border: 2px dashed var(--muted); touch-action: none; margin-bottom: 5px;}
+        .photo-preview { width: 100px; height: 100px; border-radius: 4px; object-fit: cover; display: none; border: 1px solid var(--gold); margin-bottom: 10px; }
 
         /* NAV */
         .nav { background: var(--navy2); border-top: 1px solid var(--gold); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; cursor: pointer; border-top: 3px solid transparent; }
         .nav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(240,192,64,0.05); }
 
-        #hidden-render { position: absolute; top: -9999px; left: -9999px; width: 1080px; height: 1920px; background: #0d1b2a; display: flex; flex-direction: column;}
+        #composite-canvas, #hidden-pdf-render, #proc-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
+        #hidden-pdf-render { width: 800px; background: #fff; color: #000; padding: 40px; font-family: sans-serif; display: block; }
     </style>
 </head>
 <body>
 
     <div class="hdr">
         <div class="hdr-top">
-            <div class="brand">PR EYE v12</div>
+            <div class="brand">PR EYE v13</div>
             <button id="cam-flip-btn" class="btn icon-only" style="height: 30px; border-color: transparent;">🔄</button>
         </div>
         <div class="mode-desc" id="mode-desc">Live luminance analysis and exposure balancing.</div>
@@ -98,102 +113,121 @@
         <div id="persistent-cam-area">
             <div class="cam-container" id="cam-wrapper">
                 <video id="video" autoplay playsinline webkit-playsinline></video>
-                <canvas id="grid-layer" class="overlay"></canvas>
-                <canvas id="fc-layer" class="overlay" style="opacity: 0.8; display: none;"></canvas>
-                <canvas id="ui-layer" class="overlay"></canvas>
+                <canvas id="fc-layer" class="overlay" style="opacity: 0.8; z-index: 1; display: none;"></canvas>
+                <canvas id="grid-layer" class="overlay" style="z-index: 2;"></canvas>
+                <canvas id="ui-layer" class="overlay" style="z-index: 3;"></canvas>
             </div>
             
             <div class="action-row">
-                <button id="export-plan-btn" class="btn solid">💾 Save Shot Plan</button>
+                <button id="grid-toggle-btn" class="btn icon-only" aria-label="Toggle Grid">▦</button>
                 <button id="fc-toggle-btn" class="btn icon-only" aria-label="Toggle False Colour">◐</button>
+                <button id="curve-toggle-btn" class="btn icon-only" aria-label="Toggle Curve">📈</button>
+                <button id="capture-btn" class="btn solid">📸 Capture</button>
+                <button id="sound-toggle-btn" class="btn icon-only" aria-label="Toggle Sound">🔊</button>
             </div>
         </div>
 
         <div id="page-meter" class="page active">
             <div class="ctrl-panel">
-                <h4>Camera Settings</h4>
-                <div class="row">
+                <div class="toggle-switch">
+                    <div class="toggle-opt active" id="expo-auto">AUTO EXPOSURE</div>
+                    <div class="toggle-opt" id="expo-manual">MANUAL EXPOSURE</div>
+                </div>
+                <div class="row" id="manual-controls" style="opacity: 0.5; pointer-events: none;">
                     <div class="col"><span class="label-txt">ISO</span><select id="set-iso"><option value="100">100</option><option value="400" selected>400</option><option value="800">800</option><option value="1600">1600</option><option value="3200">3200</option><option value="6400">6400</option></select></div>
                     <div class="col"><span class="label-txt">f/</span><select id="set-aperture"><option value="1.4">1.4</option><option value="2.8">2.8</option><option value="4.0">4.0</option><option value="5.6" selected>5.6</option><option value="8.0">8.0</option><option value="11">11</option><option value="16">16</option></select></div>
                     <div class="col"><span class="label-txt">1/s</span><select id="set-shutter"><option value="30">30</option><option value="60" selected>60</option><option value="125">125</option><option value="250">250</option><option value="500">500</option><option value="1000">1000</option></select></div>
                 </div>
+                <div class="expo-meter-readout">
+                    <span class="expo-val under">-3</span>
+                    <div class="expo-scale"><div class="expo-marker" id="expo-marker" style="left: 50%;"></div></div>
+                    <span class="expo-val over">+3</span>
+                </div>
             </div>
-        </div>
 
-        <div id="page-grid" class="page">
-            <div class="ctrl-panel">
-                <h4>Composition Overlay</h4>
-                <div class="toggle-switch" style="margin-bottom: 15px;">
+            <div class="ctrl-panel" id="grid-ctrls" style="display:none;">
+                <h4>Grid Overlays</h4>
+                <div class="toggle-switch">
                     <div class="toggle-opt active" data-grid="off">OFF</div>
                     <div class="toggle-opt" data-grid="thirds">THIRDS</div>
                     <div class="toggle-opt" data-grid="phi">PHI</div>
                     <div class="toggle-opt" data-grid="spiral">SPIRAL</div>
                 </div>
-                <div class="row" id="spiral-ctrls" style="display:none;">
-                    <div class="col"><button class="btn sm" id="sp-rot-btn">Rotate Spiral ↻</button></div>
-                </div>
+                <button class="btn sm" id="sp-rot-btn" style="display:none; margin-bottom: 10px;">Rotate Spiral ↻</button>
                 <div class="row">
-                    <div class="col">
-                        <span class="label-txt">Opacity (<span id="g-op-val">50</span>%)</span>
-                        <input type="range" id="g-op" min="10" max="100" value="50">
-                    </div>
-                    <div class="col">
-                        <span class="label-txt">Weight (<span id="g-wt-val">2</span>px)</span>
-                        <input type="range" id="g-wt" min="1" max="5" value="2">
-                    </div>
+                    <div class="col"><span class="label-txt">Opacity (<span id="g-op-val">50</span>%)</span><input type="range" id="g-op" min="10" max="100" value="50"></div>
+                    <div class="col"><span class="label-txt">Weight (<span id="g-wt-val">2</span>px)</span><input type="range" id="g-wt" min="1" max="5" value="2"></div>
                 </div>
             </div>
         </div>
 
         <div id="page-color" class="page">
             <div class="ctrl-panel">
-                <h4>Colour Sampling</h4>
-                <div class="toggle-switch" style="margin-bottom: 15px;" id="pan-sample-mode">
-                    <div class="toggle-opt active" data-mode="1">1×1</div>
-                    <div class="toggle-opt" data-mode="3">3×3</div>
-                    <div class="toggle-opt" data-mode="5">5×5</div>
-                    <div class="toggle-opt" data-mode="zone">ZONE</div>
+                <div class="toggle-switch">
+                    <div class="toggle-opt active" id="pan-auto">AUTO TRACKING</div>
+                    <div class="toggle-opt" id="pan-manual">MANUAL (TAP)</div>
                 </div>
-
-                <div class="pan-readout">
-                    <div class="pan-half swatch" id="ro-sample-bg" style="background:#222;"></div>
-                    <div class="pan-half" style="border-right: 1px solid var(--border);">
-                        <div class="pan-code" id="ro-hex">#------</div>
-                        <div class="pan-sub" id="ro-label">Tap image to sample</div>
-                    </div>
-                    <div class="pan-half swatch" id="ro-match-bg" style="background:#222;"></div>
-                    <div class="pan-half">
-                        <div class="pan-code" id="ro-pan">---</div>
-                        <div class="pan-sub" id="ro-de">ΔE: --</div>
-                    </div>
+                <div class="pan-grid" id="live-pan-results">
+                    <div class="pan-item"><div class="pan-swatch" id="ps1" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn1">---</div><div class="pan-hex" id="ph1">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps2" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn2">---</div><div class="pan-hex" id="ph2">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps3" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn3">---</div><div class="pan-hex" id="ph3">---</div></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="ps4" style="background:#222"></div><div class="pan-data"><div class="pan-code" id="pn4">---</div><div class="pan-hex" id="ph4">---</div></div></div>
                 </div>
-
-                <span class="label-txt">Palette History</span>
-                <div class="history-strip" id="pan-history">
-                    </div>
+                <span class="label-txt" style="margin-top: 15px;">Palette History</span>
+                <div class="history-strip" id="pan-history"></div>
             </div>
         </div>
 
         <div id="page-release" class="page">
-            <div class="ctrl-panel">
-                <h4>Legal Generation</h4>
-                <p style="font-size: 11px; color: var(--muted); margin-bottom: 15px;">Model Release generation is active. Ensure all fields are completed.</p>
-                <input type="text" id="r-name" placeholder="Model Name">
-                <input type="date" id="r-date">
-                <button class="btn solid" id="btn-gen-release">Generate Standard PDF</button>
+            <h3>Model Release Form</h3>
+            <div class="release-section">
+                <h4>Shoot Details</h4>
+                <div class="row"><div class="col"><input type="date" id="r-date"></div><div class="col"><input type="text" id="r-loc" placeholder="Location"></div></div>
             </div>
+            <div class="release-section">
+                <h4>Model Details</h4>
+                <input type="text" id="r-name" placeholder="Full Name">
+                <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YYYY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone"></div></div>
+                <input type="email" id="r-email" placeholder="Email Address">
+                <textarea id="r-address" placeholder="Full Address" rows="2"></textarea>
+                <input type="text" id="r-comp" placeholder="Compensation (if any)">
+                <div style="margin: 15px 0;"><span class="label-txt">Model Photo (Optional)</span><input type="file" id="r-photo-input" accept="image/*" capture="environment" style="padding: 5px;"><img id="r-photo-preview" class="photo-preview"></div>
+                <div class="toggle-switch"><div class="toggle-opt active" id="tog-adult">Model is 18+</div><div class="toggle-opt" id="tog-minor">Model is Under 18</div></div>
+            </div>
+            <div id="guardian-section" class="release-section" style="display:none;">
+                <h4>Parent/Guardian Consent</h4>
+                <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
+                <span class="label-txt">Guardian Signature</span><canvas id="sig-guardian" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-guardian')">Clear Guardian Sig</button>
+            </div>
+            <div class="release-section">
+                <h4>Terms & Conditions</h4>
+                <div class="legal-text">
+                    <strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br>
+                    <strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br>
+                    <strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content... <br><br><strong>DATA PROTECTION:</strong> Processed in accordance with UK GDPR and Data Protection Act 2018.
+                </div>
+            </div>
+            <div class="release-section">
+                <h4>Signatures</h4>
+                <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-model')">Clear Model Sig</button>
+                <div style="margin-top: 20px;"><span class="label-txt">Witness Details (Must be 18+, Independent)</span><input type="text" id="r-w-name" placeholder="Witness Name"><input type="text" id="r-w-address" placeholder="Witness Address"><span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-witness')">Clear Witness Sig</button></div>
+                <div style="margin-top: 20px;"><span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="100"></canvas><button class="btn sm" style="width:100%;" onclick="clearPad('sig-photog')">Clear Photog Sig</button></div>
+            </div>
+            <button id="gen-pdf-btn" class="btn solid" style="width:100%; margin-bottom:10px;">1. Generate PDF</button>
+            <button id="email-pdf-btn" class="btn" style="width:100%;">2. Email PDF</button>
         </div>
 
     </div>
 
     <div class="nav">
         <div class="nav-item active" data-target="page-meter" data-cam="true" data-desc="Live luminance analysis and exposure balancing.">📷<br>Meter</div>
-        <div class="nav-item" data-target="page-grid" data-cam="true" data-desc="Geometric overlays and framing guides.">▦<br>Grid</div>
         <div class="nav-item" data-target="page-color" data-cam="true" data-desc="Precision colour extraction and palette planning.">🎨<br>Pantone</div>
         <div class="nav-item" data-target="page-release" data-cam="false" data-desc="Legal documentation and model consent.">📝<br>Release</div>
     </div>
 
-    <canvas id="proc-canvas" style="display:none;"></canvas>
+    <canvas id="proc-canvas" width="150" height="200"></canvas>
+    <canvas id="composite-canvas" width="1200" height="1600"></canvas>
+    <div id="hidden-pdf-render"></div>
 
 <script>
     // --- CORE STATE & SETUP ---
@@ -210,11 +244,33 @@
     let currentTab = 'page-meter';
     
     let gridState = { type: 'off', opacity: 0.5, weight: 2, spiralRot: 0 };
-    let panState = { mode: 1, target: {x: 0.5, y: 0.5}, history: [] };
-    let fcActive = false;
+    let panMode = 'auto';
+    let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}];
+    let manualIndex = 0;
+    let lastPanExtraction = [];
+    let panHistory = [];
+    
+    let fcState = 0; 
+    let isLiveCurve = false;
+    let isAutoExpo = true;
+
+    // --- AUDIO SHUTTER ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let soundEnabled = true;
+    document.getElementById('sound-toggle-btn').addEventListener('click', (e) => {
+        soundEnabled = !soundEnabled; e.target.innerText = soundEnabled ? '🔊' : '🔇'; e.target.classList.toggle('active-toggle');
+    });
+    function playShutter() {
+        if(!soundEnabled) return; if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    }
 
     // --- COLOUR SCIENCE (RGB -> LAB -> ΔE CIE76) ---
-    // Minimal CIELAB conversion for inline toolkit
     function rgb2lab(r, g, b) {
         let r_ = r / 255, g_ = g / 255, b_ = b / 255;
         r_ = r_ > 0.04045 ? Math.pow((r_ + 0.055) / 1.055, 2.4) : r_ / 12.92;
@@ -228,14 +284,8 @@
         z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + 16/116;
         return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
     }
-    
-    function deltaE(labA, labB) {
-        return Math.sqrt(Math.pow(labA[0]-labB[0],2) + Math.pow(labA[1]-labB[1],2) + Math.pow(labA[2]-labB[2],2));
-    }
-
     const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).padStart(6,'0').toUpperCase();
     
-    // Auto-calculate LAB for Pantone DB on load
     const pantoneDb = [
         {n:"PMS 100 C",rgb:[246,226,59]}, {n:"PMS 109 C",rgb:[255,209,0]}, {n:"PMS 123 C",rgb:[255,199,44]},
         {n:"PMS 186 C",rgb:[200,16,46]}, {n:"PMS 200 C",rgb:[186,12,47]}, {n:"PMS 286 C",rgb:[0,50,160]},
@@ -247,10 +297,10 @@
         const targetLab = rgb2lab(r, g, b);
         let closest = pantoneDb[0], minD = Infinity;
         pantoneDb.forEach(p => {
-            const d = deltaE(targetLab, p.lab);
+            const d = Math.sqrt(Math.pow(targetLab[0]-p.lab[0],2) + Math.pow(targetLab[1]-p.lab[1],2) + Math.pow(targetLab[2]-p.lab[2],2));
             if(d < minD) { minD = d; closest = p; }
         });
-        return { p: closest, dE: minD };
+        return closest;
     }
 
     // --- NAVIGATION ---
@@ -261,15 +311,15 @@
         document.getElementById(currentTab).classList.add('active');
         document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'block' : 'none';
         document.getElementById('mode-desc').innerText = n.dataset.desc;
-        resizeCanvases();
-        drawGrid(); // Re-draw grid based on new size if needed
+        resizeCanvases(); drawGrid();
     }));
 
     // --- CAMERA ENGINE ---
     async function startCamera() {
-        if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 100)); }
+        if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } });
+            const constraints = { video: { facingMode: { exact: currentFacingMode } } };
+            stream = await navigator.mediaDevices.getUserMedia(constraints).catch(() => navigator.mediaDevices.getUserMedia({video:true})); // Fallback if exact fails
             video.srcObject = stream; video.play();
             video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
         } catch(e) { console.log("Cam Error", e); }
@@ -278,6 +328,7 @@
 
     function resizeCanvases() {
         const rect = video.getBoundingClientRect();
+        if(rect.width===0) return;
         ['grid-layer', 'ui-layer', 'fc-layer'].forEach(id => {
             const c = document.getElementById(id); c.width = rect.width; c.height = rect.height;
         });
@@ -285,15 +336,21 @@
     }
     window.addEventListener('resize', resizeCanvases);
 
-    // --- GRID ENGINE ---
+    // --- TOGGLES & GRIDS ---
+    document.getElementById('grid-toggle-btn').addEventListener('click', (e) => {
+        const ctrl = document.getElementById('grid-ctrls');
+        const isActive = ctrl.style.display === 'block';
+        ctrl.style.display = isActive ? 'none' : 'block';
+        e.target.classList.toggle('active-toggle', !isActive);
+    });
+
     document.querySelectorAll('[data-grid]').forEach(el => el.addEventListener('click', (e) => {
         document.querySelectorAll('[data-grid]').forEach(btn => btn.classList.remove('active'));
         e.target.classList.add('active'); gridState.type = e.target.dataset.grid;
-        document.getElementById('spiral-ctrls').style.display = gridState.type === 'spiral' ? 'flex' : 'none';
+        document.getElementById('sp-rot-btn').style.display = gridState.type === 'spiral' ? 'block' : 'none';
         drawGrid();
     }));
     document.getElementById('sp-rot-btn').addEventListener('click', () => { gridState.spiralRot = (gridState.spiralRot + 1) % 4; drawGrid(); });
-    
     ['g-op', 'g-wt'].forEach(id => document.getElementById(id).addEventListener('input', (e) => {
         document.getElementById(`${id}-val`).innerText = e.target.value;
         if(id==='g-op') gridState.opacity = e.target.value / 100;
@@ -306,10 +363,7 @@
         gridCtx.clearRect(0,0,w,h);
         if(gridState.type === 'off') return;
         
-        gridCtx.strokeStyle = `rgba(240, 192, 64, ${gridState.opacity})`;
-        gridCtx.lineWidth = gridState.weight;
-        gridCtx.beginPath();
-
+        gridCtx.strokeStyle = `rgba(240, 192, 64, ${gridState.opacity})`; gridCtx.lineWidth = gridState.weight; gridCtx.beginPath();
         if(gridState.type === 'thirds') {
             gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h);
             gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3);
@@ -317,212 +371,267 @@
             gridCtx.moveTo(w*0.382, 0); gridCtx.lineTo(w*0.382, h); gridCtx.moveTo(w*0.618, 0); gridCtx.lineTo(w*0.618, h);
             gridCtx.moveTo(0, h*0.382); gridCtx.lineTo(w, h*0.382); gridCtx.moveTo(0, h*0.618); gridCtx.lineTo(w, h*0.618);
         } else if (gridState.type === 'spiral') {
-            gridCtx.save();
-            gridCtx.translate(w/2, h/2); gridCtx.rotate((Math.PI/2) * gridState.spiralRot); gridCtx.translate(-w/2, -h/2);
-            // Approx bounding box for Fibonacci
+            gridCtx.save(); gridCtx.translate(w/2, h/2); gridCtx.rotate((Math.PI/2) * gridState.spiralRot); gridCtx.translate(-w/2, -h/2);
             let cw = w, ch = h, cx = 0, cy = 0;
             for(let i=0; i<6; i++) {
-                gridCtx.rect(cx, cy, cw, ch);
-                gridCtx.moveTo(cx+cw, cy); gridCtx.arc(cx+cw, cy, cw, Math.PI, Math.PI/2, true);
-                let nw = ch, nh = cw * 0.618; // approx
-                cy += ch - nh; cw = nw; ch = nh;
+                gridCtx.rect(cx, cy, cw, ch); gridCtx.moveTo(cx+cw, cy); gridCtx.arc(cx+cw, cy, cw, Math.PI, Math.PI/2, true);
+                let nw = ch, nh = cw * 0.618; cy += ch - nh; cw = nw; ch = nh;
             }
             gridCtx.restore();
         }
         gridCtx.stroke();
     }
 
-    // --- PANTONE UI LOGIC ---
-    document.querySelectorAll('[data-mode]').forEach(el => el.addEventListener('click', (e) => {
-        document.querySelectorAll('[data-mode]').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active'); 
-        panState.mode = e.target.dataset.mode === 'zone' ? 'zone' : parseInt(e.target.dataset.mode);
-    }));
-
+    // --- PANTONE MANUAL TAP ---
+    document.getElementById('pan-auto').addEventListener('click', () => { panMode = 'auto'; document.getElementById('pan-auto').classList.add('active'); document.getElementById('pan-manual').classList.remove('active'); });
+    document.getElementById('pan-manual').addEventListener('click', () => { panMode = 'manual'; document.getElementById('pan-manual').classList.add('active'); document.getElementById('pan-auto').classList.remove('active'); });
+    
     document.getElementById('ui-layer').addEventListener('pointerdown', (e) => {
-        if(currentTab !== 'page-color') return;
-        const rect = e.target.getBoundingClientRect();
-        panState.target = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        sampleColor();
+        if(currentTab === 'page-color' && panMode === 'manual') {
+            const rect = e.target.getBoundingClientRect();
+            manualPoints[manualIndex] = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height };
+            manualIndex = (manualIndex + 1) % 4;
+        }
     });
 
-    function sampleColor() {
-        const w = video.videoWidth; const h = video.videoHeight;
-        const cW = uiCtx.canvas.width; const cH = uiCtx.canvas.height;
-        procCanvas.width = w; procCanvas.height = h;
-        procCtx.drawImage(video, 0, 0, w, h);
-        
-        // Map UI coords to video coords (Object-fit cover math)
-        const vRatio = w/h; const cRatio = cW/cH;
-        let vX, vY;
-        if(vRatio > cRatio) {
-            const drawW = h * cRatio; const offset = (w - drawW)/2;
-            vX = offset + (panState.target.x / cW) * drawW; vY = (panState.target.y / cH) * h;
-        } else {
-            const drawH = w / cRatio; const offset = (h - drawH)/2;
-            vX = (panState.target.x / cW) * w; vY = offset + (panState.target.y / cH) * drawH;
-        }
+    // --- FALSE COLOUR & CURVE ---
+    document.getElementById('fc-toggle-btn').addEventListener('click', (e) => {
+        fcState = (fcState + 1) % 3; const btn = e.target;
+        if(fcState === 0) { btn.innerText = '◐'; btn.classList.remove('active-toggle'); btn.style.color = 'var(--gold)'; document.getElementById('fc-layer').style.display='none'; }
+        if(fcState === 1) { btn.innerText = '🌈'; btn.classList.add('active-toggle'); btn.style.color = 'var(--text)'; document.getElementById('fc-layer').style.display='block'; }
+        if(fcState === 2) { btn.innerText = '🔴'; btn.classList.add('active-toggle'); btn.style.color = 'var(--red)'; document.getElementById('fc-layer').style.display='block'; }
+    });
+    document.getElementById('curve-toggle-btn').addEventListener('click', (e) => { isLiveCurve = !isLiveCurve; e.target.classList.toggle('active-toggle'); });
 
-        let size = panState.mode === 'zone' ? 20 : panState.mode;
-        let tr=0, tg=0, tb=0, count=0;
-        const sx = Math.max(0, Math.floor(vX - size/2)); const sy = Math.max(0, Math.floor(vY - size/2));
-        const px = procCtx.getImageData(sx, sy, size, size).data;
-        for(let i=0; i<px.length; i+=4) { tr+=px[i]; tg+=px[i+1]; tb+=px[i+2]; count++; }
-        tr = Math.round(tr/count); tg = Math.round(tg/count); tb = Math.round(tb/count);
-        
-        const hex = rgbToHex(tr, tg, tb);
-        const match = findClosestPantone(tr, tg, tb);
-        
-        // Update Readout
-        document.getElementById('ro-sample-bg').style.background = hex;
-        document.getElementById('ro-hex').innerText = hex;
-        document.getElementById('ro-label').innerText = `Sampled: X:${Math.round(panState.target.x)}, Y:${Math.round(panState.target.y)}`;
-        document.getElementById('ro-match-bg').style.background = rgbToHex(...match.p.rgb);
-        document.getElementById('ro-pan').innerText = match.p.n;
-        document.getElementById('ro-de').innerText = `ΔE: ${match.dE.toFixed(1)} ${match.dE < 2 ? '(Exact)' : '(Close)'}`;
+    // --- EXPOSURE TOGGLES ---
+    document.getElementById('expo-auto').addEventListener('click', ()=>{ isAutoExpo=true; document.getElementById('expo-auto').classList.add('active'); document.getElementById('expo-manual').classList.remove('active'); document.getElementById('manual-controls').style.opacity = '0.5'; document.getElementById('manual-controls').style.pointerEvents = 'none'; });
+    document.getElementById('expo-manual').addEventListener('click', ()=>{ isAutoExpo=false; document.getElementById('expo-manual').classList.add('active'); document.getElementById('expo-auto').classList.remove('active'); document.getElementById('manual-controls').style.opacity = '1'; document.getElementById('manual-controls').style.pointerEvents = 'all'; });
+    ['set-iso', 'set-aperture', 'set-shutter'].forEach(id => document.getElementById(id).addEventListener('change', updateExpoBar));
 
-        // Add to history
-        const histDiv = document.getElementById('pan-history');
-        const chip = document.createElement('div'); chip.className = 'hist-chip'; chip.style.background = hex;
-        histDiv.prepend(chip); if(histDiv.children.length > 8) histDiv.lastChild.remove();
-        
-        panState.history.unshift({ hex, pan: match.p.n, rgb: [tr,tg,tb] });
+    function updateExpoBar() {
+        if(!measuredEV) return;
+        const N = parseFloat(document.getElementById('set-aperture').value); const t = 1 / parseInt(document.getElementById('set-shutter').value); const ISO = parseInt(document.getElementById('set-iso').value);
+        const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100);
+        let percent = 50 + ((measuredEV - settingsEV) * (50/3)); percent = Math.max(5, Math.min(95, percent));
+        const marker = document.getElementById('expo-marker'); marker.style.left = `${percent}%`;
+        marker.style.background = (percent < 20 || percent > 80) ? 'var(--red)' : 'var(--gold)';
     }
 
-    // --- LIVE LOOP (Telemetry & False Colour) ---
+    document.getElementById('btn-balance').addEventListener('click', () => {
+        const N = parseFloat(document.getElementById('set-aperture').value); const ISO = parseInt(document.getElementById('set-iso').value);
+        const targetShutter = (N*N * 100) / (ISO * Math.pow(2, measuredEV));
+        const sOpts = Array.from(document.getElementById('set-shutter').options).map(o=>parseInt(o.value));
+        document.getElementById('set-shutter').value = sOpts.reduce((p, c) => Math.abs((1/c)-targetShutter) < Math.abs((1/p)-targetShutter) ? c : p);
+        updateExpoBar();
+    });
+
+    // --- LIVE LOOP ---
     function liveLoop() {
-        if(video.readyState === 4) {
-            // Downsample for telemetry
-            procCanvas.width = 150; procCanvas.height = 200;
-            procCtx.drawImage(video, 0,0,150,200);
-            const d = procCtx.getImageData(0,0,150,200).data;
+        if(video.readyState === 4 && video.videoWidth > 0 && document.getElementById('persistent-cam-area').style.display !== 'none') {
             
-            let r=0, b=0, lumT=0, c=0;
-            for(let i=0; i<d.length; i+=4) {
-                r+=d[i]; b+=d[i+2]; lumT += (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]); c++;
+            // Draw 150x200 downsample preserving 3:4 aspect
+            const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
+            let sx, sy, sw, sh;
+            if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
+            else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
+            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200);
+            
+            const viewData = procCtx.getImageData(0,0,150,200).data;
+            let rT=0, bT=0, lumT=0, c=0; 
+            let hist = new Array(256).fill(0); let maxHist = 0;
+            
+            for(let i=0; i<viewData.length; i+=4) { 
+                rT+=viewData[i]; bT+=viewData[i+2]; 
+                let l = Math.round(0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]);
+                lumT += l; c++; hist[l]++; if(hist[l] > maxHist) maxHist = hist[l];
             }
             
-            // 1. Live EV Update
+            // EV & Temp
             measuredEV = Math.log2(((lumT/c)/255) * 100 / 12.5);
             const evSpan = document.querySelector('#tel-ev span');
             evSpan.innerText = measuredEV > 0 ? `+${measuredEV.toFixed(1)}` : measuredEV.toFixed(1);
             evSpan.className = '';
             
-            // Compare with Settings
-            const N = parseFloat(document.getElementById('set-aperture').value);
-            const t = 1 / parseInt(document.getElementById('set-shutter').value);
-            const ISO = parseInt(document.getElementById('set-iso').value);
-            const settingsEV = Math.log2((N*N)/t) - Math.log2(ISO/100);
-            const diff = measuredEV - settingsEV;
-            
-            if(Math.abs(diff) < 1) evSpan.classList.add('ev-good');
-            else if(diff > 0) evSpan.classList.add('ev-under');
-            else evSpan.classList.add('ev-over');
+            const N = parseFloat(document.getElementById('set-aperture').value); const t = 1 / parseInt(document.getElementById('set-shutter').value); const ISO = parseInt(document.getElementById('set-iso').value);
+            const diff = measuredEV - (Math.log2((N*N)/t) - Math.log2(ISO/100));
+            if(Math.abs(diff) < 1) evSpan.classList.add('ev-good'); else if(diff > 0) evSpan.classList.add('ev-under'); else evSpan.classList.add('ev-over');
 
-            // 2. Temperature (Celsius strictly)
-            const k = Math.round(5500 * ((b/c)/(r/c)));
-            if(!isNaN(k)) {
-                liveTempC = Math.round(k - 273.15);
-                document.getElementById('tel-wb').innerText = `${liveTempC}°C`;
+            if(currentTab === 'page-meter') updateExpoBar();
+
+            const k = Math.round(5500 * ((bT/c)/(rT/c)));
+            if(!isNaN(k)) { liveTempC = Math.round(k - 273.15); document.getElementById('tel-wb').innerText = `${liveTempC}°C`; }
+
+            // UI Layer (Curve & Pantone Targets)
+            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height;
+            uiCtx.clearRect(0,0,cw,ch);
+            
+            if(isLiveCurve) {
+                uiCtx.fillStyle = 'rgba(0,0,0,0.5)'; uiCtx.fillRect(0, ch-60, cw, 60);
+                uiCtx.strokeStyle = 'var(--gold)'; uiCtx.lineWidth = 1.5; uiCtx.beginPath();
+                for(let i=0; i<256; i++) {
+                    let x = (i/255) * cw; let y = ch - ((hist[i]/maxHist) * 50) - 5; 
+                    if(i===0) uiCtx.moveTo(x,y); else uiCtx.lineTo(x,y);
+                }
+                uiCtx.stroke();
             }
 
-            // 3. UI Layer (Crosshair)
             if(currentTab === 'page-color') {
-                const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height;
-                uiCtx.clearRect(0,0,cw,ch);
-                uiCtx.strokeStyle = 'var(--gold)'; uiCtx.lineWidth = 2;
-                uiCtx.beginPath(); uiCtx.arc(panState.target.x, panState.target.y, 15, 0, Math.PI*2);
-                uiCtx.moveTo(panState.target.x-25, panState.target.y); uiCtx.lineTo(panState.target.x+25, panState.target.y);
-                uiCtx.moveTo(panState.target.x, panState.target.y-25); uiCtx.lineTo(panState.target.x, panState.target.y+25);
-                uiCtx.stroke();
-            } else { uiCtx.clearRect(0,0,uiCtx.canvas.width,uiCtx.canvas.height); }
+                lastPanExtraction = [];
+                const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+                pts.forEach((p, idx) => {
+                    const cx = Math.floor(p.x * 150); const cy = Math.floor(p.y * 200);
+                    let tr=0, tg=0, tb=0, tc=0;
+                    for(let iy=Math.max(0, cy-5); iy<Math.min(200, cy+5); iy++) {
+                        for(let ix=Math.max(0, cx-5); ix<Math.min(150, cx+5); ix++) {
+                            const i = (iy*150 + ix)*4; tr+=viewData[i]; tg+=viewData[i+1]; tb+=viewData[i+2]; tc++;
+                        }
+                    }
+                    const hex = rgbToHex(Math.round(tr/tc), Math.round(tg/tc), Math.round(tb/tc));
+                    const pan = findClosestPantone(Math.round(tr/tc), Math.round(tg/tc), Math.round(tb/tc));
+                    lastPanExtraction.push({ hex, pan });
+                    
+                    document.getElementById(`ps${idx+1}`).style.backgroundColor = hex;
+                    document.getElementById(`pn${idx+1}`).innerText = pan.n;
+                    document.getElementById(`ph${idx+1}`).innerText = hex;
 
-            // 4. False Colour
-            if(fcActive) {
-                document.getElementById('fc-layer').style.display = 'block';
-                const fw = fcCtx.canvas.width = 150; const fh = fcCtx.canvas.height = 200;
-                const fcData = procCtx.getImageData(0,0,fw,fh);
-                for(let i=0; i<fcData.data.length; i+=4) {
-                    let l = 0.299*fcData.data[i] + 0.587*fcData.data[i+1] + 0.114*fcData.data[i+2];
-                    if(l > 240) { fcData.data[i]=255; fcData.data[i+1]=50; fcData.data[i+2]=50; fcData.data[i+3]=180; } // Clip Red
-                    else if(l < 15) { fcData.data[i]=50; fcData.data[i+1]=50; fcData.data[i+2]=255; fcData.data[i+3]=180; } // Crush Blue
-                    else fcData.data[i+3]=0;
+                    // Draw Live Target Rings
+                    const tx = p.x * cw; const ty = p.y * ch;
+                    uiCtx.strokeStyle = hex; uiCtx.lineWidth = 3; uiCtx.beginPath(); uiCtx.arc(tx, ty, 20, 0, Math.PI*2); uiCtx.stroke();
+                    uiCtx.fillStyle = '#fff'; uiCtx.font = '16px DM Mono'; uiCtx.fillText(idx+1, tx+25, ty-25);
+                });
+            }
+
+            // False Colour
+            if(fcState > 0) {
+                const fw = fcCtx.canvas.width; const fh = fcCtx.canvas.height;
+                const fcData = procCtx.getImageData(0,0,150,200); const px = fcData.data;
+                for(let i=0; i<px.length; i+=4) {
+                    let l = 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2];
+                    let ire = (l / 255) * 100;
+                    if (fcState === 1) { // Atomos
+                        if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; }
+                        else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; }
+                        else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; }
+                        else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; }
+                        else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; }
+                        else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; }
+                        else { px[i]=l; px[i+1]=l; px[i+2]=l; px[i+3]=255; }
+                    } else if (fcState === 2) { // Zebra
+                        if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; }
+                        else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; }
+                        else { px[i+3]=0; }
+                    }
                 }
-                fcCtx.putImageData(fcData,0,0);
-            } else { document.getElementById('fc-layer').style.display = 'none'; }
+                fcCtx.putImageData(fcData, 0, 0);
+            }
         }
         requestAnimationFrame(liveLoop);
     }
 
-    // --- BUTTON CONTROLS ---
-    document.getElementById('btn-balance').addEventListener('click', () => {
-        // Calculate required shutter for 0 EV diff
-        const N = parseFloat(document.getElementById('set-aperture').value);
-        const ISO = parseInt(document.getElementById('set-iso').value);
-        const targetShutter = (N*N * 100) / (ISO * Math.pow(2, measuredEV));
-        const sOpts = Array.from(document.getElementById('set-shutter').options).map(o=>parseInt(o.value));
-        const closestS = sOpts.reduce((p, c) => Math.abs((1/c)-targetShutter) < Math.abs((1/p)-targetShutter) ? c : p);
-        document.getElementById('set-shutter').value = closestS;
+    // --- CAPTURE & SAVE ---
+    document.getElementById('capture-btn').addEventListener('click', () => {
+        playShutter();
+        if(currentTab === 'page-meter') processMeterCapture();
+        else if(currentTab === 'page-color') processPantoneCapture();
     });
 
-    document.getElementById('fc-toggle-btn').addEventListener('click', (e) => {
-        fcActive = !fcActive; e.target.style.color = fcActive ? 'var(--red)' : 'var(--gold)';
-    });
-
-    // --- SHOT PLAN EXPORT ---
-    document.getElementById('export-plan-btn').addEventListener('click', () => {
-        const renderDiv = document.getElementById('hidden-render');
-        
-        // Build the HTML card
-        let html = `
-            <div style="padding: 40px; color: #e6edf5; font-family: monospace;">
-                <h1 style="font-family: serif; color: #f0c040; font-size: 60px; border-bottom: 4px solid #f0c040; padding-bottom: 20px;">PR EYE PRE-PRODUCTION PLAN</h1>
-                
-                <div style="display:flex; margin-top: 40px; gap: 40px;">
-                    <div style="flex: 2; position: relative;">
-                        <img src="${getCamSnapshot()}" style="width: 100%; border-radius: 12px; border: 2px solid #1e3a52;">
-                    </div>
-                    
-                    <div style="flex: 1; background: #142438; padding: 30px; border-radius: 12px; border: 2px solid #1e3a52;">
-                        <h2 style="color: #f0c040; font-size: 30px; margin-bottom: 30px;">TELEMETRY</h2>
-                        <div style="font-size: 24px; margin-bottom: 15px;">ISO: <strong>${document.getElementById('set-iso').value}</strong></div>
-                        <div style="font-size: 24px; margin-bottom: 15px;">F-STOP: <strong>f/${document.getElementById('set-aperture').value}</strong></div>
-                        <div style="font-size: 24px; margin-bottom: 15px;">SHUTTER: <strong>1/${document.getElementById('set-shutter').value}s</strong></div>
-                        <div style="font-size: 24px; margin-bottom: 15px;">LIGHT: <strong>${measuredEV.toFixed(1)} EV</strong></div>
-                        <div style="font-size: 24px; margin-bottom: 40px; color: #f0c040;">TEMP: <strong>${liveTempC}°C</strong></div>
-                        
-                        <h2 style="color: #f0c040; font-size: 30px; margin-bottom: 30px;">PANTONE PALETTE</h2>
-                        <div style="display:flex; flex-direction:column; gap: 20px;">
-        `;
-        
-        // Add top 4 from history
-        const hList = panState.history.slice(0,4);
-        hList.forEach(item => {
-            html += `<div style="display:flex; align-items:center; gap: 15px;">
-                        <div style="width: 60px; height: 60px; background: ${item.hex}; border-radius: 8px; border: 2px solid #fff;"></div>
-                        <div><div style="font-size: 22px; font-weight: bold;">${item.pan}</div><div style="color:#6c829c; font-size: 18px;">${item.hex}</div></div>
-                     </div>`;
-        });
-        
-        html += `</div></div></div></div>`;
-        renderDiv.innerHTML = html;
-
-        // Generate Image
-        setTimeout(async () => {
-            const canvas = await html2canvas(renderDiv, { scale: 1, backgroundColor: '#0d1b2a' });
-            const link = document.createElement('a'); link.download = `ShotPlan_${Date.now()}.jpg`;
-            link.href = canvas.toDataURL('image/jpeg', 0.9); link.click();
-        }, 100);
-    });
-
-    function getCamSnapshot() {
-        const c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(video, 0,0);
-        // Draw grid over it
-        ctx.drawImage(document.getElementById('grid-layer'), 0,0, c.width, c.height);
-        return c.toDataURL('image/jpeg');
+    function getHiResCrop() {
+        const hrCanvas = document.createElement('canvas'); hrCanvas.width = 1200; hrCanvas.height = 1600;
+        const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4;
+        let sx, sy, sw, sh;
+        if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } 
+        else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
+        hrCanvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, 1200, 1600);
+        return hrCanvas;
     }
+
+    function processMeterCapture() {
+        if(isAutoExpo) document.getElementById('btn-balance').click();
+        generateComposite(getHiResCrop(), "METER ANALYSED REPORT", (cCtx) => {
+            cCtx.font = '40px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            cCtx.fillText(`SCENE EV: ${measuredEV.toFixed(1)}`, 100, 1250);
+            cCtx.fillText(`WB: ${liveTempC}°C`, 600, 1250);
+            cCtx.fillText(`SETTINGS: ISO ${document.getElementById('set-iso').value} | f/${document.getElementById('set-aperture').value} | 1/${document.getElementById('set-shutter').value}s`, 100, 1350);
+        });
+    }
+
+    function processPantoneCapture() {
+        if(lastPanExtraction.length < 4) return alert("Waiting for colour data...");
+        const snapData = [...lastPanExtraction];
+        const snapPts = [... (panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints)];
+
+        // Update History Strip
+        const histDiv = document.getElementById('pan-history');
+        snapData.forEach(d => {
+            const chip = document.createElement('div'); chip.className = 'hist-chip'; chip.style.background = d.hex;
+            histDiv.prepend(chip); if(histDiv.children.length > 8) histDiv.lastChild.remove();
+        });
+
+        generateComposite(getHiResCrop(), "COLOUR PALETTE REPORT", (cCtx) => {
+            snapPts.forEach((t, i) => {
+                const tx = t.x * 1200; const ty = t.y * 1600;
+                cCtx.strokeStyle = snapData[i].hex; cCtx.lineWidth = 8;
+                cCtx.beginPath(); cCtx.arc(tx, ty, 40, 0, Math.PI*2); cCtx.stroke();
+                cCtx.fillStyle = '#fff'; cCtx.font = 'bold 40px DM Mono'; cCtx.fillText(i+1, tx+50, ty-50);
+            });
+            cCtx.font = 'bold 36px DM Mono'; cCtx.fillStyle = '#e6edf5';
+            const blocks = [ {x: 100, y: 1200}, {x: 600, y: 1200}, {x: 100, y: 1350}, {x: 600, y: 1350} ];
+            snapData.forEach((col, idx) => {
+                cCtx.fillStyle = col.hex; cCtx.fillRect(blocks[idx].x, blocks[idx].y, 100, 100);
+                cCtx.fillStyle = '#e6edf5'; cCtx.fillText(`${idx+1}. ${col.pan.n}`, blocks[idx].x + 130, blocks[idx].y + 45);
+                cCtx.font = '28px DM Mono'; cCtx.fillStyle = '#6c829c'; cCtx.fillText(col.hex, blocks[idx].x + 130, blocks[idx].y + 85);
+                cCtx.font = 'bold 36px DM Mono';
+            });
+        });
+    }
+
+    function generateComposite(hiResCanvas, title, renderDataFn) {
+        const cCan = document.getElementById('composite-canvas'); const cCtx = cCan.getContext('2d');
+        cCtx.drawImage(hiResCanvas, 0, 0, 1200, 1600); 
+        
+        // Draw grid over photo if active
+        if(gridState.type !== 'off') {
+            const gCanvas = document.getElementById('grid-layer');
+            cCtx.drawImage(gCanvas, 0,0, gCanvas.width, gCanvas.height, 0,0, 1200, 1600);
+        }
+
+        cCtx.fillStyle = 'rgba(13, 27, 42, 0.8)'; cCtx.fillRect(0, 0, 1200, 160);
+        cCtx.font = 'bold 60px Cormorant Garamond'; cCtx.fillStyle = '#f0c040'; cCtx.fillText(title, 50, 100);
+        
+        cCtx.fillStyle = 'rgba(20, 36, 56, 0.9)'; cCtx.fillRect(50, 1150, 1100, 400);
+        cCtx.strokeStyle = '#f0c040'; cCtx.lineWidth = 4; cCtx.strokeRect(50, 1150, 1100, 400);
+        
+        renderDataFn(cCtx); 
+        
+        const link = document.createElement('a'); link.download = `PREye_Report_${Date.now()}.jpg`;
+        link.href = cCan.toDataURL('image/jpeg', 0.9); link.click();
+    }
+
+    // --- RELEASE FORM LOGIC ---
+    document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('tog-adult').addEventListener('click', () => { document.getElementById('tog-adult').classList.add('active'); document.getElementById('tog-minor').classList.remove('active'); document.getElementById('guardian-section').style.display = 'none'; });
+    document.getElementById('tog-minor').addEventListener('click', () => { document.getElementById('tog-minor').classList.add('active'); document.getElementById('tog-adult').classList.remove('active'); document.getElementById('guardian-section').style.display = 'block'; });
+    document.getElementById('r-photo-input').addEventListener('change', (e) => { if(e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('r-photo-preview').src = ev.target.result; document.getElementById('r-photo-preview').style.display = 'block'; }; reader.readAsDataURL(e.target.files[0]); } });
+
+    function initPad(id) { const can = document.getElementById(id), c = can.getContext('2d'); can.width = can.offsetWidth; let drawing = false; can.addEventListener('touchstart', e=>{drawing=true; c.moveTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); e.preventDefault();}); can.addEventListener('touchmove', e=>{if(!drawing)return; c.lineTo(e.touches[0].clientX-can.getBoundingClientRect().left, e.touches[0].clientY-can.getBoundingClientRect().top); c.stroke(); e.preventDefault();}); can.addEventListener('touchend', ()=>drawing=false); }
+    ['sig-model', 'sig-guardian', 'sig-witness', 'sig-photog'].forEach(initPad);
+    window.clearPad = (id) => { const c = document.getElementById(id); c.getContext('2d').clearRect(0,0,c.width,c.height); };
+
+    // PDF Generation
+    document.getElementById('gen-pdf-btn').addEventListener('click', async () => {
+        const renderDiv = document.getElementById('hidden-pdf-render');
+        let html = `<div style="margin-bottom: 20px;"><h1 style="text-align:center; font-family: serif; font-size: 24px;">MODEL RELEASE FORM</h1><p><strong>Shoot Date:</strong> ${document.getElementById('r-date').value} &nbsp;&nbsp;&nbsp; <strong>Location:</strong> ${document.getElementById('r-loc').value}</p><p><strong>PHOTOGRAPHER:</strong> Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk</p><hr><div style="display:flex; justify-content: space-between; align-items: flex-start;"><div><p><strong>MODEL Name:</strong> ${document.getElementById('r-name').value} &nbsp;&nbsp;&nbsp; <strong>DOB:</strong> ${document.getElementById('r-dob').value}</p><p><strong>Address:</strong> ${document.getElementById('r-address').value}</p><p><strong>Phone:</strong> ${document.getElementById('r-phone').value} &nbsp;&nbsp;&nbsp; <strong>Email:</strong> ${document.getElementById('r-email').value}</p><p><strong>Compensation (if any):</strong> ${document.getElementById('r-comp').value}</p></div>${document.getElementById('r-photo-preview').src ? `<img src="${document.getElementById('r-photo-preview').src}" style="width:100px; height:100px; object-fit:cover; border:1px solid #000;">` : ''}</div><hr><p style="font-size: 11px; text-align: justify; line-height: 1.2;"><strong>GRANT OF RIGHTS:</strong> I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media (including digital, print, social media, advertising, TV, film, AI applications, and all future technologies) for any lawful purpose including commercial use, advertising, marketing, and promotional materials.<br><br><strong>PERMISSIONS & OWNERSHIP:</strong> I agree that: (a) the Content may be combined with other materials, cropped, altered, or digitally manipulated; (b) all rights, title, and copyright in the Content belong exclusively to the Photographer; (c) I waive any right to inspect, approve, or receive compensation beyond what is stated above; (d) the Content may be used in AI training, generative AI, and facial recognition applications where legally permitted; (e) my name, image, likeness, and biographical information may be used in connection with the Content.<br><br><strong>RELEASE OF CLAIMS:</strong> I release and hold harmless the Photographer, their clients, and all related parties from any claims, damages, or liabilities arising from the use of the Content, including claims of defamation, invasion of privacy, infringement of moral rights, publicity rights, or copyright, or any misrepresentation or unfavourable portrayal.<br><br><strong>REPRESENTATIONS & WARRANTIES:</strong> I represent that: (a) I am at least 18 years of age and have full legal capacity to execute this Release; (b) I have the authority to grant these rights; (c) no third-party permissions are required; (d) all information provided is true and accurate; (e) I am signing voluntarily after having the opportunity to seek legal advice.<br><br><strong>DATA PROTECTION:</strong> My personal information will be processed in accordance with UK GDPR and Data Protection Act 2018 for administration, licensing, legal compliance, and defence of rights. Information may be shared with clients, licensees, and transferred internationally, but will not be made publicly available or used for marketing without separate consent.<br><br><strong>GENERAL PROVISIONS:</strong> This Release: (a) constitutes the entire agreement; (b) is binding on my heirs and assigns; (c) is governed by the laws of England and Wales; (d) may only be amended in writing signed by both parties. If any provision is invalid, the remaining provisions remain in effect.</p><p style="font-size: 11px;"><strong>ACKNOWLEDGMENT:</strong> By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release, and understand this is a binding legal agreement with irrevocable rights.</p><hr></div><table style="width: 100%; font-size: 12px; border-collapse: collapse;"><tr><td style="width: 50%; padding-bottom: 20px;"><strong>MODEL SIGNATURE:</strong><br><img src="${document.getElementById('sig-model').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Name (Print):</strong> ${document.getElementById('r-name').value}</td><td style="width: 50%; padding-bottom: 20px;"><strong>PHOTOGRAPHER SIGNATURE:</strong><br><img src="${document.getElementById('sig-photog').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Date:</strong> ${document.getElementById('r-date').value}</td></tr>${document.getElementById('guardian-section').style.display === 'block' ? `<tr><td colspan="2" style="padding-bottom: 20px;"><p style="font-size: 11px;"><strong>PARENTAL/GUARDIAN CONSENT:</strong> I, ${document.getElementById('r-g-name').value}, am the parent/legal guardian of the above Model and consent to this Release on their behalf.</p><strong>GUARDIAN SIGNATURE:</strong><br><img src="${document.getElementById('sig-guardian').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block;"></td></tr>` : ''}<tr><td colspan="2" style="padding-top: 10px; border-top: 1px dashed #000;"><strong>WITNESS SIGNATURE:</strong> (Must be 18+, independent)<br><img src="${document.getElementById('sig-witness').toDataURL()}" style="height: 60px; border-bottom: 1px solid #000; display:block; margin-bottom: 5px;"><strong>Witness Name:</strong> ${document.getElementById('r-w-name').value} &nbsp;&nbsp;&nbsp; <strong>Address:</strong> ${document.getElementById('r-w-address').value}</td></tr></table>`;
+        renderDiv.innerHTML = html;
+        const cCanvas = await html2canvas(renderDiv, { scale: 2 }); const imgData = cCanvas.toDataURL('image/jpeg');
+        const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (cCanvas.height * pdfWidth) / cCanvas.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight); pdf.save(`ModelRelease_${document.getElementById('r-name').value.replace(/\s+/g, '_')}.pdf`);
+    });
+
+    document.getElementById('email-pdf-btn').addEventListener('click', () => {
+        const email = document.getElementById('r-email').value; const ref = document.getElementById('r-loc').value || "Shoot";
+        window.location.href = `mailto:${email}?subject=Model Release form: ${ref}&body=Hi ${document.getElementById('r-name').value},%0D%0A%0D%0APlease find the signed model release form attached.%0D%0A%0D%0ABest regards,%0D%0ADigby Oldridge`;
+        alert("Please attach the PDF you just downloaded to the email draft.");
+    });
 
     // --- INIT ---
     startCamera();
