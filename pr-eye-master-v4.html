@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v24 — Pro Toolkit</title>
+    <title>PR Eye v25 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -99,6 +99,8 @@
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
         
+        #yt-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #000; flex-direction: column; align-items: center; justify-content: center; }
+        
         #composite-canvas, #proc-canvas, #fc-internal-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
         #hidden-pdf-render { position: absolute; top: -9999px; left: -9999px; width: 800px; background: #fff; color: #000; padding: 40px; font-family: sans-serif; }
     </style>
@@ -113,7 +115,7 @@
                     <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
                     <line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>
                 </svg>
-                PR EYE v24
+                PR EYE v25
             </div>
             <div style="display:flex; gap:5px;">
                 <button id="toggle-sound" class="btn icon-only active-toggle" style="height:32px; width:32px; font-size:14px;" title="Toggle Sound">🔊</button>
@@ -196,6 +198,11 @@
         <div id="page-scout" class="page">
             <div class="ctrl-panel glass-panel">
                 <h4>Ephemeris Data</h4>
+                
+                <div id="scout-map-container" style="width: 100%; height: 200px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 20px; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:var(--muted); font-size:12px; letter-spacing:1px;">AWAITING GPS...</span>
+                </div>
+
                 <div class="data-row"><span class="label-txt" style="margin:0;">Heading</span><span class="data-val" id="scout-heading">--°</span></div>
                 <div class="data-row"><span class="label-txt" style="margin:0;">Sunrise</span><span class="data-val" id="loc-sunrise">--:--</span></div>
                 <div class="data-row"><span class="label-txt" style="margin:0;">Sunset</span><span class="data-val" id="loc-sunset">--:--</span></div>
@@ -233,7 +240,10 @@
              <div class="ctrl-panel glass-panel" style="text-align: center;">
                 <h4 style="color: #ff00ff;">Audio-Reactive Strobe</h4>
                 <p style="font-size:11px; color:var(--muted); margin-bottom:15px;">Requires microphone access. Screen will flash to the beat of external music.</p>
-                <button class="btn solid" id="btn-start-rave" style="width: 100%; background: #ff00ff; color:#fff; border:none; margin-bottom: 20px;">Start Rave Mode</button>
+                <button class="btn solid" id="btn-start-rave" style="width: 100%; background: #ff00ff; color:#fff; border:none; margin-bottom: 10px;">Start Rave Mode</button>
+                
+                <button class="btn" id="btn-no-rave" style="width: 100%; margin-bottom: 20px; font-size: 11px;">No, I don't want to rave</button>
+
                 <hr style="border:0; border-top:1px dashed var(--border); margin-bottom:20px;">
                 <button class="btn danger" id="btn-sos-siren" style="width: 100%; padding: 20px; font-size: 20px; letter-spacing: 5px; box-shadow: 0 0 20px rgba(255,0,0,0.5);">EMERGENCY SOS</button>
             </div>
@@ -279,6 +289,11 @@
         </div>
     </div>
 
+    <div id="yt-overlay">
+        <iframe id="yt-iframe" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <button class="btn danger" onclick="document.getElementById('yt-overlay').style.display='none'; document.getElementById('yt-iframe').src='';" style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:10000; padding:15px 30px;">CLOSE VIDEO</button>
+    </div>
+
     <div class="nav">
         <div class="nav-item active" data-target="page-meter" data-cam="true"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Meter</div>
         <div class="nav-item" data-target="page-color" data-cam="true"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>Color</div>
@@ -294,7 +309,6 @@
     <div id="hidden-pdf-render"></div>
 
 <script>
-    // Robust font loading wrapper
     try { document.fonts.load('40px "Permanent Marker"'); } catch(e) {}
 
     const video = document.getElementById('video');
@@ -341,23 +355,14 @@
     const saveExpo = () => localStorage.setItem('preye_settings', JSON.stringify({iso: document.getElementById('set-iso').value, aperture: document.getElementById('set-aperture').value, shutter: document.getElementById('set-shutter').value, nd: document.getElementById('set-nd').value}));
     ['set-iso', 'set-aperture', 'set-shutter', 'set-nd'].forEach(id => document.getElementById(id).addEventListener('change', saveExpo));
 
-    // MULTI-TIER ROBUST CAMERA START
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try { 
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } }); 
         } 
         catch(e1) {
-            try { 
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } }); 
-            }
-            catch(e2) { 
-                try { 
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true }); 
-                } catch(e3) { 
-                    alert("Camera access failed. Check permissions."); return; 
-                } 
-            }
+            try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } }); }
+            catch(e2) { try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); } catch(e3) { console.error("Camera fail"); return; } }
         }
         video.srcObject = stream; video.play();
         video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); };
@@ -512,7 +517,7 @@
         requestAnimationFrame(liveLoop);
     }
 
-    // --- SECURE MODAL CAPTURE ENGINE ---
+    // --- SECURE MODAL CAPTURE ENGINE WITH PANTONE DRAWING ---
     document.getElementById('capture-btn').addEventListener('click', async () => {
         if(isCapturing) return; isCapturing = true;
 
@@ -537,7 +542,6 @@
                 cCtx.fillStyle = '#000'; cCtx.fillRect(50, 50, 900, 1200); cCtx.fillStyle = '#fff'; cCtx.font = '24px DM Mono'; cCtx.fillText('Camera feed unavailable', 350, 600);
             }
             
-            // THE FIX: Safe reference to the grid array instead of the non-existent DOM element
             if(gridOptions[currentGridIdx] !== 'off') cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
             if(currentTab === 'page-scout') cCtx.drawImage(document.getElementById('scout-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
 
@@ -549,8 +553,18 @@
                 cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#444';
                 cCtx.fillText(`${new Date().toLocaleDateString()}  -  ${currentWeatherDesc ? currentWeatherDesc : 'Location Scout'}`, 70, 1390);
             } else if(currentTab === 'page-color') {
-                cCtx.fillText(`Color Palette:`, 70, 1320); cCtx.font = '24px "Permanent Marker", cursive, sans-serif';
-                let colTxt = ""; lastPanExtraction.forEach((col, idx) => { colTxt += `${idx+1}. ${col.pan.n}  `; }); cCtx.fillText(colTxt, 70, 1370);
+                cCtx.fillText(`Color Palette:`, 70, 1300); 
+                cCtx.font = '20px "Permanent Marker", cursive, sans-serif';
+                
+                // THE FIX: Draw actual color swatches on the export canvas
+                lastPanExtraction.forEach((col, idx) => { 
+                    const yOff = 1330 + Math.floor(idx / 2) * 45;
+                    const xOff = 70 + (idx % 2) * 450;
+                    cCtx.fillStyle = col.hex;
+                    cCtx.fillRect(xOff, yOff - 20, 35, 35); // Draw color square
+                    cCtx.fillStyle = '#444';
+                    cCtx.fillText(`${idx+1}. ${col.pan.n}`, xOff + 50, yOff + 5); // Draw text next to it
+                });
             } else {
                 let useEV = flashModeActive ? flashPeakEV : measuredEV; if(useEV === -99) useEV = measuredEV;
                 cCtx.fillText(`EV: ${useEV.toFixed(1)}  |  ISO ${document.getElementById('set-iso').value}  |  f/${document.getElementById('set-aperture').value}  |  1/${document.getElementById('set-shutter').value}s`, 70, 1330);
@@ -580,34 +594,49 @@
         } catch (e) { alert("Capture system error."); console.error(e); isCapturing = false; }
     });
 
-    // --- GPS & EPHEMERIS ---
+    // --- GPS & EPHEMERIS FIX ---
     setInterval(() => {
         if(goldenHourTime) { const diff = goldenHourTime - new Date(); if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); document.getElementById('loc-golden').innerText = `${h}h ${m}m ${s}s`; } else { document.getElementById('loc-golden').innerText = "Active"; } }
     }, 1000);
 
     const fetchLocData = () => {
-        if(navigator.geolocation) {
-            document.getElementById('tool-temp').innerText = "Locating...";
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; document.getElementById('tel-gps').innerText = "OK";
-                try {
-                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
-                    const wData = await wRes.json(); document.getElementById('tool-temp').innerText = `${wData.current_weather.temperature} °C`;
-                    currentWeatherDesc = wCodes[wData.current_weather.weathercode] || "Clear"; document.getElementById('tool-weather').innerText = currentWeatherDesc;
-                    const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
-                    const sData = await sRes.json(); sunriseTime = new Date(sData.results.sunrise); sunsetTime = new Date(sData.results.sunset); goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset); 
-                    document.getElementById('loc-sunrise').innerText = sunriseTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('loc-sunset').innerText = sunsetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                } catch(e) { document.getElementById('tool-temp').innerText = "API Error"; }
-            }, (err) => { document.getElementById('tool-temp').innerText = "Denied"; }, { enableHighAccuracy: true, timeout: 10000 });
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
         }
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            alert("SECURITY WARNING: GPS requires a secure HTTPS connection. Geolocation will likely fail.");
+        }
+        
+        document.getElementById('tool-temp').innerText = "Locating...";
+        document.getElementById('scout-map-container').innerHTML = `<span style="color:var(--muted); font-size:12px; letter-spacing:1px;">ACQUIRING SATELLITE...</span>`;
+        
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; document.getElementById('tel-gps').innerText = "OK";
+            
+            // MAP RESTORATION
+            document.getElementById('scout-map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed" allowfullscreen></iframe>`;
+            
+            try {
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
+                const wData = await wRes.json(); document.getElementById('tool-temp').innerText = `${wData.current_weather.temperature} °C`;
+                currentWeatherDesc = wCodes[wData.current_weather.weathercode] || "Clear"; document.getElementById('tool-weather').innerText = currentWeatherDesc;
+                const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
+                const sData = await sRes.json(); sunriseTime = new Date(sData.results.sunrise); sunsetTime = new Date(sData.results.sunset); goldenHourTime = new Date(sData.results.golden_hour || sData.results.sunset); 
+                document.getElementById('loc-sunrise').innerText = sunriseTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('loc-sunset').innerText = sunsetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } catch(e) { document.getElementById('tool-temp').innerText = "API Error"; }
+        }, (err) => { 
+            document.getElementById('tool-temp').innerText = "Denied"; 
+            document.getElementById('scout-map-container').innerHTML = `<span style="color:var(--red); font-size:12px; letter-spacing:1px;">GPS FAILED: ${err.message}</span>`;
+            alert(`GPS Error: ${err.message}. Ensure location permissions are allowed for this site.`);
+        }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }); // High accuracy set to false to prevent infinite hang on mobile
     };
     document.getElementById('btn-fetch-loc-scout').addEventListener('click', fetchLocData); document.getElementById('btn-fetch-loc-tools').addEventListener('click', fetchLocData);
     const wCodes = { 0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast", 45:"Fog", 48:"Depositing rime fog", 51:"Drizzle", 53:"Drizzle", 55:"Heavy Drizzle", 61:"Light Rain", 63:"Moderate Rain", 65:"Heavy Rain", 71:"Light Snow", 73:"Moderate Snow", 75:"Heavy Snow", 95:"Thunderstorm" };
 
-    // THE FIX: Clean Google Maps URI Scheme
     window.openSOS = (query) => {
         if(!currentLat) { alert("GPS coordinates not yet loaded. Please tap 'Refresh GPS Data' first."); return; }
-        window.open(`https://www.google.com/maps/search/${query}/@${currentLat},${currentLon},14z`, '_blank');
+        window.open(`https://maps.google.com/maps?q=${query}&ll=${currentLat},${currentLon}&z=14`, '_blank');
     };
 
     // --- RAVE FIXES ---
@@ -619,10 +648,15 @@
             document.getElementById('btn-start-rave').innerText = "Start Rave Mode";
             return;
         }
+        
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            alert("SECURITY WARNING: Microphone access requires a secure HTTPS connection.");
+        }
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            await raveAudioCtx.resume(); // THE FIX: Fulfills Safari/Chrome autoplay policy requirements
+            await raveAudioCtx.resume(); 
             
             raveAnalyser = raveAudioCtx.createAnalyser(); raveAnalyser.fftSize = 256;
             raveMic = raveAudioCtx.createMediaStreamSource(stream); raveMic.connect(raveAnalyser);
@@ -633,15 +667,21 @@
             raveInterval = setInterval(() => {
                 if(sosActive) return; 
                 raveAnalyser.getByteFrequencyData(dataArray);
-                // THE FIX: Lowered activation threshold to 80 (down from 140) to make it highly reactive to phone mics
-                let bassAvg = (dataArray[1] + dataArray[2] + dataArray[3] + dataArray[4] + dataArray[5]) / 5;
-                if(bassAvg > 80) { 
+                // Ultra sensitive beat detection (looking at lowest frequencies only)
+                let bassAvg = (dataArray[1] + dataArray[2]) / 2;
+                if(bassAvg > 100) { 
                     document.body.style.setProperty('background-color', `hsl(${Math.random() * 360}, 100%, 50%)`, 'important'); 
                 } else { 
                     document.body.style.setProperty('background-color', '#09121c', 'important'); 
                 }
-            }, 40);
-        } catch(e) { alert("Microphone access denied or unavailable."); }
+            }, 50);
+        } catch(e) { alert("Microphone access denied or unavailable. Please check site permissions."); console.error(e); }
+    });
+
+    // --- YOUTUBE OVERLAY BUTTON ---
+    document.getElementById('btn-no-rave').addEventListener('click', () => {
+        document.getElementById('yt-overlay').style.display = 'flex';
+        document.getElementById('yt-iframe').src = 'https://www.youtube.com/embed/cmoFNya6P4Q?autoplay=1&playsinline=1';
     });
 
     let sosAudioCtx, sirenOsc1, sirenOsc2, sirenGain1, sirenGain2, sosInterval, sosActive = false;
