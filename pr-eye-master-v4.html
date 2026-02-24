@@ -3,327 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.0 — Pro Toolkit</title>
+    <title>PR Eye v2.1 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --navy: #09121c; --navy-glass: rgba(20, 36, 56, 0.4); 
-            --border: rgba(255, 255, 255, 0.08);
+            --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --gold-dim: rgba(212, 194, 161, 0.15);
             --text: #f0f4f8; --muted: #8b9bb4;
-            --red: #ff4d4d; --blue: #4d4dff; --green: #4dff4d;
-            --whatsapp: #25d366;
+            --red: #ff4d4d; --green: #4dff4d; --whatsapp: #25d366;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #09121c; color: #f0f4f8; font-family: 'DM Mono', monospace; font-size: 14px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
-        h1, h2, h3, h4 { font-family: 'Cormorant Gramand', serif; color: var(--gold); font-weight: 400; letter-spacing: 0.5px; margin-bottom: 8px;}
+        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
-        .glass-panel { background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
-        .hdr { background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); padding: 15px 15px 25px 15px; display: flex; flex-direction: column; flex-shrink: 0; z-index: 10; }
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; display: flex; align-items: center; font-weight: 500;}
+        .hdr { padding: 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
         
-        .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; margin-top: 10px; }
-        .tel-item { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; letter-spacing: 1px;}
-        .ev-good { color: var(--green); }
+        .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
+        .tel-item { font-size: 11px; font-weight: 500; letter-spacing: 1px;}
 
-        .main-content { flex: 1; overflow-y: auto; position: relative; padding: 0 15px 90px 15px; }
-        .page { display: none; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .main-content { flex: 1; overflow-y: auto; padding: 0 15px 100px 15px; }
+        .page { display: none; } .page.active { display: block; }
 
-        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
+        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: 0.2s;}
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: 0.2s; font-size: 12px;}
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 600;}
-        .btn.whatsapp { background: var(--whatsapp); color: #fff; border: none; font-weight: 600;}
-        .btn.danger { background: var(--red); color: #fff; border: none;}
+        .btn.whatsapp { background: var(--whatsapp); color: #fff; border: none; margin-top: 10px;}
         
-        .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; }
-        .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 2px; opacity: 0.8;}
-        input, select, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 14px; margin-bottom: 12px; outline: none;}
+        .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
+        .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
+        input, select, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--gold); padding: 8px 0; font-family: inherit; font-size: 13px; margin-bottom: 12px; outline: none;}
 
-        .toggle-switch { display: flex; border: 1px solid var(--border); border-radius: 50px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 4px;}
-        .toggle-opt { flex: 1; text-align: center; padding: 10px; color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 500; border-radius: 40px;}
-        .toggle-opt.active { background: var(--gold); color: #09121c; }
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
+        .pan-swatch { width: 35%; }
+        .pan-data { width: 65%; padding: 5px; display: flex; flex-direction: column; justify-content: center; font-size: 10px;}
 
-        .signature-pad { background: #fff; border-radius: 8px; width: 100%; border: none; touch-action: none; margin-bottom: 5px;}
+        .signature-pad { background: #fff; border-radius: 4px; width: 100%; touch-action: none; margin-bottom: 5px;}
 
-        .nav { background: rgba(9, 18, 28, 0.85); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item svg { width: 18px; height: 18px; margin-bottom: 4px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+        .nav { background: rgba(9, 18, 28, 0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; }
+        .nav-item.active { color: var(--gold); background: radial-gradient(circle at top, rgba(212, 194, 161, 0.1) 0%, transparent 70%); }
 
-        #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-        #sos-flash-overlay.strobe-active { display: block; animation: strobeRedBlue 0.4s infinite; }
-        @keyframes strobeRedBlue { 0% { background: rgba(255,0,0,0.8); } 50% { background: rgba(0,0,255,0.8); } }
-
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="hdr" id="main-hdr">
-        <div class="hdr-top">
-            <div class="brand">PR EYE v2.0</div>
-            <div style="display:flex; gap:5px;">
-                <button id="toggle-sound" class="btn active-toggle" style="width:40px; padding:0;">🔊</button>
-                <button id="cam-flip-btn" class="btn" style="width:40px; padding:0;">🔄</button>
-            </div>
-        </div>
-        <div class="telemetry-bar glass-panel">
-            <div class="tel-item">EV <span id="tel-ev" class="ev-good">0.0</span></div>
-            <div class="tel-item" style="color:var(--gold)">WB <span id="tel-wb">5500 K</span></div>
-            <div class="tel-item" style="color:var(--muted)">GPS <span id="tel-gps">OK</span></div>
+    <div class="hdr">
+        <div class="hdr-top"><div class="brand">PR EYE v2.1</div><button id="cam-flip" class="btn" style="width:40px; padding:0;">🔄</button></div>
+        <div class="telemetry-bar">
+            <div class="tel-item">EV <span id="val-ev" style="color:var(--green)">0.0</span></div>
+            <div class="tel-item">GOLDEN <span id="val-golden" style="color:var(--gold)">--:--</span></div>
+            <div class="tel-item">GPS <span id="val-gps">WAIT</span></div>
         </div>
     </div>
 
     <div class="main-content">
-        <div id="persistent-cam-area">
-            <div class="cam-container" id="cam-wrapper">
-                <video id="video" autoplay playsinline webkit-playsinline></video>
+        <div id="cam-section">
+            <div class="cam-container">
+                <video id="video" autoplay playsinline></video>
                 <canvas id="scout-layer" class="overlay"></canvas>
                 <canvas id="ui-layer" class="overlay"></canvas>
             </div>
-            <div class="action-row" style="display:flex; gap:10px;">
-                <button id="capture-btn" class="btn solid">CAPTURE</button>
-            </div>
-        </div>
-
-        <div id="page-meter" class="page active">
-            <div class="ctrl-panel glass-panel">
-                <div class="row" style="display:flex; gap:10px;">
-                    <div style="flex:1;"><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>800</option><option>1600</option></select></div>
-                    <div style="flex:1;"><span class="label-txt">f/</span><select id="set-aperture"><option>2.8</option><option selected>5.6</option><option>8.0</option><option>11</option></select></div>
-                </div>
-            </div>
+            <button id="capture-btn" class="btn solid">CAPTURE IMAGE</button>
         </div>
 
         <div id="page-color" class="page">
-            <div class="ctrl-panel glass-panel">
-                <h4>Primary Swatches</h4>
-                <div id="color-results" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                    <div style="height:60px; background:#222; border-radius:8px;" id="swatch-1"></div>
-                    <div style="height:60px; background:#444; border-radius:8px;" id="swatch-2"></div>
+            <div class="ctrl-panel">
+                <h4>Color Match (Pantone)</h4>
+                <div class="pan-grid">
+                    <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><b id="cn1">---</b><span id="ch1">---</span></div></div>
+                    <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><b id="cn2">---</b><span id="ch2">---</span></div></div>
                 </div>
             </div>
         </div>
 
         <div id="page-scout" class="page">
-            <div class="ctrl-panel glass-panel">
-                <h4>Ephemeris</h4>
-                <div style="display:flex; justify-content:space-between; margin:10px 0;">
-                    <span class="label-txt">Heading</span><span id="scout-heading">--°</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin:10px 0;">
-                    <span class="label-txt">Sunrise</span><span id="scout-sunrise">--:--</span>
-                </div>
+            <div class="ctrl-panel">
+                <h4>Location Data</h4>
+                <div id="scout-map-live" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden;"></div>
+                <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunrise</span><span id="txt-sunrise">--:--</span></div>
+                <div style="display:flex; justify-content:space-between;"><span class="label-txt">Sunset</span><span id="txt-sunset">--:--</span></div>
             </div>
         </div>
 
-        <div id="page-release" class="page">
-            <div class="ctrl-panel glass-panel">
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><span class="label-txt">Date</span><input type="date" id="r-date"></div>
-                    <div style="flex:1;"><span class="label-txt">Loc</span><input type="text" id="r-loc" placeholder="London"></div>
-                </div>
+        <div id="page-legal" class="page">
+            <div class="ctrl-panel">
+                <h4>Shoot Info</h4>
+                <input type="date" id="r-date">
+                <input type="text" id="r-loc" placeholder="Location">
+                
                 <h4>Model Details</h4>
-                <input type="text" id="r-name" placeholder="Full Name">
+                <input type="text" id="r-name" placeholder="Full Legal Name">
+                <input type="text" id="r-dob" placeholder="Date of Birth">
                 <input type="text" id="r-address" placeholder="Residential Address">
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="r-dob" placeholder="DOB">
-                    <input type="tel" id="r-phone" placeholder="Phone">
-                </div>
+                <input type="tel" id="r-phone" placeholder="Phone">
                 <input type="email" id="r-email" placeholder="Email">
-                <input type="text" id="r-comp" placeholder="Compensation (e.g. £100 / TFP)">
+                <input type="text" id="r-comp" placeholder="Compensation (if any)">
 
-                <div class="toggle-switch">
-                    <div class="toggle-opt active" id="tog-adult">Adult</div>
-                    <div class="toggle-opt" id="tog-minor">Minor</div>
-                </div>
-
-                <div id="guardian-section" style="display:none; border-top:1px solid var(--border); padding-top:15px; margin-top:15px;">
+                <select id="r-age"><option value="adult">Adult (18+)</option><option value="minor">Minor (Under 18)</option></select>
+                
+                <div id="guardian-box" style="display:none;">
                     <h4>Guardian Consent</h4>
-                    <input type="text" id="r-g-name" placeholder="Guardian Name">
-                    <span class="label-txt">Guardian Signature</span>
+                    <input type="text" id="r-g-name" placeholder="Parent/Guardian Name">
                     <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
                 </div>
 
-                <h4>Witness Details</h4>
+                <h4>Witness & Signatures</h4>
                 <input type="text" id="r-w-name" placeholder="Witness Name">
-                <input type="text" id="r-w-address" placeholder="Witness Address">
-                <span class="label-txt">Witness Signature</span>
-                <canvas id="sig-witness" class="signature-pad" height="100"></canvas>
+                <input type="text" id="r-w-addr" placeholder="Witness Address">
+                <span class="label-txt">Witness Signature</span><canvas id="sig-witness" class="signature-pad" height="80"></canvas>
+                <span class="label-txt">Model Signature</span><canvas id="sig-model" class="signature-pad" height="80"></canvas>
+                <span class="label-txt">Photographer Signature</span><canvas id="sig-photog" class="signature-pad" height="80"></canvas>
 
-                <h4>Finalize</h4>
-                <span class="label-txt">Model Signature</span>
-                <canvas id="sig-model" class="signature-pad" height="100"></canvas>
-                <span class="label-txt">Photographer Signature</span>
-                <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
-                
-                <div style="display:flex; gap:10px;">
-                    <button id="gen-pdf-btn" class="btn solid">Generate PDF</button>
-                    <button id="btn-whatsapp" class="btn whatsapp">WhatsApp Share</button>
-                </div>
+                <button id="gen-pdf" class="btn solid">EXPORT PDF RELEASE</button>
+                <button id="btn-wa" class="btn whatsapp">WHATSAPP SUMMARY</button>
             </div>
         </div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active" data-target="page-meter" data-cam="true"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="currentColor"/></svg>Meter</div>
-        <div class="nav-item" data-target="page-color" data-cam="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor"/></svg>Color</div>
-        <div class="nav-item" data-target="page-scout" data-cam="true"><svg viewBox="0 0 24 24"><path d="M12 2L15 9H9L12 2Z" stroke="currentColor"/></svg>Scout</div>
-        <div class="nav-item" data-target="page-release" data-cam="false"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"/></svg>Legal</div>
+        <div class="nav-item active" data-target="cam-section">Meter</div>
+        <div class="nav-item" data-target="page-color">Color</div>
+        <div class="nav-item" data-target="page-scout">Scout</div>
+        <div class="nav-item" data-target="page-legal">Legal</div>
     </div>
 
     <div id="result-overlay">
         <img id="result-img">
-        <div style="display:flex; gap:10px; width:100%; margin-top:15px;">
-            <button class="btn solid" id="btn-share-result">Share</button>
-            <button class="btn" onclick="document.getElementById('result-overlay').style.display='none'">Close</button>
-        </div>
+        <button class="btn solid" style="margin-top:15px; width:200px;" onclick="document.getElementById('result-overlay').style.display='none'">CLOSE</button>
     </div>
 
-    <canvas id="composite-canvas" width="1000" height="1500" style="display:none;"></canvas>
+    <canvas id="proc-canvas" width="150" height="200" style="display:none;"></canvas>
+    <canvas id="comp-canvas" width="1000" height="1500" style="display:none;"></canvas>
 
 <script>
     const video = document.getElementById('video');
-    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
     const uiCtx = document.getElementById('ui-layer').getContext('2d');
-    let currentLat = 51.5074, currentLon = -0.1278, currentHeading = 0;
-    let stream, currentTab = 'page-meter';
+    const scoutCtx = document.getElementById('scout-layer').getContext('2d');
+    const procCtx = document.getElementById('proc-canvas').getContext('2d');
+    let stream, currentHeading = 0, currentLat, currentLon, goldenHour;
+    let pantoneDb = [{n:"Process Yellow C",rgb:[255,242,0]},{n:"Warm Red C",rgb:[249,66,58]},{n:"Reflex Blue C",rgb:[0,20,137]},{n:"Black 6 C",rgb:[10,10,10]}];
 
-    // PHOTOGRAPHER HARDCODED DETAILS
-    const PHOTOG_INFO = "Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk";
-
-    async function startCamera() {
+    async function init() {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            const r = video.getBoundingClientRect();
-            [scoutCtx.canvas, uiCtx.canvas].forEach(c => { c.width = r.width; c.height = r.height; });
-            requestAnimationFrame(liveLoop);
-        };
+        navigator.geolocation.getCurrentPosition(pos => {
+            currentLat = pos.coords.latitude; currentLon = pos.coords.longitude;
+            document.getElementById('val-gps').innerText = "OK";
+            document.getElementById('scout-map-live').innerHTML = `<iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed"></iframe>`;
+            fetchTimes();
+            // Pre-load static map for export
+            const mapImg = new Image(); mapImg.crossOrigin = "anonymous";
+            mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
+            mapImg.onload = () => window._staticMap = mapImg;
+        });
+        requestAnimationFrame(liveLoop);
     }
+
+    async function fetchTimes() {
+        const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
+        const data = await res.json();
+        const sunrise = new Date(data.results.sunrise);
+        const sunset = new Date(data.results.sunset);
+        goldenHour = new Date(sunset.getTime() - (60 * 60 * 1000));
+        document.getElementById('txt-sunrise').innerText = sunrise.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('txt-sunset').innerText = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+
+    setInterval(() => {
+        if(!goldenHour) return;
+        const diff = goldenHour - new Date();
+        if(diff > 0) {
+            const m = Math.floor(diff / 60000); const s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('val-golden').innerText = `${m}m ${s}s`;
+        } else { document.getElementById('val-golden').innerText = "ACTIVE"; }
+    }, 1000);
 
     function liveLoop() {
         if(video.readyState === 4) {
-            const sw = scoutCtx.canvas.width, sh = scoutCtx.canvas.height;
+            procCtx.drawImage(video, 0, 0, 150, 200);
+            const pix = procCtx.getImageData(0,0,150,200).data;
+            let lum = 0; for(let i=0; i<pix.length; i+=4) lum += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+            document.getElementById('val-ev').innerText = (Math.log2(lum/30000)).toFixed(1);
+
+            const sw = scoutCtx.canvas.width = video.offsetWidth;
+            const sh = scoutCtx.canvas.height = video.offsetHeight;
             scoutCtx.clearRect(0,0,sw,sh);
-            
-            // Scout Compass + Sun Logic
             scoutCtx.save();
             scoutCtx.translate(sw/2, sh/2);
             scoutCtx.rotate(-currentHeading * Math.PI/180);
             scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)';
-            scoutCtx.beginPath(); scoutCtx.arc(0,0,100,0,Math.PI*2); scoutCtx.stroke();
-            
-            // Sun indicator
+            scoutCtx.beginPath(); scoutCtx.arc(0,0,80,0,Math.PI*2); scoutCtx.stroke();
             scoutCtx.fillStyle = '#ffb347';
-            scoutCtx.beginPath(); scoutCtx.arc(0, -100, 8, 0, Math.PI*2); scoutCtx.fill();
-            scoutCtx.font = 'bold 12px DM Mono';
-            scoutCtx.fillText('SUN', 15, -95);
+            scoutCtx.beginPath(); scoutCtx.arc(0, -80, 6, 0, Math.PI*2); scoutCtx.fill();
+            scoutCtx.font = '10px DM Mono'; scoutCtx.fillText("SUN", 10, -75);
             scoutCtx.restore();
+
+            // Color Samples
+            [1,2].forEach(i => {
+                const p = procCtx.getImageData(i*40, 100, 1, 1).data;
+                const hex = "#" + ((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
+                document.getElementById(`cs${i}`).style.background = hex;
+                document.getElementById(`ch${i}`).innerText = hex;
+                document.getElementById(`cn${i}`).innerText = pantoneDb[i].n;
+            });
         }
         requestAnimationFrame(liveLoop);
     }
 
-    // CAPTURE SYSTEM (With GPS on ALL exports)
-    document.getElementById('capture-btn').addEventListener('click', () => {
-        const can = document.getElementById('composite-canvas');
-        const ctx = can.getContext('2d');
-        const _imgH = 1200; // Moved outside block to fix crash scope
-
-        ctx.fillStyle = '#f8f8f8'; ctx.fillRect(0,0,1000,1500);
-        ctx.drawImage(video, 50, 50, 900, _imgH);
-        
-        // GPS Stamp
-        ctx.fillStyle = '#1a1a1a';
-        ctx.font = '24px "Permanent Marker"';
-        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1300);
-        ctx.font = '20px "DM Mono"';
-        ctx.fillText(`Mode: ${currentTab.replace('page-','').toUpperCase()}`, 70, 1340);
-        
-        document.getElementById('result-img').src = can.toDataURL('image/jpeg');
+    document.getElementById('capture-btn').onclick = () => {
+        const can = document.getElementById('comp-canvas'); const ctx = can.getContext('2d');
+        ctx.fillStyle = "#f8f8f8"; ctx.fillRect(0,0,1000,1500);
+        ctx.drawImage(video, 50, 50, 900, 1150);
+        if(window._staticMap) ctx.drawImage(window._staticMap, 50, 1220, 900, 180);
+        ctx.fillStyle = "#1a1a1a"; ctx.font = "22px Permanent Marker";
+        ctx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)} | RISE: ${document.getElementById('txt-sunrise').innerText}`, 70, 1430);
+        document.getElementById('result-img').src = can.toDataURL();
         document.getElementById('result-overlay').style.display = 'flex';
-    });
-
-    // LEGAL LOGIC
-    document.getElementById('tog-minor').onclick = () => {
-        document.getElementById('guardian-section').style.display = 'block';
-        document.getElementById('tog-minor').classList.add('active');
-        document.getElementById('tog-adult').classList.remove('active');
-    };
-    document.getElementById('tog-adult').onclick = () => {
-        document.getElementById('guardian-section').style.display = 'none';
-        document.getElementById('tog-adult').classList.add('active');
-        document.getElementById('tog-minor').classList.remove('active');
     };
 
-    // PDF REBUILD
-    document.getElementById('gen-pdf-btn').onclick = () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const modelName = document.getElementById('r-name').value || "Model";
+    document.getElementById('r-age').onchange = (e) => document.getElementById('guardian-box').style.display = e.target.value === 'minor' ? 'block' : 'none';
 
-        doc.setFontSize(18); doc.text("MODEL RELEASE FORM", 105, 20, {align:'center'});
-        doc.setFontSize(8); doc.text(PHOTOG_INFO, 105, 28, {align:'center'});
-
+    document.getElementById('gen-pdf').onclick = () => {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const v = id => document.getElementById(id).value || "_______";
+        doc.setFontSize(16); doc.text("MODEL RELEASE FORM", 105, 20, {align:'center'});
+        doc.setFontSize(8); doc.text("Photographer: Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot | Tel: 07879 403 618", 105, 26, {align:'center'});
         doc.setFontSize(10);
-        doc.text(`Date: ${document.getElementById('r-date').value} | Location: ${document.getElementById('r-loc').value}`, 20, 40);
-        doc.text(`Model: ${modelName} | DOB: ${document.getElementById('r-dob').value}`, 20, 48);
-        doc.text(`Address: ${document.getElementById('r-address').value}`, 20, 56);
-        doc.text(`Compensation: ${document.getElementById('r-comp').value}`, 20, 64);
-
-        const legalText = `GRANT OF RIGHTS: I hereby grant to the Photographer, their clients, assigns, and successors the irrevocable, perpetual, worldwide right to use Content taken of me in any media for any lawful purpose including commercial use and AI applications. PERMISSIONS: I agree Content may be digitally altered and Photographer owns all copyright. DATA PROTECTION: Information processed in accordance with UK GDPR.`;
-        doc.setFontSize(9);
-        doc.text(doc.splitTextToSize(legalText, 170), 20, 75);
-
-        // Signatures
-        doc.text("Model Signature:", 20, 110);
-        doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 115, 50, 20);
+        doc.text(`Date: ${v('r-date')}  Location: ${v('r-loc')}`, 20, 40);
+        doc.text(`Model: ${v('r-name')}  DOB: ${v('r-dob')}`, 20, 50);
+        doc.text(`Address: ${v('r-address')}`, 20, 60);
         
-        doc.text("Photographer Signature:", 120, 110);
-        doc.addImage(document.getElementById('sig-photog').toDataURL(), 'PNG', 120, 115, 50, 20);
+        const legal = doc.splitTextToSize("GRANT OF RIGHTS: I hereby grant to the Photographer the irrevocable, perpetual, worldwide right to use photographs and recordings of me for any lawful purpose including commercial use and AI applications. PERMISSIONS: I agree Content may be digitally altered and Photographer owns all copyright. DATA PROTECTION: Information processed in accordance with UK GDPR.", 170);
+        doc.text(legal, 20, 75);
 
-        doc.save(`ModelRelease_${modelName}_${Date.now()}.pdf`);
+        doc.text("Model Signature:", 20, 110); doc.addImage(document.getElementById('sig-model').toDataURL(), 'PNG', 20, 112, 50, 15);
+        doc.text("Photographer Signature:", 120, 110); doc.addImage(document.getElementById('sig-photog').toDataURL(), 'PNG', 120, 112, 50, 15);
+        
+        doc.save(`Release_${v('r-name')}.pdf`);
     };
 
-    // WHATSAPP SHARE
-    document.getElementById('btn-whatsapp').onclick = () => {
-        const msg = `PR EYE v2.0 Shoot Summary\nDate: ${document.getElementById('r-date').value}\nLoc: ${document.getElementById('r-loc').value}\nModel: ${document.getElementById('r-name').value}\nPhotog: Digby Oldridge (PR Eye Ltd)`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-    };
-
-    // NAV & SIG PADS
-    document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
-        document.querySelectorAll('.page, #persistent-cam-area').forEach(p => p.style.display = 'none');
-        document.getElementById(n.dataset.target).style.display = 'block';
-        document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'block' : 'none';
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        n.classList.add('active');
-        currentTab = n.dataset.target;
+    const pads = ['sig-model','sig-photog','sig-witness','sig-guardian'].forEach(id => {
+        const can = document.getElementById(id); const ctx = can.getContext('2d');
+        can.width = can.offsetWidth; let drawing = false;
+        can.onpointerdown = (e) => { drawing = true; ctx.moveTo(e.offsetX, e.offsetY); };
+        can.onpointermove = (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+        can.onpointerup = () => drawing = false;
     });
 
-    const setupPad = (id) => {
-        const can = document.getElementById(id); const ctx = can.getContext('2d');
-        can.width = can.offsetWidth;
-        let draw = false;
-        can.onpointerdown = (e) => { draw = true; ctx.moveTo(e.offsetX, e.offsetY); };
-        can.onpointermove = (e) => { if(draw) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
-        can.onpointerup = () => draw = false;
-    };
-    ['sig-model', 'sig-photog', 'sig-witness', 'sig-guardian'].forEach(setupPad);
+    document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
+        document.querySelectorAll('.page, #cam-section').forEach(p => p.classList.remove('active'));
+        document.getElementById(n.dataset.target).classList.add('active');
+        if(n.dataset.target === 'cam-section' || n.dataset.target === 'page-color' || n.dataset.target === 'page-scout') document.getElementById('cam-section').classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); n.classList.add('active');
+    });
 
-    window.ondeviceorientation = (e) => currentHeading = e.alpha || 0;
-    startCamera();
+    window.ondeviceorientation = e => currentHeading = e.alpha || 0;
+    init();
 </script>
 </body>
 </html>
