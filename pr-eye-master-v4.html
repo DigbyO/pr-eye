@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.6 — Complete Pro Toolkit</title>
+    <title>PR Eye v4.6 — Master Recovery</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,395 +13,147 @@
         :root {
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
-            --red: #ff4d4d; --blue: #0044ff; --magenta: #ff00ff; --cyan: #00ffff; --green: #4dff4d;
-            --canon-bg: #0d141e; --canon-line: #2a3a4a; --canon-orange: #f39c12;
+            --red: #ff4d4d; --cyan: #00ffff; --canon-orange: #f39c12;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
-        h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
+        body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; display:flex; flex-direction: column; gap: 10px;}
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
-        .telemetry-bar { display: flex; align-items: center; gap: 15px; }
-        .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--muted);}
-        
-        .project-input { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gold); font-family: 'DM Mono'; font-size: 12px; padding: 8px; border-radius: 4px; width: 100%; text-align: center; outline: none;}
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; text-align: center; }
 
         .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        /* PERSISTENT CAMERA AREA */
-        #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; position: relative;}
+        #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; }
         .viewfinder-wrap { display: flex; gap: 10px; height: 180px; margin-bottom: 10px; }
-        .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: border-radius 0.2s ease;}
+        .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #scout-layer { z-index: 4; }
-        .rgb-box { width: 80px; height: 100%; background: #050a0f; border-radius: 8px; border: 1px solid #444; position: relative; display: none;}
-        #histogram-canvas { width: 100%; height: 100%; position: absolute; inset: 0;}
 
-        /* SPLIT SCREEN BRACKET */
-        #bracket-container { display: none; gap: 5px; height: 180px; margin-bottom: 15px; }
-        .bracket-panel { flex: 1; position: relative; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
-        .bracket-panel canvas { width: 100%; height: 100%; object-fit: cover; }
-        .bracket-lbl { position: absolute; bottom: 5px; left: 5px; font-size: 9px; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 2px; font-weight: bold; color: #fff;}
+        .pro-meter-display { text-align: center; margin-bottom: 15px; }
+        #ev-big-val { font-family: 'Cormorant Garamond'; font-size: 72px; color: var(--gold); line-height: 1; }
 
-        .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
-        .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
-
-        .action-row { display: flex; gap: 6px; margin-bottom: 6px; position: relative; z-index: 501;}
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 10px;}
-        .btn:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
-        .btn.solid { background: var(--gold); color: #09121c; font-weight: 700; border: none;}
-        .btn.active-toggle { background: var(--gold); color: #09121c; }
-        .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800;}
-        .btn.sm { font-size: 10px; padding: 10px; }
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; flex: 1; font-size: 10px; text-transform: uppercase; }
+        .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
         
-        .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
-        .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-        .data-txt { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 8px; }
-        .data-txt.highlight { color: var(--gold); }
-        input[type="text"], input[type="date"], input[type="tel"], input[type="email"], textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
-
-        .toggle-switch { display: flex; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
-        .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-        .toggle-opt.active { background: var(--gold); color: #09121c; }
-
-        /* JOG DIALS UI */
-        .dial-container { display: flex; align-items: center; background: #080c11; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px; height: 50px; overflow: hidden; position: relative;}
-        .dial-label { width: 45px; background: #111; color: var(--muted); font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; border-right: 1px solid #333; z-index: 2;}
-        .dial-lock { width: 35px; background: #111; color: var(--gold); font-size: 14px; display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #333; cursor: pointer; z-index: 2; transition: 0.2s;}
-        .dial-lock.locked { color: #555; }
-        .dial-lock.auto { color: var(--cyan); background: rgba(0,255,255,0.1); font-weight: bold;}
-        .dial-track { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; height: 100%; align-items: center; position: relative;}
-        .dial-track::-webkit-scrollbar { display: none; }
-        .dial-item { flex: 0 0 33.33%; display: flex; justify-content: center; align-items: center; scroll-snap-align: center; color: #fff; font-size: 16px; font-weight: 500; height: 100%; opacity: 0.3; transition: 0.1s;}
-        .dial-item.active { opacity: 1; color: var(--canon-orange); font-size: 18px; font-weight: 700;}
-        .dial-center-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(243, 156, 18, 0.5); transform: translateX(-50%); pointer-events: none; z-index: 1;}
-
-        /* COLOR TAB SWATCHES */
-        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;}
-        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 50px; cursor: pointer; transition: 0.2s;}
-        .pan-item.active-pan { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,255,255,0.2); }
-        .pan-swatch { width: 40%; transition: background-color 0.1s; }
-        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
-        .pan-code { font-family: 'DM Mono'; font-size: 12px; color: #fff; font-weight: 500; }
-        .pan-hex { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;}
-        
-        .harmony-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .harmony-box { height: 50px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; font-size: 9px; color: #fff; text-shadow: 0 1px 2px #000; text-align: center;}
-
-        .signature-pad { background: #fff; border-radius: 8px; width: 100%; border: none; touch-action: none; margin-bottom: 8px;}
-        .row { display: flex; gap: 10px; } .col { flex: 1; }
-
-        .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto; scrollbar-width: none;}
-        .nav::-webkit-scrollbar { display: none; }
-        .nav-item { flex: 0 0 20%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
+        .nav { background: rgba(9, 18, 28, 0.95); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 0; color: var(--muted); font-size: 9px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
 
-        @keyframes strobePoliceUK { 0%, 24% {background-color: #ff0000;} 25%, 49% {background-color: #000000;} 50%, 74% {background-color: #0000ff;} 75%, 100% {background-color: #000000;} }
-        @keyframes strobeWhite { 0%, 49% { background-color: rgba(255,255,255,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
-        @keyframes strobeAmber { 0%, 49% { background-color: rgba(255,160,0,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
-
         #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-        .mode-dynamic { animation: var(--sos-anim, strobePoliceUK) var(--sos-speed, 0.4s) infinite; }
-
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align:center;}
-        #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 20px;}
-        
-        canvas#proc-canvas, canvas#fc-internal-canvas, canvas#composite-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
+        .mode-dynamic { animation: var(--sos-anim, strobeWhite) var(--sos-speed, 0.5s) infinite; }
+        @keyframes strobeWhite { 0%, 49% { background: #fff; } 50%, 100% { background: #000; } }
     </style>
 </head>
 <body>
 
     <div class="hdr" id="main-hdr">
-        <div class="hdr-top">
-            <div class="brand">PR EYE v4.6</div>
-            <div class="telemetry-bar">
-                <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
-                <div class="tel-item">TILT <span id="tool-heading" style="color:var(--cyan)">0°</span></div>
-            </div>
-        </div>
-        <input type="text" id="global-project-title" class="project-input" placeholder="Enter Project / Scene Title...">
+        <div class="brand">PR EYE v4.6 MASTER</div>
     </div>
 
     <div class="main-content">
-        
         <div id="persistent-cam-area">
-            
-            <div id="bracket-container">
-                <div class="bracket-panel"><canvas id="b-minus"></canvas><div class="bracket-lbl">-1 EV</div></div>
-                <div class="bracket-panel"><canvas id="b-zero"></canvas><div class="bracket-lbl">0 EV</div></div>
-                <div class="bracket-panel"><canvas id="b-plus"></canvas><div class="bracket-lbl" style="color:var(--red);">+1 EV</div></div>
-            </div>
-
-            <div class="viewfinder-wrap" id="main-viewfinder">
+            <div class="viewfinder-wrap">
                 <div class="cam-container" id="cam-wrapper">
-                    <button id="cam-flip-btn" style="position: absolute; top: 5px; left: 5px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid #444; border-radius: 4px; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer;">REFLECTED</button>
-                    <video id="video" autoplay playsinline></video>
-                    <canvas id="fc-layer" class="overlay"></canvas>
-                    <canvas id="grid-layer" class="overlay"></canvas>
-                    <canvas id="scout-layer" class="overlay"></canvas>
+                    <video id="video" autoplay playsinline muted></video>
                     <canvas id="ui-layer" class="overlay"></canvas>
                 </div>
-                <div class="rgb-box" id="rgb-box-ui">
-                    <canvas id="histogram-canvas"></canvas>
-                </div>
             </div>
-            
-            <div class="action-row" id="cam-actions">
-                <button id="bracket-toggle-btn" class="btn">BRACKET</button>
-                <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
-                <button id="grid-toggle-btn" class="btn">GRID</button>
-            </div>
-            <button id="capture-btn" class="btn solid" style="width:100%; padding:14px; font-size:16px;">CAPTURE FRAME</button>
+            <button id="capture-btn" class="btn solid">CAPTURE FRAME</button>
         </div>
 
         <div id="page-meter" class="page active">
             <div class="pro-meter-display">
-                <div id="ev-big-display" style="text-align:center; padding:10px 0 5px; font-family:'Cormorant Garamond',serif; font-size:72px; color:var(--gold); letter-spacing:-2px; line-height:1;">
-                    <span id="ev-big-val">0.0</span>
-                    <span style="font-size:20px; color:var(--muted); vertical-align:middle;"> EV</span>
-                </div>
-                <div style="display:flex; justify-content:center; gap:20px; font-size:11px; color:var(--muted); margin-bottom:12px; letter-spacing:1px;">
-                    <span id="ev-zone-label">ZONE V</span>
-                    <span id="ev-lux-label">-- lux</span>
-                </div>
-                <div class="ev-bias-badge" id="display-bias" style="display:none;"></div>
-                <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;">Vol Keys: EV Bias +/-</p>
+                <div id="ev-big-val">0.0</div>
+                <div style="color: var(--muted); font-size: 11px;">EXPOSURE VALUE</div>
             </div>
-
-            <div class="action-row" style="margin-bottom: 15px;">
-                <button id="meter-mode-btn" class="btn" style="background: rgba(255,255,255,0.05);">[ ] MATRIX</button>
-                <button id="torch-btn" class="btn" style="background: rgba(255,255,255,0.05);">🔦 TORCH OFF</button>
+            <div style="display:flex; gap:10px;">
+                <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
+                <button id="torch-btn" class="btn">TORCH</button>
             </div>
-
-            <div class="dial-container"><div class="dial-label">SS</div><div class="dial-track" id="dial-shutter"></div><div class="dial-lock locked" id="lock-shutter">🔒</div><div class="dial-center-mark"></div></div>
-            <div class="dial-container"><div class="dial-label">F/</div><div class="dial-track" id="dial-aperture"></div><div class="dial-lock locked" id="lock-aperture">🔒</div><div class="dial-center-mark"></div></div>
-            <div class="dial-container"><div class="dial-label">ISO</div><div class="dial-track" id="dial-iso"></div><div class="dial-lock auto" id="lock-iso">◎</div><div class="dial-center-mark"></div></div>
         </div>
 
         <div id="page-color" class="page">
-            <div class="ctrl-panel">
-                <h4>Colorimetry & Generative Palette</h4>
-                <div class="toggle-switch">
-                    <div id="pan-auto" class="toggle-opt active">AUTO POINTS</div>
-                    <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
-                </div>
-                
-                <div class="pan-grid">
-                    <div class="pan-item active-pan" id="p-box-1" data-idx="1"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div class="pan-code" id="ch1">#---</div></div></div>
-                    <div class="pan-item" id="p-box-2" data-idx="2"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div class="pan-code" id="ch2">#---</div></div></div>
-                    <div class="pan-item" id="p-box-3" data-idx="3"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><div class="pan-code" id="ch3">#---</div></div></div>
-                    <div class="pan-item" id="p-box-4" data-idx="4"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><div class="pan-code" id="ch4">#---</div></div></div>
-                </div>
-                
-                <div class="harmony-grid">
-                    <div class="harmony-box" id="h-comp" style="background: #222;">Complementary</div>
-                    <div class="harmony-box" id="h-ana1" style="background: #222;">Analogous</div>
-                    <div class="harmony-box" id="h-tri" style="background: #222;">Triadic</div>
-                </div>
-            </div>
-
-            <div style="margin-top:15px; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px;">
-                <span class="label-txt">MidJourney Prompt</span>
-                <textarea id="mj-prompt-output" rows="3" style="font-size:11px; color:#c9d1d9; background:transparent; border:none; border-bottom:1px solid var(--border); resize:none; width:100%; margin-bottom:8px;" readonly placeholder="Extracted colors appear here..."></textarea>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn sm" id="btn-copy-mj" style="flex:1;">Copy Prompt</button>
-                    <button class="btn sm" id="btn-export-swatches" style="flex:1;">Export Swatches</button>
-                </div>
-            </div>
+            <h4 style="color:var(--gold)">Color Palette</h4>
+            <div id="mj-prompt-output" style="font-size:10px; background:#000; padding:10px; border-radius:5px; margin-top:10px; min-height:50px;">Waiting for data...</div>
         </div>
 
         <div id="page-scout" class="page">
-            <div class="ctrl-panel">
-                <h4>Location Ephemeris</h4>
-                <button class="btn sm" id="btn-fetch-loc" style="margin-bottom:12px; width:100%;">Sync GPS & Live Data</button>
-                <div id="map-iframe-container" style="height:200px; background:#000; border-radius:8px; margin-bottom:12px; border: 1px solid #444; display: flex; align-items:center; justify-content:center; color: var(--muted); font-size: 10px;">AWAITING GPS...</div>
-                <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" class="data-txt">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" class="data-txt">--:--</span></div></div>
-            </div>
+            <h4 style="color:var(--gold)">Location</h4>
+            <button class="btn" id="btn-fetch-loc" style="width:100%">Sync GPS</button>
         </div>
-
-        <div id="page-rave" class="page" style="height: 65vh;">
-            <div class="ctrl-panel" style="text-align: center; display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: space-around;">
-                <h4 style="color: var(--magenta);">Tactical Field Utilities</h4>
-                
-                <div style="margin-bottom:12px;">
-                    <span class="label-txt">Sound Sensitivity</span>
-                    <input type="range" id="rave-sensitivity" min="1.1" max="3.0" step="0.1" value="1.5" style="width:100%;">
-                </div>
-                <button class="btn solid rave-active-btn" id="btn-start-rave" style="width: 100%; flex-grow: 1; font-size: 24px;">START A RAVE</button>
-                
-                <div style="margin-bottom:10px; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
-                    <span class="label-txt">SOS Strobe Mode</span>
-                    <div class="toggle-switch">
-                        <div class="toggle-opt active" id="sos-mode-police">🚔 Police</div>
-                        <div class="toggle-opt" id="sos-mode-white">⚡ White</div>
-                        <div class="toggle-opt" id="sos-mode-amber">🟡 Amber</div>
-                    </div>
-                    <span class="label-txt">Strobe Speed</span>
-                    <input type="range" id="sos-speed" min="1" max="10" value="3" style="width:100%;">
-                </div>
-                <button class="btn danger" id="btn-sos-siren" style="width: 100%; padding: 20px; font-size: 20px; letter-spacing: 5px;">EMERGENCY SOS</button>
-            </div>
-        </div>
-
     </div>
 
     <div id="sos-flash-overlay"></div>
-    <div id="result-overlay">
-        <h3 style="color:#fff; margin-bottom:15px; font-family:'DM Mono', sans-serif;">Export Ready</h3>
-        <img id="result-img">
-        <button class="btn solid" id="btn-close-result" style="width:100px;">CLOSE</button>
-    </div>
 
     <div class="nav">
-        <div class="nav-item active" data-target="page-meter" data-cam="true">Meter</div>
-        <div class="nav-item" data-target="page-color" data-cam="true">Color</div>
-        <div class="nav-item" data-target="page-scout" data-cam="true">Scout</div>
-        <div class="nav-item" data-target="page-rave" data-cam="false">Rave</div>
+        <div class="nav-item active" data-target="page-meter">Meter</div>
+        <div class="nav-item" data-target="page-color">Color</div>
+        <div class="nav-item" data-target="page-scout">Scout</div>
     </div>
 
-    <canvas id="proc-canvas" width="300" height="400"></canvas>
-    <canvas id="fc-internal-canvas" width="150" height="200"></canvas>
-    <canvas id="composite-canvas" width="1000" height="1500"></canvas>
+    <canvas id="proc-canvas" width="300" height="400" style="display:none"></canvas>
 
 <script>
     const video = document.getElementById('video');
-    const [fcCtx, gridCtx, scoutCtx, uiCtx] = ['fc-layer','grid-layer','scout-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
-    const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
-    const histCtx = document.getElementById('histogram-canvas').getContext('2d', { willReadFrequently: true });
-    const fcInternalCtx = document.getElementById('fc-internal-canvas').getContext('2d', { willReadFrequently: true });
-
-    let stream = null; let currentFacingMode = 'environment';
-    let measuredEV = 0; let evBias = 0; let liveTempK = 5500; 
-    let currentTab = 'page-meter';
-    let fcState = 0; let loopAnimFrame = null;
-    let extractedColors = ['#333333','#333333','#333333','#333333'];
-    let panMode = 'auto'; let activeColorIndex = 0;
-    let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}];
-    let manualIndex = 0; let frameCount = 0;
-
-    const arrShutter = ['30"','15"','8"','4"','2"','1"','1/2','1/4','1/8','1/15','1/30','1/60','1/125','1/250','1/500','1/1000','1/2000','1/4000'];
-    const arrAperture = [1.2, 1.4, 2.0, 2.8, 4.0, 5.6, 8.0, 11, 16, 22];
-    const arrIso = [50, 100, 200, 400, 800, 1600, 3200, 6400, 12800];
-    let activeIndexes = { shutter: 10, aperture: 5, iso: 1 };
-    let priorityMode = 'iso';
-
-    const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
-    const hexToRgbArr = (hex) => { let res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return res ? [parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16)] : [0,0,0]; };
-    const pantoneDb = [{n:"Cool Gray 1",rgb:[217,217,214]},{n:"Black 6",rgb:[16,24,32]},{n:"Warm Red",rgb:[249,66,58]},{n:"Reflex Blue",rgb:[0,20,137]},{n:"Process Yellow",rgb:[255,242,0]}];
-    function findClosestPantone(r,g,b) { let closest = pantoneDb[0], minD = Infinity; pantoneDb.forEach(p => { let d = (r-p.rgb[0])**2 + (g-p.rgb[1])**2 + (b-p.rgb[2])**2; if(d < minD) { minD = d; closest = p; } }); return closest; }
-
-    function bindSafe(id, ev, cb) { const el = document.getElementById(id); if(el) el.addEventListener(ev, cb); }
+    const procCanvas = document.getElementById('proc-canvas');
+    const procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+    let stream = null;
 
     async function startCamera() {
-        if(stream) { stream.getTracks().forEach(t => t.stop()); await new Promise(r => setTimeout(r, 500)); }
-        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error(e); }
-        if (!stream) return;
-        video.srcObject = stream;
-        video.load();
-        video.play().catch(()=>{});
-        const onReady = () => { resizeCanvases(); if(loopAnimFrame) cancelAnimationFrame(loopAnimFrame); loopAnimFrame = requestAnimationFrame(liveLoop); };
-        video.onloadedmetadata = onReady;
-        video.onloadeddata = onReady;
-        if(navigator.wakeLock) navigator.wakeLock.request('screen').catch(()=>{});
+        try {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
+            video.play();
+        } catch (e) {
+            console.error("Camera fail:", e);
+        }
     }
 
-    function liveLoop() {
-        if(video.readyState === 4 && video.videoWidth > 0) {
-            frameCount++;
-            const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
-            if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
+    // Tab Switching Logic
+    document.querySelectorAll('.nav-item').forEach(nav => {
+        nav.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
-            // Optimization: Process heavy math only every 4th frame
-            if(frameCount % 4 === 0) {
-                procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 300, 400); 
-                const viewData = procCtx.getImageData(0,0,300,400).data;
+            nav.classList.add('active');
+            const target = nav.getAttribute('data-target');
+            document.getElementById(target).classList.add('active');
+            
+            // Re-trigger camera on first interaction if needed
+            if(!stream) startCamera();
+        });
+    });
 
-                if (currentTab === 'page-meter') {
-                    let lumSum = 0, count = 0;
-                    for(let i=0; i<viewData.length; i+=32) { // Stride for performance
-                        lumSum += (0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]);
-                        count++;
-                    }
-                    measuredEV = Math.log2((Math.max(1, lumSum / count) / 255) * 100 / 14.0);
-                    let useEV = measuredEV + evBias;
-                    const bigVal = document.getElementById('ev-big-val');
-                    if(bigVal) {
-                        bigVal.innerText = (useEV > 0 ? '+' : '') + useEV.toFixed(1);
-                        bigVal.style.color = (useEV < -2 || useEV > 14) ? 'var(--red)' : 'var(--gold)';
-                    }
-                    document.getElementById('ev-lux-label').innerText = Math.round(2.5 * Math.pow(2, useEV)) + ' lux';
-                    const zones = ['ZONE 0','ZONE I','ZONE II','ZONE III','ZONE IV','ZONE V','ZONE VI','ZONE VII','ZONE VIII','ZONE IX','ZONE X'];
-                    const zIdx = Math.max(0, Math.min(10, Math.round(useEV + 5)));
-                    document.getElementById('ev-zone-label').innerText = zones[zIdx] || 'ZONE V';
-                }
-
-                if (currentTab === 'page-color') {
-                    const pts = panMode === 'auto' ? [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}] : manualPoints;
-                    pts.forEach((p, idx) => {
-                        let i = (Math.floor(p.y*400)*300 + Math.floor(p.x*300)) * 4;
-                        let hex = rgbToHex(viewData[i], viewData[i+1], viewData[i+2]);
-                        extractedColors[idx] = hex;
-                        document.getElementById(`cs${idx+1}`).style.backgroundColor = hex;
-                        document.getElementById(`ch${idx+1}`).innerText = hex;
-                    });
-                    updateMJPrompt();
-                }
+    // Exposure Loop
+    function updateMeter() {
+        if (video.readyState === 4) {
+            procCtx.drawImage(video, 0, 0, 300, 400);
+            const data = procCtx.getImageData(140, 190, 20, 20).data;
+            let total = 0;
+            for(let i=0; i<data.length; i+=4) {
+                total += (data[i] + data[i+1] + data[i+2]) / 3;
             }
+            const avg = total / (data.length / 4);
+            const ev = Math.log2((avg / 255) * 100 / 12.5);
+            document.getElementById('ev-big-val').innerText = ev.toFixed(1);
         }
-        loopAnimFrame = requestAnimationFrame(liveLoop);
+        requestAnimationFrame(updateMeter);
     }
 
-    function updateMJPrompt() {
-        const p = `--ar 3:4 --style raw, cinematic photography, ${extractedColors[0]} dominant, ${extractedColors[1]} accents, photorealistic --v 6.1`;
-        const el = document.getElementById('mj-prompt-output');
-        if(el && el.value !== p) el.value = p;
-    }
-
-    function resizeCanvases() {
-        const rect = video.getBoundingClientRect(); if(rect.width===0) return;
-        ['grid-layer', 'ui-layer', 'fc-layer', 'scout-layer'].forEach(id => { let c = document.getElementById(id); if(c) { c.width = rect.width; c.height = rect.height; } });
-    }
-
-    bindSafe('fc-toggle-btn', 'click', (e) => {
-        fcState = (fcState + 1) % 4;
-        const btn = e.currentTarget; const cam = document.getElementById('cam-wrapper'); const hdr = document.getElementById('main-hdr');
-        if(fcState === 0) { btn.innerText = "F-COL: OFF"; document.getElementById('fc-layer').style.display='none'; cam.style.cssText=''; hdr.style.display=''; }
-        if(fcState === 1 || fcState === 2) { btn.innerText = "F-COL: ON"; document.getElementById('fc-layer').style.display='block'; cam.style.cssText=''; hdr.style.display=''; }
-        if(fcState === 3) { btn.innerText = "F-COL: FULL"; document.getElementById('fc-layer').style.display='none'; cam.style.cssText='position:fixed;inset:0;z-index:500;border-radius:0;'; hdr.style.display='none'; }
+    // Auto-start
+    window.addEventListener('load', () => {
+        startCamera();
+        updateMeter();
     });
 
-    document.getElementById('cam-wrapper').onclick = () => { if(fcState === 3) document.getElementById('fc-toggle-btn').click(); };
-
-    document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => {
-        document.querySelectorAll('.nav-item, .page').forEach(el => el.classList.remove('active'));
-        n.classList.add('active'); currentTab = n.dataset.target; document.getElementById(currentTab).classList.add('active');
-        document.getElementById('persistent-cam-area').style.display = n.dataset.cam === "true" ? 'flex' : 'none';
-        resizeCanvases();
+    // Handle visibility (prevents freeze when switching apps)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) startCamera();
     });
-
-    bindSafe('sos-mode-police', 'click', () => { document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); document.getElementById('sos-mode-police').classList.add('active'); });
-    bindSafe('sos-mode-white', 'click', () => { document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); document.getElementById('sos-mode-white').classList.add('active'); });
-    bindSafe('sos-mode-amber', 'click', () => { document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); document.getElementById('sos-mode-amber').classList.add('active'); });
-
-    let sosActive = false;
-    bindSafe('btn-sos-siren', 'click', () => {
-        const o = document.getElementById('sos-flash-overlay');
-        if(sosActive) { o.style.display = 'none'; sosActive = false; }
-        else {
-            const speed = (1/parseFloat(document.getElementById('sos-speed').value)).toFixed(2) + 's';
-            const isPol = document.getElementById('sos-mode-police').classList.contains('active');
-            const isWhi = document.getElementById('sos-mode-white').classList.contains('active');
-            o.style.setProperty('--sos-anim', isPol ? 'strobePoliceUK' : isWhi ? 'strobeWhite' : 'strobeAmber');
-            o.style.setProperty('--sos-speed', speed);
-            o.className = 'mode-dynamic'; o.style.display = 'block'; sosActive = true;
-        }
-    });
-
-    startCamera();
 </script>
 </body>
 </html>
