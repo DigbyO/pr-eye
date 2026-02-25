@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.7 — Pro Toolkit</title>
+    <title>PR Eye v2.8 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -33,7 +33,9 @@
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #level-layer { z-index: 6; display: none; } #scout-layer { z-index: 7; display: none; }
-        #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 15; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 8px; display: none; width: 120px; height: 70px;}
+        
+        #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 15; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 8px; display: none; width: 35%; height: 15%;}
+        
         #countdown-display { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size: 120px; font-weight:bold; color:#fff; z-index:20; text-shadow: 0 4px 20px rgba(0,0,0,0.8); display:none;}
 
         .action-row { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -86,7 +88,7 @@
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.7</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.8</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV <span style="color:var(--green)">0.0</span></div>
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span> <span id="tel-tint" style="color:var(--magenta)">0</span></div>
@@ -204,7 +206,13 @@
 
         <div id="page-release" class="page">
             <div class="ctrl-panel">
-                <h4 style="margin-bottom:12px;">Model Details</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="margin-bottom:12px; border:none;">Model Details</h4>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <img id="model-id-thumb" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid var(--gold);">
+                        <button class="btn sm" id="btn-cap-model" style="margin:0;">📷 ID Photo</button>
+                    </div>
+                </div>
                 <div class="row"><div class="col"><span class="label-txt">Shoot Date</span><input type="date" id="r-date"></div><div class="col"><span class="label-txt">Location</span><input type="text" id="r-loc" placeholder="Shoot Location"></div></div>
                 <span class="label-txt">Model Full Name</span><input type="text" id="r-name" placeholder="Full Legal Name">
                 <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone Number"></div></div>
@@ -237,7 +245,7 @@
                 <button class="btn sm" style="width:100%;border-radius:4px;margin-bottom:15px;" onclick="clearPad('sig-witness')">Clear Witness</button>
                 
                 <span class="label-txt">Photographer Name</span>
-                <input type="text" id="r-photog-name" placeholder="Photographer Name">
+                <input type="text" id="r-photog-name" value="Digby Oldridge, PR Eye Ltd">
                 <span class="label-txt">Photographer Signature</span>
                 <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
                 <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-photog')">Clear Photog</button>
@@ -297,6 +305,7 @@
     let isCapturing = false;
     let flashModeActive = false; let flashPeakEV = -99;
     let timerEnabled = false; let soundEnabled = true;
+    window.modelIdPhoto = null;
 
     // --- SETTINGS & EVENT BINDINGS (Null-Safe) ---
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
@@ -317,8 +326,6 @@
         if(saved.shutter && document.getElementById('set-shutter')) document.getElementById('set-shutter').value = saved.shutter;
         if(saved.nd && document.getElementById('set-nd')) document.getElementById('set-nd').value = saved.nd;
         
-        if(localStorage.getItem('preye_photog_name') && document.getElementById('r-photog-name')) document.getElementById('r-photog-name').value = localStorage.getItem('preye_photog_name');
-        bindSafe('r-photog-name', 'input', () => localStorage.setItem('preye_photog_name', document.getElementById('r-photog-name').value));
         if(document.getElementById('r-date')) document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
     }
     loadSettings();
@@ -339,6 +346,11 @@
         const rect = video.getBoundingClientRect(); if(rect.width===0) return;
         ['grid-layer', 'ui-layer', 'fc-layer', 'level-layer', 'scout-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
         const fcInt = document.getElementById('fc-internal-canvas'); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
+        
+        // Dynamically resize histogram canvas resolution to match its CSS container
+        const hC = document.getElementById('histogram-canvas');
+        if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
+        
         drawGrid();
     }
     window.addEventListener('resize', resizeCanvases);
@@ -352,6 +364,18 @@
             if(camArea) camArea.style.display = n.dataset.cam === "true" ? 'block' : 'none';
             resizeCanvases();
         });
+    });
+
+    // --- MODEL ID CAPTURE ---
+    bindSafe('btn-cap-model', 'click', () => {
+        if(video.videoWidth > 0 && video.videoHeight > 0) {
+            const tc = document.createElement('canvas'); tc.width = video.videoWidth; tc.height = video.videoHeight;
+            tc.getContext('2d').drawImage(video, 0, 0, tc.width, tc.height);
+            window.modelIdPhoto = tc.toDataURL('image/jpeg', 0.8);
+            const thumb = document.getElementById('model-id-thumb');
+            if(thumb) { thumb.src = window.modelIdPhoto; thumb.style.display = 'block'; }
+            alert("Model ID Photo captured.");
+        } else { alert("Camera not active."); }
     });
 
     // --- COLOR MATH & PANTONE DB ---
@@ -387,7 +411,7 @@
         if(fcState === 2) { btn.innerText = "F-COL: CLIP"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; }
     });
     
-    bindSafe('curve-toggle-btn', 'click', (e) => { curveActive = !curveActive; document.getElementById('histogram-canvas').style.display = curveActive ? 'block' : 'none'; e.currentTarget.classList.toggle('active-toggle', curveActive); });
+    bindSafe('curve-toggle-btn', 'click', (e) => { curveActive = !curveActive; document.getElementById('histogram-canvas').style.display = curveActive ? 'block' : 'none'; e.currentTarget.classList.toggle('active-toggle', curveActive); resizeCanvases(); });
     bindSafe('level-toggle-btn', 'click', (e) => { levelActive = !levelActive; document.getElementById('level-layer').style.display = levelActive ? 'block' : 'none'; e.currentTarget.classList.toggle('active-toggle', levelActive); });
 
     window.addEventListener('deviceorientation', (e) => {
@@ -456,12 +480,16 @@
             liveTint = Math.round(100 * ((gT/c) - ((rT/c + bT/c)/2)) / 255);
             const tSpan = document.getElementById('tel-tint'); if(tSpan) tSpan.innerText = (liveTint > 0 ? 'G+' : 'M') + Math.abs(liveTint);
             
-            // Curve
+            // Full-fill Histogram
             if(curveActive) {
-                histCtx.clearRect(0,0,120,70); const bins = new Array(40).fill(0); let maxBin = 0;
+                const hw = histCtx.canvas.width; const hh = histCtx.canvas.height;
+                histCtx.clearRect(0,0,hw,hh); 
+                const bins = new Array(40).fill(0); let maxBin = 0;
                 for(let i=0; i<viewData.length; i+=4) { let l = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let bin = Math.floor((l/255)*39); bins[bin]++; if(bins[bin] > maxBin) maxBin = bins[bin]; }
-                histCtx.fillStyle = 'rgba(212,194,161,0.8)'; histCtx.beginPath(); histCtx.moveTo(0, 70);
-                for(let i=0; i<40; i++) { histCtx.lineTo(i*3, 70 - (maxBin > 0 ? (bins[i] / maxBin) * 60 : 0)); } histCtx.lineTo(120, 70); histCtx.fill();
+                histCtx.fillStyle = 'rgba(212,194,161,0.8)'; histCtx.beginPath(); histCtx.moveTo(0, hh);
+                const step = hw / 40;
+                for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (bins[i] / maxBin) * (hh * 0.9) : 0)); } 
+                histCtx.lineTo(hw, hh); histCtx.fill();
             }
             
             const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch);
@@ -492,29 +520,32 @@
                 }
             }
             
-            // Scout Mapping (Astro Engine)
+            // Scout Mapping (Astro Engine + Visual Arc)
             if(currentTab === 'page-scout') {
                 scoutCtx.save(); scoutCtx.translate(swCtx/2, shCtx/2); scoutCtx.rotate(-currentHeading * Math.PI / 180);
                 
-                // Draw Radar Grid
                 scoutCtx.strokeStyle = 'rgba(212,194,161,0.2)'; scoutCtx.lineWidth = 1; 
-                scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, 0, Math.PI*2); scoutCtx.stroke(); // Horizon
-                scoutCtx.beginPath(); scoutCtx.arc(0,0, 50, 0, Math.PI*2); scoutCtx.stroke(); // 45 degree elev
-                scoutCtx.beginPath(); scoutCtx.moveTo(0, -100); scoutCtx.lineTo(0, 100); scoutCtx.moveTo(-100, 0); scoutCtx.lineTo(100, 0); scoutCtx.stroke(); // Crosshairs
+                scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, 0, Math.PI*2); scoutCtx.stroke(); 
+                scoutCtx.beginPath(); scoutCtx.arc(0,0, 50, 0, Math.PI*2); scoutCtx.stroke(); 
+                scoutCtx.beginPath(); scoutCtx.moveTo(0, -100); scoutCtx.lineTo(0, 100); scoutCtx.moveTo(-100, 0); scoutCtx.lineTo(100, 0); scoutCtx.stroke(); 
 
                 scoutCtx.fillStyle = 'var(--gold)'; scoutCtx.font = '12px DM Mono'; scoutCtx.fillText('N', -4, -105); scoutCtx.fillText('S', -4, 115); scoutCtx.fillText('E', 105, 4); scoutCtx.fillText('W', -115, 4);
                 
-                // Draw Live Sun Pos
-                if (window.currentSunAzimuth !== undefined && window.currentSunAltitude > 0) {
+                if(sunriseTime && sunsetTime) {
+                    const startAngle = (-90 - currentHeading) * Math.PI/180; const endAngle = (90 - currentHeading) * Math.PI/180;
+                    scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, startAngle, endAngle); scoutCtx.setLineDash([4, 4]); scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)'; scoutCtx.stroke(); scoutCtx.setLineDash([]);
+                }
+
+                if (window.currentSunAzimuth !== undefined && window.currentSunAltitude > -20) {
                     const sunRad = (window.currentSunAzimuth - 90) * Math.PI / 180;
-                    const sunDist = 100 * (1 - (window.currentSunAltitude / 90)); // Map altitude: 90=0 dist, 0=100 dist
+                    const altNorm = Math.max(0, Math.min(90, window.currentSunAltitude)); 
+                    const sunDist = 100 * (1 - (altNorm / 90)); 
                     
-                    scoutCtx.fillStyle='#ffb347'; scoutCtx.font='bold 10px DM Mono'; 
-                    scoutCtx.fillText('SUN', sunDist*Math.cos(sunRad)+8, sunDist*Math.sin(sunRad)+4); 
-                    scoutCtx.beginPath(); scoutCtx.arc(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad), 6, 0, Math.PI*2); scoutCtx.fill();
+                    scoutCtx.fillStyle='#ffb347'; scoutCtx.font='bold 14px DM Mono'; 
+                    scoutCtx.fillText('☀ SUN', sunDist*Math.cos(sunRad)+8, sunDist*Math.sin(sunRad)+4); 
+                    scoutCtx.beginPath(); scoutCtx.arc(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad), 8, 0, Math.PI*2); scoutCtx.fill();
                     
-                    // Target Line
-                    scoutCtx.strokeStyle = 'rgba(255, 179, 71, 0.4)'; scoutCtx.setLineDash([2, 4]);
+                    scoutCtx.strokeStyle = 'rgba(255, 179, 71, 0.6)'; scoutCtx.setLineDash([2, 4]);
                     scoutCtx.beginPath(); scoutCtx.moveTo(0,0); scoutCtx.lineTo(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad)); scoutCtx.stroke(); scoutCtx.setLineDash([]);
                 }
                 scoutCtx.restore();
@@ -525,9 +556,9 @@
                 fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
                 for(let i=0; i<px.length; i+=4) {
                     let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
-                    if (fcState === 1) { // PRO
+                    if (fcState === 1) { 
                         if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
-                    } else if (fcState === 2) { // CLIP ONLY
+                    } else if (fcState === 2) { 
                         if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
                     }
                 }
@@ -654,11 +685,12 @@
             if(mapC) mapC.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed" allowfullscreen></iframe>`;
             
             window._scoutMapImage = null;
-            const _mapTileUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + currentLat + ',' + currentLon + '&zoom=14&size=800x250&markers=' + currentLat + ',' + currentLon + ',red-pushpin';
-            const _mapImg = new Image(); _mapImg.crossOrigin = 'anonymous';
+            const _rawTileUrl = 'staticmap.openstreetmap.de/staticmap.php?center=' + currentLat + ',' + currentLon + '&zoom=14&size=800x250&markers=' + currentLat + ',' + currentLon + ',red-pushpin';
+            const _mapImg = new Image(); _mapImg.crossOrigin = 'Anonymous';
             _mapImg.onload = () => { window._scoutMapImage = _mapImg; }; 
             _mapImg.onerror = () => { window._scoutMapImage = null; };
-            _mapImg.src = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(_mapTileUrl);
+            // Using WESERV image proxy to definitively bypass CORS security headers for canvas export
+            _mapImg.src = 'https://images.weserv.nl/?url=' + encodeURIComponent(_rawTileUrl);
 
             try {
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
@@ -726,11 +758,6 @@
         const f = document.getElementById('yt-iframe'); if(f) f.src = 'https://www.youtube.com/embed/cmoFNya6P4Q?autoplay=1&playsinline=1';
     });
 
-    bindSafe('btn-email-notes', 'click', () => { 
-        const n = document.getElementById('shoot-notes');
-        if(n) { const body = encodeURIComponent(n.value); window.location.href = 'mailto:?subject=PR Eye Shoot Notes&body=' + body; }
-    });
-
     let sosAudioCtx, sirenOsc1, sirenOsc2, sirenGain1, sirenGain2, sosInterval, sosActive = false;
     bindSafe('btn-sos-siren', 'click', () => {
         const o = document.getElementById('sos-flash-overlay');
@@ -766,30 +793,40 @@
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const pageW = 210, margin = 15, usableW = 180;
         let y = 15;
+        
+        // Add Model Photo if captured
+        if (window.modelIdPhoto) {
+            try { doc.addImage(window.modelIdPhoto, 'JPEG', pageW - 40 - margin, y, 40, 40); } catch(e) { console.log(e); }
+        }
+
         const field = id => { const el = document.getElementById(id); return el ? (el.value||'') : ''; };
         const date=field('r-date'), loc=field('r-loc'), modelName=field('r-name'), dob=field('r-dob');
         const phone=field('r-phone'), email=field('r-email'), address=field('r-address'), comp=field('r-compensation')||'None';
         const tM = document.getElementById('tog-minor'); const isMinor=tM&&tM.classList.contains('active');
         const guardianName=field('r-g-name'), witnessName=field('r-witness-name'), witnessAddr=field('r-witness-address');
-        const addText=(text,size,bold,col)=>{
+        const photogName=field('r-photog-name');
+        
+        const addText=(text,size,bold,col, w)=>{
            doc.setFontSize(size||10);doc.setFont('helvetica',bold?'bold':'normal');doc.setTextColor(col||0);
-           doc.splitTextToSize(text,usableW).forEach(l=>{if(y>270){doc.addPage();y=15;}doc.text(l,margin,y);y+=(size||10)*0.45;});y+=2;
+           doc.splitTextToSize(text,w||usableW).forEach(l=>{if(y>270){doc.addPage();y=15;}doc.text(l,margin,y);y+=(size||10)*0.45;});y+=2;
         };
         const addLine=()=>{doc.setDrawColor(200);doc.line(margin,y,pageW-margin,y);y+=5;};
         const addSig=(cid,lbl)=>{
            if(y>240){doc.addPage();y=15;}addText(lbl+':',9,true);
            try{doc.addImage(document.getElementById(cid).toDataURL('image/png'),'PNG',margin,y,70,18);}catch(e){}y+=22;
         };
-        doc.setFillColor(9,18,28);doc.rect(0,0,210,25,'F');
+        
+        doc.setFillColor(9,18,28);doc.rect(0,0,window.modelIdPhoto ? 140 : 210,25,'F');
         doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161);
-        doc.text('MODEL RELEASE FORM',pageW/2,13,{align:'center'});
+        doc.text('MODEL RELEASE FORM', window.modelIdPhoto ? 75 : pageW/2,13,{align:'center'});
         doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
-        doc.text('PR Eye v2.7 — Professional Photography Release',pageW/2,20,{align:'center'});
+        doc.text('PR Eye v2.8 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
+        
         y=30;doc.setTextColor(0);
-        addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true);
+        addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true,0, window.modelIdPhoto ? 130 : usableW);
         addLine();
         addText('PHOTOGRAPHER:',10,true);
-        addText('Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG',9);
+        addText(photogName,9);
         addText('Tel: 07879 403 618 | info@preye.co.uk',9);
         addLine();
         addText('MODEL:',10,true);
@@ -833,15 +870,23 @@
         addText('Witness Address: '+(witnessAddr||'__________________________________________________'),9);
         addText('Date: '+(date||'_____________'),9);y+=4;addLine();
         addSig('sig-photog','PHOTOGRAPHER SIGNATURE');
-        addText('Photographer: Digby Oldridge, PR Eye Ltd',9);
+        addText('Photographer: '+photogName,9);
         addText('Date: '+(date||'_____________'),9);addLine();
         addText('Note: Keep a copy for your records. Governed by the laws of England and Wales.',8,false,100);
-        doc.save('ModelRelease_'+(modelName||'Unknown').replace(/\s+/g,'_')+'_'+Date.now()+'.pdf');
+        
+        try {
+            doc.save('ModelRelease_'+(modelName||'Unknown').replace(/\s+/g,'_')+'_'+Date.now()+'.pdf');
+        } catch(err) {
+            // Fallback for strict mobile browsers that block doc.save()
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+        }
     });
     
     bindSafe('btn-wa-release', 'click', () => {
         const rD = document.getElementById('r-date'); const rL = document.getElementById('r-loc'); const rN = document.getElementById('r-name');
-        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.7\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
+        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.8\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
         window.open('https://wa.me/?text='+msg,'_blank');
     });
 
@@ -880,8 +925,8 @@
         // SunCalc Live Loop
         if (currentLat !== null && currentLon !== null && typeof SunCalc !== 'undefined') {
             const pos = SunCalc.getPosition(new Date(), currentLat, currentLon);
-            const az = (pos.azimuth * 180 / Math.PI + 180) % 360; // Convert to compass
-            const alt = pos.altitude * 180 / Math.PI;             // Convert to degrees
+            const az = (pos.azimuth * 180 / Math.PI + 180) % 360; 
+            const alt = pos.altitude * 180 / Math.PI;             
             
             const azEl = document.getElementById('loc-azimuth');
             const altEl = document.getElementById('loc-altitude');
