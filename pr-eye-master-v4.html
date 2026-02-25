@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.6.2 — Pro Suite</title>
+    <title>PR Eye v4.6.3 — Pro Master Build</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,43 +18,52 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;}
+        /* HEADER */
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; display:flex; flex-direction: column; gap: 10px;}
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
         .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; }
 
         .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
+        /* CAMERA */
         #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; }
         .viewfinder-wrap { display: flex; gap: 10px; height: 180px; margin-bottom: 10px; }
         .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
-        .pro-meter-display { text-align: center; margin-bottom: 15px; }
-        #ev-big-val { font-family: 'Cormorant Garamond'; font-size: 72px; color: var(--gold); line-height: 1; }
+        /* METER UI */
+        .pro-meter-display { text-align: center; margin-bottom: 20px; border: 1px solid var(--border); padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.02); }
+        #ev-big-val { font-family: 'Cormorant Garamond'; font-size: 84px; color: var(--gold); line-height: 0.8; letter-spacing: -4px; }
+        .ev-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 10px; }
 
+        /* COLOR GRID */
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; display: flex; height: 50px; overflow: hidden; cursor: pointer; }
+        .pan-item.active { border-color: var(--cyan); }
+        .pan-swatch { width: 35%; }
+        .pan-data { padding: 8px; font-size: 10px; flex: 1; }
+
+        /* BUTTONS */
         .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; flex: 1; font-size: 10px; text-transform: uppercase; text-align: center;}
         .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
-        .btn.sm { padding: 8px; font-size: 9px; }
         
         .nav { background: rgba(9, 18, 28, 0.95); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 0; color: var(--muted); font-size: 9px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
 
-        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; display: flex; height: 45px; overflow: hidden; }
-        .pan-swatch { width: 35%; }
-        .pan-data { padding: 5px; font-size: 9px; display: flex; flex-direction: column; justify-content: center; }
-
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border: 1px solid var(--gold); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div class="hdr">
-        <div class="brand">PR EYE v4.6.2</div>
-        <div id="tel-wb" style="font-size: 10px; color: var(--muted);">WB 5500K</div>
+        <div class="hdr-top">
+            <div class="brand">PR EYE v4.6.3</div>
+            <div id="tel-wb" style="font-size: 10px; color: var(--muted);">WB 5500K</div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -71,40 +80,48 @@
         <div id="page-meter" class="page active">
             <div class="pro-meter-display">
                 <div id="ev-big-val">0.0</div>
-                <div id="ev-zone-label" style="color: var(--muted); font-size: 11px; letter-spacing: 2px;">ZONE V</div>
+                <div class="ev-label" id="ev-zone-label">ZONE V</div>
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:10px; font-size:10px; color:var(--muted);">
+                    <span id="tel-lux">-- lux</span>
+                    <span id="tel-temp">--°C</span>
+                </div>
             </div>
             <div style="display:flex; gap:10px;">
-                <button id="torch-btn" class="btn">TORCH</button>
+                <button id="torch-btn" class="btn">🔦 TORCH OFF</button>
                 <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
             </div>
         </div>
 
         <div id="page-color" class="page">
-            <h4 style="color:var(--gold); margin-bottom:10px;">GENERATIVE INTERIORS</h4>
-            <div class="toggle-switch" style="display:flex; gap:5px; margin-bottom:10px;">
-                <button class="btn sm prompt-style-btn active" data-style="Modern Home">Modern</button>
-                <button class="btn sm prompt-style-btn" data-style="Georgian House">Georgian</button>
-                <button class="btn sm prompt-style-btn" data-style="English Cottage">Cottage</button>
+            <div class="pan-grid" id="color-grid">
+                <div class="pan-item" id="p1" onclick="setActivePoint(0)"><div class="pan-swatch" id="cs1"></div><div class="pan-data" id="ch1">#---</div></div>
+                <div class="pan-item" id="p2" onclick="setActivePoint(1)"><div class="pan-swatch" id="cs2"></div><div class="pan-data" id="ch2">#---</div></div>
+                <div class="pan-item" id="p3" onclick="setActivePoint(2)"><div class="pan-swatch" id="cs3"></div><div class="pan-data" id="ch3">#---</div></div>
+                <div class="pan-item" id="p4" onclick="setActivePoint(3)"><div class="pan-swatch" id="cs4"></div><div class="pan-data" id="ch4">#---</div></div>
             </div>
-            <textarea id="mj-prompt-output" style="width:100%; height:100px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; font-family:inherit; padding:10px; font-size:11px; margin-bottom:10px;" readonly></textarea>
-            <button class="btn sm" id="btn-copy-mj" style="width:100%">Copy Prompt</button>
 
-            <div class="pan-grid" id="swatch-container">
-                <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div id="ch1">#---</div></div></div>
-                <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div id="ch2">#---</div></div></div>
+            <h4 style="color:var(--gold); margin: 15px 0 10px;">MIDJOURNEY MATRIX</h4>
+            <textarea id="mj-prompt-output" style="width:100%; height:80px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; font-size:11px; padding:10px; margin-bottom:10px;" readonly></textarea>
+            <button class="btn sm" onclick="copyPrompt()" style="width:100%">Copy Prompt</button>
+            
+            <h4 style="color:var(--cyan); margin: 15px 0 10px;">COLOR EXPLORER</h4>
+            <div id="harmony-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <div id="harm-comp" style="height:40px; border-radius:4px; font-size:9px; padding:5px; color:#000;">COMPLEMENTARY</div>
+                <div id="harm-ana" style="height:40px; border-radius:4px; font-size:9px; padding:5px; color:#000;">ANALOGOUS</div>
             </div>
         </div>
     </div>
 
     <div id="result-overlay">
         <img id="result-img" src="">
-        <button class="btn solid" id="btn-close-result" style="width:200px">CLOSE</button>
+        <button class="btn solid" id="btn-close-result" style="width:200px">BACK TO TOOLKIT</button>
     </div>
 
     <div class="nav">
         <div class="nav-item active" data-target="page-meter">Meter</div>
         <div class="nav-item" data-target="page-color">Color</div>
         <div class="nav-item" data-target="page-scout">Scout</div>
+        <div class="nav-item" data-target="page-rave">Rave</div>
     </div>
 
     <canvas id="proc-canvas" width="300" height="400" style="display:none"></canvas>
@@ -112,107 +129,92 @@
 
 <script>
     const video = document.getElementById('video');
+    const uiCtx = document.getElementById('ui-layer').getContext('2d');
     const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
-    const compCanvas = document.getElementById('composite-canvas');
-    const compCtx = compCanvas.getContext('2d');
     
     let stream = null;
     let currentEV = 0;
-    let extractedHex = ["#333333", "#666666"];
-    let currentInteriorStyle = "Modern Home";
+    let activePoint = 0;
+    let colors = ["#333333","#444444","#555555","#666666"];
+    let points = [{x:0.2, y:0.2}, {x:0.8, y:0.2}, {x:0.2, y:0.8}, {x:0.8, y:0.8}];
 
     async function startCamera() {
         try {
-            if(stream) stream.getTracks().forEach(t => t.stop());
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                video: { facingMode: 'environment', width: {ideal: 1280} } 
             });
             video.srcObject = stream;
-        } catch (e) { alert("Camera Error: " + e); }
+        } catch (e) { alert("Camera Permission Required"); }
     }
 
-    // Capture Logic
-    document.getElementById('capture-btn').addEventListener('click', () => {
-        if(video.readyState !== 4) return;
-        compCtx.fillStyle = '#09121c';
-        compCtx.fillRect(0,0,1000,1500);
-        compCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 50, 50, 900, 1200);
-        
-        // Footer bar
-        compCtx.fillStyle = 'rgba(0,0,0,0.8)';
-        compCtx.fillRect(50, 1100, 900, 150);
-        
-        // Swatches on capture
-        compCtx.fillStyle = extractedHex[0]; compCtx.fillRect(60, 1115, 60, 60);
-        compCtx.fillStyle = extractedHex[1]; compCtx.fillRect(130, 1115, 60, 60);
-        
-        compCtx.fillStyle = '#d4c2a1';
-        compCtx.font = 'bold 30px Arial';
-        compCtx.fillText("EV " + currentEV.toFixed(1) + " | " + currentInteriorStyle, 210, 1155);
-
-        const dataUrl = compCanvas.toDataURL('image/jpeg', 0.9);
-        document.getElementById('result-img').src = dataUrl;
-        document.getElementById('result-overlay').style.display = 'flex';
-    });
-
-    document.getElementById('btn-close-result').onclick = () => document.getElementById('result-overlay').style.display = 'none';
-
-    // Style Switcher
-    document.querySelectorAll('.prompt-style-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.prompt-style-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentInteriorStyle = btn.dataset.style;
-        };
-    });
-
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(nav => {
-        nav.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item, .page').forEach(el => el.classList.remove('active'));
-            nav.classList.add('active');
-            document.getElementById(nav.dataset.target).classList.add('active');
+    function setActivePoint(idx) {
+        activePoint = idx;
+        document.querySelectorAll('.pan-item').forEach((el, i) => {
+            el.style.borderColor = (i === idx) ? 'var(--cyan)' : 'var(--border)';
         });
-    });
+    }
 
     const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
 
-    function liveLoop() {
+    function updateLoop() {
         if (video.readyState === 4) {
             procCtx.drawImage(video, 0, 0, 300, 400);
             
-            // Exposure
-            const midData = procCtx.getImageData(140, 190, 20, 20).data;
+            // EXPOSURE MATH
+            const exposureData = procCtx.getImageData(140, 190, 20, 20).data;
             let lum = 0;
-            for(let i=0; i<midData.length; i+=4) lum += (0.299*midData[i] + 0.587*midData[i+1] + 0.114*midData[i+2]);
-            const avg = lum / (midData.length / 4);
-            currentEV = Math.log2((Math.max(1, avg) / 255) * 100 / 14.0);
-            document.getElementById('ev-big-val').innerText = currentEV.toFixed(1);
+            for(let i=0; i<exposureData.length; i+=4) lum += (0.299*exposureData[i] + 0.587*exposureData[i+1] + 0.114*exposureData[i+2]);
+            currentEV = Math.log2((Math.max(1, lum / 100) / 255) * 100 / 12.5);
             
-            // Zones
+            document.getElementById('ev-big-val').innerText = currentEV.toFixed(1);
             const zones = ['ZONE 0','ZONE I','ZONE II','ZONE III','ZONE IV','ZONE V','ZONE VI','ZONE VII','ZONE VIII','ZONE IX','ZONE X'];
             document.getElementById('ev-zone-label').innerText = zones[Math.max(0, Math.min(10, Math.round(currentEV + 5)))];
+            document.getElementById('tel-lux').innerText = Math.round(2.5 * Math.pow(2, currentEV)) + " lux";
 
-            // Color Sampling (Points 1 and 2)
-            const p1 = procCtx.getImageData(75, 100, 1, 1).data;
-            const p2 = procCtx.getImageData(225, 300, 1, 1).data;
-            extractedHex[0] = rgbToHex(p1[0], p1[1], p1[2]);
-            extractedHex[1] = rgbToHex(p2[0], p2[1], p2[2]);
-            
-            document.getElementById('cs1').style.backgroundColor = extractedHex[0];
-            document.getElementById('ch1').innerText = extractedHex[0];
-            document.getElementById('cs2').style.backgroundColor = extractedHex[1];
-            document.getElementById('ch2').innerText = extractedHex[1];
+            // COLOR SAMPLING (4 POINTS)
+            points.forEach((p, i) => {
+                const px = procCtx.getImageData(p.x * 300, p.y * 400, 1, 1).data;
+                const hex = rgbToHex(px[0], px[1], px[2]);
+                colors[i] = hex;
+                document.getElementById(`cs${i+1}`).style.backgroundColor = hex;
+                document.getElementById(`ch${i+1}`).innerText = hex;
+            });
 
-            // Build Prompt
-            const prompt = `/imagine prompt: interior photography of a ${currentInteriorStyle}, color palette of ${extractedHex[0]} and ${extractedHex[1]}, cinematic lighting, shot on 35mm, --ar 3:4 --v 6.1`;
-            document.getElementById('mj-prompt-output').value = prompt;
+            // MIDJOURNEY MATRIX
+            const mjPrompt = `/imagine prompt: interior photography of {Modern Home, Georgian House, Cottage}, color palette of ${colors[0]} and ${colors[1]}, detailed textures, ${colors[2]} accents, cinematic lighting --ar 3:4 --v 6.1`;
+            document.getElementById('mj-prompt-output').value = mjPrompt;
         }
-        requestAnimationFrame(liveLoop);
+        requestAnimationFrame(updateLoop);
     }
 
+    // CAPTURE ENGINE
+    document.getElementById('capture-btn').onclick = () => {
+        const comp = document.getElementById('composite-canvas');
+        const ctx = comp.getContext('2d');
+        ctx.fillStyle = '#09121c'; ctx.fillRect(0,0,1000,1500);
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 50, 50, 900, 1200);
+        
+        ctx.fillStyle = '#d4c2a1'; ctx.font = 'bold 40px Arial';
+        ctx.fillText(`EV ${currentEV.toFixed(1)} | ${colors[0]} ${colors[1]}`, 80, 1350);
+        
+        document.getElementById('result-img').src = comp.toDataURL('image/jpeg');
+        document.getElementById('result-overlay').style.display = 'flex';
+    };
+
+    document.getElementById('btn-close-result').onclick = () => document.getElementById('result-overlay').style.display = 'none';
+
+    // NAV
+    document.querySelectorAll('.nav-item').forEach(nav => {
+        nav.onclick = () => {
+            document.querySelectorAll('.nav-item, .page').forEach(el => el.classList.remove('active'));
+            nav.classList.add('active');
+            document.getElementById(nav.dataset.target).classList.add('active');
+        };
+    });
+
     startCamera();
-    liveLoop();
+    updateLoop();
+    setActivePoint(0);
 </script>
 </body>
 </html>
