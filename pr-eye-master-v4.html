@@ -3,202 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR EYE v6.2 — TACTICAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <title>PR EYE v8.0 — ULTIMATE</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+
     <style>
-        :root { --gold: #d4c2a1; --bg: #050a10; --red: #ff3b30; --magenta: #ff2d55; --cyan: #5ac8fa; }
+        :root { --gold: #d4c2a1; --bg: #09121c; --border: rgba(255, 255, 255, 0.1); --red: #ff3b30; --magenta: #ff2d55; --cyan: #5ac8fa; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; font-family: 'DM Mono', monospace; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'DM Mono', monospace; font-size: 12px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER */
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .tel-item { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        /* UI OVERLAYS */
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
+        .tel-bar { display: flex; gap: 12px; font-size: 10px; color: #8b9bb4; margin-top: 5px; }
+        .val { color: var(--gold); }
 
-        /* CAMERA VIEWPORT */
-        #viewport { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; overflow: hidden; border-bottom: 1px solid #333; flex-shrink: 0; }
+        #cam-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; flex-shrink: 0; overflow: hidden; border-bottom: 1px solid #333; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-
-        /* TAB NAVIGATION */
-        .nav { display: flex; background: #000; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; padding: 16px 0; text-align: center; font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-item.active { color: var(--gold); border-top: 2px solid var(--gold); background: rgba(212,194,161,0.05); }
-
-        /* CONTENT */
-        .content { flex: 1; overflow-y: auto; padding: 15px 15px 100px; }
+        
+        .main { flex: 1; overflow-y: auto; padding: 15px 15px 120px; }
         .page { display: none; } .page.active { display: block; }
-        .ctrl-group { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; margin-bottom: 12px; }
-        
-        /* COLOR SWATCHES */
-        .palette-row { display: flex; height: 70px; border-radius: 8px; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
-        .swatch { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; text-shadow: 0 1px 2px #000; }
-        
-        /* CANON HUD */
-        .hud-grid { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d141e; border: 1px solid #333; border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
-        .hud-cell { padding: 12px; border: 0.5px solid #222; text-align: center; }
-        .hud-label { font-size: 8px; color: #666; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        .hud-val { font-size: 15px; font-weight: bold; color: #fff; }
+        .panel { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
 
-        /* BUTTONS */
+        /* CANON HUD */
+        .hud-grid { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d141e; border: 2px solid #555; border-radius: 6px; overflow: hidden; margin-bottom: 15px; }
+        .hud-cell { padding: 10px; border: 0.5px solid #222; text-align: center; }
+        .hud-lbl { font-size: 8px; color: #888; text-transform: uppercase; }
+        .hud-v { font-size: 16px; font-weight: bold; color: #fff; }
+
         .btn { width: 100%; padding: 14px; background: transparent; border: 1px solid #444; color: var(--gold); border-radius: 8px; font-size: 10px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
         .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
         .btn.danger { background: var(--red); color: #fff; border: none; }
+        input[type="range"] { width: 100%; height: 35px; accent-color: var(--gold); }
 
-        /* RAVE */
-        #rave-overlay { display: none; position: fixed; inset: 0; z-index: 999; pointer-events: none; }
-        .mode-police { animation: strobe-p 0.15s infinite; }
-        @keyframes strobe-p { 0% { background: #f00; } 50% { background: #00f; } }
+        /* COLORS */
+        .palette-strip { display: flex; height: 60px; border-radius: 8px; overflow: hidden; margin: 10px 0; border: 1px solid #333; }
+        .sw { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; text-shadow: 0 1px 2px #000; }
+        .mj-box { font-size: 10px; color: #888; background: #000; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #222; }
 
         /* EXPORT */
-        #export-ovl { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .polaroid { background: #fff; padding: 10px 10px 60px 10px; box-shadow: 0 20px 60px #000; width: 100%; max-width: 340px; }
+        #export-ovl { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .polaroid { background: #fff; padding: 10px 10px 80px 10px; box-shadow: 0 20px 60px #000; width: 100%; max-width: 340px; }
         #pol-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-        #pol-cap { color: #111; font-family: 'Permanent Marker', cursive; padding-top: 15px; font-size: 13px; white-space: pre-line; }
+        #pol-meta { color: #111; font-family: 'Permanent Marker', cursive; padding-top: 15px; font-size: 11px; white-space: pre-line; position: relative; }
+
+        /* RAVE */
+        #rave-flash { display: none; position: fixed; inset: 0; z-index: 1500; pointer-events: none; }
+        .strobe { animation: str 0.1s infinite; }
+        @keyframes str { 0% { background: #f00; } 50% { background: #00f; } }
+
+        /* NAV */
+        .nav { background: #000; border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; padding: 15px 0; text-align: center; font-size: 9px; color: #555; text-transform: uppercase; }
+        .nav-item.active { color: var(--gold); border-top: 2px solid var(--gold); }
     </style>
 </head>
 <body>
 
     <div class="hdr">
-        <span class="tel-item">PR EYE v6.2</span>
-        <span class="tel-item" id="tel-ev">EV --.-</span>
-        <span class="tel-item" id="tel-wb">5500K</span>
+        <div class="hdr-top">
+            <div style="font-family:'Cormorant Garamond'; letter-spacing:2px; color:var(--gold);">PR EYE v8.0</div>
+            <div id="tel-ev" style="font-size:16px; font-weight:bold; color:var(--gold);">EV 0.0</div>
+        </div>
+        <div class="tel-bar">
+            <span>GPS: <span class="val" id="tel-gps">--</span></span>
+            <span>TILT: <span class="val" id="tel-tilt">0°</span></span>
+        </div>
     </div>
 
-    <div id="viewport">
-        <video id="video" autoplay playsinline></video>
+    <div id="cam-wrap">
+        <video id="video" autoplay playsinline muted></video>
         <canvas id="lvl-canvas" class="overlay"></canvas>
-        <div id="rave-overlay"></div>
+        <div id="rave-flash"></div>
     </div>
 
-    <div class="content">
+    <div class="main">
         <div id="page-meter" class="page active">
             <div class="hud-grid">
-                <div class="hud-cell"><span class="hud-label">SS</span><span class="hud-val" id="hud-ss">1/50</span></div>
-                <div class="hud-cell"><span class="hud-label">F</span><span class="hud-val" id="hud-f">F4.0</span></div>
-                <div class="hud-cell"><span class="hud-label">ISO</span><span class="hud-val" id="hud-iso">400</span></div>
+                <div class="hud-cell"><span class="hud-lbl">SS</span><br><span class="hud-v" id="h-ss">1/50</span></div>
+                <div class="hud-cell"><span class="hud-lbl">F</span><br><span class="hud-v" id="h-f">F4.0</span></div>
+                <div class="hud-cell"><span class="hud-lbl">ISO</span><br><span class="hud-v" id="h-iso">400</span></div>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="range" id="sl-ss" min="0" max="51" value="32">
+            <input type="range" id="sl-f" min="0" max="22" value="10">
+            <input type="range" id="sl-iso" min="0" max="23" value="7">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
                 <button class="btn" onclick="flipCamera()">FLIP CAMERA</button>
-                <button class="btn" onclick="toggleLevel()">TOGGLE LEVEL</button>
+                <button class="btn" onclick="toggleLvl()">LEVEL HUD</button>
             </div>
-            <button class="btn solid" style="margin-top:10px; padding:18px;" onclick="capture('pol')">CAPTURE POLAROID</button>
+            <button class="btn solid" style="margin-top:10px; padding:18px;" onclick="doCapture('pol')">CAPTURE POLAROID + SWATCHES</button>
         </div>
 
         <div id="page-color" class="page">
-            <div class="ctrl-group">
-                <h4 style="color:var(--gold); font-size:10px; margin-bottom:10px;">60-30-10 DOMINANT PALETTE</h4>
-                <div class="palette-row">
-                    <div id="sw-60" class="swatch" style="flex:6;">60%</div>
-                    <div id="sw-30" class="swatch" style="flex:3;">30%</div>
-                    <div id="sw-10" class="swatch" style="flex:1;">10%</div>
+            <div class="panel">
+                <div class="palette-strip">
+                    <div id="sw60" class="sw" style="flex:6;">--</div>
+                    <div id="sw30" class="sw" style="flex:3;">--</div>
+                    <div id="sw10" class="sw" style="flex:1;">--</div>
                 </div>
-                <div id="mj-prompt" style="font-size:10px; color:#888; font-style:italic;">Extracting colors...</div>
-                <button class="btn solid" style="margin-top:15px;" onclick="capture('swatch')">EXPORT SWATCHES</button>
+                <div class="mj-box" id="mj-1"></div>
+                <div class="mj-box" id="mj-2"></div>
+                <button class="btn solid" style="margin-top:15px;" onclick="doCapture('swatch')">EXPORT FULL SWATCH BOARD</button>
             </div>
         </div>
 
-        <div id="page-rave" class="page">
-            <div class="ctrl-group">
-                <button class="btn solid" id="rave-btn" style="height:80px; font-size:16px;" onclick="toggleRave()">START TACTICAL RAVE</button>
-                <button class="btn danger" id="siren-btn" style="height:60px;" onclick="toggleSiren()">EMERGENCY SIREN</button>
+        <div id="page-scout" class="page">
+            <div class="panel">
+                <canvas id="radar" width="800" height="280" style="width:100%; height:160px; background:#000; border-radius:8px;"></canvas>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+                    <div><span class="hud-lbl">Sunrise</span><br><span id="sun-r">--:--</span></div>
+                    <div style="text-align:right;"><span class="hud-lbl">Sunset</span><br><span id="sun-s">--:--</span></div>
+                </div>
+            </div>
+            <button class="btn solid" onclick="getGPS()">REFRESH INTEL</button>
+        </div>
+
+        <div id="page-tools" class="page">
+            <div class="panel" style="border-color:var(--red);">
+                <button class="btn" id="rave-btn" onclick="toggleRave()">START TACTICAL RAVE</button>
+                <button class="btn danger" id="siren-btn" onclick="toggleSiren()">EMERGENCY SIREN</button>
             </div>
         </div>
-    </div>
 
-    <div class="nav">
-        <div class="nav-item active" data-t="page-meter">Meter</div>
-        <div class="nav-item" data-t="page-color">Color</div>
-        <div class="nav-item" data-t="page-rave">Rave</div>
+        <div id="page-legal" class="page">
+            <div class="panel">
+                <input type="text" id="m-name" placeholder="Model Name" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff;">
+                <canvas id="sig-pad" style="background:#fff; width:100%; height:80px; touch-action:none; border:1px solid #000;"></canvas>
+                <button class="btn solid" style="margin-top:15px;" onclick="genPDF()">GENERATE SIGNED PDF</button>
+                <button class="btn" onclick="ctxSig.clearRect(0,0,1000,1000)">CLEAR</button>
+            </div>
+        </div>
     </div>
 
     <div id="export-ovl">
         <div class="polaroid">
             <img id="pol-img">
-            <div id="pol-cap"></div>
+            <div id="pol-meta"></div>
         </div>
-        <button class="btn solid" style="margin-top:20px; width:340px;" id="share-btn">SAVE / SHARE</button>
-        <button class="btn" style="width:340px;" onclick="document.getElementById('export-ovl').style.display='none'">CLOSE</button>
+        <button class="btn solid" style="margin-top:20px; width:340px;" id="share-btn">SHARE / SAVE</button>
+        <button class="btn" style="width:340px;" onclick="document.getElementById('export-ovl').style.display='none'">DISCARD</button>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" data-t="page-meter">Meter</div>
+        <div class="nav-item" data-t="page-color">Color</div>
+        <div class="nav-item" data-t="page-scout">Scout</div>
+        <div class="nav-item" data-t="page-tools">Tools</div>
+        <div class="nav-item" data-t="page-legal">Legal</div>
     </div>
 
     <script>
         let stream, currentFacing = 'environment', lvlActive = false, raveActive = false, sirenActive = false;
-        let evVal = 0, lastHex = ["#111","#222","#333"];
-        let audioCtx, osc, sirenInt;
+        let lat = 0, lon = 0, curEV = 0, hexList = ["#111","#222","#333"];
+        let audioCtx, osc, sirenInt, radarAngle = 0;
 
         const video = document.getElementById('video');
         const lcan = document.getElementById('lvl-canvas');
         const lctx = lcan.getContext('2d');
+        const rctx = document.getElementById('radar').getContext('2d');
+        const ctxSig = document.getElementById('sig-pad').getContext('2d');
 
-        // Robust Camera Init
-        async function start() {
+        const arrSS = ['30"','25"','20"','15"','13"','10"','8"','6"','5"','4"','3.2"','2.5"','2"','1.6"','1.3"','1"','0.8"','0.6"','0.5"','0.4"','0.3"','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000'];
+        const arrF = [1.2, 1.4, 1.8, 2.0, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10, 11, 13, 14, 16, 18, 20, 22];
+        const arrIso = [50, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 25600];
+
+        async function init() {
             if(stream) stream.getTracks().forEach(t => t.stop());
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacing, width: { ideal: 1280 }, height: { ideal: 720 } } 
-                });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing, width: { ideal: 1280 } } });
                 video.srcObject = stream;
-                resize();
-            } catch(e) { console.error("Camera Init Failed", e); }
+            } catch(e) { alert("Check Camera Permissions."); }
         }
 
-        function resize() { lcan.width = video.clientWidth; lcan.height = video.clientHeight; }
-        function flipCamera() { currentFacing = (currentFacing === 'user') ? 'environment' : 'user'; start(); }
-        function toggleLevel() { lvlActive = !lvlActive; if(!lvlActive) lctx.clearRect(0,0,2000,2000); }
+        function flipCamera() { currentFacing = currentFacing === 'user' ? 'environment' : 'user'; init(); }
+        function toggleLvl() { lvlActive = !lvlActive; if(!lvlActive) lctx.clearRect(0,0,2000,2000); }
 
         function loop() {
             if(video.readyState === 4) {
-                // Color Extraction Logic
-                const can = document.createElement('canvas'); const ctx = can.getContext('2d');
-                can.width = 50; can.height = 50;
-                ctx.drawImage(video, 0, 0, 50, 50);
-                const pix = ctx.getImageData(0,0,50,50).data;
-
-                // Simple Dominant Sampling
-                const getHex = (offset) => {
-                    const r = pix[offset], g = pix[offset+1], b = pix[offset+2];
-                    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-                };
-
-                lastHex = [getHex(2500), getHex(1000), getHex(4000)];
-                document.getElementById('sw-60').style.background = lastHex[0];
-                document.getElementById('sw-30').style.background = lastHex[1];
-                document.getElementById('sw-10').style.background = lastHex[2];
-                document.getElementById('sw-60').innerText = lastHex[0].toUpperCase();
+                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                c.width = 10; c.height = 10; ctx.drawImage(video, 0, 0, 10, 10);
+                const pix = ctx.getImageData(0,0,10,10).data;
                 
-                document.getElementById('mj-prompt').innerText = `/imagine prompt: pattern, ${lastHex.join(', ')} --tile`;
+                let lum = 0; for(let i=0; i<400; i+=4) lum += (0.299*pix[i] + 0.587*pix[i+1] + 0.114*pix[i+2]);
+                curEV = Math.log2((lum/100)/255 * 100/12.5).toFixed(1);
+                document.getElementById('tel-ev').innerText = `EV ${curEV}`;
 
-                // EV Calculation
-                let lum = 0; for(let i=0; i<pix.length; i+=4) lum += (pix[i]+pix[i+1]+pix[i+2])/3;
-                evVal = Math.log2((lum/2500)/255 * 100/12.5).toFixed(1);
-                document.getElementById('tel-ev').innerText = `EV ${evVal}`;
+                const toHex = (i) => "#" + ((1<<24)+(pix[i]<<16)+(pix[i+1]<<8)+pix[i+2]).toString(16).slice(1).toUpperCase();
+                hexList = [toHex(0), toHex(20), toHex(40)];
+                document.getElementById('sw60').style.background = hexList[0]; document.getElementById('sw60').innerText = hexList[0];
+                document.getElementById('sw30').style.background = hexList[1]; document.getElementById('sw30').innerText = hexList[1];
+                document.getElementById('sw10').style.background = hexList[2]; document.getElementById('sw10').innerText = hexList[2];
 
-                if(lvlActive) drawLvl();
+                document.getElementById('mj-1').innerText = `/imagine prompt: seamless pattern, ${hexList.join(', ')} --tile`;
+                document.getElementById('mj-2').innerText = `/imagine prompt: {Georgian House, Cottage, Modern Home}, sunset, colors: ${hexList[0]}, ${hexList[1]} --v 6.0`;
+
+                if(lvlActive) {
+                    lcan.width = video.clientWidth; lcan.height = video.clientHeight;
+                    lctx.clearRect(0,0,lcan.width, lcan.height);
+                    lctx.strokeStyle = '#4cd964'; lctx.lineWidth = 2;
+                    lctx.beginPath(); lctx.moveTo(lcan.width*0.2, lcan.height/2); lctx.lineTo(lcan.width*0.8, lcan.height/2); lctx.stroke();
+                }
+                drawRadar();
             }
             requestAnimationFrame(loop);
         }
 
-        function drawLvl() {
-            lctx.clearRect(0,0,lcan.width, lcan.height);
-            lctx.strokeStyle = '#4cd964'; lctx.lineWidth = 2;
-            lctx.beginPath(); lctx.moveTo(lcan.width*0.2, lcan.height/2); lctx.lineTo(lcan.width*0.8, lcan.height/2); lctx.stroke();
+        function drawRadar() {
+            rctx.fillStyle = '#051105'; rctx.fillRect(0,0,800,280);
+            rctx.strokeStyle = 'rgba(0,255,0,0.3)'; rctx.beginPath(); rctx.arc(400,140,110,0,Math.PI*2); rctx.stroke();
+            radarAngle += 0.05; rctx.save(); rctx.translate(400,140); rctx.rotate(radarAngle);
+            rctx.fillStyle='rgba(0,255,0,0.1)'; rctx.beginPath(); rctx.moveTo(0,0); rctx.arc(0,0,110,0,0.4); rctx.fill(); rctx.restore();
         }
 
-        async function capture(mode) {
-            const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1200;
-            const ctx = canvas.getContext('2d');
-            if(mode === 'pol') {
+        async function doCapture(m) {
+            const can = document.createElement('canvas'); can.width = 1200; can.height = 1200; const ctx = can.getContext('2d');
+            if(m === 'pol') {
                 const s = Math.min(video.videoWidth, video.videoHeight);
                 ctx.drawImage(video, (video.videoWidth-s)/2, (video.videoHeight-s)/2, s, s, 0, 0, 1200, 1200);
+                // BAKE VISUAL SWATCHES ONTO POLAROID
+                hexList.forEach((h, i) => {
+                    ctx.fillStyle = h; ctx.fillRect(1000 + (i*50), 1050, 40, 40);
+                });
             } else {
-                ctx.fillStyle = lastHex[0]; ctx.fillRect(0,0,1200,700);
-                ctx.fillStyle = lastHex[1]; ctx.fillRect(0,700,1200,350);
-                ctx.fillStyle = lastHex[2]; ctx.fillRect(0,1050,1200,150);
+                ctx.fillStyle = hexList[0]; ctx.fillRect(0,0,1200,700);
+                ctx.fillStyle = hexList[1]; ctx.fillRect(0,700,1200,350);
+                ctx.fillStyle = hexList[2]; ctx.fillRect(0,1050,1200,150);
             }
-            const data = canvas.toDataURL('image/jpeg', 0.95);
+            const data = can.toDataURL('image/jpeg', 0.95);
             document.getElementById('pol-img').src = data;
-            document.getElementById('pol-cap').innerText = `EV: ${evVal} | PALETTE: ${lastHex.join(', ')}\nDATE: ${new Date().toLocaleString()}\nPR EYE TACTICAL`;
+            document.getElementById('pol-meta').innerText = `GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)} | EV: ${curEV}\nCOLORS: ${hexList.join(', ')}\nPR EYE TACTICAL`;
             document.getElementById('export-ovl').style.display = 'flex';
-            
             document.getElementById('share-btn').onclick = async () => {
                 const b = await (await fetch(data)).blob();
                 const f = new File([b], `PREYE_${Date.now()}.jpg`, {type:'image/jpeg'});
@@ -206,32 +243,48 @@
             };
         }
 
-        function toggleRave() {
-            raveActive = !raveActive;
-            const ovl = document.getElementById('rave-overlay');
-            ovl.style.display = raveActive ? 'block' : 'none';
-            ovl.className = 'mode-police';
-            document.getElementById('rave-btn').innerText = raveActive ? 'STOP RAVE' : 'START TACTICAL RAVE';
-        }
-
+        function toggleRave() { raveActive = !raveActive; document.getElementById('rave-flash').style.display = raveActive?'block':'none'; document.getElementById('rave-flash').className = 'strobe'; }
         function toggleSiren() {
-            if(sirenActive) { if(osc) osc.stop(); clearInterval(sirenInt); sirenActive = false; }
+            if(sirenActive) { if(osc) osc.stop(); sirenActive = false; clearInterval(sirenInt); }
             else {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                osc = audioCtx.createOscillator(); osc.type = 'square'; osc.connect(audioCtx.destination); osc.start();
-                sirenActive = true; let t = true;
-                sirenInt = setInterval(() => { osc.frequency.setValueAtTime(t?435:580, audioCtx.currentTime); t=!t; }, 350);
+                audioCtx = new AudioContext(); osc = audioCtx.createOscillator(); osc.type = 'square'; osc.connect(audioCtx.destination);
+                osc.start(); sirenActive = true; let t = true;
+                sirenInt = setInterval(() => { osc.frequency.setValueAtTime(t?435:580, audioCtx.currentTime); t=!t; }, 400);
             }
         }
 
-        document.querySelectorAll('.nav-item').forEach(n => {
-            n.onclick = () => {
-                document.querySelectorAll('.nav-item, .page').forEach(x => x.classList.remove('active'));
-                n.classList.add('active'); document.getElementById(n.dataset.t).classList.add('active');
-            }
+        function genPDF() { const doc = new jspdf.jsPDF(); doc.text(`Model: ${document.getElementById('m-name').value}`, 10, 10); doc.addImage(document.getElementById('sig-pad').toDataURL(), 'PNG', 10, 20, 50, 20); doc.save('Release.pdf'); }
+        
+        let draw = false;
+        document.getElementById('sig-pad').addEventListener('pointerdown', e => { draw=true; ctxSig.beginPath(); ctxSig.moveTo(e.offsetX, e.offsetY); });
+        document.getElementById('sig-pad').addEventListener('pointermove', e => { if(draw) { ctxSig.lineTo(e.offsetX, e.offsetY); ctxSig.stroke(); } });
+        document.getElementById('sig-pad').addEventListener('pointerup', () => draw=false);
+
+        document.querySelectorAll('.nav-item').forEach(i => i.onclick = () => {
+            document.querySelectorAll('.nav-item, .page').forEach(x => x.classList.remove('active'));
+            i.classList.add('active'); document.getElementById(i.dataset.t).classList.add('active');
         });
 
-        start(); loop();
+        const updateHUD = () => {
+            document.getElementById('h-ss').innerText = arrSS[document.getElementById('sl-ss').value];
+            document.getElementById('h-f').innerText = 'F' + arrF[document.getElementById('sl-f').value];
+            document.getElementById('h-iso').innerText = arrIso[document.getElementById('sl-iso').value];
+        };
+        ['sl-ss','sl-f','sl-iso'].forEach(id => document.getElementById(id).oninput = updateHUD);
+        
+        function getGPS() {
+            navigator.geolocation.getCurrentPosition(p => {
+                lat = p.coords.latitude; lon = p.coords.longitude;
+                document.getElementById('tel-gps').innerText = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+                const t = SunCalc.getTimes(new Date(), lat, lon);
+                document.getElementById('sun-r').innerText = t.sunrise.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                document.getElementById('sun-s').innerText = t.sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            });
+        }
+
+        window.addEventListener('deviceorientation', e => { document.getElementById('tel-tilt').innerText = Math.round(e.beta) + '°'; });
+
+        init(); loop(); getGPS(); updateHUD();
     </script>
 </body>
 </html>
