@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.8 — Pro Toolkit</title>
+    <title>PR Eye v2.9 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -19,34 +19,34 @@
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
         h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
-        .hdr { padding: 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+        .hdr { padding: 12px 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;}
         .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
-        .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
+        .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px;}
 
         .main-content { flex: 1; overflow-y: auto; padding: 0 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        #persistent-cam-area { margin-bottom: 15px; display: block; position: relative;}
-        .cam-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
+        #persistent-cam-area { margin-bottom: 10px; display: flex; flex-direction: column; position: relative;}
+        .cam-container { position: relative; width: 100%; max-height: 42vh; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 0 auto 8px auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #level-layer { z-index: 6; display: none; } #scout-layer { z-index: 7; display: none; }
+        #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #level-layer { z-index: 6; display: none; } #scout-layer { z-index: 7; }
         
         #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 15; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 8px; display: none; width: 35%; height: 15%;}
         
         #countdown-display { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size: 120px; font-weight:bold; color:#fff; z-index:20; text-shadow: 0 4px 20px rgba(0,0,0,0.8); display:none;}
 
-        .action-row { display: flex; gap: 6px; margin-bottom: 10px; }
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 400; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 9px;}
+        .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .btn { padding: 10px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 400; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 9px;}
         .btn:active { transform: scale(0.96); }
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 600;}
         .btn.active-toggle { background: var(--gold); color: #09121c; }
         .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800;}
         .btn.sm { font-size: 10px; padding: 10px; }
         
-        .ctrl-panel { border-radius: 12px; padding: 18px; margin-bottom: 15px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
+        .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
         select, input, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
         
@@ -58,12 +58,12 @@
         .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; border-radius: 2px;}
         .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 16px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
 
-        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 50px; }
         .pan-swatch { width: 40%; transition: background-color 0.1s; }
-        .pan-data { width: 60%; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
-        .pan-code { font-family: 'Cormorant Garamond'; font-size: 13px; color: var(--gold); font-weight: 500; line-height: 1.1; }
-        .pan-hex { font-size: 9px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;}
+        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+        .pan-code { font-family: 'Cormorant Garamond'; font-size: 12px; color: var(--gold); font-weight: 500; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .pan-hex { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;}
 
         .signature-pad { background: #fff; border-radius: 8px; width: 100%; border: none; touch-action: none; margin-bottom: 8px;}
         .row { display: flex; gap: 10px; } .col { flex: 1; }
@@ -88,7 +88,7 @@
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.8</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.9</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV <span style="color:var(--green)">0.0</span></div>
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span> <span id="tel-tint" style="color:var(--magenta)">0</span></div>
@@ -118,7 +118,7 @@
                 <button id="toggle-timer-btn" class="btn">⏱️ Timer: OFF</button>
                 <button id="toggle-sound-btn" class="btn active-toggle">🔊 Sound: ON</button>
             </div>
-            <button id="capture-btn" class="btn solid" style="width:100%; padding:15px; font-size:14px; margin-bottom:15px;">CAPTURE FRAME</button>
+            <button id="capture-btn" class="btn solid" style="width:100%; padding:12px; font-size:14px; margin-bottom:8px;">CAPTURE FRAME</button>
         </div>
 
         <div id="page-meter" class="page active">
@@ -142,20 +142,19 @@
         </div>
 
         <div id="page-color" class="page">
-            <div class="ctrl-panel">
-                <h4>Color Palette Match</h4>
+            <div class="ctrl-panel" style="padding-top: 5px;">
                 <div class="pan-grid">
                     <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div class="pan-code" id="cn1">---</div><div class="pan-hex" id="ch1">---</div></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div class="pan-code" id="cn2">---</div><div class="pan-hex" id="ch2">---</div></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><div class="pan-code" id="cn3">---</div><div class="pan-hex" id="ch3">---</div></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><div class="pan-code" id="cn4">---</div><div class="pan-hex" id="ch4">---</div></div></div>
                 </div>
-                <div style="display:flex; height:20px; border-radius:10px; overflow:hidden; margin-top:15px; border:1px solid var(--border); text-align:center; line-height:20px; font-size:10px; font-weight:bold;">
+                <div style="display:flex; height:18px; border-radius:10px; overflow:hidden; margin-top:12px; border:1px solid var(--border); text-align:center; line-height:18px; font-size:10px; font-weight:bold;">
                     <div id="rule-60" style="width: 60%; background: #222; color:#fff;">60%</div>
                     <div id="rule-30" style="width: 30%; background: #444; color:#fff;">30%</div>
                     <div id="rule-10" style="width: 10%; background: #666; color:#fff;">10%</div>
                 </div>
-                <div class="toggle-switch" style="margin-top: 20px; margin-bottom: 0;">
+                <div class="toggle-switch" style="margin-top: 15px; margin-bottom: 0;">
                     <div id="pan-auto" class="toggle-opt active">AUTO TRACK</div>
                     <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
                 </div>
@@ -165,8 +164,9 @@
         <div id="page-scout" class="page">
             <div class="ctrl-panel">
                 <h4>Ephemeris Scout</h4>
-                <button class="btn sm" id="btn-fetch-loc-scout" style="margin-bottom:10px; width:100%;">Refresh GPS Data</button>
-                <div id="scout-map-container" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden; display:flex; align-items:center; justify-content:center;"></div>
+                <p style="font-size:10px; color:var(--green); margin-bottom:10px; letter-spacing:1px; text-transform:uppercase;">AR Sky HUD Active on Camera Feed</p>
+                <button class="btn sm" id="btn-fetch-loc-scout" style="margin-bottom:12px; width:100%;">Refresh GPS Data</button>
+                <div id="scout-map-container" style="height:120px; background:#000; border-radius:8px; margin-bottom:12px; overflow:hidden; display:flex; align-items:center; justify-content:center;"></div>
                 
                 <div class="row" style="margin-bottom:5px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" style="font-size:12px;">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" style="font-size:12px;">--:--</span></div></div>
                 <div class="row" style="margin-bottom:5px;"><div class="col"><span class="label-txt">Golden Hour</span><span id="loc-golden" style="font-size:12px; color:var(--gold);">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Heading</span><span id="scout-heading" style="font-size:12px;">0°</span></div></div>
@@ -175,22 +175,29 @@
         </div>
 
         <div id="page-tools" class="page">
+            <div class="ctrl-panel">
+                <h4 style="color:var(--gold);">Live Weather & Notes</h4>
+                <div class="row" style="margin-bottom:5px;">
+                    <div class="col"><span class="label-txt">Temp / Feels Like</span><span id="tool-temp" style="font-size:12px; color:var(--text);">-- °C / -- °C</span></div>
+                    <div class="col" style="text-align:right;"><span class="label-txt">Wind / Rain</span><span id="tool-weather" style="font-size:12px; color:var(--text);">-- km/h | -- mm</span></div>
+                </div>
+                <hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">
+                <span class="label-txt">Shoot Notes</span>
+                <textarea id="shoot-notes" rows="3" placeholder="Location notes, shot lists..."></textarea>
+                <button class="btn" id="btn-email-notes" style="width: 100%;">Email Notes</button>
+            </div>
             <div class="ctrl-panel" style="border-color: rgba(255, 77, 77, 0.4);">
-                <h4 style="color: var(--red);">Emergency & Local Services</h4>
+                <h4 style="color: var(--red);">Local Services Navigation</h4>
                 <p style="font-size:11px; color:var(--muted); margin-bottom:10px;">Requires GPS. Opens natively in Google Maps.</p>
-                <div class="pan-grid" style="margin-top:0;">
+                <div class="pan-grid" style="grid-template-columns: 1fr 1fr; margin-top:0;">
                     <button class="btn sm" onclick="openSOS('hospital+OR+A%26E')" style="border-color:var(--red); color:var(--red);">🏥 Nearest A&E</button>
                     <button class="btn sm" onclick="openSOS('taxi+rank')">🚕 Taxi Firm</button>
-                    <button class="btn sm" onclick="openSOS('restaurant')">🍽️ Food</button>
+                    <button class="btn sm" onclick="openSOS('parking')">🅿️ Car Park</button>
                     <button class="btn sm" onclick="openSOS('petrol+station')">⛽ Fuel</button>
+                    <button class="btn sm" onclick="openSOS('supermarket+OR+grocery')">🛒 Supermarket</button>
+                    <button class="btn sm" onclick="openSOS('restaurant')">🍽️ Food</button>
+                    <button class="btn sm solid" onclick="openSOS('train+station+OR+transit+station')" style="grid-column: span 2; background:var(--gold); color:#000;">🚆 Nearest Train / Tube</button>
                 </div>
-            </div>
-            <div class="ctrl-panel">
-                <h4>Live Conditions & Notes</h4>
-                <div class="row" style="margin-bottom:15px;"><div class="col"><span class="label-txt">Live Temp</span><span id="tool-temp" style="font-size:12px; color:var(--gold);">-- °C</span></div><div class="col" style="text-align:right;"><span class="label-txt">Conditions</span><span id="tool-weather" style="font-size:12px; color:var(--gold);">--</span></div></div>
-                <span class="label-txt">Shoot Notes</span>
-                <textarea id="shoot-notes" rows="4" placeholder="Location notes, shot lists..."></textarea>
-                <button class="btn" id="btn-email-notes" style="width: 100%;">Email Notes</button>
             </div>
         </div>
 
@@ -287,7 +294,6 @@
     <canvas id="composite-canvas" width="1000" height="1500"></canvas>
 
 <script>
-    // --- APP CORE INITIALIZATION ---
     const video = document.getElementById('video');
     const canvases = ['fc-layer','grid-layer','level-layer','scout-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
     const [fcCtx, gridCtx, lvlCtx, scoutCtx, uiCtx] = canvases;
@@ -297,7 +303,7 @@
 
     let stream = null; let currentFacingMode = 'environment';
     let measuredEV = 0; let liveTempK = 5500; let liveTint = 0; 
-    let currentLat = null; let currentLon = null; let currentWeatherDesc = "";
+    let currentLat = null; let currentLon = null;
     let currentTab = 'page-meter';
     let fcState = 0; let levelActive = false; let curveActive = false;
     let sunriseTime = null; let sunsetTime = null; let goldenHourTime = null;
@@ -306,8 +312,8 @@
     let flashModeActive = false; let flashPeakEV = -99;
     let timerEnabled = false; let soundEnabled = true;
     window.modelIdPhoto = null;
+    window.camPitch = 0;
 
-    // --- SETTINGS & EVENT BINDINGS (Null-Safe) ---
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
 
     bindSafe('toggle-timer-btn', 'click', (e) => { timerEnabled = !timerEnabled; e.currentTarget.innerText = timerEnabled ? '⏱️ Timer: 3S' : '⏱️ Timer: OFF'; e.currentTarget.classList.toggle('active-toggle', timerEnabled); });
@@ -333,7 +339,6 @@
     const saveExpo = () => localStorage.setItem('preye_settings', JSON.stringify({iso: document.getElementById('set-iso').value, aperture: document.getElementById('set-aperture').value, shutter: document.getElementById('set-shutter').value, nd: document.getElementById('set-nd').value}));
     ['set-iso', 'set-aperture', 'set-shutter', 'set-nd'].forEach(id => bindSafe(id, 'change', saveExpo));
 
-    // --- CAMERA ENGINE ---
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error("Cam fail"); }
@@ -347,7 +352,6 @@
         ['grid-layer', 'ui-layer', 'fc-layer', 'level-layer', 'scout-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
         const fcInt = document.getElementById('fc-internal-canvas'); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
         
-        // Dynamically resize histogram canvas resolution to match its CSS container
         const hC = document.getElementById('histogram-canvas');
         if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
         
@@ -361,24 +365,32 @@
             n.classList.add('active'); currentTab = n.dataset.target; 
             const tgt = document.getElementById(currentTab); if(tgt) tgt.classList.add('active');
             const camArea = document.getElementById('persistent-cam-area');
-            if(camArea) camArea.style.display = n.dataset.cam === "true" ? 'block' : 'none';
+            if(camArea) camArea.style.display = n.dataset.cam === "true" ? 'flex' : 'none';
             resizeCanvases();
         });
     });
 
-    // --- MODEL ID CAPTURE ---
+    // Model Photo Delete/Capture Engine
     bindSafe('btn-cap-model', 'click', () => {
+        const thumb = document.getElementById('model-id-thumb');
+        const btn = document.getElementById('btn-cap-model');
+        
+        if (window.modelIdPhoto) {
+            window.modelIdPhoto = null;
+            if(thumb) { thumb.src = ''; thumb.style.display = 'none'; }
+            if(btn) { btn.innerText = '📷 ID Photo'; btn.classList.remove('danger'); }
+            return;
+        }
+        
         if(video.videoWidth > 0 && video.videoHeight > 0) {
             const tc = document.createElement('canvas'); tc.width = video.videoWidth; tc.height = video.videoHeight;
             tc.getContext('2d').drawImage(video, 0, 0, tc.width, tc.height);
             window.modelIdPhoto = tc.toDataURL('image/jpeg', 0.8);
-            const thumb = document.getElementById('model-id-thumb');
             if(thumb) { thumb.src = window.modelIdPhoto; thumb.style.display = 'block'; }
-            alert("Model ID Photo captured.");
+            if(btn) { btn.innerText = '🗑️ Delete Photo'; btn.classList.add('danger'); }
         } else { alert("Camera not active."); }
     });
 
-    // --- COLOR MATH & PANTONE DB ---
     function srgbToXyz(r,g,b) { let R=r/255,G=g/255,B=b/255; R=R>0.04045?Math.pow(((R+0.055)/1.055),2.4):R/12.92; G=G>0.04045?Math.pow(((G+0.055)/1.055),2.4):G/12.92; B=B>0.04045?Math.pow(((B+0.055)/1.055),2.4):B/12.92; return [(R*100)*0.4124+(G*100)*0.3576+(B*100)*0.1805, (R*100)*0.2126+(G*100)*0.7152+(B*100)*0.0722, (R*100)*0.0193+(G*100)*0.1192+(B*100)*0.9505]; }
     function xyzToLab(x,y,z) { let X=x/95.047,Y=y/100.000,Z=z/108.883; X=X>0.008856?Math.pow(X,1/3):(7.787*X)+(16/116); Y=Y>0.008856?Math.pow(Y,1/3):(7.787*Y)+(16/116); Z=Z>0.008856?Math.pow(Z,1/3):(7.787*Z)+(16/116); return [(116*Y)-16, 500*(X-Y), 200*(Y-Z)]; }
     function deltaE94(labA,labB) { let da=labA[1]-labB[1],db=labA[2]-labB[2]; let C1=Math.sqrt(labA[1]*labA[1]+labA[2]*labA[2]); let dC=C1-Math.sqrt(labB[1]*labB[1]+labB[2]*labB[2]); let dH=Math.sqrt(Math.max(0,da*da+db*db-dC*dC)); return Math.sqrt(Math.pow((labA[0]-labB[0])/1,2)+Math.pow(dC/(1+0.045*C1),2)+Math.pow(dH/(1+0.015*C1),2)); }
@@ -393,7 +405,6 @@
     pantoneDb.forEach(p => { const xyz = srgbToXyz(p.rgb[0], p.rgb[1], p.rgb[2]); p.lab = xyzToLab(xyz[0], xyz[1], xyz[2]); });
     function findClosestPantone(r,g,b) { const targetXyz = srgbToXyz(r,g,b); const targetLab = xyzToLab(targetXyz[0], targetXyz[1], targetXyz[2]); let closest = pantoneDb[0], minD = Infinity; pantoneDb.forEach(p => { const d = deltaE94(targetLab, p.lab); if(d < minD) { minD = d; closest = p; } }); return closest; }
 
-    // --- OVERLAYS ---
     bindSafe('grid-toggle-btn', 'click', (e) => { currentGridIdx = (currentGridIdx + 1) % gridOptions.length; e.currentTarget.classList.toggle('active-toggle', currentGridIdx !== 0); drawGrid(); });
     function drawGrid() {
         const type = gridOptions[currentGridIdx]; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height; gridCtx.clearRect(0,0,w,h); if(type === 'off') return;
@@ -415,14 +426,18 @@
     bindSafe('level-toggle-btn', 'click', (e) => { levelActive = !levelActive; document.getElementById('level-layer').style.display = levelActive ? 'block' : 'none'; e.currentTarget.classList.toggle('active-toggle', levelActive); });
 
     window.addEventListener('deviceorientation', (e) => {
-        currentHeading = e.alpha || 0; 
+        let h = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0;
+        currentHeading = h; 
+        window.camPitch = e.beta || 0; 
+
         if(document.getElementById('tool-heading')) document.getElementById('tool-heading').innerText = Math.round(currentHeading) + '°'; 
         if(document.getElementById('scout-heading')) document.getElementById('scout-heading').innerText = Math.round(currentHeading) + '°';
+        
         if(levelActive) {
-            const w = lvlCtx.canvas.width; const h = lvlCtx.canvas.height; lvlCtx.clearRect(0,0,w,h);
+            const w = lvlCtx.canvas.width; const hC = lvlCtx.canvas.height; lvlCtx.clearRect(0,0,w,hC);
             let roll = e.gamma || 0; let pitch = e.beta || 0; if(window.orientation === 90 || window.orientation === -90) { roll = e.beta; pitch = e.gamma; }
             const isLevel = Math.abs(roll) < 2 && Math.abs(pitch) < 2; lvlCtx.strokeStyle = isLevel ? 'var(--green)' : 'var(--gold)'; lvlCtx.lineWidth = 3;
-            lvlCtx.save(); lvlCtx.translate(w/2, h/2); lvlCtx.rotate(roll * Math.PI / 180); lvlCtx.beginPath(); lvlCtx.moveTo(-100, 0); lvlCtx.lineTo(100, 0); lvlCtx.stroke();
+            lvlCtx.save(); lvlCtx.translate(w/2, hC/2); lvlCtx.rotate(roll * Math.PI / 180); lvlCtx.beginPath(); lvlCtx.moveTo(-100, 0); lvlCtx.lineTo(100, 0); lvlCtx.stroke();
             lvlCtx.fillStyle = isLevel ? 'var(--green)' : 'rgba(255,77,77,0.8)'; lvlCtx.beginPath(); lvlCtx.arc(0, pitch * 2, 6, 0, Math.PI*2); lvlCtx.fill(); lvlCtx.restore();
         }
     });
@@ -475,12 +490,10 @@
             }
             updateExpoBar();
             
-            // Tint and WB
             const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); const wSpan = document.getElementById('tel-wb'); if(wSpan) wSpan.innerText = `${liveTempK}K`; }
             liveTint = Math.round(100 * ((gT/c) - ((rT/c + bT/c)/2)) / 255);
             const tSpan = document.getElementById('tel-tint'); if(tSpan) tSpan.innerText = (liveTint > 0 ? 'G+' : 'M') + Math.abs(liveTint);
             
-            // Full-fill Histogram
             if(curveActive) {
                 const hw = histCtx.canvas.width; const hh = histCtx.canvas.height;
                 histCtx.clearRect(0,0,hw,hh); 
@@ -495,7 +508,6 @@
             const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch);
             const swCtx = scoutCtx.canvas.width; const shCtx = scoutCtx.canvas.height; scoutCtx.clearRect(0,0,swCtx,shCtx);
             
-            // Color Mapping
             if(currentTab === 'page-color') {
                 lastPanExtraction = [];
                 const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
@@ -520,38 +532,57 @@
                 }
             }
             
-            // Scout Mapping (Astro Engine + Visual Arc)
-            if(currentTab === 'page-scout') {
-                scoutCtx.save(); scoutCtx.translate(swCtx/2, shCtx/2); scoutCtx.rotate(-currentHeading * Math.PI / 180);
+            // FULL AR SUN TRACKER HUD
+            if(currentTab === 'page-scout' && window.currentSunAzimuth !== undefined) {
+                let camAlt = 90 - window.camPitch; // upright is 0 altitude mapping
                 
-                scoutCtx.strokeStyle = 'rgba(212,194,161,0.2)'; scoutCtx.lineWidth = 1; 
-                scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, 0, Math.PI*2); scoutCtx.stroke(); 
-                scoutCtx.beginPath(); scoutCtx.arc(0,0, 50, 0, Math.PI*2); scoutCtx.stroke(); 
-                scoutCtx.beginPath(); scoutCtx.moveTo(0, -100); scoutCtx.lineTo(0, 100); scoutCtx.moveTo(-100, 0); scoutCtx.lineTo(100, 0); scoutCtx.stroke(); 
-
-                scoutCtx.fillStyle = 'var(--gold)'; scoutCtx.font = '12px DM Mono'; scoutCtx.fillText('N', -4, -105); scoutCtx.fillText('S', -4, 115); scoutCtx.fillText('E', 105, 4); scoutCtx.fillText('W', -115, 4);
+                let dAz = window.currentSunAzimuth - currentHeading;
+                if (dAz > 180) dAz -= 360;
+                if (dAz < -180) dAz += 360;
                 
-                if(sunriseTime && sunsetTime) {
-                    const startAngle = (-90 - currentHeading) * Math.PI/180; const endAngle = (90 - currentHeading) * Math.PI/180;
-                    scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, startAngle, endAngle); scoutCtx.setLineDash([4, 4]); scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)'; scoutCtx.stroke(); scoutCtx.setLineDash([]);
-                }
-
-                if (window.currentSunAzimuth !== undefined && window.currentSunAltitude > -20) {
-                    const sunRad = (window.currentSunAzimuth - 90) * Math.PI / 180;
-                    const altNorm = Math.max(0, Math.min(90, window.currentSunAltitude)); 
-                    const sunDist = 100 * (1 - (altNorm / 90)); 
+                let dAlt = window.currentSunAltitude - camAlt;
+                
+                let pxPerDegX = swCtx / 60; // 60 deg horizontal FOV approx
+                let pxPerDegY = shCtx / 80; // 80 deg vertical FOV approx
+                
+                let sunX = (swCtx / 2) + (dAz * pxPerDegX);
+                let sunY = (shCtx / 2) - (dAlt * pxPerDegY);
+                
+                // Draw 0 Degree Horizon
+                let horizonY = (shCtx / 2) + (camAlt * pxPerDegY);
+                scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)';
+                scoutCtx.lineWidth = 1; scoutCtx.setLineDash([5, 5]);
+                scoutCtx.beginPath(); scoutCtx.moveTo(0, horizonY); scoutCtx.lineTo(swCtx, horizonY); scoutCtx.stroke();
+                scoutCtx.setLineDash([]);
+                scoutCtx.fillStyle = 'rgba(212,194,161,0.8)'; scoutCtx.font = '10px DM Mono'; scoutCtx.fillText('0° HORIZON', 5, horizonY - 5);
+                
+                // Camera Center Crosshair
+                scoutCtx.strokeStyle = 'rgba(255,255,255,0.4)'; scoutCtx.lineWidth = 1;
+                scoutCtx.beginPath(); scoutCtx.moveTo(swCtx/2-15, shCtx/2); scoutCtx.lineTo(swCtx/2+15, shCtx/2); scoutCtx.stroke();
+                scoutCtx.beginPath(); scoutCtx.moveTo(swCtx/2, shCtx/2-15); scoutCtx.lineTo(swCtx/2, shCtx/2+15); scoutCtx.stroke();
+                
+                // Draw Sun
+                scoutCtx.fillStyle = '#ffb347';
+                scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill();
+                scoutCtx.fillStyle = '#fff'; scoutCtx.font = 'bold 12px DM Mono'; scoutCtx.textAlign = 'center';
+                scoutCtx.fillText('☀ SUN', sunX, sunY + 35);
+                scoutCtx.fillText(window.currentSunAltitude.toFixed(1) + '°', sunX, sunY + 50);
+                scoutCtx.textAlign = 'left';
+                
+                // Pointer if off-screen
+                if (sunX < 0 || sunX > swCtx || sunY < 0 || sunY > shCtx) {
+                    let cx = swCtx/2; let cy = shCtx/2;
+                    let angle = Math.atan2(sunY - cy, sunX - cx);
+                    let ptrX = cx + Math.cos(angle) * (swCtx/2 - 30);
+                    let ptrY = cy + Math.sin(angle) * (swCtx/2 - 30);
                     
-                    scoutCtx.fillStyle='#ffb347'; scoutCtx.font='bold 14px DM Mono'; 
-                    scoutCtx.fillText('☀ SUN', sunDist*Math.cos(sunRad)+8, sunDist*Math.sin(sunRad)+4); 
-                    scoutCtx.beginPath(); scoutCtx.arc(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad), 8, 0, Math.PI*2); scoutCtx.fill();
-                    
-                    scoutCtx.strokeStyle = 'rgba(255, 179, 71, 0.6)'; scoutCtx.setLineDash([2, 4]);
-                    scoutCtx.beginPath(); scoutCtx.moveTo(0,0); scoutCtx.lineTo(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad)); scoutCtx.stroke(); scoutCtx.setLineDash([]);
+                    scoutCtx.fillStyle = 'rgba(255, 179, 71, 0.9)';
+                    scoutCtx.beginPath(); scoutCtx.arc(ptrX, ptrY, 10, 0, Math.PI*2); scoutCtx.fill();
+                    scoutCtx.fillStyle = '#fff'; scoutCtx.font = '10px DM Mono';
+                    scoutCtx.fillText('SUN', ptrX + 15, ptrY + 4);
                 }
-                scoutCtx.restore();
             }
             
-            // FC Mapping
             if(fcState > 0) {
                 fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
                 for(let i=0; i<px.length; i+=4) {
@@ -689,14 +720,17 @@
             const _mapImg = new Image(); _mapImg.crossOrigin = 'Anonymous';
             _mapImg.onload = () => { window._scoutMapImage = _mapImg; }; 
             _mapImg.onerror = () => { window._scoutMapImage = null; };
-            // Using WESERV image proxy to definitively bypass CORS security headers for canvas export
             _mapImg.src = 'https://images.weserv.nl/?url=' + encodeURIComponent(_rawTileUrl);
 
             try {
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
+                // Expanded Weather Data Request
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m&temperature_unit=celsius`);
                 if(wRes.ok) {
                     const wData = await wRes.json(); 
-                    const tt = document.getElementById('tool-temp'); if(tt) tt.innerText = `${wData.current_weather.temperature} °C`;
+                    const tt = document.getElementById('tool-temp'); 
+                    if(tt) tt.innerText = `${wData.current.temperature_2m} °C / ${wData.current.apparent_temperature} °C`;
+                    const tw = document.getElementById('tool-weather');
+                    if(tw) tw.innerText = `${wData.current.wind_speed_10m} km/h | ${wData.current.precipitation} mm`;
                 }
 
                 const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
@@ -758,6 +792,11 @@
         const f = document.getElementById('yt-iframe'); if(f) f.src = 'https://www.youtube.com/embed/cmoFNya6P4Q?autoplay=1&playsinline=1';
     });
 
+    bindSafe('btn-email-notes', 'click', () => { 
+        const n = document.getElementById('shoot-notes');
+        if(n) { const body = encodeURIComponent(n.value); window.location.href = 'mailto:?subject=PR Eye Shoot Notes&body=' + body; }
+    });
+
     let sosAudioCtx, sirenOsc1, sirenOsc2, sirenGain1, sirenGain2, sosInterval, sosActive = false;
     bindSafe('btn-sos-siren', 'click', () => {
         const o = document.getElementById('sos-flash-overlay');
@@ -794,7 +833,6 @@
         const pageW = 210, margin = 15, usableW = 180;
         let y = 15;
         
-        // Add Model Photo if captured
         if (window.modelIdPhoto) {
             try { doc.addImage(window.modelIdPhoto, 'JPEG', pageW - 40 - margin, y, 40, 40); } catch(e) { console.log(e); }
         }
@@ -820,7 +858,7 @@
         doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161);
         doc.text('MODEL RELEASE FORM', window.modelIdPhoto ? 75 : pageW/2,13,{align:'center'});
         doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
-        doc.text('PR Eye v2.8 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
+        doc.text('PR Eye v2.9 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
         
         y=30;doc.setTextColor(0);
         addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true,0, window.modelIdPhoto ? 130 : usableW);
@@ -877,7 +915,6 @@
         try {
             doc.save('ModelRelease_'+(modelName||'Unknown').replace(/\s+/g,'_')+'_'+Date.now()+'.pdf');
         } catch(err) {
-            // Fallback for strict mobile browsers that block doc.save()
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
             window.open(pdfUrl, '_blank');
@@ -886,7 +923,7 @@
     
     bindSafe('btn-wa-release', 'click', () => {
         const rD = document.getElementById('r-date'); const rL = document.getElementById('r-loc'); const rN = document.getElementById('r-name');
-        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.8\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
+        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.9\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
         window.open('https://wa.me/?text='+msg,'_blank');
     });
 
@@ -912,7 +949,6 @@
     startCamera();
     
     setInterval(() => {
-        // GH Timer
         if(goldenHourTime) { 
             const diff = goldenHourTime - new Date(); 
             const locG = document.getElementById('loc-golden');
@@ -922,7 +958,6 @@
             }
         }
         
-        // SunCalc Live Loop
         if (currentLat !== null && currentLon !== null && typeof SunCalc !== 'undefined') {
             const pos = SunCalc.getPosition(new Date(), currentLat, currentLon);
             const az = (pos.azimuth * 180 / Math.PI + 180) % 360; 
