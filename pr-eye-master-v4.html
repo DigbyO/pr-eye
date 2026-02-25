@@ -3,252 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR EYE v18 | Master Build</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PR EYE v12.0 — ULTIMATE</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+
     <style>
-        :root {
-            --preye-bg: #0A111F;
-            --preye-gold: #D4B483;
-            --preye-yellow: #FFCC33;
-            --preye-blue: #1A2637;
-            --preye-red: #FF3B30;
-        }
+        :root { --gold: #d4c2a1; --bg: #050a10; --red: #ff3b30; --magenta: #ff2d55; --cyan: #5ac8fa; --green: #4cd964; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; font-family: 'DM Mono', monospace; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body { background-color: var(--preye-bg); color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        /* HEADER */
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
+        .tel-bar { display: flex; gap: 10px; font-size: 9px; color: #8b9bb4; margin-top: 5px; text-transform: uppercase; }
+
+        /* VIEWPORT */
+        #viewport { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; overflow: hidden; border-bottom: 1px solid #333; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        /* Tactical Elements */
-        .gold-text { color: var(--preye-gold); }
-        .red-text { color: var(--preye-red); }
-        .serif-font { font-family: 'Georgia', serif; }
+        /* HUD ELEMENTS */
+        .marker { position: absolute; width: 26px; height: 26px; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; pointer-events: none; z-index: 10; }
+        #m0 { border-color: var(--cyan); } #m1 { border-color: var(--magenta); } #m2 { border-color: var(--gold); }
         
-        /* Layout Grid */
-        .tab-workspace { position: absolute; top: 85px; bottom: 70px; left: 0; right: 0; padding: 12px; overflow-y: auto; }
-        .hidden { display: none !important; }
+        .canon-hud { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d141e; border: 2px solid #555; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+        .hud-cell { padding: 8px; border: 0.5px solid #222; text-align: center; }
+        .hud-v { font-size: 15px; font-weight: bold; color: #fff; }
 
-        /* Custom UI Sliders */
-        input[type=range] { -webkit-appearance: none; background: #2D3748; height: 2px; width: 100%; outline: none; }
-        input[type=range]::-webkit-slider-thumb { 
-            -webkit-appearance: none; height: 20px; width: 20px; 
-            border-radius: 50%; background: var(--preye-gold); cursor: pointer; border: 2px solid var(--preye-bg);
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+        /* NAVIGATION & PANELS */
+        .main { flex: 1; overflow-y: auto; padding: 15px 15px 120px; }
+        .page { display: none; } .page.active { display: block; }
+        .panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
 
-        /* Nav Transition Logic */
-        .nav-item.active { color: var(--preye-gold); border-top: 3px solid var(--preye-gold); opacity: 1; }
-        .nav-item { transition: all 0.2s ease; border-top: 3px solid transparent; }
+        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #444; color: var(--gold); border-radius: 8px; font-size: 10px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
+        .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
+        .btn.active { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px rgba(76, 217, 100, 0.2); }
         
-        /* Signature Area */
-        canvas#sig-pad { background: var(--preye-blue); border: 1px dashed #4A5568; cursor: crosshair; touch-action: none; }
+        /* RAVE */
+        #rave-flash { display: none; position: fixed; inset: 0; z-index: 999; pointer-events: none; }
+        .strobe { animation: strb 0.1s infinite; }
+        @keyframes strb { 0% { background: #f00; } 50% { background: #00f; } }
 
-        @media print {
-            .no-print { display: none !important; }
-            #print-area { display: block !important; color: black !important; padding: 40px; }
-        }
+        /* NAV */
+        .nav { background: #000; border-top: 1px solid rgba(255,255,255,0.1); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; padding: 15px 0; text-align: center; font-size: 9px; color: #555; text-transform: uppercase; }
+        .nav-item.active { color: var(--gold); border-top: 2px solid var(--gold); }
+
+        /* LEGAL RELEASE FIELDS */
+        .input-group { margin-bottom: 10px; }
+        label { font-size: 8px; text-transform: uppercase; color: #666; display: block; margin-bottom: 4px; }
+        input[type="text"] { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-family: inherit; }
     </style>
 </head>
 <body>
 
-    <header class="fixed top-0 w-full bg-[#0A111F] px-4 pt-3 pb-2 z-50 border-b border-gray-900 no-print">
-        <div class="flex justify-between items-baseline mb-1">
-            <h1 class="gold-text serif-font text-xl font-bold tracking-tighter">PR EYE <span class="text-[10px] font-light opacity-80 uppercase tracking-widest">v18</span></h1>
-            <div class="flex gap-4 text-[10px] font-bold">
-                <div>EV: <span class="red-text">+1.9</span></div>
-                <div>WB: <span class="gold-text">2853°C</span></div>
-            </div>
+    <div class="hdr">
+        <div class="hdr-top">
+            <div style="font-family:'Cormorant Garamond'; letter-spacing:2px; color:var(--gold); font-size:18px;">PR EYE v12.0</div>
+            <button id="gyro-perm" style="font-size:8px; padding:4px 8px; background:var(--gold); border:none; border-radius:4px; display:none;">ACTIVATE SENSORS</button>
+            <div id="tel-ev" style="font-size:16px; font-weight:bold; color:var(--gold);">EV 0.0</div>
         </div>
-        <div class="flex justify-between text-[8px] text-gray-500 uppercase tracking-tighter font-mono">
-            <span>GPS: 51.62, -1.60</span>
-            <span>ALT: 61m</span>
-            <span>HDG: 147°</span>
+        <div class="tel-bar">
+            <span>GPS <span class="val" id="t-gps">--</span></span>
+            <span>HDG <span class="val" id="t-hdg">0°</span></span>
+            <span>WB <span class="val" id="t-wb">5500K</span></span>
         </div>
-    </header>
+    </div>
 
-    <main id="ws-METER" class="tab-workspace no-print">
-        <div class="text-center mb-6 pt-2">
-            <div class="text-7xl font-bold inline-block relative">1.9<span class="absolute top-2 -right-8 text-xl">EV</span></div>
-            <div class="text-[9px] tracking-widest text-gray-500 mt-1 uppercase">Vol Keys: EV Bias +/-</div>
-        </div>
+    <div id="viewport" onclick="setMarker(event)">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="ar-canvas" class="overlay"></canvas>
+        <canvas id="fc-canvas" class="overlay" style="display:none;"></canvas>
+        <canvas id="lvl-canvas" class="overlay"></canvas>
+        <div id="m0" class="marker">A</div>
+        <div id="m1" class="marker">B</div>
+        <div id="m2" class="marker">C</div>
+        <div id="rave-flash"></div>
+    </div>
 
-        <div class="flex gap-2 h-32 mb-4">
-            <div class="relative flex-[2] bg-black rounded border border-gray-800">
-                <div class="absolute top-2 left-2 bg-black/60 text-[8px] px-2 py-0.5 rounded uppercase font-bold">Reflected</div>
+    <div class="main">
+        <div id="p-meter" class="page active">
+            <div class="canon-hud">
+                <div class="hud-cell"><span class="hud-v" id="h-ss">1/50</span></div>
+                <div class="hud-cell"><span class="hud-v" id="h-f">F4.0</span></div>
+                <div class="hud-cell"><span class="hud-v" id="h-iso">400</span></div>
             </div>
-            <div class="flex-1 bg-black/40 rounded border border-gray-800 p-1">
-                <div class="h-full w-full bg-gradient-to-t from-blue-500/20 via-green-500/20 to-red-500/20"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button class="btn" id="btn-fc" onclick="toggleFC()">FALSE COLOR</button>
+                <button class="btn" id="btn-sun" onclick="sunActive = !sunActive">SUN TRACKER</button>
+                <button class="btn" onclick="flipCam()">FLIP CAMERA</button>
+                <button class="btn" id="btn-lvl" onclick="lvlActive = !lvlActive">LEVEL HUD</button>
             </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 mb-6">
-            <button class="bg-gray-900 border border-gray-800 py-3 text-[9px] uppercase tracking-widest text-gray-400 rounded">Split</button>
-            <button class="bg-gray-900 border border-gray-800 py-3 text-[9px] uppercase tracking-widest text-gray-400 rounded">False Col</button>
-            <button class="bg-gray-900 border border-gray-800 py-3 text-[9px] uppercase tracking-widest text-gray-400 rounded">Grid</button>
-        </div>
-
-        <div class="grid grid-cols-3 border-y border-gray-800 py-6 mb-8">
-            <div class="text-center border-r border-gray-800">
-                <div class="gold-text text-[9px] font-bold uppercase mb-1 tracking-widest">Shutter</div>
-                <div class="text-2xl font-medium">1/60</div>
-            </div>
-            <div class="text-center border-r border-gray-800">
-                <div class="gold-text text-[9px] font-bold uppercase mb-1 tracking-widest">F-Stop</div>
-                <div class="text-2xl font-medium">F5.6</div>
-            </div>
-            <div class="text-center">
-                <div class="gold-text text-[9px] font-bold uppercase mb-1 tracking-widest">ISO</div>
-                <div class="text-2xl font-medium">400</div>
-            </div>
+            <button class="btn solid" style="margin-top:10px; padding:18px;" onclick="doExport('pol')">CAPTURE POLAROID</button>
         </div>
 
-        <div class="space-y-8 px-2">
-            <div class="flex items-center gap-4"><span class="text-[10px] w-8 text-gray-600 font-bold">SS</span><input type="range"></div>
-            <div class="flex items-center gap-4"><span class="text-[10px] w-8 text-gray-600 font-bold">F/</span><input type="range"></div>
-            <div class="flex items-center gap-4"><span class="text-[10px] w-8 text-gray-600 font-bold">ISO</span><input type="range"></div>
-        </div>
-    </main>
-
-    <main id="ws-COLOR" class="tab-workspace hidden no-print">
-        <div class="relative w-full aspect-[4/3] bg-black rounded border border-gray-800 mb-4 overflow-hidden">
-            <div class="absolute top-[45%] left-[30%] w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
-                <span class="absolute -top-6 text-[10px] font-bold text-white uppercase">Sample 3</span>
-            </div>
-            <div class="absolute top-[35%] left-[70%] w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
-                <span class="absolute -top-6 text-[10px] font-bold text-white uppercase">Sample 4</span>
+        <div id="p-color" class="page">
+            <div class="panel">
+                <div style="display:flex; height:60px; border-radius:8px; overflow:hidden; margin-bottom:10px; border:1px solid #333;">
+                    <div id="sw0" style="flex:6; background:#333; display:flex; align-items:center; justify-content:center; font-size:9px;">60%</div>
+                    <div id="sw1" style="flex:3; background:#666; display:flex; align-items:center; justify-content:center; font-size:9px;">30%</div>
+                    <div id="sw2" style="flex:1; background:#999; display:flex; align-items:center; justify-content:center; font-size:9px;">10%</div>
+                </div>
+                <div id="mj-pattern" style="font-size:10px; color:#888; background:#000; padding:10px; border-radius:6px; margin-bottom:8px;">/imagine prompt: pattern...</div>
+                <div id="mj-house" style="font-size:10px; color:#888; background:#000; padding:10px; border-radius:6px;">/imagine prompt: house...</div>
+                <button class="btn solid" style="margin-top:15px;" onclick="doExport('swatch')">EXPORT SWATCH BOARD</button>
             </div>
         </div>
 
-        <div class="flex gap-2 mb-6">
-            <button class="flex-1 bg-gray-900 border border-gray-800 aspect-square rounded flex items-center justify-center">📸</button>
-            <button class="flex-[4] bg-[#FFCC33] text-black font-black py-5 rounded uppercase tracking-[0.4em] text-sm">Capture Frame</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-[#1A2637] p-3 border border-gray-800 rounded flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#1A79D9] rounded shadow-inner"></div>
-                <div><div class="gold-text text-[10px] font-bold serif-font leading-tight">Warm Gray 5 C</div><div class="text-[9px] opacity-60">#1A79D9</div></div>
-            </div>
-            <div class="bg-[#1A2637] p-3 border border-gray-800 rounded flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#185685] rounded shadow-inner"></div>
-                <div><div class="gold-text text-[10px] font-bold serif-font leading-tight">Cool Gray 9 C</div><div class="text-[9px] opacity-60">#185685</div></div>
+        <div id="p-tools" class="page">
+            <div class="panel" style="border-color:var(--magenta);">
+                <button class="btn" id="rave-btn" onclick="toggleRave()">START TACTICAL RAVE</button>
+                <button class="btn danger" id="siren-btn" onclick="toggleSiren()">UK POLICE SIREN</button>
             </div>
         </div>
-    </main>
 
-    <main id="ws-SCOUT" class="tab-workspace hidden no-print">
-        <div class="w-full h-64 bg-gray-900 relative rounded-lg border border-gray-800 mb-6 overflow-hidden">
-            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#FFF_1px,transparent_1px)] [background-size:20px_20px]"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-blue-500 rounded-full border-4 border-white"></div>
-        </div>
-        <div class="space-y-3">
-            <div class="bg-black/40 border border-red-900/40 p-4 rounded flex justify-between items-center">
-                <div><div class="text-red-500 font-bold text-xs">GREAT WESTERN A&E</div><div class="text-[9px] text-gray-500">Marlborough Rd, Swindon</div></div>
-                <div class="text-white font-bold text-sm">7.5 mi</div>
-            </div>
-            <div class="bg-black/40 border border-gray-800 p-4 rounded flex justify-between items-center">
-                <div><div class="gold-text font-bold text-xs uppercase">The King & Queen</div><div class="text-[9px] text-gray-500">Longcot, SN7 7TL</div></div>
-                <div class="text-white font-bold text-sm">0.2 mi</div>
+        <div id="p-legal" class="page">
+            <div class="panel">
+                <div class="input-group">
+                    <label>Model Full Name</label>
+                    <input type="text" id="m-name" placeholder="Name">
+                </div>
+                <label>Signature</label>
+                <canvas id="sig-pad" style="background:#fff; width:100%; height:100px; border-radius:6px; touch-action:none;"></canvas>
+                <button class="btn solid" style="margin-top:15px;" onclick="genPDF()">GENERATE SIGNED PDF</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <main id="ws-TOOLS" class="tab-workspace hidden no-print">
-        <div class="space-y-3">
-            <button class="w-full bg-[#1A2637] border border-gray-800 py-6 rounded text-white font-bold uppercase tracking-[0.2em] text-[11px] flex justify-between px-8">
-                <span class="gold-text">Torch Status</span> <span>[ OFF ]</span>
-            </button>
-            <button class="w-full bg-[#1A2637] border border-gray-800 py-6 rounded text-white font-bold uppercase tracking-[0.2em] text-[11px] flex justify-between px-8">
-                <span class="gold-text">Local Weather</span> <span>8°C / RAIN</span>
-            </button>
-            <div class="grid grid-cols-2 gap-3">
-                <button class="bg-[#1A2637] border border-gray-800 py-6 rounded text-[#D4B483] font-bold uppercase text-[10px]">Tactical Rave</button>
-                <button class="bg-[#1A2637] border border-gray-800 py-6 rounded text-[#D4B483] font-bold uppercase text-[10px]">Emergency Siren</button>
-            </div>
+    <div id="export-ovl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:2000; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+        <div id="pol-frame" style="background:#fff; padding:10px 10px 80px 10px; width:100%; max-width:340px;">
+            <img id="pol-img" style="width:100%; aspect-ratio:1/1; object-fit:cover;">
+            <div id="pol-meta" style="color:#111; font-family:'Permanent Marker', cursive; padding-top:15px; font-size:11px; white-space:pre-line;"></div>
         </div>
-    </main>
+        <button class="btn solid" style="margin-top:20px; width:340px;" id="share-btn">SAVE / SHARE TO DEVICE</button>
+        <button class="btn" style="width:340px;" onclick="document.getElementById('export-ovl').style.display='none'">DISCARD</button>
+    </div>
 
-    <main id="ws-LEGAL" class="tab-workspace hidden no-print">
-        <div class="bg-black/60 p-4 rounded border border-gray-800 mb-6">
-            <div class="gold-text text-xs font-bold serif-font mb-1 tracking-tight">Digby Oldridge, PR Eye Ltd</div>
-            <div class="text-[9px] text-gray-400 leading-tight">Downs Cottage, Fernham Rd, Longcot, SN7 7TG<br>07879 403 618 | info@preye.co.uk</div>
-        </div>
-        
-        <div class="space-y-3 mb-6">
-            <input type="text" id="model-name" placeholder="MODEL NAME" class="w-full bg-[#1A2637] border border-gray-800 p-4 rounded text-white text-xs uppercase outline-none focus:border-white">
-            <div class="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="D.O.B" class="w-full bg-[#1A2637] border border-gray-800 p-4 rounded text-white text-xs uppercase">
-                <input type="text" value="25/02/2026" class="w-full bg-[#1A2637] border border-gray-800 p-4 rounded text-white text-xs opacity-50">
-            </div>
-        </div>
-        
-        <div class="bg-[#1A2637] rounded border border-dashed border-gray-600 h-40 relative mb-4">
-            <canvas id="sig-pad" class="w-full h-full"></canvas>
-            <span class="absolute bottom-2 left-2 text-[8px] text-gray-500 uppercase tracking-widest pointer-events-none">Model Signature Required</span>
-        </div>
-
-        <button onclick="handleExport()" class="w-full bg-[#D4B483] text-black font-black py-5 rounded uppercase tracking-[0.4em] text-xs shadow-xl active:scale-[0.98] transition-all">
-            Lock & Export Release
-        </button>
-    </main>
-
-    <nav class="fixed bottom-0 w-full bg-black border-t border-gray-900 grid grid-cols-5 h-[70px] z-50 no-print">
-        <button onclick="switchTab('METER')" id="nav-METER" class="nav-item active flex flex-col items-center justify-center opacity-50">
-            <span class="text-[9px] uppercase font-bold tracking-widest">Meter</span>
-        </button>
-        <button onclick="switchTab('COLOR')" id="nav-COLOR" class="nav-item flex flex-col items-center justify-center opacity-50">
-            <span class="text-[9px] uppercase font-bold tracking-widest">Color</span>
-        </button>
-        <button onclick="switchTab('SCOUT')" id="nav-SCOUT" class="nav-item flex flex-col items-center justify-center opacity-50">
-            <span class="text-[9px] uppercase font-bold tracking-widest">Scout</span>
-        </button>
-        <button onclick="switchTab('TOOLS')" id="nav-TOOLS" class="nav-item flex flex-col items-center justify-center opacity-50">
-            <span class="text-[9px] uppercase font-bold tracking-widest">Tools</span>
-        </button>
-        <button onclick="switchTab('LEGAL')" id="nav-LEGAL" class="nav-item flex flex-col items-center justify-center opacity-50">
-            <span class="text-[9px] uppercase font-bold tracking-widest">Legal</span>
-        </button>
-    </nav>
+    <div class="nav">
+        <div class="nav-item active" data-t="p-meter">Meter</div>
+        <div class="nav-item" data-t="p-color">Color</div>
+        <div class="nav-item" data-t="p-tools">Tools</div>
+        <div class="nav-item" data-t="p-legal">Legal</div>
+    </div>
 
     <script>
-        function switchTab(id) {
-            document.querySelectorAll('.tab-workspace').forEach(ws => ws.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.getElementById(`ws-${id}`).classList.remove('hidden');
-            document.getElementById(`nav-${id}`).classList.add('active');
-            if(id === 'LEGAL') initSig();
+        let stream, currentFacing = 'environment', lvlActive = false, fcActive = false, sunActive = false, raveActive = false, sirenActive = false;
+        let lat = 0, lon = 0, hdg = 0, pitch = 0, roll = 0, ev = 0, hexList = ["#333","#666","#999"];
+        let samplePts = [{x:0.5, y:0.5}, {x:0.3, y:0.3}, {x:0.7, y:0.7}], activePt = 0;
+        let audioCtx, osc, sirenInt;
+
+        const video = document.getElementById('video');
+        const actx = document.getElementById('ar-canvas').getContext('2d');
+        const fcan = document.getElementById('fc-canvas');
+        const fctx = fcan.getContext('2d');
+        const lcan = document.getElementById('lvl-canvas');
+        const lctx = lcan.getContext('2d');
+        const sctx = document.getElementById('sig-pad').getContext('2d');
+
+        async function init() {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing, width: 1280 } });
+                video.srcObject = stream;
+            } catch(e) { alert("Camera failed."); }
         }
 
-        let sigInitialized = false;
-        function initSig() {
-            if(sigInitialized) return;
-            const canvas = document.getElementById('sig-pad');
-            const ctx = canvas.getContext('2d');
-            let painting = false;
+        function setMarker(e) {
+            const r = e.currentTarget.getBoundingClientRect();
+            samplePts[activePt] = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+            const m = document.getElementById(`m${activePt}`);
+            m.style.left = (samplePts[activePt].x * 100) + '%';
+            m.style.top = (samplePts[activePt].y * 100) + '%';
+            activePt = (activePt + 1) % 3;
+        }
 
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            ctx.strokeStyle = "#D4B483"; ctx.lineWidth = 3; ctx.lineCap = "round";
+        function toggleFC() {
+            fcActive = !fcActive;
+            fcan.style.display = fcActive ? 'block' : 'none';
+            document.getElementById('btn-fc').classList.toggle('active', fcActive);
+        }
 
-            function start(e) { painting = true; draw(e); }
-            function end() { painting = false; ctx.beginPath(); }
-            function draw(e) {
-                if(!painting) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
-                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+        function loop() {
+            if(video.readyState === 4) {
+                const w = video.clientWidth; const h = video.clientHeight;
+                actx.canvas.width = lcan.width = fcan.width = w;
+                actx.canvas.height = lcan.height = fcan.height = h;
+
+                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                c.width = 100; c.height = 100; ctx.drawImage(video, 0, 0, 100, 100);
+                const pix = ctx.getImageData(0,0,100,100).data;
+
+                // Color Extraction
+                hexList = samplePts.map(p => {
+                    const idx = (Math.floor(p.y*99)*100 + Math.floor(p.x*99))*4;
+                    return "#" + ((1<<24)+(pix[idx]<<16)+(pix[idx+1]<<8)+pix[idx+2]).toString(16).slice(1).toUpperCase();
+                });
+                hexList.forEach((hex, i) => {
+                    const sw = document.getElementById(`sw${i}`);
+                    sw.style.backgroundColor = hex; sw.innerText = hex;
+                });
+
+                // EV
+                let lum = 0; for(let i=0; i<pix.length; i+=4) lum += (0.299*pix[i]+0.587*pix[i+1]+0.114*pix[i+2]);
+                ev = Math.log2((lum/100)/255 * 100/12.5).toFixed(1);
+                document.getElementById('tel-ev').innerText = `EV ${ev}`;
+
+                if(fcActive) drawFC();
+                if(lvlActive) drawLvl();
+                if(sunActive) drawSun();
             }
-
-            canvas.onmousedown = start; canvas.onmouseup = end; canvas.onmousemove = draw;
-            canvas.ontouchstart = (e) => { e.preventDefault(); start(e); };
-            canvas.ontouchend = end; canvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
-            sigInitialized = true;
+            requestAnimationFrame(loop);
         }
 
-        function handleExport() {
-            const name = document.getElementById('model-name').value || "Unnamed Model";
-            alert(`Generating PDF Release for ${name}...\nUK GDPR compliant data saved locally.`);
-            window.print();
+        function drawFC() {
+            fctx.drawImage(video, 0, 0, fcan.width, fcan.height);
+            const id = fctx.getImageData(0,0,fcan.width, fcan.height);
+            const d = id.data;
+            for(let i=0; i<d.length; i+=4) {
+                const v = (d[i]+d[i+1]+d[i+2])/3;
+                if(v > 230) { d[i]=255; d[i+1]=0; d[i+2]=0; } // Clip Red
+                else if(v < 20) { d[i]=0; d[i+1]=0; d[i+2]=255; } // Shadow Blue
+                else { d[i]=d[i+1]=d[i+2]=v; d[i+1]*=0.5; } // Mid Green-Shift
+            }
+            fctx.putImageData(id, 0, 0);
         }
+
+        function drawSun() {
+            actx.clearRect(0,0,fcan.width, fcan.height);
+            if(!lat) return;
+            const sun = SunCalc.getPosition(new Date(), lat, lon);
+            const sAz = (sun.azimuth * 180 / Math.PI + 180) % 360;
+            const sAlt = sun.altitude * 180 / Math.PI;
+
+            let dAz = sAz - hdg; if(dAz > 180) dAz -= 360; if(dAz < -180) dAz += 360;
+            let dAlt = sAlt - (90 - pitch);
+
+            const x = (fcan.width/2) + (dAz * (fcan.width / 60));
+            const y = (fcan.height/2) - (dAlt * (fcan.height / 45));
+
+            actx.fillStyle = '#ffb347'; actx.beginPath(); actx.arc(x, y, 15, 0, Math.PI*2); actx.fill();
+            actx.fillStyle = '#fff'; actx.font = '10px DM Mono'; actx.fillText("SUN", x + 20, y);
+        }
+
+        function drawLvl() {
+            lctx.clearRect(0,0,lcan.width, lcan.height);
+            lctx.strokeStyle = Math.abs(roll) < 1.5 ? 'var(--green)' : 'var(--gold)';
+            lctx.lineWidth = 2; lctx.save();
+            lctx.translate(lcan.width/2, lcan.height/2);
+            lctx.rotate(roll * Math.PI / 180);
+            lctx.beginPath(); lctx.moveTo(-80, 0); lctx.lineTo(80, 0); lctx.stroke();
+            lctx.restore();
+        }
+
+        async function doExport(m) {
+            const can = document.createElement('canvas'); can.width = 1200; can.height = 1200;
+            const ctx = can.getContext('2d');
+            if(m === 'pol') {
+                const s = Math.min(video.videoWidth, video.videoHeight);
+                ctx.drawImage(video, (video.videoWidth-s)/2, (video.videoHeight-s)/2, s, s, 0, 0, 1200, 1200);
+                hexList.forEach((h, i) => { ctx.fillStyle = h; ctx.fillRect(1000 + (i*50), 1050, 40, 40); });
+            } else {
+                ctx.fillStyle = hexList[0]; ctx.fillRect(0,0,1200,700);
+                ctx.fillStyle = hexList[1]; ctx.fillRect(0,700,1200,350);
+                ctx.fillStyle = hexList[2]; ctx.fillRect(0,1050,1200,150);
+            }
+            const d = can.toDataURL('image/jpeg', 0.95);
+            document.getElementById('pol-img').src = d;
+            document.getElementById('pol-meta').innerText = `GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)} | EV: ${ev}\nPALETTE: ${hexList.join(', ')}\nPR EYE TACTICAL`;
+            document.getElementById('export-ovl').style.display = 'flex';
+            document.getElementById('share-btn').onclick = async () => {
+                const blob = await (await fetch(d)).blob();
+                const file = new File([blob], `PREYE_${Date.now()}.jpg`, {type:'image/jpeg'});
+                if(navigator.share) await navigator.share({files:[file]});
+            };
+        }
+
+        function toggleSiren() {
+            if(sirenActive) { if(osc) osc.stop(); sirenActive = false; clearInterval(sirenInt); }
+            else {
+                audioCtx = new AudioContext(); osc = audioCtx.createOscillator(); osc.type = 'square'; osc.connect(audioCtx.destination);
+                osc.start(); sirenActive = true; let t = true;
+                sirenInt = setInterval(() => { osc.frequency.setValueAtTime(t?435:580, audioCtx.currentTime); t=!t; }, 400);
+            }
+        }
+
+        // PERMISSIONS & SENSORS
+        if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            document.getElementById('gyro-perm').style.display = 'block';
+            document.getElementById('gyro-perm').onclick = () => {
+                DeviceOrientationEvent.requestPermission().then(r => { if(r==='granted') document.getElementById('gyro-perm').style.display='none'; });
+            };
+        }
+
+        window.addEventListener('deviceorientation', e => {
+            hdg = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0;
+            pitch = e.beta || 0; roll = e.gamma || 0;
+            document.getElementById('t-hdg').innerText = Math.round(hdg) + '°';
+        });
+
+        navigator.geolocation.watchPosition(p => {
+            lat = p.coords.latitude; lon = p.coords.longitude;
+            document.getElementById('t-gps').innerText = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+        });
+
+        // SIGNATURE PAD
+        let isD = false;
+        sigPad.addEventListener('pointerdown', e => { isD = true; sctx.beginPath(); sctx.moveTo(e.offsetX, e.offsetY); });
+        sigPad.addEventListener('pointermove', e => { if(isD) { sctx.lineTo(e.offsetX, e.offsetY); sctx.stroke(); } });
+        sigPad.addEventListener('pointerup', () => isD = false);
+
+        // NAV
+        document.querySelectorAll('.nav-item').forEach(i => i.onclick = () => {
+            document.querySelectorAll('.nav-item, .page').forEach(x => x.classList.remove('active'));
+            i.classList.add('active'); document.getElementById(i.dataset.t).classList.add('active');
+        });
+
+        init(); loop();
     </script>
-
 </body>
 </html>
