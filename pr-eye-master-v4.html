@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.2 — Pro Toolkit</title>
+    <title>PR Eye v4.3 — Complete Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,7 +13,7 @@
         :root {
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
-            --red: #ff4d4d; --blue: #0044ff; --magenta: #ff00ff; --cyan: #00ffff;
+            --red: #ff4d4d; --blue: #0044ff; --magenta: #ff00ff; --cyan: #00ffff; --green: #4dff4d;
             --canon-bg: #0d141e; --canon-line: #2a3a4a; --canon-orange: #f39c12;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -31,24 +31,26 @@
         .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
-        .ev-huge { font-size: 84px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
-        .ev-huge span { font-size: 30px; color: var(--muted); letter-spacing: 0; vertical-align: top;}
-        .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
-
-        .viewfinder-wrap { display: flex; gap: 10px; margin-bottom: 15px; height: 160px; }
+        /* PERSISTENT CAMERA AREA */
+        #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; position: relative;}
+        .viewfinder-wrap { display: flex; gap: 10px; height: 180px; margin-bottom: 10px; }
         .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} 
-        
-        #bracket-container { display: none; gap: 5px; height: 160px; margin-bottom: 15px; }
+        #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #scout-layer { z-index: 4; }
+        .rgb-box { width: 80px; height: 100%; background: #050a0f; border-radius: 8px; border: 1px solid #444; position: relative; display: none;}
+        #histogram-canvas { width: 100%; height: 100%; position: absolute; inset: 0;}
+
+        /* SPLIT SCREEN BRACKET */
+        #bracket-container { display: none; gap: 5px; height: 180px; margin-bottom: 15px; }
         .bracket-panel { flex: 1; position: relative; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
         .bracket-panel canvas { width: 100%; height: 100%; object-fit: cover; }
         .bracket-lbl { position: absolute; bottom: 5px; left: 5px; font-size: 9px; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 2px; font-weight: bold; color: #fff;}
 
-        .rgb-box { width: 100px; height: 100%; background: #050a0f; border-radius: 8px; border: 1px solid #444; position: relative; }
-        #histogram-canvas { width: 100%; height: 100%; position: absolute; inset: 0;}
+        .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
+        .ev-huge { font-size: 84px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
+        .ev-huge span { font-size: 30px; color: var(--muted); letter-spacing: 0; vertical-align: top;}
+        .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
 
         .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
         .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 10px;}
@@ -61,9 +63,10 @@
         .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
         .data-txt { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 8px; }
+        .data-txt.highlight { color: var(--gold); }
         input[type="text"], input[type="date"], input[type="tel"], input[type="email"], textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
 
-        .toggle-switch { display: flex; border-radius: 50px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+        .toggle-switch { display: flex; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
         .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
         .toggle-opt.active { background: var(--gold); color: #09121c; }
 
@@ -80,25 +83,34 @@
         .dial-center-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(243, 156, 18, 0.5); transform: translateX(-50%); pointer-events: none; z-index: 1;}
 
         /* COLOR TAB SWATCHES */
-        .color-stage { height: 100px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; transition: 0.3s; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-        .harmony-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .harmony-box { height: 60px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; font-size: 9px; color: #fff; text-shadow: 0 1px 2px #000; }
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;}
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 50px; cursor: pointer; transition: 0.2s;}
+        .pan-item.active-pan { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,255,255,0.2); }
+        .pan-swatch { width: 40%; transition: background-color 0.1s; }
+        .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+        .pan-code { font-family: 'DM Mono'; font-size: 12px; color: #fff; font-weight: 500; }
+        .pan-hex { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .harmony-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .harmony-box { height: 50px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; font-size: 9px; color: #fff; text-shadow: 0 1px 2px #000; text-align: center;}
 
-        .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
+        .signature-pad { background: #fff; border-radius: 8px; width: 100%; border: none; touch-action: none; margin-bottom: 8px;}
+        .row { display: flex; gap: 10px; } .col { flex: 1; }
+
+        .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto; scrollbar-width: none;}
+        .nav::-webkit-scrollbar { display: none; }
+        .nav-item { flex: 0 0 20%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
         .nav-item.active { color: var(--gold); }
 
         @keyframes pulsateGlow { 0% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } 50% { box-shadow: 0 0 40px var(--magenta), 0 0 30px var(--cyan); transform: scale(1.02); } 100% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } }
         .rave-active-btn { animation: pulsateGlow 0.8s infinite; background: linear-gradient(45deg, var(--magenta), var(--cyan)) !important; border:none; color:#000; font-weight:900;}
-        
         @keyframes strobeHeavyBlue { 0%, 20% {background-color: #0000ff;} 21%, 100% {background-color: #000000;} }
         @keyframes strobeRedWhite { 0%, 49% {background-color: #ff0000;} 50%, 100% {background-color: #ffffff;} }
-        
         #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
         .mode-heavyBlue { animation: strobeHeavyBlue 0.1s infinite; }
         .mode-strobeRedWhite { animation: strobeRedWhite 0.2s infinite; }
 
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #result-overlay, #pdf-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align:center;}
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 20px;}
         
         canvas#proc-canvas, canvas#fc-internal-canvas, canvas#composite-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
@@ -108,9 +120,10 @@
 
     <div class="hdr">
         <div class="hdr-top">
-            <div class="brand">PR EYE v4.2</div>
+            <div class="brand">PR EYE v4.3</div>
             <div class="telemetry-bar">
                 <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
+                <div class="tel-item">TILT <span id="tool-heading" style="color:var(--cyan)">0°</span></div>
             </div>
         </div>
         <input type="text" id="global-project-title" class="project-input" placeholder="Enter Project / Scene Title...">
@@ -118,12 +131,12 @@
 
     <div class="main-content">
         
-        <div id="page-meter" class="page active">
+        <div id="persistent-cam-area">
             
-            <div class="pro-meter-display">
-                <div class="ev-huge" id="display-ev">0.0<span>EV</span></div>
-                <div class="ev-bias-badge" id="display-bias" style="display:none;"></div>
-                <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;">Vol Keys: EV Bias +/-</p>
+            <div id="bracket-container">
+                <div class="bracket-panel"><canvas id="b-minus"></canvas><div class="bracket-lbl">-1 EV</div></div>
+                <div class="bracket-panel"><canvas id="b-zero"></canvas><div class="bracket-lbl">0 EV</div></div>
+                <div class="bracket-panel"><canvas id="b-plus"></canvas><div class="bracket-lbl" style="color:var(--red);">+1 EV</div></div>
             </div>
 
             <div class="viewfinder-wrap" id="main-viewfinder">
@@ -132,79 +145,102 @@
                     <video id="video" autoplay playsinline></video>
                     <canvas id="fc-layer" class="overlay"></canvas>
                     <canvas id="grid-layer" class="overlay"></canvas>
+                    <canvas id="scout-layer" class="overlay"></canvas>
                     <canvas id="ui-layer" class="overlay"></canvas>
                 </div>
-                <div class="rgb-box">
+                <div class="rgb-box" id="rgb-box-ui">
                     <canvas id="histogram-canvas"></canvas>
                 </div>
             </div>
             
-            <div id="bracket-container">
-                <div class="bracket-panel"><canvas id="b-minus"></canvas><div class="bracket-lbl">-1 EV</div></div>
-                <div class="bracket-panel"><canvas id="b-zero"></canvas><div class="bracket-lbl">0 EV</div></div>
-                <div class="bracket-panel"><canvas id="b-plus"></canvas><div class="bracket-lbl" style="color:var(--red);">+1 EV</div></div>
+            <div class="action-row" id="cam-actions">
+                <button id="bracket-toggle-btn" class="btn">BRACKET</button>
+                <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
+                <button id="grid-toggle-btn" class="btn">GRID</button>
+            </div>
+            <button id="capture-btn" class="btn solid" style="width:100%; padding:14px; font-size:16px;">CAPTURE FRAME</button>
+        </div>
+
+        <div id="page-meter" class="page active">
+            <div class="pro-meter-display">
+                <div class="ev-huge" id="display-ev">0.0<span>EV</span></div>
+                <div class="ev-bias-badge" id="display-bias" style="display:none;"></div>
+                <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;">Vol Keys: EV Bias +/-</p>
             </div>
 
-            <div class="action-row">
-                <button id="bracket-toggle-btn" class="btn">SPLIT SCREEN</button>
-                <button id="fc-toggle-btn" class="btn">FALSE COL</button>
-                <button id="meter-mode-btn" class="btn">[ ] MATRIX</button>
+            <div class="action-row" style="margin-bottom: 15px;">
+                <button id="meter-mode-btn" class="btn" style="background: rgba(255,255,255,0.05);">[ ] MATRIX</button>
+                <button id="torch-btn" class="btn" style="background: rgba(255,255,255,0.05);">🔦 TORCH OFF</button>
             </div>
 
             <p style="font-size: 9px; color: var(--cyan); text-align: center; margin: 10px 0; letter-spacing: 1px;">TAP '◎' TO SET AUTO-PRIORITY VARIABLE</p>
             
-            <div class="dial-container">
-                <div class="dial-label">SS</div>
-                <div class="dial-track" id="dial-shutter"></div>
-                <div class="dial-lock locked" id="lock-shutter">🔒</div>
-                <div class="dial-center-mark"></div>
-            </div>
-            
-            <div class="dial-container">
-                <div class="dial-label">F/</div>
-                <div class="dial-track" id="dial-aperture"></div>
-                <div class="dial-lock locked" id="lock-aperture">🔒</div>
-                <div class="dial-center-mark"></div>
-            </div>
-            
-            <div class="dial-container">
-                <div class="dial-label">ISO</div>
-                <div class="dial-track" id="dial-iso"></div>
-                <div class="dial-lock auto" id="lock-iso">◎</div>
-                <div class="dial-center-mark"></div>
-            </div>
-
-            <button id="capture-btn" class="btn solid" style="width:100%; padding:16px; font-size:18px; margin-top:10px;">CAPTURE FRAME</button>
+            <div class="dial-container"><div class="dial-label">SS</div><div class="dial-track" id="dial-shutter"></div><div class="dial-lock locked" id="lock-shutter">🔒</div><div class="dial-center-mark"></div></div>
+            <div class="dial-container"><div class="dial-label">F/</div><div class="dial-track" id="dial-aperture"></div><div class="dial-lock locked" id="lock-aperture">🔒</div><div class="dial-center-mark"></div></div>
+            <div class="dial-container"><div class="dial-label">ISO</div><div class="dial-track" id="dial-iso"></div><div class="dial-lock auto" id="lock-iso">◎</div><div class="dial-center-mark"></div></div>
         </div>
 
         <div id="page-color" class="page">
             <div class="ctrl-panel">
-                <h4>Colorimetry & Generative AI</h4>
-                <p style="font-size:10px; color:var(--muted); margin-bottom:12px;">Center crosshair sets the base color. Harmonies calculate automatically.</p>
-                
-                <div class="color-stage" id="color-base" style="background: #333;">HEX</div>
-                
-                <div class="harmony-grid">
-                    <div class="harmony-box" id="color-comp" style="background: #222;">Complementary</div>
-                    <div class="harmony-box" id="color-ana1" style="background: #222;">Analogous L</div>
-                    <div class="harmony-box" id="color-ana2" style="background: #222;">Analogous R</div>
-                    <div class="harmony-box" id="color-tri" style="background: #222;">Triadic</div>
+                <h4>Colorimetry & Generative Palette</h4>
+                <div class="toggle-switch">
+                    <div id="pan-auto" class="toggle-opt active">AUTO POINTS</div>
+                    <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
                 </div>
                 
-                <button id="btn-midjourney" class="btn" style="width: 100%; border-color: var(--cyan); color: var(--cyan); margin-bottom: 10px;">📋 Copy Midjourney Prompt</button>
-                <button id="btn-export-swatch" class="btn solid" style="width: 100%;">EXPORT DIGITAL SWATCH</button>
+                <p style="font-size: 10px; color: var(--cyan); margin-bottom: 10px; text-align: center;">TAP A SWATCH TO VIEW HARMONIES</p>
+                
+                <div class="pan-grid">
+                    <div class="pan-item active-pan" id="p-box-1" data-idx="1"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div class="pan-code" id="ch1">#---</div></div></div>
+                    <div class="pan-item" id="p-box-2" data-idx="2"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div class="pan-code" id="ch2">#---</div></div></div>
+                    <div class="pan-item" id="p-box-3" data-idx="3"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><div class="pan-code" id="ch3">#---</div></div></div>
+                    <div class="pan-item" id="p-box-4" data-idx="4"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><div class="pan-code" id="ch4">#---</div></div></div>
+                </div>
+                
+                <div class="harmony-grid">
+                    <div class="harmony-box" id="h-comp" style="background: #222;">Complementary</div>
+                    <div class="harmony-box" id="h-ana1" style="background: #222;">Analogous</div>
+                    <div class="harmony-box" id="h-tri" style="background: #222;">Triadic</div>
+                </div>
+                
+                <button id="btn-midjourney" class="btn" style="width: 100%; border-color: var(--cyan); color: var(--cyan); margin-bottom: 10px;">📋 Copy AI Style Prompt</button>
             </div>
         </div>
 
         <div id="page-scout" class="page">
             <div class="ctrl-panel">
-                <h4>Location Scout</h4>
-                <button class="btn sm" id="btn-fetch-loc" style="margin-bottom:12px; width:100%;">Get Live GPS & Map</button>
-                
-                <div id="map-iframe-container" style="height:200px; background:#000; border-radius:8px; margin-bottom:12px; overflow:hidden; border: 1px solid #444; display: flex; align-items:center; justify-content:center; color: var(--muted); font-size: 10px;">AWAITING GPS...</div>
+                <h4>Location Ephemeris</h4>
+                <button class="btn sm" id="btn-fetch-loc" style="margin-bottom:12px; width:100%;">Sync GPS & Live Data</button>
+                <p style="font-size:10px; color:var(--green); margin-bottom:10px; letter-spacing:1px; text-transform:uppercase;">AR Sky HUD Active on Camera Feed</p>
                 
                 <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" class="data-txt">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" class="data-txt">--:--</span></div></div>
+                <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Golden Hour</span><span id="loc-golden" class="data-txt highlight">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Heading</span><span id="scout-heading" class="data-txt">0°</span></div></div>
                 <div class="row"><div class="col"><span class="label-txt">Sun Azimuth</span><span id="loc-azimuth" class="data-txt highlight">--°</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sun Elev.</span><span id="loc-altitude" class="data-txt highlight">--°</span></div></div>
+            </div>
+        </div>
+
+        <div id="page-tools" class="page">
+            <div class="ctrl-panel">
+                <h4 style="color:var(--gold);">Live Weather & Notes</h4>
+                <div class="row" style="margin-bottom:5px;">
+                    <div class="col"><span class="label-txt">Temp / Feels Like</span><span id="tool-temp" class="data-txt">-- °C / -- °C</span></div>
+                    <div class="col" style="text-align:right;"><span class="label-txt">Wind / Rain</span><span id="tool-weather" class="data-txt">-- km/h | -- mm</span></div>
+                </div>
+                <hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">
+                <span class="label-txt">Shoot Notes</span>
+                <textarea id="shoot-notes" rows="4" placeholder="Location notes, shot lists..."></textarea>
+                <button class="btn" id="btn-email-notes" style="width: 100%;">Email Notes</button>
+            </div>
+            <div class="ctrl-panel" style="border-color: rgba(255, 77, 77, 0.4);">
+                <h4 style="color: var(--red);">Local Services Navigation</h4>
+                <div class="pan-grid" style="grid-template-columns: 1fr 1fr; margin-top:0;">
+                    <button class="btn sm" onclick="openSOS('hospital+OR+A%26E')" style="border-color:var(--red); color:var(--red);">🏥 Nearest A&E</button>
+                    <button class="btn sm" onclick="openSOS('taxi+rank')">🚕 Taxi Firm</button>
+                    <button class="btn sm" onclick="openSOS('parking')">🅿️ Car Park</button>
+                    <button class="btn sm" onclick="openSOS('pub')">🍺 Nearest Pub</button>
+                    <button class="btn sm" onclick="openSOS('camera+store')">📷 Camera Shop</button>
+                    <button class="btn sm solid" onclick="openSOS('train+station+OR+transit+station')" style="grid-column: span 2; background:var(--gold); color:#000;">🚆 Nearest Train / Tube</button>
+                </div>
             </div>
         </div>
 
@@ -220,13 +256,51 @@
                 
                 <div style="text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
                     <span class="label-txt" style="color:var(--red);">Siren / Flash Mode</span>
-                    <select id="sos-mode-select" style="margin-bottom: 8px; font-size: 16px; font-weight: bold;">
+                    <select id="sos-mode-select" style="margin-bottom: 8px; font-size: 16px; font-weight: bold; width: 100%; background: transparent; color: #fff; border: 1px solid #444; padding: 5px;">
                         <option value="heavyBlue">Heavy Police Blue Strobe</option>
                         <option value="strobe">Red/White Warning Strobe</option>
                     </select>
                 </div>
                 <button class="btn danger" id="btn-sos-siren" style="width: 100%; flex-grow: 1; font-size:22px; border-radius: 12px; font-weight: 900; letter-spacing: 2px;">EMERGENCY SIREN</button>
             </div>
+        </div>
+
+        <div id="page-release" class="page">
+            <div class="ctrl-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="margin-bottom:12px; border:none;">Model Details</h4>
+                </div>
+                <div class="row"><div class="col"><span class="label-txt">Shoot Date</span><input type="date" id="r-date"></div><div class="col"><span class="label-txt">Location</span><input type="text" id="r-loc" placeholder="Shoot Location"></div></div>
+                <span class="label-txt">Model Full Name</span><input type="text" id="r-name" placeholder="Full Legal Name">
+                <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone Number"></div></div>
+                <input type="email" id="r-email" placeholder="Email Address">
+                <span class="label-txt">Model Address</span><input type="text" id="r-address" placeholder="Full Address">
+                <span class="label-txt">Compensation (if any)</span><input type="text" id="r-compensation" placeholder="e.g. £200, TFP, None">
+                <div class="toggle-switch"><div class="toggle-opt active" id="tog-adult">Adult (18+)</div><div class="toggle-opt" id="tog-minor">Minor (Under 18)</div></div>
+            </div>
+            
+            <div id="guardian-section" class="ctrl-panel" style="display:none; border-color:var(--gold);">
+                <h4 style="color:var(--gold);">Parent / Guardian Consent</h4>
+                <input type="text" id="r-g-name" placeholder="Parent/Guardian Full Name">
+                <span class="label-txt">Guardian Signature</span>
+                <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
+                <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-guardian')">Clear Guardian Signature</button>
+            </div>
+            
+            <div class="ctrl-panel">
+                <h4>Signatures</h4>
+                <span class="label-txt">Model Signature</span>
+                <canvas id="sig-model" class="signature-pad" height="100"></canvas>
+                <button class="btn sm" style="width:100%;border-radius:4px;margin-bottom:15px;" onclick="clearPad('sig-model')">Clear Model</button>
+                
+                <span class="label-txt">Photographer Name</span>
+                <input type="text" id="r-photog-name" value="PR Eye User">
+                <span class="label-txt">Photographer Signature</span>
+                <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
+                <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-photog')">Clear Photog</button>
+            </div>
+            
+            <button id="gen-pdf-btn" class="btn solid" style="width:100%; padding:15px; font-size:16px;">GENERATE PDF</button>
         </div>
 
     </div>
@@ -240,12 +314,20 @@
             <button class="btn" id="btn-close-result" style="flex:1; border-color:#fff; color:#fff;">CLOSE</button>
         </div>
     </div>
+    <div id="pdf-overlay">
+        <h2 style="color:var(--gold); margin-bottom: 20px;">PDF GENERATED</h2>
+        <p style="color:var(--muted); margin-bottom: 30px; font-size:12px;">Your model release is ready to download.</p>
+        <a id="pdf-dl-link" class="btn solid" style="width:80%; padding:20px; font-size:18px; text-decoration:none; margin-bottom:15px;">DOWNLOAD PDF</a>
+        <button class="btn danger" onclick="document.getElementById('pdf-overlay').style.display='none';">CLOSE</button>
+    </div>
 
     <div class="nav">
-        <div class="nav-item active" data-target="page-meter">Meter</div>
-        <div class="nav-item" data-target="page-color">Color</div>
-        <div class="nav-item" data-target="page-scout">Scout</div>
-        <div class="nav-item" data-target="page-rave">Rave</div>
+        <div class="nav-item active" data-target="page-meter" data-cam="true">Meter</div>
+        <div class="nav-item" data-target="page-color" data-cam="true">Color</div>
+        <div class="nav-item" data-target="page-scout" data-cam="true">Scout</div>
+        <div class="nav-item" data-target="page-tools" data-cam="false">Tools</div>
+        <div class="nav-item" data-target="page-rave" data-cam="false">Rave</div>
+        <div class="nav-item" data-target="page-release" data-cam="false" id="nav-release">Legal</div>
     </div>
 
     <canvas id="proc-canvas" width="150" height="200"></canvas>
@@ -254,8 +336,8 @@
 
 <script>
     const video = document.getElementById('video');
-    const canvases = ['fc-layer','grid-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
-    const [fcCtx, gridCtx, uiCtx] = canvases;
+    const canvases = ['fc-layer','grid-layer','scout-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
+    const [fcCtx, gridCtx, scoutCtx, uiCtx] = canvases;
     const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
     const fcInternalCtx = document.getElementById('fc-internal-canvas').getContext('2d', { willReadFrequently: true });
     const histCtx = document.getElementById('histogram-canvas').getContext('2d', { willReadFrequently: true });
@@ -271,9 +353,9 @@
     let fcState = 0; let bracketActive = false;
     let currentGridIdx = 0; const gridOptions = ['off', 'thirds', 'cross'];
     let isCapturing = false;
-    let frameCount = 0; // Throttling variable
+    let frameCount = 0;
 
-    let currentLat = null; let currentLon = null;
+    let currentLat = null; let currentLon = null; let currentHeading = 0;
 
     // CANON EXPOSURE ARRAYS
     const arrShutter = ['30"','25"','20"','15"','13"','10"','8"','6"','5"','4"','3.2"','2.5"','2"','1.6"','1.3"','1"','0.8"','0.6"','0.5"','0.4"','0.3"','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000'];
@@ -281,10 +363,17 @@
     const arrIso = [50, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 25600];
     
     // PRIORITY ENGINE STATE
-    let activeIndexes = { shutter: 33, aperture: 10, iso: 7 }; // Defaults: 1/60, f/5.6, ISO 400
-    let priorityMode = 'iso'; // 'shutter', 'aperture', or 'iso'
+    let activeIndexes = { shutter: 33, aperture: 10, iso: 7 };
+    let priorityMode = 'iso';
     let currentMeterMode = 0; 
-    let currentColorData = { hex: '#333333', comp: '#333333', ana1: '#333333', ana2: '#333333' };
+    let torchActive = false;
+
+    // COLOR HARMONY STATE
+    let panMode = 'auto'; 
+    let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}]; 
+    let manualIndex = 0; 
+    let extractedColors = ['#333','#333','#333','#333'];
+    let activeColorIndex = 0; // Which of the 4 is selected for harmonies
 
     function parseShutter(s) { if(s.includes('"')) return parseFloat(s.replace('"','')); if(s.includes('/')) { let pts = s.split('/'); return parseInt(pts[0]) / parseInt(pts[1]); } return parseFloat(s); }
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
@@ -292,14 +381,13 @@
     // --- DIGITAL JOG DIALS BUILDER ---
     function buildDial(id, arr, type) {
         const track = document.getElementById(id); track.innerHTML = '';
-        // Add padding elements so first/last items can center
         const padStr = `<div class="dial-item" style="flex: 0 0 33.33%;"></div>`;
         track.innerHTML += padStr;
         arr.forEach((val, i) => { track.innerHTML += `<div class="dial-item" data-idx="${i}">${val}</div>`; });
         track.innerHTML += padStr;
         
         track.addEventListener('scroll', () => {
-            if(priorityMode === type) return; // Don't allow manual scroll if auto-calculating
+            if(priorityMode === type) return; 
             const center = track.scrollLeft + (track.clientWidth / 2);
             let closest = null; let minD = Infinity;
             Array.from(track.children).forEach(child => {
@@ -309,57 +397,36 @@
                 if(d < minD) { minD = d; closest = child; }
                 child.classList.remove('active');
             });
-            if(closest) {
-                closest.classList.add('active');
-                activeIndexes[type] = parseInt(closest.dataset.idx);
-                calculatePriority();
-            }
+            if(closest) { closest.classList.add('active'); activeIndexes[type] = parseInt(closest.dataset.idx); calculatePriority(); }
         });
     }
 
     function syncDial(id, idx) {
-        const track = document.getElementById(id);
-        const item = track.querySelector(`[data-idx="${idx}"]`);
-        if(item) {
-            Array.from(track.children).forEach(c => c.classList.remove('active'));
-            item.classList.add('active');
-            const targetScroll = item.offsetLeft - (track.clientWidth / 2) + (item.clientWidth / 2);
-            track.scrollTo({ left: targetScroll, behavior: 'smooth' });
-        }
+        const track = document.getElementById(id); const item = track.querySelector(`[data-idx="${idx}"]`);
+        if(item) { Array.from(track.children).forEach(c => c.classList.remove('active')); item.classList.add('active'); const targetScroll = item.offsetLeft - (track.clientWidth / 2) + (item.clientWidth / 2); track.scrollTo({ left: targetScroll, behavior: 'smooth' }); }
     }
 
     // --- EXPOSURE PRIORITY MATH ---
     function calculatePriority() {
         if(!measuredEV) return;
         let useEV = measuredEV + evBias;
-        
-        const N = arrAperture[activeIndexes.aperture]; 
-        const ISO = arrIso[activeIndexes.iso]; 
-        const t = parseShutter(arrShutter[activeIndexes.shutter]);
+        const N = arrAperture[activeIndexes.aperture]; const ISO = arrIso[activeIndexes.iso]; const t = parseShutter(arrShutter[activeIndexes.shutter]);
 
         if(priorityMode === 'iso') {
-            // Calculate needed ISO
-            // EV = log2(N^2 / t) - log2(ISO/100)  =>  log2(ISO/100) = log2(N^2 / t) - EV
             let targetIso = 100 * Math.pow(2, Math.log2((N*N)/t) - useEV);
-            // Find closest ISO index
             let closestIdx = 0; let minD = Infinity;
             arrIso.forEach((val, i) => { const d = Math.abs(val - targetIso); if(d < minD) { minD = d; closestIdx = i; }});
-            activeIndexes.iso = closestIdx;
-            syncDial('dial-iso', closestIdx);
+            activeIndexes.iso = closestIdx; syncDial('dial-iso', closestIdx);
         } else if (priorityMode === 'aperture') {
-            // Target N = sqrt( t * 2^(EV + log2(ISO/100)) )
             let targetN = Math.sqrt(t * Math.pow(2, useEV + Math.log2(ISO/100)));
             let closestIdx = 0; let minD = Infinity;
             arrAperture.forEach((val, i) => { const d = Math.abs(val - targetN); if(d < minD) { minD = d; closestIdx = i; }});
-            activeIndexes.aperture = closestIdx;
-            syncDial('dial-aperture', closestIdx);
+            activeIndexes.aperture = closestIdx; syncDial('dial-aperture', closestIdx);
         } else if (priorityMode === 'shutter') {
-            // Target t = N^2 / 2^(EV + log2(ISO/100))
             let targetT = (N*N) / Math.pow(2, useEV + Math.log2(ISO/100));
             let closestIdx = 0; let minD = Infinity;
             arrShutter.forEach((val, i) => { const pv = parseShutter(val); const d = Math.abs(pv - targetT); if(d < minD) { minD = d; closestIdx = i; }});
-            activeIndexes.shutter = closestIdx;
-            syncDial('dial-shutter', closestIdx);
+            activeIndexes.shutter = closestIdx; syncDial('dial-shutter', closestIdx);
         }
     }
 
@@ -372,31 +439,16 @@
         });
         calculatePriority();
     }
+    bindSafe('lock-shutter', 'click', () => setPriority('shutter')); bindSafe('lock-aperture', 'click', () => setPriority('aperture')); bindSafe('lock-iso', 'click', () => setPriority('iso'));
 
-    bindSafe('lock-shutter', 'click', () => setPriority('shutter'));
-    bindSafe('lock-aperture', 'click', () => setPriority('aperture'));
-    bindSafe('lock-iso', 'click', () => setPriority('iso'));
-
-    // --- BINDINGS ---
-    bindSafe('meter-mode-btn', 'click', (e) => { 
-        currentMeterMode = (currentMeterMode + 1) % 3; 
-        if(currentMeterMode === 0) e.currentTarget.innerText = "[ ] MATRIX"; 
-        else if(currentMeterMode === 1) e.currentTarget.innerText = "( ) CENTER"; 
-        else e.currentTarget.innerText = "[•] SPOT"; 
-    });
+    // --- UI BINDINGS ---
+    bindSafe('meter-mode-btn', 'click', (e) => { currentMeterMode = (currentMeterMode + 1) % 3; if(currentMeterMode === 0) e.currentTarget.innerText = "[ ] MATRIX"; else if(currentMeterMode === 1) e.currentTarget.innerText = "( ) CENTER"; else e.currentTarget.innerText = "[•] SPOT"; });
+    bindSafe('torch-btn', 'click', async (e) => { if (!stream) return; const track = stream.getVideoTracks()[0]; try { torchActive = !torchActive; await track.applyConstraints({ advanced: [{ torch: torchActive }] }); e.currentTarget.innerText = torchActive ? "🔦 TORCH ON" : "🔦 TORCH OFF"; e.currentTarget.style.color = torchActive ? "var(--canon-orange)" : "var(--gold)"; } catch (err) { alert('Torch API not supported on this browser/lens.'); torchActive = false; } });
 
     window.addEventListener('keydown', function(e) { 
-        if (currentTab === 'page-meter') {
-            if (e.key === 'VolumeUp' || e.key === 'AudioVolumeUp') { e.preventDefault(); evBias += 0.33; updateBiasDisplay(); }
-            if (e.key === 'VolumeDown' || e.key === 'AudioVolumeDown') { e.preventDefault(); evBias -= 0.33; updateBiasDisplay(); }
-        }
+        if (currentTab === 'page-meter') { if (e.key === 'VolumeUp' || e.key === 'AudioVolumeUp') { e.preventDefault(); evBias += 0.33; updateBiasDisplay(); } if (e.key === 'VolumeDown' || e.key === 'AudioVolumeDown') { e.preventDefault(); evBias -= 0.33; updateBiasDisplay(); } }
     });
-
-    function updateBiasDisplay() {
-        const badge = document.getElementById('display-bias');
-        if(Math.abs(evBias) < 0.1) { badge.style.display = 'none'; evBias = 0; }
-        else { badge.style.display = 'block'; badge.innerText = (evBias > 0 ? '+' : '') + evBias.toFixed(1) + ' EV'; }
-    }
+    function updateBiasDisplay() { const badge = document.getElementById('display-bias'); if(Math.abs(evBias) < 0.1) { badge.style.display = 'none'; evBias = 0; } else { badge.style.display = 'block'; badge.innerText = (evBias > 0 ? '+' : '') + evBias.toFixed(1) + ' EV'; } }
 
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
@@ -407,6 +459,7 @@
     
     bindSafe('cam-flip-btn', 'click', (e)=>{ 
         currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; 
+        torchActive = false; document.getElementById('torch-btn').innerText = "🔦 TORCH OFF"; document.getElementById('torch-btn').style.color = "var(--gold)";
         if(currentFacingMode === 'user') { video.style.filter = 'blur(15px) grayscale(20%)'; e.currentTarget.innerText = "INCIDENT SIM"; e.currentTarget.style.background = "var(--magenta)"; } 
         else { video.style.filter = 'none'; e.currentTarget.innerText = "REFLECTED"; e.currentTarget.style.background = "rgba(0,0,0,0.6)"; }
         startCamera(); 
@@ -414,7 +467,7 @@
 
     function resizeCanvases() {
         const rect = video.getBoundingClientRect(); if(rect.width===0) return;
-        ['grid-layer', 'ui-layer', 'fc-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
+        ['grid-layer', 'ui-layer', 'fc-layer', 'scout-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
         const fcInt = document.getElementById('fc-internal-canvas'); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
         const hC = document.getElementById('histogram-canvas'); if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
         const bRect = document.getElementById('b-zero').getBoundingClientRect();
@@ -428,6 +481,16 @@
             document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
             n.classList.add('active'); currentTab = n.dataset.target; 
             const tgt = document.getElementById(currentTab); if(tgt) tgt.classList.add('active');
+            
+            // Handle Persistent Camera Visibility
+            const camArea = document.getElementById('persistent-cam-area');
+            if(n.dataset.cam === "true") {
+                camArea.style.display = 'flex';
+                document.getElementById('rgb-box-ui').style.display = currentTab === 'page-meter' ? 'block' : 'none';
+                document.getElementById('cam-actions').style.display = currentTab === 'page-meter' ? 'flex' : 'none';
+            } else {
+                camArea.style.display = 'none';
+            }
             resizeCanvases();
         });
     });
@@ -435,8 +498,7 @@
     bindSafe('grid-toggle-btn', 'click', (e) => { currentGridIdx = (currentGridIdx + 1) % gridOptions.length; e.currentTarget.classList.toggle('active-toggle', currentGridIdx !== 0); drawGrid(); });
     function drawGrid() { const type = gridOptions[currentGridIdx]; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height; gridCtx.clearRect(0,0,w,h); if(type === 'off') return; gridCtx.strokeStyle = `rgba(212, 194, 161, 0.5)`; gridCtx.lineWidth = 1; gridCtx.beginPath(); if(type === 'thirds') { gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h); gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3); } else if (type === 'cross') { gridCtx.moveTo(w/2, 0); gridCtx.lineTo(w/2, h); gridCtx.moveTo(0, h/2); gridCtx.lineTo(w, h/2); } gridCtx.stroke(); }
     
-    bindSafe('fc-toggle-btn', 'click', (e) => { fcState = (fcState + 1) % 3; const btn = e.currentTarget; if(fcState === 0) { btn.innerText = "FALSE COL"; btn.classList.remove('active-toggle'); document.getElementById('fc-layer').style.display='none'; } if(fcState === 1) { btn.innerText = "F-COL: PRO"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } if(fcState === 2) { btn.innerText = "F-COL: CLIP"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } });
-    
+    bindSafe('fc-toggle-btn', 'click', (e) => { fcState = (fcState + 1) % 3; const btn = e.currentTarget; if(fcState === 0) { btn.innerText = "F-COL: OFF"; btn.classList.remove('active-toggle'); document.getElementById('fc-layer').style.display='none'; } if(fcState === 1) { btn.innerText = "F-COL: PRO"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } if(fcState === 2) { btn.innerText = "F-COL: CLIP"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } });
     bindSafe('bracket-toggle-btn', 'click', (e) => { bracketActive = !bracketActive; document.getElementById('bracket-container').style.display = bracketActive ? 'flex' : 'none'; document.getElementById('main-viewfinder').style.display = bracketActive ? 'none' : 'flex'; e.currentTarget.classList.toggle('active-toggle', bracketActive); resizeCanvases(); });
 
     // --- COLOR HARMONY MATH ---
@@ -444,121 +506,168 @@
     function hslToRgb(h, s, l) { let r, g, b; if(s == 0){ r = g = b = l; } else { let hue2rgb = function hue2rgb(p, q, t){ if(t < 0) t += 1; if(t > 1) t -= 1; if(t < 1/6) return p + (q - p) * 6 * t; if(t < 1/2) return q; if(t < 2/3) return p + (q - p) * (2/3 - t) * 6; return p; }; let q = l < 0.5 ? l * (1 + s) : l + s - l * s; let p = 2 * l - q; r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3); } return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]; }
     function rgbToHex(r,g,b) { return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase(); }
 
-    function updateColors(r,g,b) {
-        let [h, s, l] = rgbToHsl(r,g,b);
-        let hexBase = rgbToHex(r,g,b);
-        
-        let cComp = hslToRgb((h + 0.5) % 1, s, l);
-        let hexComp = rgbToHex(...cComp);
-        
-        let cAna1 = hslToRgb((h + 0.083) % 1, s, l);
-        let hexAna1 = rgbToHex(...cAna1);
-        
-        let cAna2 = hslToRgb((h - 0.083 + 1) % 1, s, l);
-        let hexAna2 = rgbToHex(...cAna2);
-        
-        let cTri = hslToRgb((h + 0.33) % 1, s, l);
-        let hexTri = rgbToHex(...cTri);
+    bindSafe('pan-auto', 'click', () => { panMode = 'auto'; document.getElementById('pan-auto').classList.add('active'); document.getElementById('pan-manual').classList.remove('active'); });
+    bindSafe('pan-manual', 'click', () => { panMode = 'manual'; document.getElementById('pan-manual').classList.add('active'); document.getElementById('pan-auto').classList.remove('active'); });
+    bindSafe('ui-layer', 'pointerdown', (e) => { if(currentTab === 'page-color' && panMode === 'manual') { const rect = e.target.getBoundingClientRect(); manualPoints[manualIndex] = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height }; manualIndex = (manualIndex + 1) % 4; } });
 
-        currentColorData = { hex: hexBase, comp: hexComp, ana1: hexAna1, ana2: hexAna2 };
+    // Handle tapping a swatch to view its harmonies
+    for(let i=1; i<=4; i++) {
+        bindSafe(`p-box-${i}`, 'click', () => {
+            document.querySelectorAll('.pan-item').forEach(el => el.classList.remove('active-pan'));
+            document.getElementById(`p-box-${i}`).classList.add('active-pan');
+            activeColorIndex = i - 1;
+            updateHarmonies(extractedColors[activeColorIndex]);
+        });
+    }
 
-        document.getElementById('color-base').style.background = hexBase; document.getElementById('color-base').innerText = hexBase;
-        document.getElementById('color-comp').style.background = hexComp; document.getElementById('color-comp').innerHTML = `Comp<br>${hexComp}`;
-        document.getElementById('color-ana1').style.background = hexAna1; document.getElementById('color-ana1').innerHTML = `Ana L<br>${hexAna1}`;
-        document.getElementById('color-ana2').style.background = hexAna2; document.getElementById('color-ana2').innerHTML = `Ana R<br>${hexAna2}`;
-        document.getElementById('color-tri').style.background = hexTri; document.getElementById('color-tri').innerHTML = `Triad<br>${hexTri}`;
+    function hexToRgbArr(hex) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0,0,0];
+    }
+
+    function updateHarmonies(hexBase) {
+        let rgb = hexToRgbArr(hexBase);
+        let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+        
+        let cComp = hslToRgb((h + 0.5) % 1, s, l); let hexComp = rgbToHex(...cComp);
+        let cAna1 = hslToRgb((h + 0.083) % 1, s, l); let hexAna1 = rgbToHex(...cAna1);
+        let cTri = hslToRgb((h + 0.33) % 1, s, l); let hexTri = rgbToHex(...cTri);
+
+        document.getElementById('h-comp').style.background = hexComp; document.getElementById('h-comp').innerHTML = `Comp<br>${hexComp}`;
+        document.getElementById('h-ana1').style.background = hexAna1; document.getElementById('h-ana1').innerHTML = `Analogous<br>${hexAna1}`;
+        document.getElementById('h-tri').style.background = hexTri; document.getElementById('h-tri').innerHTML = `Triad<br>${hexTri}`;
+    }
+
+    // AI Prompt Generator
+    function getRoughColorName(h, s, l) {
+        if(l < 0.15) return "Obsidian Dark"; if(l > 0.85) return "Bright Highlights"; if(s < 0.15) return "Muted Grey";
+        h = h * 360;
+        if(h<15 || h>345) return "Crimson Red"; if(h<45) return "Warm Orange"; if(h<75) return "Golden Yellow";
+        if(h<150) return "Foliage Green"; if(h<210) return "Cyan/Teal"; if(h<260) return "Deep Blue";
+        if(h<315) return "Rich Purple"; return "Magenta";
     }
 
     bindSafe('btn-midjourney', 'click', (e) => {
         const title = document.getElementById('global-project-title').value || 'Subject';
-        const prompt = `A cinematic, highly detailed photograph of ${title}, featuring a primary color palette of ${currentColorData.hex}, balanced with complementary lighting in ${currentColorData.comp}, and analogous geometric background patterns in ${currentColorData.ana1} and ${currentColorData.ana2}. 8k resolution, photorealistic, shot on 35mm lens, highly detailed --ar 16:9 --style raw`;
+        let rgb = hexToRgbArr(extractedColors[activeColorIndex]);
+        let baseName = getRoughColorName(...rgbToHsl(rgb[0], rgb[1], rgb[2]));
+        
+        const prompt = `Cinematic photography, stunning composition of ${title}, professional color grading with a dominant palette of ${baseName} (${extractedColors[activeColorIndex]}), balanced with a complementary lighting accent of ${document.getElementById('h-comp').innerText.split('\n')[1]}. Analogous undertones in the shadows. Moody, volumetric lighting, 8k resolution, photorealistic, shot on 35mm lens --ar 16:9 --style raw`;
+        
         navigator.clipboard.writeText(prompt);
         e.currentTarget.innerText = "✅ COPIED TO CLIPBOARD";
-        setTimeout(() => e.currentTarget.innerText = "📋 Copy Midjourney Prompt", 2000);
+        setTimeout(() => e.currentTarget.innerText = "📋 Copy AI Style Prompt", 2000);
+    });
+
+    window.addEventListener('deviceorientation', (e) => {
+        currentHeading = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0; window.camPitch = e.beta || 0; 
+        const hEl = document.getElementById('tool-heading'); if(hEl) hEl.innerText = Math.round(currentHeading) + '°'; 
+        const sEl = document.getElementById('scout-heading'); if(sEl) sEl.innerText = Math.round(currentHeading) + '°';
     });
 
     // --- LIVE FEED ENGINE (THROTTLED) ---
     function liveLoop() {
-        if(video.readyState === 4 && video.videoWidth > 0) {
+        if(video.readyState === 4 && video.videoWidth > 0 && document.getElementById('persistent-cam-area').style.display !== 'none') {
             frameCount++;
             const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
             if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
             
-            // BRACKET SIMULATION
             if(bracketActive) {
                 bMinusCtx.filter = 'brightness(50%) contrast(110%)'; bMinusCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bMinusCtx.canvas.width, bMinusCtx.canvas.height);
                 bZeroCtx.filter = 'none'; bZeroCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bZeroCtx.canvas.width, bZeroCtx.canvas.height);
                 bPlusCtx.filter = 'brightness(180%) contrast(90%)'; bPlusCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bPlusCtx.canvas.width, bPlusCtx.canvas.height);
             }
 
-            // THROTTLE HEAVY MATH TO EVERY 5TH FRAME (~12fps for math)
-            if (frameCount % 5 === 0) {
+            // THROTTLE HEAVY MATH
+            if (frameCount % 4 === 0) {
                 procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200); const viewData = procCtx.getImageData(0,0,150,200).data;
                 
-                let rT=0, gT=0, bT=0, lumT=0, c=0; 
-                let centerR=0, centerG=0, centerB=0, centerC=0;
-
-                for(let y=0; y<200; y++) {
-                    for(let x=0; x<150; x++) {
-                        let i = (y * 150 + x) * 4; let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let weight = 1;
-                        let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2));
-                        
-                        if(currentMeterMode === 1) { weight = dist < 50 ? 1 : (dist < 80 ? 0.5 : 0.1); } 
-                        else if(currentMeterMode === 2) { weight = dist < 15 ? 1 : 0; }
-                        
-                        if(weight > 0) { rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight; lumT += luma * weight; c += weight; }
-
-                        // Color Extraction at dead center (10px radius)
-                        if(currentTab === 'page-color' && dist < 10) { centerR += viewData[i]; centerG += viewData[i+1]; centerB += viewData[i+2]; centerC++; }
-                    }
-                }
-                
-                measuredEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 12.5); 
-                calculatePriority(); // Update UI dials
-                
-                let finalEV = measuredEV + evBias;
-                const evDisplay = document.getElementById('display-ev');
-                if(evDisplay) evDisplay.innerHTML = `${finalEV.toFixed(1)}<span>EV</span>`;
-                
-                const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); const wSpan = document.getElementById('tel-wb'); if(wSpan) wSpan.innerHTML = `WB <span style="color:var(--gold)">${liveTempK}K</span>`; }
-                
-                if(currentTab === 'page-color' && centerC > 0) { updateColors(centerR/centerC, centerG/centerC, centerB/centerC); }
-
-                // RGB WAVEFORM
-                if(!bracketActive && currentTab === 'page-meter') {
-                    const hw = histCtx.canvas.width; const hh = histCtx.canvas.height; histCtx.clearRect(0,0,hw,hh); 
-                    const binsR = new Array(40).fill(0); const binsG = new Array(40).fill(0); const binsB = new Array(40).fill(0); let maxBin = 0;
-                    for(let i=0; i<viewData.length; i+=4) { 
-                        let bR = Math.floor((viewData[i]/255)*39); binsR[bR]++; if(binsR[bR] > maxBin) maxBin = binsR[bR];
-                        let bG = Math.floor((viewData[i+1]/255)*39); binsG[bG]++; if(binsG[bG] > maxBin) maxBin = binsG[bG];
-                        let bB = Math.floor((viewData[i+2]/255)*39); binsB[bB]++; if(binsB[bB] > maxBin) maxBin = binsB[bB];
-                    }
-                    const step = hw / 40; histCtx.globalCompositeOperation = "screen";
-                    histCtx.strokeStyle = 'rgba(255,50,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsR[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.strokeStyle = 'rgba(50,255,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsG[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.strokeStyle = 'rgba(50,100,255,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsB[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.globalCompositeOperation = "source-over";
-                }
-
-                if(fcState > 0 && !bracketActive) {
-                    fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
-                    for(let i=0; i<px.length; i+=4) {
-                        let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
-                        if (fcState === 1) { 
-                            if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
-                        } else if (fcState === 2) { 
-                            if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
+                if(currentTab === 'page-meter') {
+                    let rT=0, gT=0, bT=0, lumT=0, c=0; 
+                    for(let y=0; y<200; y++) {
+                        for(let x=0; x<150; x++) {
+                            let i = (y * 150 + x) * 4; let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let weight = 1;
+                            let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2));
+                            if(currentMeterMode === 1) { weight = dist < 50 ? 1 : (dist < 80 ? 0.5 : 0.1); } 
+                            else if(currentMeterMode === 2) { weight = dist < 15 ? 1 : 0; }
+                            if(weight > 0) { rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight; lumT += luma * weight; c += weight; }
                         }
                     }
-                    fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height); const tmp = new ImageData(px, fcCtx.canvas.width, fcCtx.canvas.height); fcInternalCtx.putImageData(tmp, 0, 0); fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0);
+                    measuredEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 12.5); 
+                    calculatePriority(); 
+                    
+                    let finalEV = measuredEV + evBias;
+                    const evDisplay = document.getElementById('display-ev');
+                    if(evDisplay) evDisplay.innerHTML = `${finalEV.toFixed(1)}<span>EV</span>`;
+                    
+                    const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); const wSpan = document.getElementById('tel-wb'); if(wSpan) wSpan.innerHTML = `WB <span style="color:var(--gold)">${liveTempK}K</span>`; }
+
+                    if(!bracketActive) {
+                        const hw = histCtx.canvas.width; const hh = histCtx.canvas.height; histCtx.clearRect(0,0,hw,hh); 
+                        const binsR = new Array(40).fill(0); const binsG = new Array(40).fill(0); const binsB = new Array(40).fill(0); let maxBin = 0;
+                        for(let i=0; i<viewData.length; i+=4) { 
+                            let bR = Math.floor((viewData[i]/255)*39); binsR[bR]++; if(binsR[bR] > maxBin) maxBin = binsR[bR];
+                            let bG = Math.floor((viewData[i+1]/255)*39); binsG[bG]++; if(binsG[bG] > maxBin) maxBin = binsG[bG];
+                            let bB = Math.floor((viewData[i+2]/255)*39); binsB[bB]++; if(binsB[bB] > maxBin) maxBin = binsB[bB];
+                        }
+                        const step = hw / 40; histCtx.globalCompositeOperation = "screen";
+                        histCtx.strokeStyle = 'rgba(255,50,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsR[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                        histCtx.strokeStyle = 'rgba(50,255,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsG[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                        histCtx.strokeStyle = 'rgba(50,100,255,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsB[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                        histCtx.globalCompositeOperation = "source-over";
+                    }
+
+                    if(fcState > 0 && !bracketActive) {
+                        fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
+                        for(let i=0; i<px.length; i+=4) {
+                            let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
+                            if (fcState === 1) { 
+                                if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
+                            } else if (fcState === 2) { 
+                                if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
+                            }
+                        }
+                        fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height); const tmp = new ImageData(px, fcCtx.canvas.width, fcCtx.canvas.height); fcInternalCtx.putImageData(tmp, 0, 0); fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0);
+                    }
+                }
+
+                if(currentTab === 'page-color') {
+                    const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+                    pts.forEach((p, idx) => {
+                        const sampleX = Math.floor(p.x * 150); const sampleY = Math.floor(p.y * 200); const pxd = procCtx.getImageData(Math.max(0, sampleX - 1), Math.max(0, sampleY - 1), 3, 3).data;
+                        let tr=0,tg=0,tb=0,pc=0; for(let i=0;i<pxd.length;i+=4){ tr+=pxd[i]; tg+=pxd[i+1]; tb+=pxd[i+2]; pc++; }
+                        if(pc>0) { tr=Math.round(tr/pc); tg=Math.round(tg/pc); tb=Math.round(tb/pc); }
+                        const hex = rgbToHex(tr,tg,tb); extractedColors[idx] = hex;
+                        document.getElementById(`cs${idx+1}`).style.backgroundColor = hex; document.getElementById(`ch${idx+1}`).innerText = hex;
+                    });
+                    updateHarmonies(extractedColors[activeColorIndex]);
                 }
             } // End Throttle
             
-            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch); 
+            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch); scoutCtx.clearRect(0,0,cw,ch);
+            
             if(currentTab === 'page-meter' && !bracketActive) { uiCtx.strokeStyle = 'rgba(255,255,255,0.4)'; uiCtx.lineWidth = 1; if(currentMeterMode === 1) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, cw*0.25, 0, Math.PI*2); uiCtx.stroke(); } else if(currentMeterMode === 2) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); } }
-            if(currentTab === 'page-color') { uiCtx.strokeStyle = currentColorData.comp; uiCtx.lineWidth = 2; uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); }
+            
+            if(currentTab === 'page-color') { 
+                const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+                pts.forEach((p, idx) => {
+                    const drawX = Math.floor(p.x * cw); const drawY = Math.floor(p.y * ch);
+                    uiCtx.strokeStyle = extractedColors[idx]; uiCtx.lineWidth = 2; uiCtx.beginPath(); uiCtx.arc(drawX, drawY, 18, 0, Math.PI*2); uiCtx.stroke(); 
+                    if(idx === activeColorIndex) { uiCtx.strokeStyle = '#fff'; uiCtx.beginPath(); uiCtx.arc(drawX, drawY, 22, 0, Math.PI*2); uiCtx.stroke(); }
+                });
+            }
+
+            if(currentTab === 'page-scout' && window.currentSunAzimuth !== undefined) {
+                let camAlt = 90 - window.camPitch; let dAz = window.currentSunAzimuth - currentHeading; if (dAz > 180) dAz -= 360; if (dAz < -180) dAz += 360;
+                let dAlt = window.currentSunAltitude - camAlt; let pxPerDegX = cw / 60; let pxPerDegY = ch / 80; 
+                let sunX = (cw / 2) + (dAz * pxPerDegX); let sunY = (ch / 2) - (dAlt * pxPerDegY);
+                let horizonY = (ch / 2) + (camAlt * pxPerDegY);
+                scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)'; scoutCtx.lineWidth = 1; scoutCtx.setLineDash([5, 5]); scoutCtx.beginPath(); scoutCtx.moveTo(0, horizonY); scoutCtx.lineTo(cw, horizonY); scoutCtx.stroke(); scoutCtx.setLineDash([]); scoutCtx.fillStyle = 'rgba(212,194,161,0.8)'; scoutCtx.font = '10px DM Mono'; scoutCtx.fillText('0° HORIZON', 5, horizonY - 5);
+                scoutCtx.strokeStyle = 'rgba(255,255,255,0.4)'; scoutCtx.lineWidth = 1; scoutCtx.beginPath(); scoutCtx.moveTo(cw/2-15, ch/2); scoutCtx.lineTo(cw/2+15, ch/2); scoutCtx.stroke(); scoutCtx.beginPath(); scoutCtx.moveTo(cw/2, ch/2-15); scoutCtx.lineTo(cw/2, ch/2+15); scoutCtx.stroke();
+                scoutCtx.fillStyle = '#ffb347'; scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = '#fff'; scoutCtx.font = 'bold 12px DM Mono'; scoutCtx.textAlign = 'center'; scoutCtx.fillText('☀ SUN', sunX, sunY + 35); scoutCtx.fillText(window.currentSunAltitude.toFixed(1) + '°', sunX, sunY + 50); scoutCtx.textAlign = 'left';
+                if (sunX < 0 || sunX > cw || sunY < 0 || sunY > ch) { let tcx = cw/2; let tcy = ch/2; let angle = Math.atan2(sunY - tcy, sunX - tcx); let ptrX = tcx + Math.cos(angle) * (cw/2 - 30); let ptrY = tcy + Math.sin(angle) * (cw/2 - 30); scoutCtx.fillStyle = 'rgba(255, 179, 71, 0.9)'; scoutCtx.beginPath(); scoutCtx.arc(ptrX, ptrY, 10, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = '#fff'; scoutCtx.font = '10px DM Mono'; scoutCtx.fillText('SUN', ptrX + 15, ptrY + 4); }
+            }
         }
-        
         requestAnimationFrame(liveLoop);
     }
 
@@ -568,7 +677,7 @@
         const url = URL.createObjectURL(blob); const resImg = document.getElementById('result-img'); if(resImg) resImg.src = url;
         const resOvl = document.getElementById('result-overlay'); if(resOvl) resOvl.style.display = 'flex';
         bindSafe('btn-share-result', 'click', async () => {
-            const file = new File([blob], `PREye_Export_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            const file = new File([blob], `PREye_Capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
             if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'PR Eye Export' }); } catch(err) {} } else { const a = document.createElement('a'); a.href = url; a.download = file.name; a.click(); }
         });
         bindSafe('btn-close-result', 'click', () => { document.getElementById('result-overlay').style.display = 'none'; URL.revokeObjectURL(url); });
@@ -581,81 +690,71 @@
             const hrCan = document.getElementById('composite-canvas'); hrCan.width = 1000; hrCan.height = 1500; const cCtx = hrCan.getContext('2d');
             cCtx.fillStyle = '#111'; cCtx.fillRect(0,0,1000,1500); 
             
+            const vRect = video.getBoundingClientRect();
             if(video.videoWidth > 0 && video.videoHeight > 0) {
                 const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
                 if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
                 cCtx.drawImage(video, sx, sy, sw, sh, 50, 50, 900, 1200);
             }
-            if(fcState > 0) cCtx.drawImage(document.getElementById('fc-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
+            if(fcState > 0 && currentTab === 'page-meter') cCtx.drawImage(document.getElementById('fc-layer'), 0,0, vRect.width, vRect.height, 50,50, 900,1200);
+            if(currentTab === 'page-scout') cCtx.drawImage(document.getElementById('scout-layer'), 0,0, vRect.width, vRect.height, 50,50, 900,1200);
             
             cCtx.fillStyle = '#fff'; cCtx.font = '40px "Permanent Marker", cursive, sans-serif';
             let finalEV = measuredEV + evBias;
             const sStr = arrShutter[activeIndexes.shutter]; const fVal = arrAperture[activeIndexes.aperture]; const iVal = arrIso[activeIndexes.iso];
-            cCtx.fillText(`EV: ${finalEV.toFixed(1)} | ISO ${iVal} | f/${fVal} | ${sStr}s`, 70, 1330);
-            cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#aaa'; 
             
+            if(currentTab === 'page-meter') {
+                cCtx.fillText(`EV: ${finalEV.toFixed(1)} | ISO ${iVal} | f/${fVal} | ${sStr}s`, 70, 1330);
+            } else if (currentTab === 'page-scout' && window.currentSunAzimuth !== undefined) {
+                cCtx.fillText(`Azimuth: ${window.currentSunAzimuth.toFixed(1)}° | Elev: ${window.currentSunAltitude.toFixed(1)}°`, 70, 1330);
+            } else if (currentTab === 'page-color') {
+                cCtx.fillText(`Palette: ${extractedColors.join(' | ')}`, 70, 1330);
+            }
+
+            cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#aaa'; 
             const pTitle = document.getElementById('global-project-title').value || 'PR Eye Capture';
             cCtx.fillText(`${pTitle} | WB: ${liveTempK}K | ${new Date().toLocaleDateString()}`, 70, 1390);
-            if(currentLat) cCtx.fillText(`Google Maps Link: http://google.com/maps?q=${currentLat.toFixed(5)},${currentLon.toFixed(5)}`, 70, 1440);
+            if(currentLat) cCtx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1440);
             
             hrCan.toBlob(triggerExport, 'image/jpeg', 0.95);
         } catch (e) { alert("Capture error."); isCapturing = false; }
     });
 
-    bindSafe('btn-export-swatch', 'click', async () => {
-        if(isCapturing) return; isCapturing = true;
-        try {
-            const hrCan = document.getElementById('composite-canvas'); hrCan.width = 1000; hrCan.height = 1000; const cCtx = hrCan.getContext('2d');
-            cCtx.fillStyle = '#09121c'; cCtx.fillRect(0,0,1000,1000); 
-            
-            cCtx.fillStyle = currentColorData.hex; cCtx.fillRect(50, 50, 900, 450);
-            cCtx.fillStyle = '#fff'; cCtx.font = '80px "DM Mono", monospace'; cCtx.fillText(currentColorData.hex, 80, 460);
-            
-            cCtx.fillStyle = currentColorData.comp; cCtx.fillRect(50, 520, 440, 200); cCtx.fillStyle = '#fff'; cCtx.font = '40px "DM Mono"'; cCtx.fillText('Comp: ' + currentColorData.comp, 70, 700);
-            cCtx.fillStyle = currentColorData.ana1; cCtx.fillRect(510, 520, 210, 200); cCtx.fillStyle = '#fff'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(currentColorData.ana1, 530, 700);
-            cCtx.fillStyle = currentColorData.ana2; cCtx.fillRect(740, 520, 210, 200); cCtx.fillStyle = '#fff'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(currentColorData.ana2, 760, 700);
-            
-            const pTitle = document.getElementById('global-project-title').value || 'Generative Palette';
-            cCtx.fillStyle = 'var(--gold)'; cCtx.font = '50px "Cormorant Garamond", serif'; cCtx.fillText(pTitle, 50, 820);
-            cCtx.fillStyle = '#888'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(`Exported via PR Eye v4.2 | ${new Date().toLocaleDateString()}`, 50, 880);
-
-            hrCan.toBlob(triggerExport, 'image/jpeg', 0.95);
-        } catch (e) { alert("Swatch error."); isCapturing = false; }
-    });
-
-    // --- SCOUT API ENGINE ---
+    // --- SCOUT & TOOLS API ENGINE ---
     bindSafe('btn-fetch-loc', 'click', () => {
         if (!navigator.geolocation) return;
         const btnS = document.getElementById('btn-fetch-loc'); btnS.innerText = 'Acquiring GPS...';
         navigator.geolocation.getCurrentPosition(async (pos) => {
             currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; 
-            
-            // Iframe Map Re-implementation
-            const mapC = document.getElementById('map-iframe-container');
-            if(mapC) mapC.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&hl=es;z=14&amp;output=embed" allowfullscreen></iframe>`;
-
             try {
-                const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
-                if(sRes.ok) {
-                    const sData = await sRes.json();
-                    if (sData.status === 'OK' && sData.results) {
-                      document.getElementById('loc-sunrise').innerText = new Date(sData.results.sunrise).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                      document.getElementById('loc-sunset').innerText = new Date(sData.results.sunset).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }
+                // SunCalc
+                if(typeof SunCalc !== 'undefined') {
+                    const times = SunCalc.getTimes(new Date(), currentLat, currentLon);
+                    document.getElementById('loc-sunrise').innerText = times.sunrise.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('loc-sunset').innerText = times.sunset.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('loc-golden').innerText = times.goldenHour.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+                // Weather (Forced °C via User Preference)
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m&temperature_unit=celsius`);
+                if(wRes.ok) { 
+                    const wData = await wRes.json(); 
+                    const tt = document.getElementById('tool-temp'); if(tt) tt.innerText = `${wData.current.temperature_2m} °C / ${wData.current.apparent_temperature} °C`; 
+                    const tw = document.getElementById('tool-weather'); if(tw) tw.innerText = `${wData.current.wind_speed_10m} km/h | ${wData.current.precipitation} mm`; 
                 }
             } catch(e) { }
-            btnS.innerText = 'Get Live GPS & Map';
+            btnS.innerText = 'Sync GPS & Live Data';
         }, () => { btnS.innerText = 'GPS FAILED'; }, { enableHighAccuracy: false, timeout: 15000 });
     });
 
+    window.openSOS = (query) => { if(!currentLat) { alert("Load GPS in Scout Tab first."); return; } window.open('https://www.google.com/maps/search/' + query + '/@' + currentLat + ',' + currentLon + ',14z', '_blank'); };
+    bindSafe('btn-email-notes', 'click', () => { const n = document.getElementById('shoot-notes'); if(n) window.location.href = 'mailto:?subject=PR Eye Notes&body=' + encodeURIComponent(n.value); });
+
     // --- RAVE SYNTH & SOS ENGINE ---
     let raveAudioCtx = null; let raveInterval = null; let raveActive = false;
-    
     function playRaveBeat() {
         if(!document.getElementById('rave-audio-toggle').checked) return;
         if(!raveAudioCtx) raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let now = raveAudioCtx.currentTime;
-        const osc = raveAudioCtx.createOscillator(); const gain = raveAudioCtx.createGain();
+        let now = raveAudioCtx.currentTime; const osc = raveAudioCtx.createOscillator(); const gain = raveAudioCtx.createGain();
         osc.connect(gain); gain.connect(raveAudioCtx.destination);
         osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
         gain.gain.setValueAtTime(1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
@@ -665,72 +764,76 @@
     bindSafe('btn-start-rave', 'click', async () => {
         const btn = document.getElementById('btn-start-rave');
         if(raveActive) {
-            clearInterval(raveInterval); raveActive = false;
-            document.body.style.setProperty('background-color', '#09121c', 'important'); 
+            clearInterval(raveInterval); raveActive = false; document.body.style.setProperty('background-color', '#09121c', 'important'); 
             btn.innerText = "START A RAVE"; btn.classList.add('rave-active-btn'); return;
         }
-        
-        if(document.getElementById('rave-audio-toggle').checked) {
-            raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            await raveAudioCtx.resume();
-        }
-
-        btn.innerText = "STOP THE RAVE"; btn.classList.remove('rave-active-btn');
-        raveActive = true; 
-        
+        if(document.getElementById('rave-audio-toggle').checked) { raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); await raveAudioCtx.resume(); }
+        btn.innerText = "STOP THE RAVE"; btn.classList.remove('rave-active-btn'); raveActive = true; 
         raveInterval = setInterval(() => {
-            if(sosActive) return; 
-            playRaveBeat();
-            document.body.style.setProperty('background-color', `hsl(${Math.random() * 360}, 100%, 50%)`, 'important'); 
-        }, 400); // ~150 BPM Techno
+            if(sosActive) return; playRaveBeat(); document.body.style.setProperty('background-color', `hsl(${Math.random() * 360}, 100%, 50%)`, 'important'); 
+        }, 400); 
     });
 
     let sosAudioCtx, sirenOsc, sirenGain, sirenInterval, sosActive = false;
     bindSafe('btn-sos-siren', 'click', () => {
-        const o = document.getElementById('sos-flash-overlay');
-        const mode = document.getElementById('sos-mode-select').value;
-        
+        const o = document.getElementById('sos-flash-overlay'); const mode = document.getElementById('sos-mode-select').value;
         if(sosActive) {
-            clearInterval(sirenInterval); 
-            if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); } if(sosAudioCtx) sosAudioCtx.close();
+            clearInterval(sirenInterval); if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); } if(sosAudioCtx) sosAudioCtx.close();
             if(o) { o.className = ''; o.style.display = 'none'; }
             sosActive = false; document.getElementById('btn-sos-siren').innerText = "EMERGENCY SIREN";
         } else {
             sosActive = true; document.getElementById('btn-sos-siren').innerText = "STOP SIREN";
-            if(o) { 
-                o.className = mode === 'heavyBlue' ? 'mode-heavyBlue' : 'mode-strobeRedWhite'; 
-                o.style.display = 'block'; 
-            }
-            
-            sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            sirenOsc = sosAudioCtx.createOscillator(); sirenGain = sosAudioCtx.createGain();
-            sirenOsc.connect(sirenGain); sirenGain.connect(sosAudioCtx.destination);
-            sirenOsc.type = 'square'; sirenGain.gain.value = 1; sirenOsc.start();
-            
+            if(o) { o.className = mode === 'heavyBlue' ? 'mode-heavyBlue' : 'mode-strobeRedWhite'; o.style.display = 'block'; }
+            sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); sirenOsc = sosAudioCtx.createOscillator(); sirenGain = sosAudioCtx.createGain();
+            sirenOsc.connect(sirenGain); sirenGain.connect(sosAudioCtx.destination); sirenOsc.type = 'square'; sirenGain.gain.value = 1; sirenOsc.start();
             let low = true;
-            sirenInterval = setInterval(() => {
-                let t = sosAudioCtx.currentTime;
-                if(low) { sirenOsc.frequency.linearRampToValueAtTime(1200, t + 0.2); } else { sirenOsc.frequency.linearRampToValueAtTime(600, t + 0.2); }
-                low = !low;
-            }, 200);
+            sirenInterval = setInterval(() => { let t = sosAudioCtx.currentTime; if(low) { sirenOsc.frequency.linearRampToValueAtTime(1200, t + 0.2); } else { sirenOsc.frequency.linearRampToValueAtTime(600, t + 0.2); } low = !low; }, 200);
         }
     });
 
-    // --- STARTUP ---
-    buildDial('dial-shutter', arrShutter, 'shutter');
-    buildDial('dial-aperture', arrAperture.map(a=>'F'+a), 'aperture');
-    buildDial('dial-iso', arrIso, 'iso');
-    syncDial('dial-shutter', 33); syncDial('dial-aperture', 10); syncDial('dial-iso', 7);
-    
-    startCamera(); 
-    
-    setInterval(() => {
-        if (currentLat !== null && currentLon !== null && typeof SunCalc !== 'undefined') { 
-            const pos = SunCalc.getPosition(new Date(), currentLat, currentLon); const az = (pos.azimuth * 180 / Math.PI + 180) % 360; const alt = pos.altitude * 180 / Math.PI; 
-            const azEl = document.getElementById('loc-azimuth'); const altEl = document.getElementById('loc-altitude'); 
-            if(azEl) azEl.innerText = az.toFixed(1) + '°'; if(altEl) altEl.innerText = alt.toFixed(1) + '°'; 
+    // --- LEGAL PDF ENGINE ---
+    bindSafe('gen-pdf-btn', 'click', async () => {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = 210, margin = 15, usableW = 180; let y = 15;
+        const field = id => { const el = document.getElementById(id); return el ? (el.value||'') : ''; };
+        const date=field('r-date'), loc=field('r-loc'), modelName=field('r-name'), photogName=field('r-photog-name'), comp=field('r-compensation')||'None';
+        
+        const addText=(text,size,bold,col, w)=>{ doc.setFontSize(size||10);doc.setFont('helvetica',bold?'bold':'normal');doc.setTextColor(col||0); doc.splitTextToSize(text,w||usableW).forEach(l=>{if(y>270){doc.addPage();y=15;}doc.text(l,margin,y);y+=(size||10)*0.45;});y+=2; };
+        const addLine=()=>{doc.setDrawColor(200);doc.line(margin,y,pageW-margin,y);y+=5;};
+        const addSig=(cid,lbl)=>{ if(y>240){doc.addPage();y=15;}addText(lbl+':',9,true); try{doc.addImage(document.getElementById(cid).toDataURL('image/png'),'PNG',margin,y,70,18);}catch(e){}y+=22; };
+        
+        doc.setFillColor(9,18,28);doc.rect(0,0,210,25,'F'); doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161); doc.text('MODEL RELEASE FORM', pageW/2,13,{align:'center'}); doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180); doc.text('PR Eye v4.3 — Professional Photography Release', pageW/2,20,{align:'center'});
+        y=30;doc.setTextColor(0); addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true,0, usableW); addLine(); 
+        addText('PHOTOGRAPHER:',10,true); addText(photogName,9); addLine(); 
+        addText('MODEL:',10,true); addText('Name: '+(modelName||'_________________________________'),9); addText('Compensation: '+comp,9); addLine();
+        addText('GRANT OF RIGHTS',10,true); addText('I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media for any lawful purpose including commercial use, advertising, marketing, and promotional materials.',9); addLine(); 
+        addText('ACKNOWLEDGMENT',10,true); addText('By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release.',9); y+=4; 
+        addSig('sig-model','MODEL SIGNATURE'); addText('Date: '+(date||'_____________'),9);y+=4;addLine(); 
+        addSig('sig-photog','PHOTOGRAPHER SIGNATURE'); addText('Date: '+(date||'_____________'),9);
+        
+        try {
+            const pdfBlob = doc.output('blob'); const pdfUrl = URL.createObjectURL(pdfBlob);
+            const dlLink = document.getElementById('pdf-dl-link'); dlLink.href = pdfUrl; dlLink.download = 'ModelRelease_'+(modelName||'Unknown').replace(/\s+/g,'_')+'.pdf';
+            document.getElementById('pdf-overlay').style.display = 'flex';
+        } catch(err) { alert("PDF Engine failed."); }
+    });
+
+    let padsInit = false;
+    bindSafe('nav-release', 'click', () => {
+        if(!padsInit) { 
+            ['sig-model', 'sig-guardian', 'sig-photog'].forEach(id => { const can = document.getElementById(id); if(!can) return; const c = can.getContext('2d'); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false; can.style.touchAction = 'none'; can.addEventListener('pointerdown', e=>{drawing=true; const r = can.getBoundingClientRect(); c.beginPath(); c.moveTo(e.clientX-r.left, e.clientY-r.top); e.preventDefault();}); can.addEventListener('pointermove', e=>{if(!drawing)return; const r = can.getBoundingClientRect(); c.lineTo(e.clientX-r.left, e.clientY-r.top); c.stroke(); e.preventDefault();}); can.addEventListener('pointerup', ()=>drawing=false); can.addEventListener('pointerleave', ()=>drawing=false); }); 
+            padsInit = true; 
         }
-    }, 1000);
+        const tA = document.getElementById('tog-adult'); const tM = document.getElementById('tog-minor'); const gS = document.getElementById('guardian-section');
+        if(tA) tA.onclick=()=>{tA.classList.add('active'); if(tM) tM.classList.remove('active'); if(gS) gS.style.display='none';};
+        if(tM) tM.onclick=()=>{tM.classList.add('active'); if(tA) tA.classList.remove('active'); if(gS) gS.style.display='block';};
+    });
+    window.clearPad = (id) => { const c = document.getElementById(id).getContext('2d'); c.clearRect(0,0,1000,1000); };
+
+    // --- STARTUP ---
+    buildDial('dial-shutter', arrShutter, 'shutter'); buildDial('dial-aperture', arrAperture.map(a=>'F'+a), 'aperture'); buildDial('dial-iso', arrIso, 'iso');
+    syncDial('dial-shutter', 33); syncDial('dial-aperture', 10); syncDial('dial-iso', 7);
+    startCamera(); 
 </script>
 </body>
 </html>
