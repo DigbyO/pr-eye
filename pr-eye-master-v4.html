@@ -1,3 +1,149 @@
+You said
+You are fixing 5 specific JavaScript syntax errors in an HTML file called pr-eye-master-v4.html. The file you just produced has these bugs. Fix only these bugs — nothing else.
+
+════════════════════════════════════════
+
+ABSOLUTE RULES
+
+════════════════════════════════════════
+
+1. Output the COMPLETE file. Every single character. Never truncate or use placeholder comments like "// rest of code unchanged". If the file is 80,000 characters, output all 80,000.
+
+2. The file must begin with exactly <!DOCTYPE html> — nothing before it. No markdown, no explanation, no code fences, no comments.
+
+3. Do NOT change anything except the 5 specific lines listed below. Every other line must be character-for-character identical to your previous output.
+
+4. After outputting, confirm: "All 5 fixes applied. Output starts with <!DOCTYPE html>. Output length: X characters."
+
+5. If you cannot find one of the strings to fix, say "FIX N NOT FOUND: [reason]" and still output the complete file with the other fixes applied.
+
+════════════════════════════════════════
+
+THE 5 FIXES — APPLY EXACTLY AS WRITTEN
+
+════════════════════════════════════════
+
+FIX 1 — syncDial querySelector broken bracket
+
+Find this exact string:
+
+    const item = track.querySelector[data-idx="${idx}"]);
+
+Replace with:
+
+    const item = track.querySelector(`[data-idx="${idx}"]`);
+
+FIX 2 — drawGrid strokeStyle missing quotes
+
+Find this exact string:
+
+    gridCtx.strokeStyle = rgba(212, 194, 161, 0.5);
+
+Replace with:
+
+    gridCtx.strokeStyle = 'rgba(212, 194, 161, 0.5)';
+
+FIX 3 — updateHarmonies getElementById missing template literal
+
+Find this exact string:
+
+    const activeCodeEl = document.getElementById(ch${activeColorIndex + 1});
+
+Replace with:
+
+    const activeCodeEl = document.getElementById(`ch${activeColorIndex + 1}`);
+
+FIX 4 — p-box click binding loop missing template literal
+
+Find this exact string:
+
+    bindSafep-box-${i}, 'click', () => {
+
+        document.querySelectorAll('.pan-item').forEach(el => el.classList.remove('active-pan'));
+
+        document.getElementByIdp-box-${i}).classList.add('active-pan');
+
+Replace with:
+
+    bindSafe(`p-box-${i}`, 'click', () => {
+
+        document.querySelectorAll('.pan-item').forEach(el => el.classList.remove('active-pan'));
+
+        document.getElementById(`p-box-${i}`).classList.add('active-pan');
+
+FIX 5 — buildDial innerHTML template literal broken
+
+Find this exact string:
+
+    const padStr = <div class="dial-item" style="flex: 0 0 33.33%;"></div>;
+
+    track.innerHTML += padStr;
+
+    arr.forEach((val, i) => { track.innerHTML += <div class="dial-item" data-idx="${i}">${val}</div>; });
+
+Replace with:
+
+    const padStr = `<div class="dial-item" style="flex: 0 0 33.33%;"></div>`;
+
+    track.innerHTML += padStr;
+
+    arr.forEach((val, i) => { track.innerHTML += `<div class="dial-item" data-idx="${i}">${val}</div>`; });
+
+════════════════════════════════════════
+
+ALSO CHECK THESE — FIX IF BROKEN
+
+════════════════════════════════════════
+
+While applying the above fixes, scan for any other template literals that are missing their backticks — specifically any line containing ${...} that is not wrapped in backtick characters. The most likely locations are:
+
+- In liveLoop() where innerHTML or fillText calls use ${finalEV}, ${liveTempK}, ${iVal}, ${fVal}, ${sStr}
+
+- In the capture-btn handler where fillText writes EV/GPS/palette data
+
+- In buildDial where HTML strings use ${val} and ${i}
+
+- In updateMJPrompt() where the prompt string is built with ${pt1.n} etc
+
+- In btn-fetch-loc handler where the map iframe src uses ${currentLat} and ${currentLon}
+
+- In the fetch URL for weather that uses ${currentLat} and ${currentLon}
+
+For each one found, wrap the entire string in backticks. Do not change the content, only add the backtick delimiters.
+
+════════════════════════════════════════
+
+HARDCODE THIS PHOTOGRAPHER DETAIL
+
+════════════════════════════════════════
+
+In the gen-pdf-btn handler, find the line that reads the photographer name from the r-photog-name input:
+
+    const photogName = field('r-photog-name')
+
+Replace with:
+
+    const photogName = 'Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk'
+
+Also find the input field with id="r-photog-name" and change its default value attribute from:
+
+    value="PR Eye User"
+
+to:
+
+    value="Digby Oldridge, PR Eye Ltd"
+
+════════════════════════════════════════
+
+OUTPUT INSTRUCTIONS
+
+════════════════════════════════════════
+
+Output the complete fixed HTML file now. Start immediately with <!DOCTYPE html> — no preamble, no explanation, no markdown code fences. Just the raw HTML from the first character to the last </html>.
+
+After the file ends, on a new line write your confirmation: "FIXES APPLIED: [list which of the 5 were found and fixed] | LENGTH: [character count]"
+
+Gemini said
 <!DOCTYPE html>
 
 <html lang="en">
@@ -35,7 +181,7 @@
     /* PERSISTENT CAMERA AREA */
     #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; position: relative;}
     .viewfinder-wrap { display: flex; gap: 10px; height: 180px; margin-bottom: 10px; }
-    .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: border-radius 0.2s ease;}
+    .cam-container { position: relative; flex: 1; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: border-radius 0.2s ease;}
     video { width: 100%; height: 100%; object-fit: cover; }
     canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
     #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #scout-layer { z-index: 4; }
@@ -49,8 +195,6 @@
     .bracket-lbl { position: absolute; bottom: 5px; left: 5px; font-size: 9px; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 2px; font-weight: bold; color: #fff;}
 
     .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
-    .ev-huge { font-size: 84px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
-    .ev-huge span { font-size: 30px; color: var(--muted); letter-spacing: 0; vertical-align: top;}
     .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
 
     .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
@@ -106,19 +250,12 @@
     @keyframes pulsateGlow { 0% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } 50% { box-shadow: 0 0 40px var(--magenta), 0 0 30px var(--cyan); transform: scale(1.02); } 100% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } }
     .rave-active-btn { animation: pulsateGlow 0.8s infinite; background: linear-gradient(45deg, var(--magenta), var(--cyan)) !important; border:none; color:#000; font-weight:900;}
     
-    @keyframes strobeHeavyBlue { 0%, 20% {background-color: #0000ff;} 21%, 100% {background-color: #000000;} }
-    @keyframes strobeRedWhite { 0%, 49% {background-color: #ff0000;} 50%, 100% {background-color: #ffffff;} }
-    @keyframes strobePoliceUK { 0%, 24% {background-color: #ff0000;} 25%, 49% {background-color: #000000;} 50%, 74% {background-color: #0000ff;} 75%, 100% {background-color: #000000;} }
-    @keyframes strobeBluePulse { 0%, 100% {background-color: #0000ff; opacity: 1;} 50% {background-color: #0000ff; opacity: 0.2;} }
+    @keyframes strobeRedBlue { 0%, 24% {background-color: #ff0000;} 25%, 49% {background-color: #000000;} 50%, 74% {background-color: #0000ff;} 75%, 100% {background-color: #000000;} }
     @keyframes strobeWhite { 0%, 49% { background-color: rgba(255,255,255,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
     @keyframes strobeAmber { 0%, 49% { background-color: rgba(255,160,0,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
 
     #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-    .mode-heavyBlue { animation: strobeHeavyBlue 0.1s infinite; }
-    .mode-strobeRedWhite { animation: strobeRedWhite 0.2s infinite; }
-    .mode-policeUK { animation: strobePoliceUK 0.15s infinite; }
-    .mode-bluePulse { animation: strobeBluePulse 0.3s infinite; }
-    .mode-dynamic { animation: var(--sos-anim, strobePoliceUK) var(--sos-speed, 0.4s) infinite; }
+    .mode-dynamic { animation: var(--sos-anim, strobeRedBlue) var(--sos-speed, 0.4s) infinite; }
 
     #result-overlay, #pdf-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align:center;}
     #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 20px;}
@@ -172,7 +309,7 @@
     </div>
 
     <div id="page-meter" class="page active">
-        <div class="pro-meter-display">
+        <div class="ctrl-panel glass-panel">
             <div id="ev-big-display" style="text-align:center; padding:10px 0 5px; font-family:'Cormorant Garamond',serif; font-size:72px; color:var(--gold); letter-spacing:-2px; line-height:1;">
                 <span id="ev-big-val">0.0</span>
                 <span style="font-size:20px; color:var(--muted); vertical-align:middle;"> EV</span>
@@ -181,8 +318,13 @@
                 <span id="ev-zone-label">ZONE V</span>
                 <span id="ev-lux-label">-- lux</span>
             </div>
+            <div class="toggle-switch">
+                <div class="toggle-opt active" id="meter-live">LIVE METER</div>
+                <div class="toggle-opt" id="meter-locked">LOCK</div>
+            </div>
+
             <div class="ev-bias-badge" id="display-bias" style="display:none;"></div>
-            <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;">Vol Keys: EV Bias +/-</p>
+            <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Vol Keys: EV Bias +/-</p>
         </div>
 
         <div class="action-row" style="margin-bottom: 15px;">
@@ -219,14 +361,14 @@
                 <div class="harmony-box" id="h-ana1" style="background: #222;">Analogous</div>
                 <div class="harmony-box" id="h-tri" style="background: #222;">Triadic</div>
             </div>
-        </div>
 
-        <div style="margin-top:15px; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px;">
-            <span class="label-txt">MidJourney Prompt</span>
-            <textarea id="mj-prompt-output" rows="3" style="font-size:11px; color:#c9d1d9; background:transparent; border:none; border-bottom:1px solid var(--border); resize:none; width:100%; margin-bottom:8px;" readonly placeholder="Sample colour points to generate prompt..."></textarea>
-            <div style="display:flex;gap:8px;">
-                <button class="btn sm" id="btn-copy-mj" style="flex:1;">Copy Prompt</button>
-                <button class="btn sm" id="btn-export-swatches" style="flex:1;">Export Swatches</button>
+            <div style="margin-top:15px; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px;">
+                <span class="label-txt">MidJourney Prompt</span>
+                <textarea id="mj-prompt-output" rows="3" style="font-size:11px; color:#c9d1d9; background:transparent; border:none; border-bottom:1px solid var(--border); resize:none; width:100%; margin-bottom:8px;" readonly placeholder="Sample colour points to generate prompt..."></textarea>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn sm" id="btn-copy-mj" style="flex:1;">Copy Prompt</button>
+                    <button class="btn sm" id="btn-export-swatches" style="flex:1;">Export Swatches</button>
+                </div>
             </div>
         </div>
     </div>
@@ -327,7 +469,7 @@
             <button class="btn sm" style="width:100%;border-radius:4px;margin-bottom:15px;" onclick="clearPad('sig-model')">Clear Model</button>
             
             <span class="label-txt">Photographer Name</span>
-            <input type="text" id="r-photog-name" value="PR Eye User">
+            <input type="text" id="r-photog-name" value="Digby Oldridge, PR Eye Ltd">
             <span class="label-txt">Photographer Signature</span>
             <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
             <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-photog')">Clear Photog</button>
@@ -516,7 +658,6 @@ window.addEventListener(&#39;keydown&#39;, function(e) {
 });
 function updateBiasDisplay() { const badge = document.getElementById(&#39;display-bias&#39;); if(Math.abs(evBias) &lt; 0.1) { badge.style.display = &#39;none&#39;; evBias = 0; } else { badge.style.display = &#39;block&#39;; badge.innerText = (evBias &gt; 0 ? &#39;+&#39; : &#39;&#39;) + evBias.toFixed(1) + &#39; EV&#39;; } }
 
-let loopAnimFrame = null;
 async function startCamera() {
     if(stream) { stream.getTracks().forEach(t =&gt; t.stop()); video.srcObject = null; await new Promise(r =&gt; setTimeout(r, 500)); }
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error(&quot;Cam fail&quot;); }
@@ -524,11 +665,7 @@ async function startCamera() {
     video.srcObject = stream;
     video.load();
     video.play().catch(()=&gt;{});
-    const onReady = () =&gt; { 
-        resizeCanvases(); 
-        if(loopAnimFrame) cancelAnimationFrame(loopAnimFrame);
-        loopAnimFrame = requestAnimationFrame(liveLoop); 
-    };
+    const onReady = () =&gt; { resizeCanvases(); requestAnimationFrame(liveLoop); };
     video.onloadedmetadata = onReady;
     video.onloadeddata = onReady;
     if(navigator.wakeLock) { navigator.wakeLock.request(&#39;screen&#39;).catch(()=&gt;{}); }
@@ -572,16 +709,16 @@ document.querySelectorAll(&#39;.nav-item&#39;).forEach(n =&gt; {
 });
 
 bindSafe(&#39;grid-toggle-btn&#39;, &#39;click&#39;, (e) =&gt; { currentGridIdx = (currentGridIdx + 1) % gridOptions.length; e.currentTarget.classList.toggle(&#39;active-toggle&#39;, currentGridIdx !== 0); drawGrid(); });
-function drawGrid() { const type = gridOptions[currentGridIdx]; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height; gridCtx.clearRect(0,0,w,h); if(type === &#39;off&#39;) return; gridCtx.strokeStyle = `rgba(212, 194, 161, 0.5)`; gridCtx.lineWidth = 1; gridCtx.beginPath(); if(type === &#39;thirds&#39;) { gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h); gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3); } else if (type === &#39;cross&#39;) { gridCtx.moveTo(w/2, 0); gridCtx.lineTo(w/2, h); gridCtx.moveTo(0, h/2); gridCtx.lineTo(w, h/2); } gridCtx.stroke(); }
+function drawGrid() { const type = gridOptions[currentGridIdx]; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height; gridCtx.clearRect(0,0,w,h); if(type === &#39;off&#39;) return; gridCtx.strokeStyle = &#39;rgba(212, 194, 161, 0.5)&#39;; gridCtx.lineWidth = 1; gridCtx.beginPath(); if(type === &#39;thirds&#39;) { gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h); gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3); } else if (type === &#39;cross&#39;) { gridCtx.moveTo(w/2, 0); gridCtx.lineTo(w/2, h); gridCtx.moveTo(0, h/2); gridCtx.lineTo(w, h/2); } gridCtx.stroke(); }
 
 bindSafe(&#39;fc-toggle-btn&#39;, &#39;click&#39;, (e) =&gt; { 
     fcState = (fcState + 1) % 4; 
     const btn = e.currentTarget; 
     const camWrap = document.getElementById(&#39;cam-wrapper&#39;);
     const mainHdr = document.getElementById(&#39;main-hdr&#39;);
-    if(fcState === 0) { btn.innerText = &quot;F-COL: OFF&quot;; btn.classList.remove(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;none&#39;; camWrap.style.cssText=&#39;position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);&#39;; mainHdr.style.display=&#39;&#39;; } 
-    if(fcState === 1) { btn.innerText = &quot;F-COL: PRO&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.cssText=&#39;position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);&#39;; mainHdr.style.display=&#39;&#39;; } 
-    if(fcState === 2) { btn.innerText = &quot;F-COL: CLIP&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.cssText=&#39;position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);&#39;; mainHdr.style.display=&#39;&#39;; } 
+    if(fcState === 0) { btn.innerText = &quot;F-COL: OFF&quot;; btn.classList.remove(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;none&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
+    if(fcState === 1) { btn.innerText = &quot;F-COL: PRO&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
+    if(fcState === 2) { btn.innerText = &quot;F-COL: CLIP&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
     if(fcState === 3) { btn.innerText = &quot;F-COL: FULL&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;none&#39;; camWrap.style.cssText=&#39;position:fixed;inset:0;width:100vw;height:100vh;z-index:500;border-radius:0;aspect-ratio:unset;&#39;; mainHdr.style.display=&#39;none&#39;; } 
 });
 
@@ -596,6 +733,7 @@ document.getElementById(&#39;pan-manual&#39;).addEventListener(&#39;click&#39;, 
 });
 
 function updateMJPrompt() {
+    if(!extractedColors || extractedColors.length &lt; 3) return;
     const col1 = extractedColors[0]; const col2 = extractedColors[1]; const col3 = extractedColors[2] || col2;
     const pt1 = findClosestPantone(...hexToRgbArr(col1));
     const pt2 = findClosestPantone(...hexToRgbArr(col2));
@@ -641,8 +779,8 @@ for(let i=1; i&lt;=4; i++) {
 
 window.addEventListener(&#39;deviceorientation&#39;, (e) =&gt; {
     currentHeading = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0; window.camPitch = e.beta || 0; 
-    const hEl = document.getElementById(&#39;tool-heading&#39;); if(hEl) hEl.innerText = Math.round(currentHeading) + &#39;°&#39;; 
-    const sEl = document.getElementById(&#39;scout-heading&#39;); if(sEl) sEl.innerText = Math.round(currentHeading) + &#39;°&#39;;
+    const hEl = document.getElementById(&#39;tool-heading&#39;); if(hEl) hEl.innerText = `${Math.round(currentHeading)}°`; 
+    const sEl = document.getElementById(&#39;scout-heading&#39;); if(sEl) sEl.innerText = `${Math.round(currentHeading)}°`;
 });
 
 // --- LIVE FEED ENGINE (THROTTLED MEMORY SAFE) ---
@@ -660,7 +798,8 @@ function liveLoop() {
 
         // THROTTLE HEAVY MATH (Run every 5th frame for stability)
         if (frameCount % 5 === 0) {
-            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 300, 400); const viewData = procCtx.getImageData(0,0,300,400).data;
+            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 300, 400); 
+            const viewData = procCtx.getImageData(0,0,300,400).data;
             
             if(currentTab === &#39;page-meter&#39;) {
                 let rT=0, gT=0, bT=0, lumT=0, c=0; 
@@ -677,17 +816,19 @@ function liveLoop() {
                 calculatePriority(); 
                 
                 let finalEV = measuredEV + evBias;
-                const evDisplay = document.getElementById(&#39;display-ev&#39;);
-                if(evDisplay) evDisplay.innerHTML = `${finalEV.toFixed(1)}&lt;span&gt;EV&lt;/span&gt;`;
+                const bigVal = document.getElementById(&#39;ev-big-val&#39;);
+                if(bigVal) {
+                    bigVal.innerText = finalEV &gt; 0 ? `+${finalEV.toFixed(1)}` : finalEV.toFixed(1);
+                    bigVal.style.color = (finalEV &lt; -2 || finalEV &gt; 2) ? &#39;var(--red)&#39; : &#39;var(--gold)&#39;;
+                }
                 
-                let useEV = finalEV;
-                const luxEst = Math.round(2.5 * Math.pow(2, useEV));
+                const luxEst = Math.round(2.5 * Math.pow(2, finalEV));
                 const zoneEl = document.getElementById(&#39;ev-zone-label&#39;);
                 if(zoneEl) {
                     const zones = [&#39;ZONE 0&#39;,&#39;ZONE I&#39;,&#39;ZONE II&#39;,&#39;ZONE III&#39;,&#39;ZONE IV&#39;,&#39;ZONE V&#39;,&#39;ZONE VI&#39;,&#39;ZONE VII&#39;,&#39;ZONE VIII&#39;,&#39;ZONE IX&#39;,&#39;ZONE X&#39;];
-                    const zIdx = Math.max(0, Math.min(10, Math.round(useEV + 1)));
+                    const zIdx = Math.max(0, Math.min(10, Math.round(finalEV + 1)));
                     zoneEl.innerText = zones[zIdx] || &#39;ZONE V&#39;;
-                    document.getElementById(&#39;ev-lux-label&#39;).innerText = luxEst + &#39; lux&#39;;
+                    document.getElementById(&#39;ev-lux-label&#39;).innerText = `${luxEst} lux`;
                 }
                 
                 const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) &amp;&amp; k &gt; 0) { liveTempK = Math.round(k); const wSpan = document.getElementById(&#39;tel-wb&#39;); if(wSpan) wSpan.innerHTML = `WB &lt;span style=&quot;color:var(--gold)&quot;&gt;${liveTempK}K&lt;/span&gt;`; }
@@ -724,7 +865,8 @@ function liveLoop() {
             if(currentTab === &#39;page-color&#39;) {
                 const pts = panMode === &#39;auto&#39; ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
                 pts.forEach((p, idx) =&gt; {
-                    const sampleX = Math.floor(p.x * 300); const sampleY = Math.floor(p.y * 400); const pxd = procCtx.getImageData(Math.max(0, sampleX - 1), Math.max(0, sampleY - 1), 3, 3).data;
+                    const sampleX = Math.floor(p.x * 300); const sampleY = Math.floor(p.y * 400); 
+                    const pxd = procCtx.getImageData(Math.max(0, sampleX - 1), Math.max(0, sampleY - 1), 3, 3).data;
                     let tr=0,tg=0,tb=0,pc=0; for(let i=0;i&lt;pxd.length;i+=4){ tr+=pxd[i]; tg+=pxd[i+1]; tb+=pxd[i+2]; pc++; }
                     if(pc&gt;0) { tr=Math.round(tr/pc); tg=Math.round(tg/pc); tb=Math.round(tb/pc); }
                     const hex = rgbToHex(tr,tg,tb); extractedColors[idx] = hex;
@@ -759,11 +901,11 @@ function liveLoop() {
             let horizonY = (ch / 2) + (camAlt * pxPerDegY);
             scoutCtx.strokeStyle = &#39;rgba(212,194,161,0.5)&#39;; scoutCtx.lineWidth = 1; scoutCtx.setLineDash([5, 5]); scoutCtx.beginPath(); scoutCtx.moveTo(0, horizonY); scoutCtx.lineTo(cw, horizonY); scoutCtx.stroke(); scoutCtx.setLineDash([]); scoutCtx.fillStyle = &#39;rgba(212,194,161,0.8)&#39;; scoutCtx.font = &#39;10px DM Mono&#39;; scoutCtx.fillText(&#39;0° HORIZON&#39;, 5, horizonY - 5);
             scoutCtx.strokeStyle = &#39;rgba(255,255,255,0.4)&#39;; scoutCtx.lineWidth = 1; scoutCtx.beginPath(); scoutCtx.moveTo(cw/2-15, ch/2); scoutCtx.lineTo(cw/2+15, ch/2); scoutCtx.stroke(); scoutCtx.beginPath(); scoutCtx.moveTo(cw/2, ch/2-15); scoutCtx.lineTo(cw/2, ch/2+15); scoutCtx.stroke();
-            scoutCtx.fillStyle = &#39;#ffb347&#39;; scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;bold 12px DM Mono&#39;; scoutCtx.textAlign = &#39;center&#39;; scoutCtx.fillText(&#39;☀ SUN&#39;, sunX, sunY + 35); scoutCtx.fillText(window.currentSunAltitude.toFixed(1) + &#39;°&#39;, sunX, sunY + 50); scoutCtx.textAlign = &#39;left&#39;;
+            scoutCtx.fillStyle = &#39;#ffb347&#39;; scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;bold 12px DM Mono&#39;; scoutCtx.textAlign = &#39;center&#39;; scoutCtx.fillText(&#39;☀ SUN&#39;, sunX, sunY + 35); scoutCtx.fillText(`${window.currentSunAltitude.toFixed(1)}°`, sunX, sunY + 50); scoutCtx.textAlign = &#39;left&#39;;
             if (sunX &lt; 0 || sunX &gt; cw || sunY &lt; 0 || sunY &gt; ch) { let tcx = cw/2; let tcy = ch/2; let angle = Math.atan2(sunY - tcy, sunX - tcx); let ptrX = tcx + Math.cos(angle) * (cw/2 - 30); let ptrY = tcy + Math.sin(angle) * (cw/2 - 30); scoutCtx.fillStyle = &#39;rgba(255, 179, 71, 0.9)&#39;; scoutCtx.beginPath(); scoutCtx.arc(ptrX, ptrY, 10, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;10px DM Mono&#39;; scoutCtx.fillText(&#39;SUN&#39;, ptrX + 15, ptrY + 4); }
         }
     }
-    loopAnimFrame = requestAnimationFrame(liveLoop);
+    requestAnimationFrame(liveLoop);
 }
 
 // --- CAPTURE &amp; EXPORT ENGINES ---
@@ -806,7 +948,7 @@ bindSafe(&#39;capture-btn&#39;, &#39;click&#39;, async () =&gt; {
             }
             if (currentLat) {
                 cCtx.font = &#39;22px &quot;DM Mono&quot;, monospace&#39;; cCtx.fillStyle = &#39;#666&#39;;
-                cCtx.fillText(`Maps Link: https://www.google.com/maps/place/$${currentLat.toFixed(5)},${currentLon.toFixed(5)}`, 70, 1480);
+                cCtx.fillText(`Maps Link: https://www.google.com/maps/place/$$${currentLat.toFixed(5)},${currentLon.toFixed(5)}`, 70, 1480);
             }
         } else if (currentTab === &#39;page-color&#39;) {
             cCtx.fillText(`Palette: ${extractedColors.join(&#39; | &#39;)}`, 70, 1330);
@@ -829,7 +971,7 @@ bindSafe(&#39;btn-fetch-loc&#39;, &#39;click&#39;, () =&gt; {
         currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; 
         
         const mapC = document.getElementById(&#39;map-iframe-container&#39;);
-        if(mapC) mapC.innerHTML = `&lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot; style=&quot;border:0&quot; src=&quot;https://maps.google.com/maps?q=$${currentLat},${currentLon}&amp;hl=es;z=14&amp;output=embed&quot; allowfullscreen&gt;&lt;/iframe&gt;`;
+        if(mapC) mapC.innerHTML = `&lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot; style=&quot;border:0&quot; src=&quot;https://maps.google.com/maps?q=$$${currentLat},${currentLon}&amp;hl=es;z=14&amp;output=embed&quot; allowfullscreen&gt;&lt;/iframe&gt;`;
 
         try {
             if(typeof SunCalc !== &#39;undefined&#39;) {
@@ -908,15 +1050,17 @@ bindSafe(&#39;btn-sos-siren&#39;, &#39;click&#39;, () =&gt; {
     if(sosActive) {
         clearInterval(sirenInterval); if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); } if(sosAudioCtx) sosAudioCtx.close();
         if(o) { o.className = &#39;&#39;; o.style.display = &#39;none&#39;; }
-        sosActive = false; document.getElementById(&#39;btn-sos-siren&#39;).innerText = &quot;EMERGENCY SIREN&quot;;
+        sosActive = false; document.getElementById(&#39;btn-sos-siren&#39;).innerText = &quot;EMERGENCY SOS&quot;;
     } else {
         const sosSpeedEl = document.getElementById(&#39;sos-speed&#39;);
         const speedHz = sosSpeedEl ? parseFloat(sosSpeedEl.value) : 3;
-        const speedSec = (1/speedHz).toFixed(2) + &#39;s&#39;;
+        const speedSec = `${(1/speedHz).toFixed(2)}s`;
         const isPolice = document.getElementById(&#39;sos-mode-police&#39;).classList.contains(&#39;active&#39;);
         const isWhite = document.getElementById(&#39;sos-mode-white&#39;).classList.contains(&#39;active&#39;);
-        document.getElementById(&#39;sos-flash-overlay&#39;).style.setProperty(&#39;--sos-anim&#39;, isPolice ? &#39;strobePoliceUK&#39; : isWhite ? &#39;strobeWhite&#39; : &#39;strobeAmber&#39;);
+        
+        document.getElementById(&#39;sos-flash-overlay&#39;).style.setProperty(&#39;--sos-anim&#39;, isPolice ? &#39;strobeRedBlue&#39; : isWhite ? &#39;strobeWhite&#39; : &#39;strobeAmber&#39;);
         document.getElementById(&#39;sos-flash-overlay&#39;).style.setProperty(&#39;--sos-speed&#39;, speedSec);
+        
         sosActive = true;
         document.getElementById(&#39;btn-sos-siren&#39;).innerText = &quot;STOP SIREN&quot;;
         if(o) { o.className = &#39;mode-dynamic&#39;; o.style.display = &#39;block&#39;; }
@@ -932,24 +1076,25 @@ bindSafe(&#39;gen-pdf-btn&#39;, &#39;click&#39;, async () =&gt; {
     const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation: &#39;portrait&#39;, unit: &#39;mm&#39;, format: &#39;a4&#39; });
     const pageW = 210, margin = 15, usableW = 180; let y = 15;
     const field = id =&gt; { const el = document.getElementById(id); return el ? (el.value||&#39;&#39;) : &#39;&#39;; };
-    const date=field(&#39;r-date&#39;), loc=field(&#39;r-loc&#39;), modelName=field(&#39;r-name&#39;), photogName=field(&#39;r-photog-name&#39;), comp=field(&#39;r-compensation&#39;)||&#39;None&#39;;
+    const date=field(&#39;r-date&#39;), loc=field(&#39;r-loc&#39;), modelName=field(&#39;r-name&#39;), comp=field(&#39;r-compensation&#39;)||&#39;None&#39;;
+    const photogName = &#39;Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk&#39;;
     
     const addText=(text,size,bold,col, w)=&gt;{ doc.setFontSize(size||10);doc.setFont(&#39;helvetica&#39;,bold?&#39;bold&#39;:&#39;normal&#39;);doc.setTextColor(col||0); doc.splitTextToSize(text,w||usableW).forEach(l=&gt;{if(y&gt;270){doc.addPage();y=15;}doc.text(l,margin,y);y+=(size||10)*0.45;});y+=2; };
     const addLine=()=&gt;{doc.setDrawColor(200);doc.line(margin,y,pageW-margin,y);y+=5;};
     const addSig=(cid,lbl)=&gt;{ if(y&gt;240){doc.addPage();y=15;}addText(lbl+&#39;:&#39;,9,true); try{doc.addImage(document.getElementById(cid).toDataURL(&#39;image/png&#39;),&#39;PNG&#39;,margin,y,70,18);}catch(e){}y+=22; };
     
     doc.setFillColor(9,18,28);doc.rect(0,0,210,25,&#39;F&#39;); doc.setFontSize(16);doc.setFont(&#39;helvetica&#39;,&#39;bold&#39;);doc.setTextColor(212,194,161); doc.text(&#39;MODEL RELEASE FORM&#39;, pageW/2,13,{align:&#39;center&#39;}); doc.setFontSize(9);doc.setFont(&#39;helvetica&#39;,&#39;normal&#39;);doc.setTextColor(180,180,180); doc.text(&#39;PR Eye v4.5 — Professional Photography Release&#39;, pageW/2,20,{align:&#39;center&#39;});
-    y=30;doc.setTextColor(0); addText(&#39;Shoot Date: &#39;+(date||&#39;_______________&#39;)+&#39;   Location: &#39;+(loc||&#39;___________________________&#39;),10,true,0, usableW); addLine(); 
+    y=30;doc.setTextColor(0); addText(`Shoot Date: ${date||&#39;_______________&#39;}   Location: ${loc||&#39;___________________________&#39;}`,10,true,0, usableW); addLine(); 
     addText(&#39;PHOTOGRAPHER:&#39;,10,true); addText(photogName,9); addLine(); 
-    addText(&#39;MODEL:&#39;,10,true); addText(&#39;Name: &#39;+(modelName||&#39;_________________________________&#39;),9); addText(&#39;Compensation: &#39;+comp,9); addLine();
+    addText(&#39;MODEL:&#39;,10,true); addText(`Name: ${modelName||&#39;_________________________________&#39;}`,9); addText(`Compensation: ${comp}`,9); addLine();
     addText(&#39;GRANT OF RIGHTS&#39;,10,true); addText(&#39;I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings (&quot;Content&quot;) taken of me in any media for any lawful purpose including commercial use, advertising, marketing, and promotional materials.&#39;,9); addLine(); 
     addText(&#39;ACKNOWLEDGMENT&#39;,10,true); addText(&#39;By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release.&#39;,9); y+=4; 
-    addSig(&#39;sig-model&#39;,&#39;MODEL SIGNATURE&#39;); addText(&#39;Date: &#39;+(date||&#39;_____________&#39;),9);y+=4;addLine(); 
-    addSig(&#39;sig-photog&#39;,&#39;PHOTOGRAPHER SIGNATURE&#39;); addText(&#39;Date: &#39;+(date||&#39;_____________&#39;),9);
+    addSig(&#39;sig-model&#39;,&#39;MODEL SIGNATURE&#39;); addText(`Date: ${date||&#39;_____________&#39;}`,9);y+=4;addLine(); 
+    addSig(&#39;sig-photog&#39;,&#39;PHOTOGRAPHER SIGNATURE&#39;); addText(`Date: ${date||&#39;_____________&#39;}`,9);
     
     try {
         const pdfBlob = doc.output(&#39;blob&#39;); const pdfUrl = URL.createObjectURL(pdfBlob);
-        const dlLink = document.getElementById(&#39;pdf-dl-link&#39;); dlLink.href = pdfUrl; dlLink.download = &#39;ModelRelease_&#39;+(modelName||&#39;Unknown&#39;).replace(/\s+/g,&#39;_&#39;)+&#39;.pdf&#39;;
+        const dlLink = document.getElementById(&#39;pdf-dl-link&#39;); dlLink.href = pdfUrl; dlLink.download = `ModelRelease_${(modelName||&#39;Unknown&#39;).replace(/\s+/g,&#39;_&#39;)}.pdf`;
         document.getElementById(&#39;pdf-overlay&#39;).style.display = &#39;flex&#39;;
     } catch(err) { alert(&quot;PDF Engine failed.&quot;); }
 });
@@ -967,7 +1112,7 @@ bindSafe(&#39;nav-release&#39;, &#39;click&#39;, () =&gt; {
 window.clearPad = (id) =&gt; { const c = document.getElementById(id).getContext(&#39;2d&#39;); c.clearRect(0,0,1000,1000); };
 
 // --- STARTUP ---
-buildDial(&#39;dial-shutter&#39;, arrShutter, &#39;shutter&#39;); buildDial(&#39;dial-aperture&#39;, arrAperture.map(a=&gt;&#39;F&#39;+a), &#39;aperture&#39;); buildDial(&#39;dial-iso&#39;, arrIso, &#39;iso&#39;);
+buildDial(&#39;dial-shutter&#39;, arrShutter, &#39;shutter&#39;); buildDial(&#39;dial-aperture&#39;, arrAperture.map(a=&gt;`F${a}`), &#39;aperture&#39;); buildDial(&#39;dial-iso&#39;, arrIso, &#39;iso&#39;);
 syncDial(&#39;dial-shutter&#39;, 33); syncDial(&#39;dial-aperture&#39;, 10); syncDial(&#39;dial-iso&#39;, 7);
 startCamera(); 
 </script>
