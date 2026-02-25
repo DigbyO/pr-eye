@@ -3,324 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR EYE v12.0 — ULTIMATE</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
-
+    <title>PR EYE v4.1 (v19.0.0)</title>
     <style>
-        :root { --gold: #d4c2a1; --bg: #050a10; --red: #ff3b30; --magenta: #ff2d55; --cyan: #5ac8fa; --green: #4cd964; }
+        :root {
+            --bg-dark: #0A111F;
+            --panel-bg: #151E2D;
+            --gold: #D4C4A1;
+            --text-main: #FFFFFF;
+            --text-dim: #8E9AAF;
+            --accent-red: #E63946;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; font-family: 'DM Mono', monospace; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER */
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
-        .tel-bar { display: flex; gap: 10px; font-size: 9px; color: #8b9bb4; margin-top: 5px; text-transform: uppercase; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* VIEWPORT */
-        #viewport { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; overflow: hidden; border-bottom: 1px solid #333; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-        
-        /* HUD ELEMENTS */
-        .marker { position: absolute; width: 26px; height: 26px; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; pointer-events: none; z-index: 10; }
-        #m0 { border-color: var(--cyan); } #m1 { border-color: var(--magenta); } #m2 { border-color: var(--gold); }
-        
-        .canon-hud { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d141e; border: 2px solid #555; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
-        .hud-cell { padding: 8px; border: 0.5px solid #222; text-align: center; }
-        .hud-v { font-size: 15px; font-weight: bold; color: #fff; }
+        /* --- Header Section --- */
+        header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        /* NAVIGATION & PANELS */
-        .main { flex: 1; overflow-y: auto; padding: 15px 15px 120px; }
-        .page { display: none; } .page.active { display: block; }
-        .panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .brand { font-weight: bold; letter-spacing: 2px; font-size: 1.2rem; }
+        .meta-info { display: flex; gap: 15px; font-size: 0.8rem; color: var(--text-main); }
+        .meta-info span { font-weight: 500; }
 
-        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #444; color: var(--gold); border-radius: 8px; font-size: 10px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
-        .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
-        .btn.active { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px rgba(76, 217, 100, 0.2); }
-        
-        /* RAVE */
-        #rave-flash { display: none; position: fixed; inset: 0; z-index: 999; pointer-events: none; }
-        .strobe { animation: strb 0.1s infinite; }
-        @keyframes strb { 0% { background: #f00; } 50% { background: #00f; } }
+        /* --- Primary EV Display --- */
+        .ev-hero {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .ev-value { font-size: 6rem; font-weight: 700; line-height: 1; position: relative; display: inline-block; }
+        .ev-unit { font-size: 1.5rem; position: absolute; top: 15px; right: -35px; }
+        .ev-label { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 1px; margin-top: 5px; }
 
-        /* NAV */
-        .nav { background: #000; border-top: 1px solid rgba(255,255,255,0.1); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; padding: 15px 0; text-align: center; font-size: 9px; color: #555; text-transform: uppercase; }
-        .nav-item.active { color: var(--gold); border-top: 2px solid var(--gold); }
+        /* --- Media Row (Camera & Histogram) --- */
+        .media-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            padding: 10px 15px;
+            height: 180px;
+        }
 
-        /* LEGAL RELEASE FIELDS */
-        .input-group { margin-bottom: 10px; }
-        label { font-size: 8px; text-transform: uppercase; color: #666; display: block; margin-bottom: 4px; }
-        input[type="text"] { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-family: inherit; }
+        .preview-container {
+            background: #000;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        #camera-view { width: 100%; height: 100%; object-fit: cover; }
+        .preview-label {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px; font-size: 0.6rem; border-radius: 4px;
+        }
+
+        .histogram-container {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            position: relative;
+        }
+        #histogram-canvas { width: 100%; height: 100%; }
+
+        /* --- Function Buttons --- */
+        .btn-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px 15px;
+        }
+        .ui-btn {
+            background: var(--panel-bg);
+            border: 1px solid #2A3649;
+            color: var(--text-main);
+            padding: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        /* --- Parameter Grid --- */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            border-top: 1px solid #2A3649;
+            border-bottom: 1px solid #2A3649;
+            margin: 10px 0;
+            padding: 15px 0;
+        }
+        .grid-item .label { color: var(--gold); font-size: 0.65rem; text-transform: uppercase; margin-bottom: 5px; }
+        .grid-item .value { font-size: 1.4rem; font-weight: 500; }
+
+        /* --- Meter Scale --- */
+        .meter-container {
+            padding: 10px 20px;
+            position: relative;
+        }
+        .scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .scale-line {
+            height: 1px; background: #444; position: absolute; bottom: 0; width: 100%;
+        }
+        .indicator {
+            position: absolute; bottom: -5px; left: 50%;
+            width: 2px; height: 15px; background: var(--accent-red);
+            transition: left 0.2s ease;
+        }
+
+        /* --- Sliders --- */
+        .controls { padding: 5px 20px; }
+        .control-group { display: flex; align-items: center; margin-bottom: 15px; }
+        .control-label { width: 40px; font-size: 0.7rem; color: var(--text-dim); }
+        input[type=range] {
+            flex-grow: 1;
+            appearance: none; background: #2A3649; height: 2px; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none; width: 18px; height: 18px;
+            background: var(--gold); border-radius: 50%; cursor: pointer;
+        }
+
+        /* --- Bottom Bar --- */
+        .capture-area { padding: 10px 15px; }
+        .capture-btn {
+            width: 100%; background: var(--gold); color: #000;
+            border: none; padding: 18px; font-weight: bold;
+            font-size: 1.1rem; border-radius: 8px; text-transform: uppercase;
+        }
+
+        nav {
+            display: flex; justify-content: space-around;
+            padding: 15px 0; border-top: 1px solid #2A3649;
+            font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;
+        }
+        nav span.active { color: #FFF; border-bottom: 2px solid #FFF; padding-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="hdr">
-        <div class="hdr-top">
-            <div style="font-family:'Cormorant Garamond'; letter-spacing:2px; color:var(--gold); font-size:18px;">PR EYE v12.0</div>
-            <button id="gyro-perm" style="font-size:8px; padding:4px 8px; background:var(--gold); border:none; border-radius:4px; display:none;">ACTIVATE SENSORS</button>
-            <div id="tel-ev" style="font-size:16px; font-weight:bold; color:var(--gold);">EV 0.0</div>
-        </div>
-        <div class="tel-bar">
-            <span>GPS <span class="val" id="t-gps">--</span></span>
-            <span>HDG <span class="val" id="t-hdg">0°</span></span>
-            <span>WB <span class="val" id="t-wb">5500K</span></span>
-        </div>
+<header>
+    <div class="brand">PR EYE <span style="font-weight: 300;">v4.1</span></div>
+    <div class="meta-info">
+        <div>WB <span id="wb-val">2258K</span></div>
+        <div>LUX <span id="lux-val">9</span></div>
     </div>
+</header>
 
-    <div id="viewport" onclick="setMarker(event)">
-        <video id="video" autoplay playsinline muted></video>
-        <canvas id="ar-canvas" class="overlay"></canvas>
-        <canvas id="fc-canvas" class="overlay" style="display:none;"></canvas>
-        <canvas id="lvl-canvas" class="overlay"></canvas>
-        <div id="m0" class="marker">A</div>
-        <div id="m1" class="marker">B</div>
-        <div id="m2" class="marker">C</div>
-        <div id="rave-flash"></div>
+<div class="ev-hero">
+    <div class="ev-value"><span id="ev-display">1.9</span><span class="ev-unit">EV</span></div>
+    <div class="ev-label">VOL KEYS: EV BIAS +/-</div>
+</div>
+
+<div class="media-row">
+    <div class="preview-container">
+        <div class="preview-label">REFLECTED</div>
+        <video id="camera-view" autoplay playsinline></video>
     </div>
-
-    <div class="main">
-        <div id="p-meter" class="page active">
-            <div class="canon-hud">
-                <div class="hud-cell"><span class="hud-v" id="h-ss">1/50</span></div>
-                <div class="hud-cell"><span class="hud-v" id="h-f">F4.0</span></div>
-                <div class="hud-cell"><span class="hud-v" id="h-iso">400</span></div>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="btn" id="btn-fc" onclick="toggleFC()">FALSE COLOR</button>
-                <button class="btn" id="btn-sun" onclick="sunActive = !sunActive">SUN TRACKER</button>
-                <button class="btn" onclick="flipCam()">FLIP CAMERA</button>
-                <button class="btn" id="btn-lvl" onclick="lvlActive = !lvlActive">LEVEL HUD</button>
-            </div>
-            <button class="btn solid" style="margin-top:10px; padding:18px;" onclick="doExport('pol')">CAPTURE POLAROID</button>
-        </div>
-
-        <div id="p-color" class="page">
-            <div class="panel">
-                <div style="display:flex; height:60px; border-radius:8px; overflow:hidden; margin-bottom:10px; border:1px solid #333;">
-                    <div id="sw0" style="flex:6; background:#333; display:flex; align-items:center; justify-content:center; font-size:9px;">60%</div>
-                    <div id="sw1" style="flex:3; background:#666; display:flex; align-items:center; justify-content:center; font-size:9px;">30%</div>
-                    <div id="sw2" style="flex:1; background:#999; display:flex; align-items:center; justify-content:center; font-size:9px;">10%</div>
-                </div>
-                <div id="mj-pattern" style="font-size:10px; color:#888; background:#000; padding:10px; border-radius:6px; margin-bottom:8px;">/imagine prompt: pattern...</div>
-                <div id="mj-house" style="font-size:10px; color:#888; background:#000; padding:10px; border-radius:6px;">/imagine prompt: house...</div>
-                <button class="btn solid" style="margin-top:15px;" onclick="doExport('swatch')">EXPORT SWATCH BOARD</button>
-            </div>
-        </div>
-
-        <div id="p-tools" class="page">
-            <div class="panel" style="border-color:var(--magenta);">
-                <button class="btn" id="rave-btn" onclick="toggleRave()">START TACTICAL RAVE</button>
-                <button class="btn danger" id="siren-btn" onclick="toggleSiren()">UK POLICE SIREN</button>
-            </div>
-        </div>
-
-        <div id="p-legal" class="page">
-            <div class="panel">
-                <div class="input-group">
-                    <label>Model Full Name</label>
-                    <input type="text" id="m-name" placeholder="Name">
-                </div>
-                <label>Signature</label>
-                <canvas id="sig-pad" style="background:#fff; width:100%; height:100px; border-radius:6px; touch-action:none;"></canvas>
-                <button class="btn solid" style="margin-top:15px;" onclick="genPDF()">GENERATE SIGNED PDF</button>
-            </div>
-        </div>
+    <div class="histogram-container">
+        <canvas id="histogram-canvas"></canvas>
     </div>
+</div>
 
-    <div id="export-ovl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:2000; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-        <div id="pol-frame" style="background:#fff; padding:10px 10px 80px 10px; width:100%; max-width:340px;">
-            <img id="pol-img" style="width:100%; aspect-ratio:1/1; object-fit:cover;">
-            <div id="pol-meta" style="color:#111; font-family:'Permanent Marker', cursive; padding-top:15px; font-size:11px; white-space:pre-line;"></div>
-        </div>
-        <button class="btn solid" style="margin-top:20px; width:340px;" id="share-btn">SAVE / SHARE TO DEVICE</button>
-        <button class="btn" style="width:340px;" onclick="document.getElementById('export-ovl').style.display='none'">DISCARD</button>
+<div class="btn-row">
+    <button class="ui-btn">Split Screen</button>
+    <button class="ui-btn">False Col</button>
+    <button class="ui-btn">Grid</button>
+</div>
+
+<div class="data-grid">
+    <div class="grid-item">
+        <div class="label">Shutter</div>
+        <div class="value" id="ss-val">1/60</div>
     </div>
-
-    <div class="nav">
-        <div class="nav-item active" data-t="p-meter">Meter</div>
-        <div class="nav-item" data-t="p-color">Color</div>
-        <div class="nav-item" data-t="p-tools">Tools</div>
-        <div class="nav-item" data-t="p-legal">Legal</div>
+    <div class="grid-item">
+        <div class="label">F-Stop</div>
+        <div class="value" id="f-val">F5.6</div>
     </div>
+    <div class="grid-item">
+        <div class="label">ISO</div>
+        <div class="value" id="iso-val">400</div>
+    </div>
+</div>
 
-    <script>
-        let stream, currentFacing = 'environment', lvlActive = false, fcActive = false, sunActive = false, raveActive = false, sirenActive = false;
-        let lat = 0, lon = 0, hdg = 0, pitch = 0, roll = 0, ev = 0, hexList = ["#333","#666","#999"];
-        let samplePts = [{x:0.5, y:0.5}, {x:0.3, y:0.3}, {x:0.7, y:0.7}], activePt = 0;
-        let audioCtx, osc, sirenInt;
+<div class="meter-container">
+    <div class="scale">
+        <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>+1</span><span>+2</span><span>+3</span>
+        <div class="scale-line"></div>
+        <div class="indicator" id="meter-indicator"></div>
+    </div>
+</div>
 
-        const video = document.getElementById('video');
-        const actx = document.getElementById('ar-canvas').getContext('2d');
-        const fcan = document.getElementById('fc-canvas');
-        const fctx = fcan.getContext('2d');
-        const lcan = document.getElementById('lvl-canvas');
-        const lctx = lcan.getContext('2d');
-        const sctx = document.getElementById('sig-pad').getContext('2d');
+<div class="controls">
+    <div class="control-group">
+        <div class="control-label">SS</div>
+        <input type="range" id="ss-slider" min="0" max="10" value="5">
+    </div>
+    <div class="control-group">
+        <div class="control-label">F/</div>
+        <input type="range" id="f-slider" min="0" max="10" value="4">
+    </div>
+    <div class="control-group">
+        <div class="control-label">ISO</div>
+        <input type="range" id="iso-slider" min="100" max="3200" step="100" value="400">
+    </div>
+</div>
 
-        async function init() {
-            if(stream) stream.getTracks().forEach(t => t.stop());
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing, width: 1280 } });
-                video.srcObject = stream;
-            } catch(e) { alert("Camera failed."); }
+<div class="capture-area">
+    <button class="capture-btn">Capture Frame</button>
+</div>
+
+<nav>
+    <span class="active">Meter</span>
+    <span>Color</span>
+    <span style="opacity: 0.3;">■</span>
+</nav>
+
+<script>
+    // --- Camera Initialization ---
+    async function initCamera() {
+        const video = document.getElementById('camera-view');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' }, 
+                audio: false 
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            console.error("Camera Error: ", err);
+            alert("Camera access denied or unavailable. Please check permissions.");
         }
+    }
 
-        function setMarker(e) {
-            const r = e.currentTarget.getBoundingClientRect();
-            samplePts[activePt] = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
-            const m = document.getElementById(`m${activePt}`);
-            m.style.left = (samplePts[activePt].x * 100) + '%';
-            m.style.top = (samplePts[activePt].y * 100) + '%';
-            activePt = (activePt + 1) % 3;
-        }
+    // --- Logic & UI Updates ---
+    const ssSlider = document.getElementById('ss-slider');
+    const fSlider = document.getElementById('f-slider');
+    const isoSlider = document.getElementById('iso-slider');
+    
+    const ssText = document.getElementById('ss-val');
+    const fText = document.getElementById('f-val');
+    const isoText = document.getElementById('iso-val');
+    const evDisplay = document.getElementById('ev-display');
+    const indicator = document.getElementById('meter-indicator');
 
-        function toggleFC() {
-            fcActive = !fcActive;
-            fcan.style.display = fcActive ? 'block' : 'none';
-            document.getElementById('btn-fc').classList.toggle('active', fcActive);
-        }
+    function updateLogic() {
+        // Mock calculations to demonstrate live UI response
+        const ssArray = ["1/15", "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000"];
+        const fArray = ["F2.8", "F4.0", "F5.6", "F8.0", "F11", "F16"];
+        
+        const ssVal = ssArray[Math.floor(ssSlider.value % ssArray.length)];
+        const fVal = fArray[Math.floor(fSlider.value % fArray.length)];
+        
+        ssText.innerText = ssVal;
+        fText.innerText = fVal;
+        isoText.innerText = isoSlider.value;
 
-        function loop() {
-            if(video.readyState === 4) {
-                const w = video.clientWidth; const h = video.clientHeight;
-                actx.canvas.width = lcan.width = fcan.width = w;
-                actx.canvas.height = lcan.height = fcan.height = h;
+        // Dynamic EV Calculation (Simplified for UI display)
+        let simulatedEV = (parseFloat(ssSlider.value) + parseFloat(fSlider.value)) / 4;
+        evDisplay.innerText = simulatedEV.toFixed(1);
 
-                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                c.width = 100; c.height = 100; ctx.drawImage(video, 0, 0, 100, 100);
-                const pix = ctx.getImageData(0,0,100,100).data;
+        // Move Meter Indicator (-3 to +3 mapping)
+        let percent = ((simulatedEV + 3) / 6) * 100;
+        indicator.style.left = `${Math.max(0, Math.min(100, percent))}%`;
+    }
 
-                // Color Extraction
-                hexList = samplePts.map(p => {
-                    const idx = (Math.floor(p.y*99)*100 + Math.floor(p.x*99))*4;
-                    return "#" + ((1<<24)+(pix[idx]<<16)+(pix[idx+1]<<8)+pix[idx+2]).toString(16).slice(1).toUpperCase();
-                });
-                hexList.forEach((hex, i) => {
-                    const sw = document.getElementById(`sw${i}`);
-                    sw.style.backgroundColor = hex; sw.innerText = hex;
-                });
+    // --- Listeners ---
+    [ssSlider, fSlider, isoSlider].forEach(s => s.addEventListener('input', updateLogic));
 
-                // EV
-                let lum = 0; for(let i=0; i<pix.length; i+=4) lum += (0.299*pix[i]+0.587*pix[i+1]+0.114*pix[i+2]);
-                ev = Math.log2((lum/100)/255 * 100/12.5).toFixed(1);
-                document.getElementById('tel-ev').innerText = `EV ${ev}`;
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+        initCamera();
+        updateLogic();
+    });
+</script>
 
-                if(fcActive) drawFC();
-                if(lvlActive) drawLvl();
-                if(sunActive) drawSun();
-            }
-            requestAnimationFrame(loop);
-        }
-
-        function drawFC() {
-            fctx.drawImage(video, 0, 0, fcan.width, fcan.height);
-            const id = fctx.getImageData(0,0,fcan.width, fcan.height);
-            const d = id.data;
-            for(let i=0; i<d.length; i+=4) {
-                const v = (d[i]+d[i+1]+d[i+2])/3;
-                if(v > 230) { d[i]=255; d[i+1]=0; d[i+2]=0; } // Clip Red
-                else if(v < 20) { d[i]=0; d[i+1]=0; d[i+2]=255; } // Shadow Blue
-                else { d[i]=d[i+1]=d[i+2]=v; d[i+1]*=0.5; } // Mid Green-Shift
-            }
-            fctx.putImageData(id, 0, 0);
-        }
-
-        function drawSun() {
-            actx.clearRect(0,0,fcan.width, fcan.height);
-            if(!lat) return;
-            const sun = SunCalc.getPosition(new Date(), lat, lon);
-            const sAz = (sun.azimuth * 180 / Math.PI + 180) % 360;
-            const sAlt = sun.altitude * 180 / Math.PI;
-
-            let dAz = sAz - hdg; if(dAz > 180) dAz -= 360; if(dAz < -180) dAz += 360;
-            let dAlt = sAlt - (90 - pitch);
-
-            const x = (fcan.width/2) + (dAz * (fcan.width / 60));
-            const y = (fcan.height/2) - (dAlt * (fcan.height / 45));
-
-            actx.fillStyle = '#ffb347'; actx.beginPath(); actx.arc(x, y, 15, 0, Math.PI*2); actx.fill();
-            actx.fillStyle = '#fff'; actx.font = '10px DM Mono'; actx.fillText("SUN", x + 20, y);
-        }
-
-        function drawLvl() {
-            lctx.clearRect(0,0,lcan.width, lcan.height);
-            lctx.strokeStyle = Math.abs(roll) < 1.5 ? 'var(--green)' : 'var(--gold)';
-            lctx.lineWidth = 2; lctx.save();
-            lctx.translate(lcan.width/2, lcan.height/2);
-            lctx.rotate(roll * Math.PI / 180);
-            lctx.beginPath(); lctx.moveTo(-80, 0); lctx.lineTo(80, 0); lctx.stroke();
-            lctx.restore();
-        }
-
-        async function doExport(m) {
-            const can = document.createElement('canvas'); can.width = 1200; can.height = 1200;
-            const ctx = can.getContext('2d');
-            if(m === 'pol') {
-                const s = Math.min(video.videoWidth, video.videoHeight);
-                ctx.drawImage(video, (video.videoWidth-s)/2, (video.videoHeight-s)/2, s, s, 0, 0, 1200, 1200);
-                hexList.forEach((h, i) => { ctx.fillStyle = h; ctx.fillRect(1000 + (i*50), 1050, 40, 40); });
-            } else {
-                ctx.fillStyle = hexList[0]; ctx.fillRect(0,0,1200,700);
-                ctx.fillStyle = hexList[1]; ctx.fillRect(0,700,1200,350);
-                ctx.fillStyle = hexList[2]; ctx.fillRect(0,1050,1200,150);
-            }
-            const d = can.toDataURL('image/jpeg', 0.95);
-            document.getElementById('pol-img').src = d;
-            document.getElementById('pol-meta').innerText = `GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)} | EV: ${ev}\nPALETTE: ${hexList.join(', ')}\nPR EYE TACTICAL`;
-            document.getElementById('export-ovl').style.display = 'flex';
-            document.getElementById('share-btn').onclick = async () => {
-                const blob = await (await fetch(d)).blob();
-                const file = new File([blob], `PREYE_${Date.now()}.jpg`, {type:'image/jpeg'});
-                if(navigator.share) await navigator.share({files:[file]});
-            };
-        }
-
-        function toggleSiren() {
-            if(sirenActive) { if(osc) osc.stop(); sirenActive = false; clearInterval(sirenInt); }
-            else {
-                audioCtx = new AudioContext(); osc = audioCtx.createOscillator(); osc.type = 'square'; osc.connect(audioCtx.destination);
-                osc.start(); sirenActive = true; let t = true;
-                sirenInt = setInterval(() => { osc.frequency.setValueAtTime(t?435:580, audioCtx.currentTime); t=!t; }, 400);
-            }
-        }
-
-        // PERMISSIONS & SENSORS
-        if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            document.getElementById('gyro-perm').style.display = 'block';
-            document.getElementById('gyro-perm').onclick = () => {
-                DeviceOrientationEvent.requestPermission().then(r => { if(r==='granted') document.getElementById('gyro-perm').style.display='none'; });
-            };
-        }
-
-        window.addEventListener('deviceorientation', e => {
-            hdg = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0;
-            pitch = e.beta || 0; roll = e.gamma || 0;
-            document.getElementById('t-hdg').innerText = Math.round(hdg) + '°';
-        });
-
-        navigator.geolocation.watchPosition(p => {
-            lat = p.coords.latitude; lon = p.coords.longitude;
-            document.getElementById('t-gps').innerText = `${lat.toFixed(2)},${lon.toFixed(2)}`;
-        });
-
-        // SIGNATURE PAD
-        let isD = false;
-        sigPad.addEventListener('pointerdown', e => { isD = true; sctx.beginPath(); sctx.moveTo(e.offsetX, e.offsetY); });
-        sigPad.addEventListener('pointermove', e => { if(isD) { sctx.lineTo(e.offsetX, e.offsetY); sctx.stroke(); } });
-        sigPad.addEventListener('pointerup', () => isD = false);
-
-        // NAV
-        document.querySelectorAll('.nav-item').forEach(i => i.onclick = () => {
-            document.querySelectorAll('.nav-item, .page').forEach(x => x.classList.remove('active'));
-            i.classList.add('active'); document.getElementById(i.dataset.t).classList.add('active');
-        });
-
-        init(); loop();
-    </script>
 </body>
 </html>
