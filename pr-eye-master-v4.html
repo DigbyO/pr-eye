@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR EYE v4.1 (v19.0.0)</title>
+    <title>PR EYE v4.1 (v19.1.0)</title>
     <style>
         :root {
             --bg-dark: #0A111F;
@@ -26,136 +26,47 @@
             flex-direction: column;
         }
 
-        /* --- Header Section --- */
-        header {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-weight: bold; letter-spacing: 2px; font-size: 1.2rem; }
-        .meta-info { display: flex; gap: 15px; font-size: 0.8rem; color: var(--text-main); }
-        .meta-info span { font-weight: 500; }
+        .meta-info { display: flex; gap: 15px; font-size: 0.8rem; }
 
-        /* --- Primary EV Display --- */
-        .ev-hero {
-            text-align: center;
-            padding: 10px 0;
-        }
-        .ev-value { font-size: 6rem; font-weight: 700; line-height: 1; position: relative; display: inline-block; }
-        .ev-unit { font-size: 1.5rem; position: absolute; top: 15px; right: -35px; }
-        .ev-label { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 1px; margin-top: 5px; }
+        .ev-hero { text-align: center; padding: 5px 0; }
+        .ev-value { font-size: 5.5rem; font-weight: 700; line-height: 1; position: relative; display: inline-block; }
+        .ev-unit { font-size: 1.2rem; position: absolute; top: 12px; right: -30px; }
+        .ev-label { color: var(--text-dim); font-size: 0.65rem; letter-spacing: 1px; margin-top: 2px; }
 
-        /* --- Media Row (Camera & Histogram) --- */
-        .media-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 10px;
-            padding: 10px 15px;
-            height: 180px;
-        }
-
-        .preview-container {
-            background: #000;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-        }
+        /* Media Row with Histogram */
+        .media-row { display: grid; grid-template-columns: 2.2fr 1fr; gap: 10px; padding: 10px 15px; height: 160px; }
+        .preview-container { background: #000; border-radius: 4px; position: relative; overflow: hidden; border: 1px solid #2A3649; }
         #camera-view { width: 100%; height: 100%; object-fit: cover; }
-        .preview-label {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 2px 8px; font-size: 0.6rem; border-radius: 4px;
-        }
+        .preview-label { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; font-size: 0.55rem; border-radius: 2px; z-index: 2; }
+        
+        .histogram-container { background: #050A14; border-radius: 4px; border: 1px solid #2A3649; position: relative; }
+        #hist-canvas { width: 100%; height: 100%; display: block; }
 
-        .histogram-container {
-            background: var(--panel-bg);
-            border-radius: 8px;
-            position: relative;
-        }
-        #histogram-canvas { width: 100%; height: 100%; }
+        .btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px 15px; }
+        .ui-btn { background: var(--panel-bg); border: 1px solid #2A3649; color: var(--text-main); padding: 8px; font-size: 0.65rem; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
 
-        /* --- Function Buttons --- */
-        .btn-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 10px 15px;
-        }
-        .ui-btn {
-            background: var(--panel-bg);
-            border: 1px solid #2A3649;
-            color: var(--text-main);
-            padding: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
+        .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-top: 1px solid #2A3649; border-bottom: 1px solid #2A3649; margin: 8px 0; padding: 12px 0; }
+        .grid-item .label { color: var(--gold); font-size: 0.6rem; text-transform: uppercase; margin-bottom: 4px; }
+        .grid-item .value { font-size: 1.3rem; font-weight: 500; }
 
-        /* --- Parameter Grid --- */
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            text-align: center;
-            border-top: 1px solid #2A3649;
-            border-bottom: 1px solid #2A3649;
-            margin: 10px 0;
-            padding: 15px 0;
-        }
-        .grid-item .label { color: var(--gold); font-size: 0.65rem; text-transform: uppercase; margin-bottom: 5px; }
-        .grid-item .value { font-size: 1.4rem; font-weight: 500; }
+        /* Meter with Detail Levels */
+        .meter-container { padding: 5px 20px 15px; position: relative; }
+        .scale { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-main); position: relative; padding-bottom: 8px; border-bottom: 1px solid #333; }
+        .indicator { position: absolute; bottom: -4px; left: 50%; width: 2px; height: 12px; background: var(--accent-red); transition: left 0.1s ease-out; }
 
-        /* --- Meter Scale --- */
-        .meter-container {
-            padding: 10px 20px;
-            position: relative;
-        }
-        .scale {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-main);
-            position: relative;
-            padding-bottom: 10px;
-        }
-        .scale-line {
-            height: 1px; background: #444; position: absolute; bottom: 0; width: 100%;
-        }
-        .indicator {
-            position: absolute; bottom: -5px; left: 50%;
-            width: 2px; height: 15px; background: var(--accent-red);
-            transition: left 0.2s ease;
-        }
-
-        /* --- Sliders --- */
         .controls { padding: 5px 20px; }
-        .control-group { display: flex; align-items: center; margin-bottom: 15px; }
-        .control-label { width: 40px; font-size: 0.7rem; color: var(--text-dim); }
-        input[type=range] {
-            flex-grow: 1;
-            appearance: none; background: #2A3649; height: 2px; outline: none;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            appearance: none; width: 18px; height: 18px;
-            background: var(--gold); border-radius: 50%; cursor: pointer;
-        }
+        .control-group { display: flex; align-items: center; margin-bottom: 10px; }
+        .control-label { width: 40px; font-size: 0.65rem; color: var(--text-dim); font-weight: bold; }
+        input[type=range] { flex-grow: 1; appearance: none; background: #2A3649; height: 1px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: var(--gold); border-radius: 50%; border: 3px solid var(--bg-dark); }
 
-        /* --- Bottom Bar --- */
         .capture-area { padding: 10px 15px; }
-        .capture-btn {
-            width: 100%; background: var(--gold); color: #000;
-            border: none; padding: 18px; font-weight: bold;
-            font-size: 1.1rem; border-radius: 8px; text-transform: uppercase;
-        }
-
-        nav {
-            display: flex; justify-content: space-around;
-            padding: 15px 0; border-top: 1px solid #2A3649;
-            font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;
-        }
-        nav span.active { color: #FFF; border-bottom: 2px solid #FFF; padding-bottom: 5px; }
+        .capture-btn { width: 100%; background: var(--gold); color: #000; border: none; padding: 16px; font-weight: 800; font-size: 1rem; border-radius: 6px; text-transform: uppercase; }
+        
+        nav { display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #2A3649; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+        nav span.active { color: #FFF; border-bottom: 2px solid #FFF; padding-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -176,10 +87,10 @@
 <div class="media-row">
     <div class="preview-container">
         <div class="preview-label">REFLECTED</div>
-        <video id="camera-view" autoplay playsinline></video>
+        <video id="camera-view" autoplay playsinline muted></video>
     </div>
     <div class="histogram-container">
-        <canvas id="histogram-canvas"></canvas>
+        <canvas id="hist-canvas"></canvas>
     </div>
 </div>
 
@@ -190,41 +101,22 @@
 </div>
 
 <div class="data-grid">
-    <div class="grid-item">
-        <div class="label">Shutter</div>
-        <div class="value" id="ss-val">1/60</div>
-    </div>
-    <div class="grid-item">
-        <div class="label">F-Stop</div>
-        <div class="value" id="f-val">F5.6</div>
-    </div>
-    <div class="grid-item">
-        <div class="label">ISO</div>
-        <div class="value" id="iso-val">400</div>
-    </div>
+    <div class="grid-item"><div class="label">Shutter</div><div class="value" id="ss-val">1/60</div></div>
+    <div class="grid-item"><div class="label">F-Stop</div><div class="value" id="f-val">F5.6</div></div>
+    <div class="grid-item"><div class="label">ISO</div><div class="value" id="iso-val">400</div></div>
 </div>
 
 <div class="meter-container">
     <div class="scale">
-        <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>+1</span><span>+2</span><span>+3</span>
-        <div class="scale-line"></div>
+        <span>-3</span><span>..</span><span>-2</span><span>..</span><span>-1</span><span>..</span><span>0</span><span>..</span><span>1</span><span>..</span><span>2</span><span>..</span><span>3</span>
         <div class="indicator" id="meter-indicator"></div>
     </div>
 </div>
 
 <div class="controls">
-    <div class="control-group">
-        <div class="control-label">SS</div>
-        <input type="range" id="ss-slider" min="0" max="10" value="5">
-    </div>
-    <div class="control-group">
-        <div class="control-label">F/</div>
-        <input type="range" id="f-slider" min="0" max="10" value="4">
-    </div>
-    <div class="control-group">
-        <div class="control-label">ISO</div>
-        <input type="range" id="iso-slider" min="100" max="3200" step="100" value="400">
-    </div>
+    <div class="control-group"><div class="control-label">SS</div><input type="range" id="ss-slider" min="0" max="7" value="2"></div>
+    <div class="control-group"><div class="control-label">F/</div><input type="range" id="f-slider" min="0" max="8" value="4"></div>
+    <div class="control-group"><div class="control-label">ISO</div><input type="range" id="iso-slider" min="100" max="6400" step="100" value="400"></div>
 </div>
 
 <div class="capture-area">
@@ -237,63 +129,89 @@
     <span style="opacity: 0.3;">■</span>
 </nav>
 
+<canvas id="proc-canvas" style="display:none;"></canvas>
+
 <script>
-    // --- Camera Initialization ---
-    async function initCamera() {
-        const video = document.getElementById('camera-view');
+    const video = document.getElementById('camera-view');
+    const evDisplay = document.getElementById('ev-display');
+    const indicator = document.getElementById('meter-indicator');
+    const histCanvas = document.getElementById('hist-canvas');
+    const histCtx = histCanvas.getContext('2d');
+    const procCanvas = document.getElementById('proc-canvas');
+    const procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+
+    async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' }, 
-                audio: false 
+                video: { facingMode: 'environment' }, audio: false 
             });
             video.srcObject = stream;
-        } catch (err) {
-            console.error("Camera Error: ", err);
-            alert("Camera access denied or unavailable. Please check permissions.");
+            requestAnimationFrame(drawHistogram);
+        } catch (e) {
+            console.error("Camera fail", e);
         }
     }
 
-    // --- Logic & UI Updates ---
-    const ssSlider = document.getElementById('ss-slider');
-    const fSlider = document.getElementById('f-slider');
-    const isoSlider = document.getElementById('iso-slider');
-    
-    const ssText = document.getElementById('ss-val');
-    const fText = document.getElementById('f-val');
-    const isoText = document.getElementById('iso-val');
-    const evDisplay = document.getElementById('ev-display');
-    const indicator = document.getElementById('meter-indicator');
+    function drawHistogram() {
+        if (video.paused || video.ended) return;
 
-    function updateLogic() {
-        // Mock calculations to demonstrate live UI response
-        const ssArray = ["1/15", "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000"];
-        const fArray = ["F2.8", "F4.0", "F5.6", "F8.0", "F11", "F16"];
+        // 1. Process Frame
+        const w = 100; const h = 60;
+        procCanvas.width = w; procCanvas.height = h;
+        procCtx.drawImage(video, 0, 0, w, h);
+        const data = procCtx.getImageData(0, 0, w, h).data;
+
+        // 2. Count Buckets
+        const rArr = new Array(256).fill(0);
+        const gArr = new Array(256).fill(0);
+        const bArr = new Array(256).fill(0);
+
+        for (let i = 0; i < data.length; i += 4) {
+            rArr[data[i]]++; gArr[data[i+1]]++; bArr[data[i+2]]++;
+        }
+
+        // 3. Draw Curves
+        histCanvas.width = histCanvas.clientWidth;
+        histCanvas.height = histCanvas.clientHeight;
+        histCtx.clearRect(0, 0, histCanvas.width, histCanvas.height);
+        histCtx.globalCompositeOperation = 'screen';
         
-        const ssVal = ssArray[Math.floor(ssSlider.value % ssArray.length)];
-        const fVal = fArray[Math.floor(fSlider.value % fArray.length)];
-        
-        ssText.innerText = ssVal;
-        fText.innerText = fVal;
-        isoText.innerText = isoSlider.value;
+        drawCurve(rArr, '#ff4d4d');
+        drawCurve(gArr, '#4dff4d');
+        drawCurve(bArr, '#4d4dff');
 
-        // Dynamic EV Calculation (Simplified for UI display)
-        let simulatedEV = (parseFloat(ssSlider.value) + parseFloat(fSlider.value)) / 4;
-        evDisplay.innerText = simulatedEV.toFixed(1);
-
-        // Move Meter Indicator (-3 to +3 mapping)
-        let percent = ((simulatedEV + 3) / 6) * 100;
-        indicator.style.left = `${Math.max(0, Math.min(100, percent))}%`;
+        requestAnimationFrame(drawHistogram);
     }
 
-    // --- Listeners ---
-    [ssSlider, fSlider, isoSlider].forEach(s => s.addEventListener('input', updateLogic));
+    function drawCurve(arr, color) {
+        const max = Math.max(...arr);
+        histCtx.beginPath();
+        histCtx.strokeStyle = color;
+        histCtx.lineWidth = 1.5;
+        const step = histCanvas.width / 256;
+        for(let i=0; i<256; i++) {
+            const x = i * step;
+            const y = histCanvas.height - (arr[i] / max * histCanvas.height);
+            if(i === 0) histCtx.moveTo(x, y); else histCtx.lineTo(x, y);
+        }
+        histCtx.stroke();
+    }
 
-    // Initialize
-    window.addEventListener('DOMContentLoaded', () => {
-        initCamera();
-        updateLogic();
-    });
+    function updateUI() {
+        const ss = ["1/15", "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000"];
+        const f = ["F1.4", "F2.0", "F2.8", "F4.0", "F5.6", "F8.0", "F11", "F16", "F22"];
+        
+        document.getElementById('ss-val').innerText = ss[document.getElementById('ss-slider').value];
+        document.getElementById('f-val').innerText = f[document.getElementById('f-slider').value];
+        document.getElementById('iso-val').innerText = document.getElementById('iso-slider').value;
+
+        let ev = (parseInt(document.getElementById('ss-slider').value) + parseInt(document.getElementById('f-slider').value)) / 2;
+        evDisplay.innerText = ev.toFixed(1);
+        indicator.style.left = `${((ev + 1) / 8) * 100}%`;
+    }
+
+    document.querySelectorAll('input').forEach(i => i.addEventListener('input', updateUI));
+    window.onload = startCamera;
 </script>
-
 </body>
 </html>
