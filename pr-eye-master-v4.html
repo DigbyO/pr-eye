@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.9 — Pro Toolkit</title>
+    <title>PR Eye v3.0 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,15 +13,15 @@
         :root {
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
-            --red: #ff4d4d; --green: #4dff4d; --magenta: #ff00ff;
+            --red: #ff4d4d; --green: #4dff4d; --magenta: #ff00ff; --cyan: #00ffff;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
         h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
         .hdr { padding: 12px 15px; background: linear-gradient(180deg, rgba(9,18,28,1) 0%, rgba(9,18,28,0) 100%); z-index: 10; flex-shrink: 0; }
-        .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;}
-        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
+        .hdr-top { display: flex; justify-content: center; align-items: center; margin-bottom: 6px;}
+        .brand { font-family: 'Cormorant Garamond'; font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 500; text-align: center;}
         .telemetry-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; border-radius: 50px; background: rgba(20, 36, 56, 0.4); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px;}
 
@@ -34,8 +34,10 @@
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #level-layer { z-index: 6; display: none; } #scout-layer { z-index: 7; }
         
+        #cam-flip-btn { position: absolute; top: 12px; right: 12px; z-index: 25; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 44px; height: 44px; font-size: 22px; color: #fff; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        #cam-flip-btn:active { transform: scale(0.9); background: rgba(212,194,161,0.5); }
+
         #histogram-canvas { position: absolute; bottom: 10px; right: 10px; z-index: 15; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 8px; display: none; width: 35%; height: 15%;}
-        
         #countdown-display { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size: 120px; font-weight:bold; color:#fff; z-index:20; text-shadow: 0 4px 20px rgba(0,0,0,0.8); display:none;}
 
         .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
@@ -49,7 +51,8 @@
         .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
         select, input, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
-        
+        select option { background: var(--navy); color: var(--text); }
+
         .toggle-switch { display: flex; border-radius: 50px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
         .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
         .toggle-opt.active { background: var(--gold); color: #09121c; }
@@ -72,9 +75,20 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
         .nav-item.active { color: var(--gold); }
 
-        @keyframes strobeUK { 0% { background-color: rgba(0, 40, 255, 0.9); } 50% { background-color: rgba(0, 40, 255, 0.9); } 51% { background-color: rgba(255, 255, 255, 0.9); } 100% { background-color: rgba(255, 255, 255, 0.9); } }
+        /* SOS / RAVE ANIMATIONS */
+        @keyframes pulsateGlow { 0% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } 50% { box-shadow: 0 0 30px var(--magenta), 0 0 20px var(--cyan); transform: scale(1.02); } 100% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } }
+        .rave-active-btn { animation: pulsateGlow 1.2s infinite; background: linear-gradient(45deg, var(--magenta), var(--cyan)) !important; border:none; color:#000; font-weight:900;}
+        
+        @keyframes strobeRedBlue { 0%, 49% {background-color: #ff0000;} 50%, 100% {background-color: #0000ff;} }
+        @keyframes strobeRedWhite { 0%, 49% {background-color: #ff0000;} 50%, 100% {background-color: #ffffff;} }
+        @keyframes strobeBlueWhite { 0%, 49% {background-color: #0000ff;} 50%, 100% {background-color: #ffffff;} }
+        @keyframes strobeBluePulse { 0%, 100% {background-color: #0000ff; opacity: 1;} 50% {background-color: #0000ff; opacity: 0.2;} }
+        
         #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-        #sos-flash-overlay.strobe-active { display: block; animation: strobeUK 0.6s infinite; }
+        .mode-strobeRedBlue { animation: strobeRedBlue 0.3s infinite; }
+        .mode-strobeRedWhite { animation: strobeRedWhite 0.3s infinite; }
+        .mode-strobeBlueWhite { animation: strobeBlueWhite 0.3s infinite; }
+        .mode-strobeBluePulse { animation: strobeBluePulse 0.4s infinite; }
 
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); }
@@ -88,7 +102,7 @@
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.9</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v3.0</div></div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV <span style="color:var(--green)">0.0</span></div>
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span> <span id="tel-tint" style="color:var(--magenta)">0</span></div>
@@ -99,6 +113,7 @@
     <div class="main-content">
         <div id="persistent-cam-area">
             <div class="cam-container">
+                <button id="cam-flip-btn">🔄</button>
                 <video id="video" autoplay playsinline></video>
                 <canvas id="fc-layer" class="overlay"></canvas>
                 <canvas id="grid-layer" class="overlay"></canvas>
@@ -202,12 +217,24 @@
         </div>
 
         <div id="page-rave" class="page">
-            <div class="ctrl-panel" style="text-align: center;">
-                <h4 style="color: #ff00ff;">Field Utilities</h4>
-                <button class="btn solid" id="btn-start-rave" style="width: 100%; background: #ff00ff; color:#fff; border:none; margin-bottom: 10px; padding:15px;">START AUDIO STROBE</button>
-                <button class="btn" id="btn-no-rave" style="width: 100%; margin-bottom: 20px; font-size: 11px;">No, I don't want to rave</button>
-                <hr style="border:0; border-top:1px dashed var(--border); margin-bottom:20px;">
-                <button class="btn danger" id="btn-sos-siren" style="width: 100%; padding:15px; font-size:14px;">UK EMERGENCY SIREN</button>
+            <div class="ctrl-panel" style="text-align: center; display: flex; flex-direction: column; gap: 15px;">
+                <h4 style="color: var(--magenta);">Field Utilities</h4>
+                
+                <button class="btn solid rave-active-btn" id="btn-start-rave" style="width: 100%; height: 75px; font-size: 18px; margin-bottom: 5px;">START A RAVE</button>
+                <button class="btn" id="btn-no-rave" style="width: 100%; font-size: 11px;">No, I don't want to rave</button>
+                
+                <hr style="border:0; border-top:1px dashed var(--border); margin: 5px 0;">
+                
+                <div style="text-align: left;">
+                    <span class="label-txt">Siren / Flash Mode</span>
+                    <select id="sos-mode-select" style="margin-bottom: 8px;">
+                        <option value="mode-strobeRedBlue">Red & Blue Strobe</option>
+                        <option value="mode-strobeRedWhite">Red & White Strobe</option>
+                        <option value="mode-strobeBlueWhite">Blue & White Strobe</option>
+                        <option value="mode-strobeBluePulse">Blue Pulse</option>
+                    </select>
+                </div>
+                <button class="btn danger" id="btn-sos-siren" style="width: 100%; height: 60px; font-size:15px; border-radius: 8px;">EMERGENCY SIREN</button>
             </div>
         </div>
 
@@ -313,6 +340,7 @@
     let timerEnabled = false; let soundEnabled = true;
     window.modelIdPhoto = null;
     window.camPitch = 0;
+    window._scoutMapImage = null; // Global for Blob Image
 
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
 
@@ -354,7 +382,6 @@
         
         const hC = document.getElementById('histogram-canvas');
         if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
-        
         drawGrid();
     }
     window.addEventListener('resize', resizeCanvases);
@@ -370,7 +397,7 @@
         });
     });
 
-    // Model Photo Delete/Capture Engine
+    // Model Photo Delete/Capture
     bindSafe('btn-cap-model', 'click', () => {
         const thumb = document.getElementById('model-id-thumb');
         const btn = document.getElementById('btn-cap-model');
@@ -532,23 +559,19 @@
                 }
             }
             
-            // FULL AR SUN TRACKER HUD
             if(currentTab === 'page-scout' && window.currentSunAzimuth !== undefined) {
-                let camAlt = 90 - window.camPitch; // upright is 0 altitude mapping
-                
+                let camAlt = 90 - window.camPitch; 
                 let dAz = window.currentSunAzimuth - currentHeading;
                 if (dAz > 180) dAz -= 360;
                 if (dAz < -180) dAz += 360;
                 
                 let dAlt = window.currentSunAltitude - camAlt;
-                
-                let pxPerDegX = swCtx / 60; // 60 deg horizontal FOV approx
-                let pxPerDegY = shCtx / 80; // 80 deg vertical FOV approx
+                let pxPerDegX = swCtx / 60; 
+                let pxPerDegY = shCtx / 80; 
                 
                 let sunX = (swCtx / 2) + (dAz * pxPerDegX);
                 let sunY = (shCtx / 2) - (dAlt * pxPerDegY);
                 
-                // Draw 0 Degree Horizon
                 let horizonY = (shCtx / 2) + (camAlt * pxPerDegY);
                 scoutCtx.strokeStyle = 'rgba(212,194,161,0.5)';
                 scoutCtx.lineWidth = 1; scoutCtx.setLineDash([5, 5]);
@@ -556,12 +579,10 @@
                 scoutCtx.setLineDash([]);
                 scoutCtx.fillStyle = 'rgba(212,194,161,0.8)'; scoutCtx.font = '10px DM Mono'; scoutCtx.fillText('0° HORIZON', 5, horizonY - 5);
                 
-                // Camera Center Crosshair
                 scoutCtx.strokeStyle = 'rgba(255,255,255,0.4)'; scoutCtx.lineWidth = 1;
                 scoutCtx.beginPath(); scoutCtx.moveTo(swCtx/2-15, shCtx/2); scoutCtx.lineTo(swCtx/2+15, shCtx/2); scoutCtx.stroke();
                 scoutCtx.beginPath(); scoutCtx.moveTo(swCtx/2, shCtx/2-15); scoutCtx.lineTo(swCtx/2, shCtx/2+15); scoutCtx.stroke();
                 
-                // Draw Sun
                 scoutCtx.fillStyle = '#ffb347';
                 scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill();
                 scoutCtx.fillStyle = '#fff'; scoutCtx.font = 'bold 12px DM Mono'; scoutCtx.textAlign = 'center';
@@ -569,7 +590,6 @@
                 scoutCtx.fillText(window.currentSunAltitude.toFixed(1) + '°', sunX, sunY + 50);
                 scoutCtx.textAlign = 'left';
                 
-                // Pointer if off-screen
                 if (sunX < 0 || sunX > swCtx || sunY < 0 || sunY > shCtx) {
                     let cx = swCtx/2; let cy = shCtx/2;
                     let angle = Math.atan2(sunY - cy, sunX - cx);
@@ -635,9 +655,15 @@
                    cCtx.fillStyle = '#555'; cCtx.font = '18px "DM Mono", monospace';
                    cCtx.fillText('📍 ' + (currentLat ? currentLat.toFixed(5) : '--') + ', ' + (currentLon ? currentLon.toFixed(5) : '--'), 70, 1395);
                 } else {
-                   cCtx.fillStyle = '#ccc'; cCtx.fillRect(50, _imgH + 70, 900, 140); 
-                   cCtx.fillStyle = '#1a1a1a'; cCtx.font = '22px "DM Mono", monospace'; 
-                   cCtx.fillText('Map block (CORS). GPS: ' + (currentLat ? currentLat.toFixed(4) : '--') + ', ' + (currentLon ? currentLon.toFixed(4) : '--'), 70, _imgH + 140);
+                   // Fallback Map Graphic
+                   cCtx.fillStyle = '#111'; cCtx.fillRect(50, _imgH + 70, 900, 140); 
+                   cCtx.strokeStyle = '#333'; cCtx.lineWidth = 2;
+                   for(let i=0; i<900; i+=30) { cCtx.beginPath(); cCtx.moveTo(50+i, _imgH+70); cCtx.lineTo(50+i, _imgH+210); cCtx.stroke(); }
+                   for(let i=0; i<140; i+=30) { cCtx.beginPath(); cCtx.moveTo(50, _imgH+70+i); cCtx.lineTo(950, _imgH+70+i); cCtx.stroke(); }
+                   cCtx.fillStyle = '#fff'; cCtx.font = '22px "DM Mono", monospace'; 
+                   cCtx.fillText('[ SATELLITE MAP UNAVAILABLE - GPS ONLY ]', 70, _imgH + 110);
+                   cCtx.fillStyle = 'var(--gold)'; cCtx.font = '18px "DM Mono", monospace'; 
+                   cCtx.fillText('LAT: ' + (currentLat ? currentLat.toFixed(5) : '--') + ' | LON: ' + (currentLon ? currentLon.toFixed(5) : '--'), 70, _imgH + 150);
                 }
             }
             
@@ -716,11 +742,22 @@
             if(mapC) mapC.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed" allowfullscreen></iframe>`;
             
             window._scoutMapImage = null;
-            const _rawTileUrl = 'staticmap.openstreetmap.de/staticmap.php?center=' + currentLat + ',' + currentLon + '&zoom=14&size=800x250&markers=' + currentLat + ',' + currentLon + ',red-pushpin';
-            const _mapImg = new Image(); _mapImg.crossOrigin = 'Anonymous';
-            _mapImg.onload = () => { window._scoutMapImage = _mapImg; }; 
-            _mapImg.onerror = () => { window._scoutMapImage = null; };
-            _mapImg.src = 'https://images.weserv.nl/?url=' + encodeURIComponent(_rawTileUrl);
+            // The nuclear CORS bypass: Fetch raw data via proxy, convert to Base64, draw to canvas.
+            try {
+                const mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(mapUrl)}`;
+                const mapRes = await fetch(proxyUrl);
+                if(mapRes.ok) {
+                    const blob = await mapRes.blob();
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const img = new Image();
+                        img.onload = () => { window._scoutMapImage = img; };
+                        img.src = reader.result; // Pure Base64 data URI string. 100% CORS safe.
+                    }
+                    reader.readAsDataURL(blob);
+                }
+            } catch(e) { console.warn("Map fetch blocked. Using styled fallback grid."); }
 
             try {
                 // Expanded Weather Data Request
@@ -757,22 +794,41 @@
         window.open('https://www.google.com/maps/search/' + query + '/@' + currentLat + ',' + currentLon + ',14z', '_blank');
     };
 
-    // --- RAVE & SIREN ---
+    // --- RAVE ENGINE ---
     let raveAudioCtx = null; let raveAnalyser = null; let raveMic = null; let raveInterval = null; let raveActive = false;
+    
+    const playRaveSiren = () => {
+        if(!soundEnabled) return;
+        const tmpCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = tmpCtx.createOscillator(); const gain = tmpCtx.createGain();
+        osc.type = 'sawtooth'; osc.connect(gain); gain.connect(tmpCtx.destination);
+        let now = tmpCtx.currentTime;
+        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(1400, now + 0.4);
+        osc.frequency.setValueAtTime(300, now + 0.4); osc.frequency.linearRampToValueAtTime(1400, now + 0.8);
+        osc.frequency.setValueAtTime(300, now + 0.8); osc.frequency.linearRampToValueAtTime(1400, now + 1.2);
+        gain.gain.setValueAtTime(0.5, now); gain.gain.linearRampToValueAtTime(0, now + 1.2);
+        osc.start(now); osc.stop(now + 1.2);
+        setTimeout(() => tmpCtx.close(), 1500);
+    };
+
     bindSafe('btn-start-rave', 'click', async () => {
+        const btn = document.getElementById('btn-start-rave');
         if(raveActive) {
             clearInterval(raveInterval); if(raveMic) raveMic.disconnect(); if(raveAudioCtx) raveAudioCtx.close(); raveActive = false;
             document.body.style.setProperty('background-color', '#09121c', 'important'); 
-            const b = document.getElementById('btn-start-rave'); if(b) b.innerText = "Start Audio Strobe"; return;
+            if(btn) { btn.innerText = "START A RAVE"; btn.classList.add('rave-active-btn'); }
+            return;
         }
         try {
+            playRaveSiren();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             await raveAudioCtx.resume(); 
             raveAnalyser = raveAudioCtx.createAnalyser(); raveAnalyser.fftSize = 256;
             raveMic = raveAudioCtx.createMediaStreamSource(stream); raveMic.connect(raveAnalyser);
             const dataArray = new Uint8Array(raveAnalyser.frequencyBinCount);
-            const b = document.getElementById('btn-start-rave'); if(b) b.innerText = "Stop Audio Strobe"; raveActive = true;
+            if(btn) { btn.innerText = "STOP THE RAVE"; btn.classList.remove('rave-active-btn'); }
+            raveActive = true;
             let raveRollingAvg = 0;
             raveInterval = setInterval(() => {
                 if(sosActive) return; 
@@ -800,13 +856,20 @@
     let sosAudioCtx, sirenOsc1, sirenOsc2, sirenGain1, sirenGain2, sosInterval, sosActive = false;
     bindSafe('btn-sos-siren', 'click', () => {
         const o = document.getElementById('sos-flash-overlay');
+        const modeSelect = document.getElementById('sos-mode-select');
+        
         if(sosActive) {
             clearInterval(sosInterval); 
             if(sirenOsc1) { sirenOsc1.stop(); sirenOsc1.disconnect(); } if(sirenOsc2) { sirenOsc2.stop(); sirenOsc2.disconnect(); }
             if(sosAudioCtx) sosAudioCtx.close();
-            if(o) o.classList.remove('strobe-active'); sosActive = false;
+            if(o) { o.className = ''; o.style.display = 'none'; }
+            sosActive = false;
         } else {
-            sosActive = true; if(o) o.classList.add('strobe-active');
+            sosActive = true; 
+            if(o) { 
+                o.className = modeSelect ? modeSelect.value : 'mode-strobeRedBlue'; 
+                o.style.display = 'block'; 
+            }
             sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             sirenOsc1 = sosAudioCtx.createOscillator(); sirenOsc2 = sosAudioCtx.createOscillator();
             sirenGain1 = sosAudioCtx.createGain(); sirenGain2 = sosAudioCtx.createGain();
@@ -858,7 +921,7 @@
         doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161);
         doc.text('MODEL RELEASE FORM', window.modelIdPhoto ? 75 : pageW/2,13,{align:'center'});
         doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
-        doc.text('PR Eye v2.9 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
+        doc.text('PR Eye v3.0 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
         
         y=30;doc.setTextColor(0);
         addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true,0, window.modelIdPhoto ? 130 : usableW);
@@ -923,7 +986,7 @@
     
     bindSafe('btn-wa-release', 'click', () => {
         const rD = document.getElementById('r-date'); const rL = document.getElementById('r-loc'); const rN = document.getElementById('r-name');
-        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.9\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
+        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v3.0\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
         window.open('https://wa.me/?text='+msg,'_blank');
     });
 
