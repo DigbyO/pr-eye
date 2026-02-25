@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v3.0 — Pro Toolkit</title>
+    <title>PR Eye v3.2 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,6 +14,7 @@
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
             --red: #ff4d4d; --green: #4dff4d; --magenta: #ff00ff; --cyan: #00ffff;
+            --canon-bg: #111a24; --canon-line: #3a4a5a; --canon-orange: #f39c12;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
@@ -29,7 +30,7 @@
         .page { display: none; } .page.active { display: block; }
 
         #persistent-cam-area { margin-bottom: 10px; display: flex; flex-direction: column; position: relative;}
-        .cam-container { position: relative; width: 100%; max-height: 42vh; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 0 auto 8px auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
+        .cam-container { position: relative; width: 100%; max-height: 40vh; aspect-ratio: 3/4; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 0 auto 8px auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #level-layer { z-index: 6; display: none; } #scout-layer { z-index: 7; }
@@ -50,16 +51,35 @@
         
         .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-        select, input, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
-        select option { background: var(--navy); color: var(--text); }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="email"], textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
 
         .toggle-switch { display: flex; border-radius: 50px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
         .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
         .toggle-opt.active { background: var(--gold); color: #09121c; }
 
-        .expo-meter-readout { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; margin-bottom: 10px;}
-        .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; border-radius: 2px;}
-        .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 16px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
+        /* CANON-STYLE METER GRID */
+        .canon-hud { background: var(--canon-bg); border: 2px solid #555; border-radius: 8px; overflow: hidden; font-family: 'DM Mono', monospace; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);}
+        .canon-row { display: flex; border-bottom: 1px solid var(--canon-line); }
+        .canon-row:last-child { border-bottom: none; }
+        .canon-cell { flex: 1; padding: 12px 5px; text-align: center; border-right: 1px solid var(--canon-line); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .canon-cell:last-child { border-right: none; }
+        .c-val { font-size: 22px; font-weight: 500; color: #fff; letter-spacing: -0.5px;}
+        .c-lbl { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1px;}
+        .c-active { color: var(--canon-orange); }
+        .c-box { border: 1px solid #888; padding: 1px 4px; border-radius: 3px; font-size: 8px; margin-bottom: 3px;}
+        
+        .meter-scale-container { padding: 12px; background: #0a1118; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid var(--canon-line);}
+        .meter-numbers { display: flex; justify-content: space-between; width: 95%; color: #fff; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+        .meter-bar-wrap { position: relative; width: 95%; height: 10px; border-bottom: 2px solid #666; display: flex; justify-content: space-between;}
+        .tick { width: 2px; height: 5px; background: #666; align-self: flex-end; }
+        .tick.major { height: 10px; background: #fff; }
+        .meter-needle { position: absolute; top: -2px; left: 50%; width: 3px; height: 18px; background: var(--canon-orange); transform: translateX(-50%); transition: left 0.1s linear; z-index: 2;}
+
+        .slider-row { display: flex; align-items: center; margin-bottom: 15px; gap: 12px;}
+        .slider-lbl { width: 35px; font-size: 11px; color: var(--muted); text-align: right; font-weight: 500;}
+        input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; margin-top: -9px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
         .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 50px; }
@@ -102,7 +122,7 @@
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v3.0</div></div>
+        <div class="hdr-top"><div class="brand">PR EYE v3.2</div></div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV <span style="color:var(--green)">0.0</span></div>
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span> <span id="tel-tint" style="color:var(--magenta)">0</span></div>
@@ -133,27 +153,48 @@
                 <button id="toggle-timer-btn" class="btn">⏱️ Timer: OFF</button>
                 <button id="toggle-sound-btn" class="btn active-toggle">🔊 Sound: ON</button>
             </div>
-            <button id="capture-btn" class="btn solid" style="width:100%; padding:12px; font-size:14px; margin-bottom:8px;">CAPTURE FRAME</button>
+            <button id="capture-btn" class="btn solid" style="width:100%; padding:14px; font-size:16px; margin-bottom:8px; border-radius: 8px;">CAPTURE FRAME</button>
+            <p style="font-size: 9px; color: var(--muted); text-align: center; margin-bottom: 10px;">TIP: Press phone volume keys to trigger capture.</p>
         </div>
 
         <div id="page-meter" class="page active">
-            <div class="ctrl-panel">
-                <h4>Pro Metering</h4>
-                <div class="toggle-switch">
-                    <div id="meter-live" class="toggle-opt active">LIVE</div>
-                    <div id="meter-flash" class="toggle-opt">FLASH PEAK</div>
+            <div class="canon-hud">
+                <div class="canon-row">
+                    <div class="canon-cell"><span class="c-lbl" style="color: var(--canon-orange);">SHUTTER</span><span class="c-val" id="hud-shutter">1/60</span></div>
+                    <div class="canon-cell"><span class="c-lbl">F-STOP</span><span class="c-val" id="hud-aperture">F5.6</span></div>
+                    <div class="canon-cell"><span class="c-box">ISO</span><span class="c-val" id="hud-iso">400</span></div>
                 </div>
-                <div class="row">
-                    <div class="col"><span class="label-txt">ISO</span><select id="set-iso"><option>100</option><option selected>400</option><option>800</option><option>1600</option><option>3200</option></select></div>
-                    <div class="col"><span class="label-txt">Aperture</span><select id="set-aperture"><option>1.4</option><option>2.8</option><option selected>5.6</option><option>8</option><option>11</option><option>16</option></select></div>
+                
+                <div class="meter-scale-container">
+                    <div class="meter-numbers"><span>-3</span><span>..</span><span>-2</span><span>..</span><span>-1</span><span>..</span><span>0</span><span>..</span><span>1</span><span>..</span><span>2</span><span>..</span><span>+3</span></div>
+                    <div class="meter-bar-wrap" id="hud-scale-wrap">
+                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major" style="height:12px;"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
+                        <div class="tick major"></div>
+                        <div class="meter-needle" id="expo-marker"></div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="col"><span class="label-txt">Shutter</span><select id="set-shutter"><option>30</option><option selected>60</option><option>125</option><option>250</option></select></div>
-                    <div class="col"><span class="label-txt">ND Filter</span><select id="set-nd"><option value="0">None</option><option value="1">1 Stop</option><option value="2">2 Stops</option><option value="3">3 Stops</option></select></div>
+
+                <div class="canon-row" style="background: #1a2530;">
+                    <div class="canon-cell" id="hud-meter-mode" style="cursor: pointer;"><span class="c-lbl">METER</span><span class="c-val" id="icon-meter-mode" style="font-size:16px; color: var(--canon-orange);">[ ]</span></div>
+                    <div class="canon-cell" id="hud-torch" style="cursor: pointer;"><span class="c-lbl">TORCH</span><span class="c-val" id="icon-torch" style="font-size:16px; color:#555;">🔦 OFF</span></div>
+                    <div class="canon-cell" id="hud-nd" style="cursor: pointer;"><span class="c-lbl">ND FLTR</span><span class="c-val" id="icon-nd" style="font-size:14px; color:#fff;">OFF</span></div>
                 </div>
-                <div class="expo-meter-readout"><span>-3</span><div class="expo-scale"><div class="expo-marker" id="expo-marker"></div></div><span>+3</span></div>
-                <button id="reset-flash-btn" class="btn" style="width:100%; display:none;">Reset Peak Meter</button>
             </div>
+            
+            <div class="toggle-switch" style="margin-bottom: 15px;">
+                <div id="meter-live" class="toggle-opt active">LIVE METER</div>
+                <div id="meter-flash" class="toggle-opt">FLASH PEAK</div>
+            </div>
+            <button id="reset-flash-btn" class="btn" style="width:100%; display:none; margin-bottom: 15px;">Reset Peak Meter</button>
+
+            <div class="slider-row"><span class="slider-lbl">SS</span><input type="range" id="slide-shutter" min="0" max="52" value="33"></div>
+            <div class="slider-row"><span class="slider-lbl">F/</span><input type="range" id="slide-aperture" min="0" max="22" value="10"></div>
+            <div class="slider-row"><span class="slider-lbl">ISO</span><input type="range" id="slide-iso" min="0" max="23" value="7"></div>
         </div>
 
         <div id="page-color" class="page">
@@ -340,7 +381,23 @@
     let timerEnabled = false; let soundEnabled = true;
     window.modelIdPhoto = null;
     window.camPitch = 0;
-    window._scoutMapImage = null; // Global for Blob Image
+    window._scoutMapImage = null;
+
+    // CANON EXPOSURE ARRAYS
+    const arrShutter = ['30"','25"','20"','15"','13"','10"','8"','6"','5"','4"','3.2"','2.5"','2"','1.6"','1.3"','1"','0.8"','0.6"','0.5"','0.4"','0.3"','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000'];
+    const arrAperture = [1.2, 1.4, 1.8, 2.0, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10, 11, 13, 14, 16, 18, 20, 22];
+    const arrIso = [50, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 25600];
+    
+    // Metering Modes: 0 = Matrix, 1 = Center, 2 = Spot
+    let currentMeterMode = 0; 
+    let currentNdLevel = 0; const arrNd = [0, 1, 2, 3];
+    let torchActive = false;
+
+    function parseShutter(s) {
+        if(s.includes('"')) return parseFloat(s.replace('"',''));
+        if(s.includes('/')) { let pts = s.split('/'); return parseInt(pts[0]) / parseInt(pts[1]); }
+        return parseFloat(s);
+    }
 
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
 
@@ -350,22 +407,52 @@
     bindSafe('meter-flash', 'click', () => { flashModeActive=true; flashPeakEV=-99; document.getElementById('meter-flash').classList.add('active'); document.getElementById('meter-live').classList.remove('active'); document.getElementById('reset-flash-btn').style.display='block'; });
     bindSafe('reset-flash-btn', 'click', () => { flashPeakEV=-99; document.querySelector('#tel-ev span').innerText = `PEAK --`; });
 
-    function loadSettings() {
-        if(localStorage.getItem('preye_notes') && document.getElementById('shoot-notes')) document.getElementById('shoot-notes').value = localStorage.getItem('preye_notes');
-        bindSafe('shoot-notes', 'input', () => localStorage.setItem('preye_notes', document.getElementById('shoot-notes').value));
-
-        const saved = JSON.parse(localStorage.getItem('preye_settings') || '{}');
-        if(saved.iso && document.getElementById('set-iso')) document.getElementById('set-iso').value = saved.iso;
-        if(saved.aperture && document.getElementById('set-aperture')) document.getElementById('set-aperture').value = saved.aperture;
-        if(saved.shutter && document.getElementById('set-shutter')) document.getElementById('set-shutter').value = saved.shutter;
-        if(saved.nd && document.getElementById('set-nd')) document.getElementById('set-nd').value = saved.nd;
+    // HUD Interactions
+    function updateHudData() {
+        const sVal = arrShutter[document.getElementById('slide-shutter').value];
+        const fVal = arrAperture[document.getElementById('slide-aperture').value];
+        const iVal = arrIso[document.getElementById('slide-iso').value];
         
-        if(document.getElementById('r-date')) document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('hud-shutter').innerText = sVal;
+        document.getElementById('hud-aperture').innerText = 'F' + fVal;
+        document.getElementById('hud-iso').innerText = iVal;
     }
-    loadSettings();
+    ['slide-shutter', 'slide-aperture', 'slide-iso'].forEach(id => bindSafe(id, 'input', updateHudData));
 
-    const saveExpo = () => localStorage.setItem('preye_settings', JSON.stringify({iso: document.getElementById('set-iso').value, aperture: document.getElementById('set-aperture').value, shutter: document.getElementById('set-shutter').value, nd: document.getElementById('set-nd').value}));
-    ['set-iso', 'set-aperture', 'set-shutter', 'set-nd'].forEach(id => bindSafe(id, 'change', saveExpo));
+    bindSafe('hud-meter-mode', 'click', () => {
+        currentMeterMode = (currentMeterMode + 1) % 3;
+        const icon = document.getElementById('icon-meter-mode');
+        if(currentMeterMode === 0) icon.innerText = "[ ]";
+        else if(currentMeterMode === 1) icon.innerText = "( )";
+        else icon.innerText = "[•]";
+    });
+
+    bindSafe('hud-nd', 'click', () => {
+        currentNdLevel = (currentNdLevel + 1) % 4;
+        const icon = document.getElementById('icon-nd');
+        icon.innerText = currentNdLevel === 0 ? "OFF" : currentNdLevel + " STOP";
+        icon.style.color = currentNdLevel === 0 ? "#fff" : "var(--canon-orange)";
+    });
+
+    bindSafe('hud-torch', 'click', async () => {
+        if (!stream) return;
+        const track = stream.getVideoTracks()[0];
+        try {
+            torchActive = !torchActive;
+            await track.applyConstraints({ advanced: [{ torch: torchActive }] });
+            const icon = document.getElementById('icon-torch');
+            icon.innerText = torchActive ? "🔦 ON" : "🔦 OFF";
+            icon.style.color = torchActive ? "var(--canon-orange)" : "#555";
+        } catch (err) { alert('Torch API not supported on this browser/lens.'); torchActive = false; }
+    });
+
+    // Hardware Volume Button Shutter
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'VolumeUp' || e.key === 'VolumeDown' || e.key === 'AudioVolumeUp' || e.key === 'AudioVolumeDown') {
+            const capBtn = document.getElementById('capture-btn');
+            if (capBtn && currentTab === 'page-meter') { e.preventDefault(); capBtn.click(); }
+        }
+    });
 
     async function startCamera() {
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
@@ -373,13 +460,12 @@
         video.srcObject = stream; video.play();
         video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); fetchLocData(); }; 
     }
-    bindSafe('cam-flip-btn', 'click', ()=>{ currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; startCamera(); });
+    bindSafe('cam-flip-btn', 'click', ()=>{ currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; torchActive = false; document.getElementById('icon-torch').style.color='#555'; document.getElementById('icon-torch').innerText='🔦 OFF'; startCamera(); });
 
     function resizeCanvases() {
         const rect = video.getBoundingClientRect(); if(rect.width===0) return;
         ['grid-layer', 'ui-layer', 'fc-layer', 'level-layer', 'scout-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
         const fcInt = document.getElementById('fc-internal-canvas'); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
-        
         const hC = document.getElementById('histogram-canvas');
         if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
         drawGrid();
@@ -472,18 +558,23 @@
     function updateExpoBar() {
         if(measuredEV === null || measuredEV === undefined) return;
         let useEV = flashModeActive ? flashPeakEV : measuredEV; if(useEV === -99) useEV = measuredEV;
-        const nEl=document.getElementById('set-aperture'); const iEl=document.getElementById('set-iso'); const ndEl=document.getElementById('set-nd'); const sEl=document.getElementById('set-shutter');
-        if(!nEl || !iEl || !ndEl || !sEl) return;
         
-        const N = parseFloat(nEl.value); const ISO = parseInt(iEl.value); const ndStops = parseFloat(ndEl.value);
-        let t = 1 / parseFloat(sEl.value);
-        let diff = useEV - (Math.log2((N*N)/t) - Math.log2(ISO/100) + ndStops);
-        let percent = Math.max(5, Math.min(95, 50 + (diff * (50/3))));
+        const N = arrAperture[document.getElementById('slide-aperture').value]; 
+        const ISO = arrIso[document.getElementById('slide-iso').value]; 
+        const sStr = arrShutter[document.getElementById('slide-shutter').value];
+        const t = parseShutter(sStr);
+        
+        let diff = useEV - (Math.log2((N*N)/t) - Math.log2(ISO/100) + currentNdLevel);
+        
+        let percent = Math.max(0, Math.min(100, 50 + (diff * (50/3))));
         const marker = document.getElementById('expo-marker');
-        if(marker) { marker.style.left = `${percent}%`; marker.style.background = (percent < 20 || percent > 80) ? 'var(--red)' : 'var(--gold)'; }
+        if(marker) { 
+            marker.style.left = `${percent}%`; 
+            marker.style.background = (percent < 10 || percent > 90) ? 'var(--red)' : 'var(--canon-orange)'; 
+        }
         
         const evSpan = document.querySelector('#tel-ev span'); 
-        if(evSpan) { if(Math.abs(diff) < 1) evSpan.style.color = 'var(--green)'; else if(diff > 0) evSpan.style.color = 'var(--gold)'; else evSpan.style.color = 'var(--red)'; }
+        if(evSpan) { if(Math.abs(diff) < 0.5) evSpan.style.color = 'var(--green)'; else if(Math.abs(diff) < 2) evSpan.style.color = 'var(--gold)'; else evSpan.style.color = 'var(--red)'; }
     }
 
     let panMode = 'auto'; let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}]; let manualIndex = 0; let lastPanExtraction = [];
@@ -503,8 +594,31 @@
             if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
             procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200);
             const viewData = procCtx.getImageData(0,0,150,200).data;
+            
             let rT=0, gT=0, bT=0, lumT=0, c=0; 
-            for(let i=0; i<viewData.length; i+=4) { rT+=viewData[i]; gT+=viewData[i+1]; bT+=viewData[i+2]; lumT += (0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]); c++; }
+            
+            // Apply Metering Mode Logic
+            for(let y=0; y<200; y++) {
+                for(let x=0; x<150; x++) {
+                    let i = (y * 150 + x) * 4;
+                    let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2];
+                    
+                    let weight = 1;
+                    if(currentMeterMode === 1) { // Center Weighted
+                        let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2));
+                        weight = dist < 50 ? 1 : (dist < 80 ? 0.5 : 0.1);
+                    } else if(currentMeterMode === 2) { // Spot
+                        let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2));
+                        weight = dist < 15 ? 1 : 0;
+                    }
+                    
+                    if(weight > 0) {
+                        rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight;
+                        lumT += luma * weight; c += weight;
+                    }
+                }
+            }
+            
             let curEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 12.5);
             measuredEV = curEV;
             
@@ -535,6 +649,16 @@
             const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch);
             const swCtx = scoutCtx.canvas.width; const shCtx = scoutCtx.canvas.height; scoutCtx.clearRect(0,0,swCtx,shCtx);
             
+            // Draw Center Reticle for Metering
+            if(currentTab === 'page-meter') {
+                uiCtx.strokeStyle = 'rgba(255,255,255,0.4)'; uiCtx.lineWidth = 1;
+                if(currentMeterMode === 1) { // Center
+                    uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, cw*0.25, 0, Math.PI*2); uiCtx.stroke();
+                } else if(currentMeterMode === 2) { // Spot
+                    uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke();
+                }
+            }
+
             if(currentTab === 'page-color') {
                 lastPanExtraction = [];
                 const pts = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
@@ -646,6 +770,7 @@
                 cCtx.drawImage(video, sx, sy, sw, sh, 50, 50, 900, _imgH);
             }
             if(gridOptions[currentGridIdx] !== 'off') cCtx.drawImage(document.getElementById('grid-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,_imgH);
+            if(currentTab === 'page-meter') cCtx.drawImage(document.getElementById('ui-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,_imgH);
             
             if(currentTab === 'page-scout') {
                 cCtx.drawImage(document.getElementById('scout-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,_imgH);
@@ -655,7 +780,6 @@
                    cCtx.fillStyle = '#555'; cCtx.font = '18px "DM Mono", monospace';
                    cCtx.fillText('📍 ' + (currentLat ? currentLat.toFixed(5) : '--') + ', ' + (currentLon ? currentLon.toFixed(5) : '--'), 70, 1395);
                 } else {
-                   // Fallback Map Graphic
                    cCtx.fillStyle = '#111'; cCtx.fillRect(50, _imgH + 70, 900, 140); 
                    cCtx.strokeStyle = '#333'; cCtx.lineWidth = 2;
                    for(let i=0; i<900; i+=30) { cCtx.beginPath(); cCtx.moveTo(50+i, _imgH+70); cCtx.lineTo(50+i, _imgH+210); cCtx.stroke(); }
@@ -699,11 +823,12 @@
                 });
             } else {
                 let useEV = flashModeActive ? flashPeakEV : measuredEV; if(useEV === -99) useEV = measuredEV;
-                const setIso = document.getElementById('set-iso') ? document.getElementById('set-iso').value : '--';
-                const setAp = document.getElementById('set-aperture') ? document.getElementById('set-aperture').value : '--';
-                const setSh = document.getElementById('set-shutter') ? document.getElementById('set-shutter').value : '--';
                 
-                cCtx.fillText(`EV: ${useEV.toFixed(1)} | ISO ${setIso} | f/${setAp} | 1/${setSh}s`, 70, 1330);
+                const sStr = arrShutter[document.getElementById('slide-shutter').value];
+                const fVal = arrAperture[document.getElementById('slide-aperture').value];
+                const iVal = arrIso[document.getElementById('slide-iso').value];
+                
+                cCtx.fillText(`EV: ${useEV.toFixed(1)} | ISO ${iVal} | f/${fVal} | ${sStr}s`, 70, 1330);
                 cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#444';
                 cCtx.fillText(`WB: ${liveTempK}K (Tint: ${liveTint > 0 ? 'G+' : 'M'}${Math.abs(liveTint)}) | ${new Date().toLocaleDateString()}`, 70, 1390);
                 cCtx.font = '22px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#666';
@@ -742,10 +867,11 @@
             if(mapC) mapC.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&z=15&output=embed" allowfullscreen></iframe>`;
             
             window._scoutMapImage = null;
-            // The nuclear CORS bypass: Fetch raw data via proxy, convert to Base64, draw to canvas.
+            // Definitive CORS Bypass Pipeline via allorigins.win
             try {
                 const mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${currentLat},${currentLon}&zoom=14&size=800x250&markers=${currentLat},${currentLon},red-pushpin`;
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(mapUrl)}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(mapUrl)}`;
+                
                 const mapRes = await fetch(proxyUrl);
                 if(mapRes.ok) {
                     const blob = await mapRes.blob();
@@ -753,14 +879,13 @@
                     reader.onloadend = function() {
                         const img = new Image();
                         img.onload = () => { window._scoutMapImage = img; };
-                        img.src = reader.result; // Pure Base64 data URI string. 100% CORS safe.
+                        img.src = reader.result; 
                     }
                     reader.readAsDataURL(blob);
                 }
             } catch(e) { console.warn("Map fetch blocked. Using styled fallback grid."); }
 
             try {
-                // Expanded Weather Data Request
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m&temperature_unit=celsius`);
                 if(wRes.ok) {
                     const wData = await wRes.json(); 
@@ -921,7 +1046,7 @@
         doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161);
         doc.text('MODEL RELEASE FORM', window.modelIdPhoto ? 75 : pageW/2,13,{align:'center'});
         doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
-        doc.text('PR Eye v3.0 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
+        doc.text('PR Eye v3.2 — Professional Photography Release', window.modelIdPhoto ? 75 : pageW/2,20,{align:'center'});
         
         y=30;doc.setTextColor(0);
         addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true,0, window.modelIdPhoto ? 130 : usableW);
@@ -986,7 +1111,7 @@
     
     bindSafe('btn-wa-release', 'click', () => {
         const rD = document.getElementById('r-date'); const rL = document.getElementById('r-loc'); const rN = document.getElementById('r-name');
-        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v3.0\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
+        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v3.2\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
         window.open('https://wa.me/?text='+msg,'_blank');
     });
 
@@ -1010,6 +1135,7 @@
     
     // --- STARTUP & REAL-TIME LOOPS ---
     startCamera();
+    updateHudData();
     
     setInterval(() => {
         if(goldenHourTime) { 
