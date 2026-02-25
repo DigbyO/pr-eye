@@ -1,4 +1,3 @@
-Gemini said
 <!DOCTYPE html>
 
 <html lang="en">
@@ -131,7 +130,7 @@ Gemini said
 
 <div class="hdr" id="main-hdr">
     <div class="hdr-top">
-        <div class="brand">PR EYE v4.4</div>
+        <div class="brand">PR EYE v4.5</div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
             <div class="tel-item">TILT <span id="tool-heading" style="color:var(--cyan)">0°</span></div>
@@ -174,7 +173,10 @@ Gemini said
 
     <div id="page-meter" class="page active">
         <div class="pro-meter-display">
-            <div class="ev-huge" id="display-ev">0.0<span>EV</span></div>
+            <div id="ev-big-display" style="text-align:center; padding:10px 0 5px; font-family:'Cormorant Garamond',serif; font-size:72px; color:var(--gold); letter-spacing:-2px; line-height:1;">
+                <span id="ev-big-val">0.0</span>
+                <span style="font-size:20px; color:var(--muted); vertical-align:middle;"> EV</span>
+            </div>
             <div style="display:flex; justify-content:center; gap:20px; font-size:11px; color:var(--muted); margin-bottom:12px; letter-spacing:1px;">
                 <span id="ev-zone-label">ZONE V</span>
                 <span id="ev-lux-label">-- lux</span>
@@ -514,13 +516,19 @@ window.addEventListener(&#39;keydown&#39;, function(e) {
 });
 function updateBiasDisplay() { const badge = document.getElementById(&#39;display-bias&#39;); if(Math.abs(evBias) &lt; 0.1) { badge.style.display = &#39;none&#39;; evBias = 0; } else { badge.style.display = &#39;block&#39;; badge.innerText = (evBias &gt; 0 ? &#39;+&#39; : &#39;&#39;) + evBias.toFixed(1) + &#39; EV&#39;; } }
 
+let loopAnimFrame = null;
 async function startCamera() {
     if(stream) { stream.getTracks().forEach(t =&gt; t.stop()); video.srcObject = null; await new Promise(r =&gt; setTimeout(r, 500)); }
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error(&quot;Cam fail&quot;); }
+    if (!stream) return;
     video.srcObject = stream;
     video.load();
     video.play().catch(()=&gt;{});
-    const onReady = () =&gt; { resizeCanvases(); requestAnimationFrame(liveLoop); };
+    const onReady = () =&gt; { 
+        resizeCanvases(); 
+        if(loopAnimFrame) cancelAnimationFrame(loopAnimFrame);
+        loopAnimFrame = requestAnimationFrame(liveLoop); 
+    };
     video.onloadedmetadata = onReady;
     video.onloadeddata = onReady;
     if(navigator.wakeLock) { navigator.wakeLock.request(&#39;screen&#39;).catch(()=&gt;{}); }
@@ -612,7 +620,7 @@ document.getElementById(&#39;btn-export-swatches&#39;) &amp;&amp; document.getEl
         cx.fillStyle=&#39;#8b9bb4&#39;; cx.font=&#39;14px DM Mono&#39;; cx.fillText(col, x+10, 248);
     });
     cx.fillStyle=&#39;rgba(212,194,161,0.5)&#39;; cx.font=&#39;12px DM Mono&#39;;
-    cx.fillText(&#39;PR Eye v4.4 — Colour Analysis&#39;, 10, 285);
+    cx.fillText(&#39;PR Eye v4.5 — Colour Analysis&#39;, 10, 285);
     c.toBlob(blob=&gt;{
         const url=URL.createObjectURL(blob); const a=document.createElement(&#39;a&#39;);
         a.href=url; a.download=&#39;PREye_Swatches_&#39;+Date.now()+&#39;.jpg&#39;; a.click();
@@ -755,7 +763,7 @@ function liveLoop() {
             if (sunX &lt; 0 || sunX &gt; cw || sunY &lt; 0 || sunY &gt; ch) { let tcx = cw/2; let tcy = ch/2; let angle = Math.atan2(sunY - tcy, sunX - tcx); let ptrX = tcx + Math.cos(angle) * (cw/2 - 30); let ptrY = tcy + Math.sin(angle) * (cw/2 - 30); scoutCtx.fillStyle = &#39;rgba(255, 179, 71, 0.9)&#39;; scoutCtx.beginPath(); scoutCtx.arc(ptrX, ptrY, 10, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;10px DM Mono&#39;; scoutCtx.fillText(&#39;SUN&#39;, ptrX + 15, ptrY + 4); }
         }
     }
-    requestAnimationFrame(liveLoop);
+    loopAnimFrame = requestAnimationFrame(liveLoop);
 }
 
 // --- CAPTURE &amp; EXPORT ENGINES ---
@@ -930,7 +938,7 @@ bindSafe(&#39;gen-pdf-btn&#39;, &#39;click&#39;, async () =&gt; {
     const addLine=()=&gt;{doc.setDrawColor(200);doc.line(margin,y,pageW-margin,y);y+=5;};
     const addSig=(cid,lbl)=&gt;{ if(y&gt;240){doc.addPage();y=15;}addText(lbl+&#39;:&#39;,9,true); try{doc.addImage(document.getElementById(cid).toDataURL(&#39;image/png&#39;),&#39;PNG&#39;,margin,y,70,18);}catch(e){}y+=22; };
     
-    doc.setFillColor(9,18,28);doc.rect(0,0,210,25,&#39;F&#39;); doc.setFontSize(16);doc.setFont(&#39;helvetica&#39;,&#39;bold&#39;);doc.setTextColor(212,194,161); doc.text(&#39;MODEL RELEASE FORM&#39;, pageW/2,13,{align:&#39;center&#39;}); doc.setFontSize(9);doc.setFont(&#39;helvetica&#39;,&#39;normal&#39;);doc.setTextColor(180,180,180); doc.text(&#39;PR Eye v4.4 — Professional Photography Release&#39;, pageW/2,20,{align:&#39;center&#39;});
+    doc.setFillColor(9,18,28);doc.rect(0,0,210,25,&#39;F&#39;); doc.setFontSize(16);doc.setFont(&#39;helvetica&#39;,&#39;bold&#39;);doc.setTextColor(212,194,161); doc.text(&#39;MODEL RELEASE FORM&#39;, pageW/2,13,{align:&#39;center&#39;}); doc.setFontSize(9);doc.setFont(&#39;helvetica&#39;,&#39;normal&#39;);doc.setTextColor(180,180,180); doc.text(&#39;PR Eye v4.5 — Professional Photography Release&#39;, pageW/2,20,{align:&#39;center&#39;});
     y=30;doc.setTextColor(0); addText(&#39;Shoot Date: &#39;+(date||&#39;_______________&#39;)+&#39;   Location: &#39;+(loc||&#39;___________________________&#39;),10,true,0, usableW); addLine(); 
     addText(&#39;PHOTOGRAPHER:&#39;,10,true); addText(photogName,9); addLine(); 
     addText(&#39;MODEL:&#39;,10,true); addText(&#39;Name: &#39;+(modelName||&#39;_________________________________&#39;),9); addText(&#39;Compensation: &#39;+comp,9); addLine();
