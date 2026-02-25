@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.6.1 — Full Restore</title>
+    <title>PR Eye v4.6.2 — Pro Suite</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -35,19 +35,25 @@
 
         .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; flex: 1; font-size: 10px; text-transform: uppercase; text-align: center;}
         .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
+        .btn.sm { padding: 8px; font-size: 9px; }
         
         .nav { background: rgba(9, 18, 28, 0.95); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 0; color: var(--muted); font-size: 9px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
 
-        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; display: flex; height: 45px; overflow: hidden; }
+        .pan-swatch { width: 35%; }
+        .pan-data { padding: 5px; font-size: 9px; display: flex; flex-direction: column; justify-content: center; }
+
+        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border: 1px solid var(--gold); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="hdr" id="main-hdr">
-        <div class="brand">PR EYE v4.6.1</div>
+    <div class="hdr">
+        <div class="brand">PR EYE v4.6.2</div>
         <div id="tel-wb" style="font-size: 10px; color: var(--muted);">WB 5500K</div>
     </div>
 
@@ -65,7 +71,7 @@
         <div id="page-meter" class="page active">
             <div class="pro-meter-display">
                 <div id="ev-big-val">0.0</div>
-                <div style="color: var(--muted); font-size: 11px; letter-spacing: 2px;">ZONE V</div>
+                <div id="ev-zone-label" style="color: var(--muted); font-size: 11px; letter-spacing: 2px;">ZONE V</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button id="torch-btn" class="btn">TORCH</button>
@@ -74,15 +80,25 @@
         </div>
 
         <div id="page-color" class="page">
-            <h4 style="color:var(--gold); margin-bottom:10px;">MIDJOURNEY PROMPT</h4>
-            <textarea id="mj-prompt-output" style="width:100%; height:80px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; font-family:inherit; padding:10px; font-size:11px; margin-bottom:10px;" readonly></textarea>
+            <h4 style="color:var(--gold); margin-bottom:10px;">GENERATIVE INTERIORS</h4>
+            <div class="toggle-switch" style="display:flex; gap:5px; margin-bottom:10px;">
+                <button class="btn sm prompt-style-btn active" data-style="Modern Home">Modern</button>
+                <button class="btn sm prompt-style-btn" data-style="Georgian House">Georgian</button>
+                <button class="btn sm prompt-style-btn" data-style="English Cottage">Cottage</button>
+            </div>
+            <textarea id="mj-prompt-output" style="width:100%; height:100px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; font-family:inherit; padding:10px; font-size:11px; margin-bottom:10px;" readonly></textarea>
             <button class="btn sm" id="btn-copy-mj" style="width:100%">Copy Prompt</button>
+
+            <div class="pan-grid" id="swatch-container">
+                <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div id="ch1">#---</div></div></div>
+                <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div id="ch2">#---</div></div></div>
+            </div>
         </div>
     </div>
 
     <div id="result-overlay">
         <img id="result-img" src="">
-        <button class="btn solid" id="btn-close-result" style="width:200px">CLOSE & DISCARD</button>
+        <button class="btn solid" id="btn-close-result" style="width:200px">CLOSE</button>
     </div>
 
     <div class="nav">
@@ -102,6 +118,8 @@
     
     let stream = null;
     let currentEV = 0;
+    let extractedHex = ["#333333", "#666666"];
+    let currentInteriorStyle = "Modern Home";
 
     async function startCamera() {
         try {
@@ -116,34 +134,37 @@
     // Capture Logic
     document.getElementById('capture-btn').addEventListener('click', () => {
         if(video.readyState !== 4) return;
-        
-        // Build the composite image
         compCtx.fillStyle = '#09121c';
         compCtx.fillRect(0,0,1000,1500);
-        
-        // Draw Video Frame (Maintain 3:4 aspect)
         compCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 50, 50, 900, 1200);
         
-        // Add Telemetry Overlay
-        compCtx.fillStyle = 'rgba(0,0,0,0.5)';
-        compCtx.fillRect(50, 1150, 900, 100);
+        // Footer bar
+        compCtx.fillStyle = 'rgba(0,0,0,0.8)';
+        compCtx.fillRect(50, 1100, 900, 150);
+        
+        // Swatches on capture
+        compCtx.fillStyle = extractedHex[0]; compCtx.fillRect(60, 1115, 60, 60);
+        compCtx.fillStyle = extractedHex[1]; compCtx.fillRect(130, 1115, 60, 60);
         
         compCtx.fillStyle = '#d4c2a1';
-        compCtx.font = 'bold 40px Arial';
-        compCtx.fillText("EV: " + currentEV.toFixed(1), 80, 1215);
-        
-        compCtx.font = '24px Arial';
-        compCtx.fillText(new Date().toLocaleString(), 700, 1215);
+        compCtx.font = 'bold 30px Arial';
+        compCtx.fillText("EV " + currentEV.toFixed(1) + " | " + currentInteriorStyle, 210, 1155);
 
-        // Show Result
         const dataUrl = compCanvas.toDataURL('image/jpeg', 0.9);
         document.getElementById('result-img').src = dataUrl;
         document.getElementById('result-overlay').style.display = 'flex';
     });
 
-    document.getElementById('btn-close-result').onclick = () => {
-        document.getElementById('result-overlay').style.display = 'none';
-    };
+    document.getElementById('btn-close-result').onclick = () => document.getElementById('result-overlay').style.display = 'none';
+
+    // Style Switcher
+    document.querySelectorAll('.prompt-style-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.prompt-style-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentInteriorStyle = btn.dataset.style;
+        };
+    });
 
     // Navigation
     document.querySelectorAll('.nav-item').forEach(nav => {
@@ -154,21 +175,37 @@
         });
     });
 
-    // Exposure Loop
+    const rgbToHex = (r,g,b) => "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase();
+
     function liveLoop() {
         if (video.readyState === 4) {
             procCtx.drawImage(video, 0, 0, 300, 400);
-            const data = procCtx.getImageData(140, 190, 20, 20).data;
+            
+            // Exposure
+            const midData = procCtx.getImageData(140, 190, 20, 20).data;
             let lum = 0;
-            for(let i=0; i<data.length; i+=4) {
-                lum += (0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2]);
-            }
-            const avg = lum / (data.length / 4);
+            for(let i=0; i<midData.length; i+=4) lum += (0.299*midData[i] + 0.587*midData[i+1] + 0.114*midData[i+2]);
+            const avg = lum / (midData.length / 4);
             currentEV = Math.log2((Math.max(1, avg) / 255) * 100 / 14.0);
             document.getElementById('ev-big-val').innerText = currentEV.toFixed(1);
             
-            // Sync MJ Prompt
-            const prompt = `--ar 3:4 --style raw, cinematic, exposure_ev_${currentEV.toFixed(1)} --v 6.1`;
+            // Zones
+            const zones = ['ZONE 0','ZONE I','ZONE II','ZONE III','ZONE IV','ZONE V','ZONE VI','ZONE VII','ZONE VIII','ZONE IX','ZONE X'];
+            document.getElementById('ev-zone-label').innerText = zones[Math.max(0, Math.min(10, Math.round(currentEV + 5)))];
+
+            // Color Sampling (Points 1 and 2)
+            const p1 = procCtx.getImageData(75, 100, 1, 1).data;
+            const p2 = procCtx.getImageData(225, 300, 1, 1).data;
+            extractedHex[0] = rgbToHex(p1[0], p1[1], p1[2]);
+            extractedHex[1] = rgbToHex(p2[0], p2[1], p2[2]);
+            
+            document.getElementById('cs1').style.backgroundColor = extractedHex[0];
+            document.getElementById('ch1').innerText = extractedHex[0];
+            document.getElementById('cs2').style.backgroundColor = extractedHex[1];
+            document.getElementById('ch2').innerText = extractedHex[1];
+
+            // Build Prompt
+            const prompt = `/imagine prompt: interior photography of a ${currentInteriorStyle}, color palette of ${extractedHex[0]} and ${extractedHex[1]}, cinematic lighting, shot on 35mm, --ar 3:4 --v 6.1`;
             document.getElementById('mj-prompt-output').value = prompt;
         }
         requestAnimationFrame(liveLoop);
