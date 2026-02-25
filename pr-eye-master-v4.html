@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.6 — Master Recovery</title>
+    <title>PR Eye v4.6.1 — Full Restore</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,8 +18,8 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; text-align: center; }
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;}
+        .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; }
 
         .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
@@ -33,22 +33,22 @@
         .pro-meter-display { text-align: center; margin-bottom: 15px; }
         #ev-big-val { font-family: 'Cormorant Garamond'; font-size: 72px; color: var(--gold); line-height: 1; }
 
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; flex: 1; font-size: 10px; text-transform: uppercase; }
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; flex: 1; font-size: 10px; text-transform: uppercase; text-align: center;}
         .btn.solid { background: var(--gold); color: #000; font-weight: bold; border: none; }
         
         .nav { background: rgba(9, 18, 28, 0.95); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 0; color: var(--muted); font-size: 9px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
 
-        #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-        .mode-dynamic { animation: var(--sos-anim, strobeWhite) var(--sos-speed, 0.5s) infinite; }
-        @keyframes strobeWhite { 0%, 49% { background: #fff; } 50%, 100% { background: #000; } }
+        #result-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #result-img { max-width: 100%; max-height: 70vh; border: 1px solid var(--gold); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div class="hdr" id="main-hdr">
-        <div class="brand">PR EYE v4.6 MASTER</div>
+        <div class="brand">PR EYE v4.6.1</div>
+        <div id="tel-wb" style="font-size: 10px; color: var(--muted);">WB 5500K</div>
     </div>
 
     <div class="main-content">
@@ -65,26 +65,25 @@
         <div id="page-meter" class="page active">
             <div class="pro-meter-display">
                 <div id="ev-big-val">0.0</div>
-                <div style="color: var(--muted); font-size: 11px;">EXPOSURE VALUE</div>
+                <div style="color: var(--muted); font-size: 11px; letter-spacing: 2px;">ZONE V</div>
             </div>
             <div style="display:flex; gap:10px;">
-                <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
                 <button id="torch-btn" class="btn">TORCH</button>
+                <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
             </div>
         </div>
 
         <div id="page-color" class="page">
-            <h4 style="color:var(--gold)">Color Palette</h4>
-            <div id="mj-prompt-output" style="font-size:10px; background:#000; padding:10px; border-radius:5px; margin-top:10px; min-height:50px;">Waiting for data...</div>
-        </div>
-
-        <div id="page-scout" class="page">
-            <h4 style="color:var(--gold)">Location</h4>
-            <button class="btn" id="btn-fetch-loc" style="width:100%">Sync GPS</button>
+            <h4 style="color:var(--gold); margin-bottom:10px;">MIDJOURNEY PROMPT</h4>
+            <textarea id="mj-prompt-output" style="width:100%; height:80px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; font-family:inherit; padding:10px; font-size:11px; margin-bottom:10px;" readonly></textarea>
+            <button class="btn sm" id="btn-copy-mj" style="width:100%">Copy Prompt</button>
         </div>
     </div>
 
-    <div id="sos-flash-overlay"></div>
+    <div id="result-overlay">
+        <img id="result-img" src="">
+        <button class="btn solid" id="btn-close-result" style="width:200px">CLOSE & DISCARD</button>
+    </div>
 
     <div class="nav">
         <div class="nav-item active" data-target="page-meter">Meter</div>
@@ -93,67 +92,90 @@
     </div>
 
     <canvas id="proc-canvas" width="300" height="400" style="display:none"></canvas>
+    <canvas id="composite-canvas" width="1000" height="1500" style="display:none"></canvas>
 
 <script>
     const video = document.getElementById('video');
-    const procCanvas = document.getElementById('proc-canvas');
-    const procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+    const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
+    const compCanvas = document.getElementById('composite-canvas');
+    const compCtx = compCanvas.getContext('2d');
+    
     let stream = null;
+    let currentEV = 0;
 
     async function startCamera() {
         try {
             if(stream) stream.getTracks().forEach(t => t.stop());
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
             });
             video.srcObject = stream;
-            video.play();
-        } catch (e) {
-            console.error("Camera fail:", e);
-        }
+        } catch (e) { alert("Camera Error: " + e); }
     }
 
-    // Tab Switching Logic
+    // Capture Logic
+    document.getElementById('capture-btn').addEventListener('click', () => {
+        if(video.readyState !== 4) return;
+        
+        // Build the composite image
+        compCtx.fillStyle = '#09121c';
+        compCtx.fillRect(0,0,1000,1500);
+        
+        // Draw Video Frame (Maintain 3:4 aspect)
+        compCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 50, 50, 900, 1200);
+        
+        // Add Telemetry Overlay
+        compCtx.fillStyle = 'rgba(0,0,0,0.5)';
+        compCtx.fillRect(50, 1150, 900, 100);
+        
+        compCtx.fillStyle = '#d4c2a1';
+        compCtx.font = 'bold 40px Arial';
+        compCtx.fillText("EV: " + currentEV.toFixed(1), 80, 1215);
+        
+        compCtx.font = '24px Arial';
+        compCtx.fillText(new Date().toLocaleString(), 700, 1215);
+
+        // Show Result
+        const dataUrl = compCanvas.toDataURL('image/jpeg', 0.9);
+        document.getElementById('result-img').src = dataUrl;
+        document.getElementById('result-overlay').style.display = 'flex';
+    });
+
+    document.getElementById('btn-close-result').onclick = () => {
+        document.getElementById('result-overlay').style.display = 'none';
+    };
+
+    // Navigation
     document.querySelectorAll('.nav-item').forEach(nav => {
         nav.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            
+            document.querySelectorAll('.nav-item, .page').forEach(el => el.classList.remove('active'));
             nav.classList.add('active');
-            const target = nav.getAttribute('data-target');
-            document.getElementById(target).classList.add('active');
-            
-            // Re-trigger camera on first interaction if needed
-            if(!stream) startCamera();
+            document.getElementById(nav.dataset.target).classList.add('active');
         });
     });
 
     // Exposure Loop
-    function updateMeter() {
+    function liveLoop() {
         if (video.readyState === 4) {
             procCtx.drawImage(video, 0, 0, 300, 400);
             const data = procCtx.getImageData(140, 190, 20, 20).data;
-            let total = 0;
+            let lum = 0;
             for(let i=0; i<data.length; i+=4) {
-                total += (data[i] + data[i+1] + data[i+2]) / 3;
+                lum += (0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2]);
             }
-            const avg = total / (data.length / 4);
-            const ev = Math.log2((avg / 255) * 100 / 12.5);
-            document.getElementById('ev-big-val').innerText = ev.toFixed(1);
+            const avg = lum / (data.length / 4);
+            currentEV = Math.log2((Math.max(1, avg) / 255) * 100 / 14.0);
+            document.getElementById('ev-big-val').innerText = currentEV.toFixed(1);
+            
+            // Sync MJ Prompt
+            const prompt = `--ar 3:4 --style raw, cinematic, exposure_ev_${currentEV.toFixed(1)} --v 6.1`;
+            document.getElementById('mj-prompt-output').value = prompt;
         }
-        requestAnimationFrame(updateMeter);
+        requestAnimationFrame(liveLoop);
     }
 
-    // Auto-start
-    window.addEventListener('load', () => {
-        startCamera();
-        updateMeter();
-    });
-
-    // Handle visibility (prevents freeze when switching apps)
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) startCamera();
-    });
+    startCamera();
+    liveLoop();
 </script>
 </body>
 </html>
