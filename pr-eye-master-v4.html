@@ -15,961 +15,175 @@
         --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
         --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
         --red: #ff4d4d; --blue: #0044ff; --magenta: #ff00ff; --cyan: #00ffff; --green: #4dff4d;
-        --canon-bg: #0d141e; --canon-line: #2a3a4a; --canon-orange: #f39c12;
+        --canon-orange: #f39c12;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
-    h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
+    body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
     
-    .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; display:flex; flex-direction: column; gap: 10px;}
-    .hdr-top { display: flex; justify-content: space-between; align-items: center; }
+    .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; }
+    .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
-    .telemetry-bar { display: flex; align-items: center; gap: 15px; }
-    .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--muted);}
-    
-    .project-input { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gold); font-family: 'DM Mono'; font-size: 12px; padding: 8px; border-radius: 4px; width: 100%; text-align: center; outline: none;}
+    .project-input { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gold); font-family: 'DM Mono'; font-size: 11px; padding: 6px; border-radius: 4px; width: 100%; text-align: center; outline: none;}
 
     .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
     .page { display: none; } .page.active { display: block; }
 
     /* PERSISTENT CAMERA AREA */
-    #persistent-cam-area { margin-bottom: 15px; display: flex; flex-direction: column; position: relative;}
-    .viewfinder-wrap { display: flex; gap: 10px; height: 180px; margin-bottom: 10px; }
-    .cam-container { position: relative; flex: 1; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: border-radius 0.2s ease;}
+    #cam-section { margin-bottom: 15px; }
+    .cam-container { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
     video { width: 100%; height: 100%; object-fit: cover; }
     canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-    #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} #scout-layer { z-index: 4; }
-    .rgb-box { width: 80px; height: 100%; background: #050a0f; border-radius: 8px; border: 1px solid #444; position: relative; display: none;}
-    #histogram-canvas { width: 100%; height: 100%; position: absolute; inset: 0;}
-
-    /* SPLIT SCREEN BRACKET */
-    #bracket-container { display: none; gap: 5px; height: 180px; margin-bottom: 15px; }
-    .bracket-panel { flex: 1; position: relative; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
-    .bracket-panel canvas { width: 100%; height: 100%; object-fit: cover; }
-    .bracket-lbl { position: absolute; bottom: 5px; left: 5px; font-size: 9px; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 2px; font-weight: bold; color: #fff;}
-
-    .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
-    .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
-
-    .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
-    .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 10px;}
-    .btn:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
-    .btn.solid { background: var(--gold); color: #09121c; font-weight: 700; border: none;}
-    .btn.active-toggle { background: var(--gold); color: #09121c; }
-    .btn.danger { background: var(--red); color: #fff; border: none; font-weight: 800;}
-    .btn.sm { font-size: 10px; padding: 10px; }
     
-    .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
-    .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-    .data-txt { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 8px; }
-    .data-txt.highlight { color: var(--gold); }
-    input[type="text"], input[type="date"], input[type="tel"], input[type="email"], textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
-
-    .toggle-switch { display: flex; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
-    .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-    .toggle-opt.active { background: var(--gold); color: #09121c; }
-
-    /* JOG DIALS UI */
     .dial-container { display: flex; align-items: center; background: #080c11; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px; height: 50px; overflow: hidden; position: relative;}
     .dial-label { width: 45px; background: #111; color: var(--muted); font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; border-right: 1px solid #333; z-index: 2;}
-    .dial-lock { width: 35px; background: #111; color: var(--gold); font-size: 14px; display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #333; cursor: pointer; z-index: 2; transition: 0.2s;}
-    .dial-lock.locked { color: #555; }
-    .dial-lock.auto { color: var(--cyan); background: rgba(0,255,255,0.1); font-weight: bold;}
-    .dial-track { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; height: 100%; align-items: center; position: relative;}
-    .dial-track::-webkit-scrollbar { display: none; }
-    .dial-item { flex: 0 0 33.33%; display: flex; justify-content: center; align-items: center; scroll-snap-align: center; color: #fff; font-size: 16px; font-weight: 500; height: 100%; opacity: 0.3; transition: 0.1s;}
-    .dial-item.active { opacity: 1; color: var(--canon-orange); font-size: 18px; font-weight: 700;}
-    .dial-center-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(243, 156, 18, 0.5); transform: translateX(-50%); pointer-events: none; z-index: 1;}
+    .dial-track { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; align-items: center; position: relative;}
+    .dial-item { flex: 0 0 33.33%; text-align: center; scroll-snap-align: center; color: #fff; font-size: 14px; opacity: 0.3; transition: 0.2s;}
+    .dial-item.active { opacity: 1; color: var(--canon-orange); font-weight: 700; font-size: 16px; }
 
-    /* COLOR TAB SWATCHES */
-    .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;}
-    .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; height: 50px; cursor: pointer; transition: 0.2s;}
-    .pan-item.active-pan { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,255,255,0.2); }
-    .pan-swatch { width: 40%; transition: background-color 0.1s; }
-    .pan-data { width: 60%; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
-    .pan-code { font-family: 'DM Mono'; font-size: 12px; color: #fff; font-weight: 500; }
-    .pan-hex { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;}
+    .nav { background: rgba(0,0,0,0.9); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; }
+    .nav-item.active { color: var(--gold); font-weight: bold; }
     
-    .harmony-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-    .harmony-box { height: 50px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; font-size: 9px; color: #fff; text-shadow: 0 1px 2px #000; text-align: center;}
-
+    .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 10px; text-transform: uppercase; width: 100%; }
+    .btn.solid { background: var(--gold); color: #000; font-weight: 700; border: none; }
+    
+    .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); }
     .signature-pad { background: #fff; border-radius: 8px; width: 100%; border: none; touch-action: none; margin-bottom: 8px;}
-    .row { display: flex; gap: 10px; } .col { flex: 1; }
-
-    .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto; scrollbar-width: none;}
-    .nav::-webkit-scrollbar { display: none; }
-    .nav-item { flex: 0 0 20%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
-    .nav-item.active { color: var(--gold); }
-
-    @keyframes pulsateGlow { 0% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } 50% { box-shadow: 0 0 40px var(--magenta), 0 0 30px var(--cyan); transform: scale(1.02); } 100% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } }
-    .rave-active-btn { animation: pulsateGlow 0.8s infinite; background: linear-gradient(45deg, var(--magenta), var(--cyan)) !important; border:none; color:#000; font-weight:900;}
-    
-    @keyframes strobeRedBlue { 0%, 24% {background-color: #ff0000;} 25%, 49% {background-color: #000000;} 50%, 74% {background-color: #0000ff;} 75%, 100% {background-color: #000000;} }
-    @keyframes strobeWhite { 0%, 49% { background-color: rgba(255,255,255,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
-    @keyframes strobeAmber { 0%, 49% { background-color: rgba(255,160,0,0.95); } 50%, 100% { background-color: rgba(0,0,0,0); } }
-
-    #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
-    .mode-dynamic { animation: var(--sos-anim, strobeRedBlue) var(--sos-speed, 0.4s) infinite; }
-
-    #result-overlay, #pdf-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align:center;}
-    #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 20px;}
-    
-    canvas#proc-canvas, canvas#fc-internal-canvas, canvas#composite-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
 </style>
 </head>
 <body>
 
-<div class="hdr" id="main-hdr">
+<div class="hdr">
     <div class="hdr-top">
         <div class="brand">PR EYE v4.5</div>
-        <div class="telemetry-bar">
-            <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
-            <div class="tel-item">TILT <span id="tool-heading" style="color:var(--cyan)">0°</span></div>
-        </div>
+        <div id="tel-wb" style="font-size: 10px; color: var(--muted);">WB <span style="color:var(--gold)">5500K</span></div>
     </div>
-    <input type="text" id="global-project-title" class="project-input" placeholder="Enter Project / Scene Title...">
+    <input type="text" id="global-project-title" class="project-input" placeholder="Scene / Project Title...">
 </div>
 
 <div class="main-content">
     
-    <div id="persistent-cam-area">
-        
-        <div id="bracket-container">
-            <div class="bracket-panel"><canvas id="b-minus"></canvas><div class="bracket-lbl">-1 EV</div></div>
-            <div class="bracket-panel"><canvas id="b-zero"></canvas><div class="bracket-lbl">0 EV</div></div>
-            <div class="bracket-panel"><canvas id="b-plus"></canvas><div class="bracket-lbl" style="color:var(--red);">+1 EV</div></div>
+    <div id="cam-section">
+        <div class="cam-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="ui-layer" class="overlay"></canvas>
         </div>
-
-        <div class="viewfinder-wrap" id="main-viewfinder">
-            <div class="cam-container" id="cam-wrapper">
-                <button id="cam-flip-btn" style="position: absolute; top: 5px; left: 5px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid #444; border-radius: 4px; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer;">REFLECTED</button>
-                <video id="video" autoplay playsinline></video>
-                <canvas id="fc-layer" class="overlay"></canvas>
-                <canvas id="grid-layer" class="overlay"></canvas>
-                <canvas id="scout-layer" class="overlay"></canvas>
-                <canvas id="ui-layer" class="overlay"></canvas>
-            </div>
-            <div class="rgb-box" id="rgb-box-ui">
-                <canvas id="histogram-canvas"></canvas>
-            </div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+            <button id="capture-btn" class="btn solid">Capture Frame</button>
         </div>
-        
-        <div class="action-row" id="cam-actions">
-            <button id="bracket-toggle-btn" class="btn">BRACKET</button>
-            <button id="fc-toggle-btn" class="btn">F-COL: OFF</button>
-            <button id="grid-toggle-btn" class="btn">GRID</button>
-        </div>
-        <button id="capture-btn" class="btn solid" style="width:100%; padding:14px; font-size:16px;">CAPTURE FRAME</button>
     </div>
 
     <div id="page-meter" class="page active">
-        <div class="ctrl-panel glass-panel">
-            <div id="ev-big-display" style="text-align:center; padding:10px 0 5px; font-family:'Cormorant Garamond',serif; font-size:72px; color:var(--gold); letter-spacing:-2px; line-height:1;">
-                <span id="ev-big-val">0.0</span>
-                <span style="font-size:20px; color:var(--muted); vertical-align:middle;"> EV</span>
-            </div>
-            <div style="display:flex; justify-content:center; gap:20px; font-size:11px; color:var(--muted); margin-bottom:12px; letter-spacing:1px;">
-                <span id="ev-zone-label">ZONE V</span>
-                <span id="ev-lux-label">-- lux</span>
-            </div>
-            <div class="toggle-switch">
-                <div class="toggle-opt active" id="meter-live">LIVE METER</div>
-                <div class="toggle-opt" id="meter-locked">LOCK</div>
-            </div>
-
-            <div class="ev-bias-badge" id="display-bias" style="display:none;"></div>
-            <p style="color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Vol Keys: EV Bias +/-</p>
+        <div class="ctrl-panel" style="text-align:center;">
+            <div id="ev-display" style="font-size: 64px; color: #fff; font-family: 'Cormorant Garamond';">0.0<span style="font-size:18px; color:var(--muted);"> EV</span></div>
+            <div id="zone-label" style="font-size: 10px; color: var(--cyan); letter-spacing: 2px;">ZONE V</div>
         </div>
-
-        <div class="action-row" style="margin-bottom: 15px;">
-            <button id="meter-mode-btn" class="btn" style="background: rgba(255,255,255,0.05);">[ ] MATRIX</button>
-            <button id="torch-btn" class="btn" style="background: rgba(255,255,255,0.05);">🔦 TORCH OFF</button>
-        </div>
-
-        <p style="font-size: 9px; color: var(--cyan); text-align: center; margin: 10px 0; letter-spacing: 1px;">TAP '◎' TO SET AUTO-PRIORITY VARIABLE</p>
         
-        <div class="dial-container"><div class="dial-label">SS</div><div class="dial-track" id="dial-shutter"></div><div class="dial-lock locked" id="lock-shutter">🔒</div><div class="dial-center-mark"></div></div>
-        <div class="dial-container"><div class="dial-label">F/</div><div class="dial-track" id="dial-aperture"></div><div class="dial-lock locked" id="lock-aperture">🔒</div><div class="dial-center-mark"></div></div>
-        <div class="dial-container"><div class="dial-label">ISO</div><div class="dial-track" id="dial-iso"></div><div class="dial-lock auto" id="lock-iso">◎</div><div class="dial-center-mark"></div></div>
+        <div class="dial-container"><div class="dial-label">SS</div><div class="dial-track" id="dial-shutter"></div></div>
+        <div class="dial-container"><div class="dial-label">F/</div><div class="dial-track" id="dial-aperture"></div></div>
+        <div class="dial-container"><div class="dial-label">ISO</div><div class="dial-track" id="dial-iso"></div></div>
     </div>
 
     <div id="page-color" class="page">
         <div class="ctrl-panel">
-            <h4>Colorimetry & Generative Palette</h4>
-            <div class="toggle-switch">
-                <div id="pan-auto" class="toggle-opt active">AUTO POINTS</div>
-                <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
+            <h4 style="color:var(--gold); margin-bottom:10px;">Palette Generator</h4>
+            <div id="palette-display" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 5px; height: 60px;">
+                <div style="background:#333; border-radius:4px;"></div>
+                <div style="background:#444; border-radius:4px;"></div>
+                <div style="background:#555; border-radius:4px;"></div>
+                <div style="background:#666; border-radius:4px;"></div>
             </div>
-            
-            <p style="font-size: 10px; color: var(--cyan); margin-bottom: 10px; text-align: center;">TAP A SWATCH TO VIEW HARMONIES</p>
-            
-            <div class="pan-grid">
-                <div class="pan-item active-pan" id="p-box-1" data-idx="1"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div class="pan-code" id="ch1">#---</div></div></div>
-                <div class="pan-item" id="p-box-2" data-idx="2"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div class="pan-code" id="ch2">#---</div></div></div>
-                <div class="pan-item" id="p-box-3" data-idx="3"><div class="pan-swatch" id="cs3"></div><div class="pan-data"><div class="pan-code" id="ch3">#---</div></div></div>
-                <div class="pan-item" id="p-box-4" data-idx="4"><div class="pan-swatch" id="cs4"></div><div class="pan-data"><div class="pan-code" id="ch4">#---</div></div></div>
-            </div>
-            
-            <div class="harmony-grid">
-                <div class="harmony-box" id="h-comp" style="background: #222;">Complementary</div>
-                <div class="harmony-box" id="h-ana1" style="background: #222;">Analogous</div>
-                <div class="harmony-box" id="h-tri" style="background: #222;">Triadic</div>
-            </div>
-
-            <div style="margin-top:15px; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px;">
-                <span class="label-txt">MidJourney Prompt</span>
-                <textarea id="mj-prompt-output" rows="3" style="font-size:11px; color:#c9d1d9; background:transparent; border:none; border-bottom:1px solid var(--border); resize:none; width:100%; margin-bottom:8px;" readonly placeholder="Sample colour points to generate prompt..."></textarea>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn sm" id="btn-copy-mj" style="flex:1;">Copy Prompt</button>
-                    <button class="btn sm" id="btn-export-swatches" style="flex:1;">Export Swatches</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-scout" class="page">
-        <div class="ctrl-panel">
-            <h4>Location Ephemeris</h4>
-            <button class="btn sm" id="btn-fetch-loc" style="margin-bottom:12px; width:100%;">Sync GPS & Live Data</button>
-            <p style="font-size:10px; color:var(--green); margin-bottom:10px; letter-spacing:1px; text-transform:uppercase;">AR Sky HUD Active on Camera Feed</p>
-            
-            <div id="map-iframe-container" style="height:200px; background:#000; border-radius:8px; margin-bottom:12px; overflow:hidden; border: 1px solid #444; display: flex; align-items:center; justify-content:center; color: var(--muted); font-size: 10px;">AWAITING GPS...</div>
-            
-            <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" class="data-txt">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" class="data-txt">--:--</span></div></div>
-            <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Golden Hour</span><span id="loc-golden" class="data-txt highlight">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Heading</span><span id="scout-heading" class="data-txt">0°</span></div></div>
-            <div class="row"><div class="col"><span class="label-txt">Sun Azimuth</span><span id="loc-azimuth" class="data-txt highlight">--°</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sun Elev.</span><span id="loc-altitude" class="data-txt highlight">--°</span></div></div>
-        </div>
-    </div>
-
-    <div id="page-tools" class="page">
-        <div class="ctrl-panel">
-            <h4 style="color:var(--gold);">Live Weather & Notes</h4>
-            <div class="row" style="margin-bottom:5px;">
-                <div class="col"><span class="label-txt">Temp / Feels Like</span><span id="tool-temp" class="data-txt">-- °C / -- °C</span></div>
-                <div class="col" style="text-align:right;"><span class="label-txt">Wind / Rain</span><span id="tool-weather" class="data-txt">-- km/h | -- mm</span></div>
-            </div>
-            <hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">
-            <span class="label-txt">Shoot Notes</span>
-            <textarea id="shoot-notes" rows="4" placeholder="Location notes, shot lists..."></textarea>
-            <button class="btn" id="btn-email-notes" style="width: 100%;">Email Notes</button>
-        </div>
-        <div class="ctrl-panel" style="border-color: rgba(255, 77, 77, 0.4);">
-            <h4 style="color: var(--red);">Local Services Navigation</h4>
-            <div class="pan-grid" style="grid-template-columns: 1fr 1fr; margin-top:0;">
-                <button class="btn sm" onclick="openSOS('hospital+OR+A%26E')" style="border-color:var(--red); color:var(--red);">🏥 Nearest A&E</button>
-                <button class="btn sm" onclick="openSOS('taxi+rank')">🚕 Taxi Firm</button>
-                <button class="btn sm" onclick="openSOS('parking')">🅿️ Car Park</button>
-                <button class="btn sm" onclick="openSOS('pub')">🍺 Nearest Pub</button>
-                <button class="btn sm" onclick="openSOS('camera+store')">📷 Camera Shop</button>
-                <button class="btn sm solid" onclick="openSOS('train+station+OR+transit+station')" style="grid-column: span 2; background:var(--gold); color:#000;">🚆 Nearest Train / Tube</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-rave" class="page" style="height: 65vh;">
-        <div class="ctrl-panel" style="text-align: center; display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: space-around;">
-            <h4 style="color: var(--magenta);">Tactical Field Utilities</h4>
-            
-            <div style="margin-bottom:12px;">
-                <span class="label-txt">Sound Sensitivity</span>
-                <input type="range" id="rave-sensitivity" min="1.1" max="3.0" step="0.1" value="1.5" style="width:100%;">
-            </div>
-            <button class="btn solid rave-active-btn" id="btn-start-rave" style="width: 100%; flex-grow: 1; font-size: 24px; border-radius: 12px; letter-spacing: 2px;">START A RAVE</button>
-            <div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin: -10px 0 10px 0;">
-                <span style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Audio Synth:</span>
-                <input type="checkbox" id="rave-audio-toggle" checked style="width: 20px; height: 20px;">
-            </div>
-            
-            <div style="margin-bottom:10px; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
-                <span class="label-txt" style="color:var(--red);">SOS Strobe Mode</span>
-                <div class="toggle-switch" style="margin-bottom:8px;">
-                    <div class="toggle-opt active" id="sos-mode-police" onclick="document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); this.classList.add('active');">🚔 Police</div>
-                    <div class="toggle-opt" id="sos-mode-white" onclick="document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); this.classList.add('active');">⚡ White</div>
-                    <div class="toggle-opt" id="sos-mode-amber" onclick="document.querySelectorAll('#sos-mode-police, #sos-mode-white, #sos-mode-amber').forEach(e=>e.classList.remove('active')); this.classList.add('active');">🟡 Amber</div>
-                </div>
-                <span class="label-txt" style="color:var(--red);">Strobe Speed</span>
-                <input type="range" id="sos-speed" min="1" max="10" value="3" style="width:100%;margin-bottom:10px;">
-            </div>
-            <button class="btn danger" id="btn-sos-siren" style="width: 100%; padding: 20px; font-size: 20px; letter-spacing: 5px; box-shadow: 0 0 20px rgba(255,0,0,0.5);">EMERGENCY SOS</button>
         </div>
     </div>
 
     <div id="page-release" class="page">
         <div class="ctrl-panel">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 style="margin-bottom:12px; border:none;">Model Details</h4>
-            </div>
-            <div class="row"><div class="col"><span class="label-txt">Shoot Date</span><input type="date" id="r-date"></div><div class="col"><span class="label-txt">Location</span><input type="text" id="r-loc" placeholder="Shoot Location"></div></div>
-            <span class="label-txt">Model Full Name</span><input type="text" id="r-name" placeholder="Full Legal Name">
-            <div class="row"><div class="col"><input type="text" id="r-dob" placeholder="DOB (DD/MM/YY)"></div><div class="col"><input type="tel" id="r-phone" placeholder="Phone Number"></div></div>
-            <input type="email" id="r-email" placeholder="Email Address">
-            <span class="label-txt">Model Address</span><input type="text" id="r-address" placeholder="Full Address">
-            <span class="label-txt">Compensation (if any)</span><input type="text" id="r-compensation" placeholder="e.g. £200, TFP, None">
-            <div class="toggle-switch"><div class="toggle-opt active" id="tog-adult">Adult (18+)</div><div class="toggle-opt" id="tog-minor">Minor (Under 18)</div></div>
-        </div>
-        
-        <div id="guardian-section" class="ctrl-panel" style="display:none; border-color:var(--gold);">
-            <h4 style="color:var(--gold);">Parent / Guardian Consent</h4>
-            <input type="text" id="r-g-name" placeholder="Parent/Guardian Full Name">
-            <span class="label-txt">Guardian Signature</span>
-            <canvas id="sig-guardian" class="signature-pad" height="100"></canvas>
-            <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-guardian')">Clear Guardian Signature</button>
-        </div>
-        
-        <div class="ctrl-panel">
-            <h4>Signatures</h4>
-            <span class="label-txt">Model Signature</span>
+            <h4 style="color:var(--gold); margin-bottom:10px;">Model Release</h4>
+            <input type="text" id="r-name" style="width:100%; background:transparent; border:none; border-bottom:1px solid #333; color:#fff; padding:10px 0; margin-bottom:10px;" placeholder="Model Full Name">
             <canvas id="sig-model" class="signature-pad" height="100"></canvas>
-            <button class="btn sm" style="width:100%;border-radius:4px;margin-bottom:15px;" onclick="clearPad('sig-model')">Clear Model</button>
-            
-            <span class="label-txt">Photographer Name</span>
-            <input type="text" id="r-photog-name" value="Digby Oldridge, PR Eye Ltd">
-            <span class="label-txt">Photographer Signature</span>
-            <canvas id="sig-photog" class="signature-pad" height="100"></canvas>
-            <button class="btn sm" style="width:100%;border-radius:4px;" onclick="clearPad('sig-photog')">Clear Photog</button>
+            <button id="gen-pdf-btn" class="btn solid">Generate PDF</button>
         </div>
-        
-        <button id="gen-pdf-btn" class="btn solid" style="width:100%; padding:15px; font-size:16px;">GENERATE PDF</button>
     </div>
 
-</div>
-
-<div id="sos-flash-overlay"></div>
-<div id="result-overlay">
-    <h3 style="color:#fff; margin-bottom:15px; font-family:'DM Mono', sans-serif;">Export Ready</h3>
-    <img id="result-img">
-    <div style="display:flex; gap:10px; margin-top:10px; width:100%; max-width:300px;">
-        <button class="btn solid" id="btn-share-result" style="flex:1;">SAVE / SHARE</button>
-        <button class="btn" id="btn-close-result" style="flex:1; border-color:#fff; color:#fff;">CLOSE</button>
-    </div>
-</div>
-<div id="pdf-overlay">
-    <h2 style="color:var(--gold); margin-bottom: 20px;">PDF GENERATED</h2>
-    <p style="color:var(--muted); margin-bottom: 30px; font-size:12px;">Your model release is ready to download.</p>
-    <a id="pdf-dl-link" class="btn solid" style="width:80%; padding:20px; font-size:18px; text-decoration:none; margin-bottom:15px;">DOWNLOAD PDF</a>
-    <button class="btn danger" onclick="document.getElementById('pdf-overlay').style.display='none';">CLOSE</button>
 </div>
 
 <div class="nav">
-    <div class="nav-item active" data-target="page-meter" data-cam="true">Meter</div>
-    <div class="nav-item" data-target="page-color" data-cam="true">Color</div>
-    <div class="nav-item" data-target="page-scout" data-cam="true">Scout</div>
-    <div class="nav-item" data-target="page-tools" data-cam="false">Tools</div>
-    <div class="nav-item" data-target="page-rave" data-cam="false">Rave</div>
-    <div class="nav-item" data-target="page-release" data-cam="false" id="nav-release">Legal</div>
+    <div class="nav-item active" data-target="page-meter">Meter</div>
+    <div class="nav-item" data-target="page-color">Color</div>
+    <div class="nav-item" data-target="page-release">Legal</div>
 </div>
 
-<canvas id="proc-canvas" width="300" height="400"></canvas>
-<canvas id="fc-internal-canvas" width="150" height="200"></canvas>
-<canvas id="composite-canvas" width="1000" height="1500"></canvas>
 <script>
-const video = document.getElementById('video');
-const canvases = ['fc-layer','grid-layer','scout-layer','ui-layer'].map(id => document.getElementById(id).getContext('2d'));
-const [fcCtx, gridCtx, scoutCtx, uiCtx] = canvases;
-const procCtx = document.getElementById('proc-canvas').getContext('2d', { willReadFrequently: true });
-const fcInternalCtx = document.getElementById('fc-internal-canvas').getContext('2d', { willReadFrequently: true });
-const histCtx = document.getElementById('histogram-canvas').getContext('2d', { willReadFrequently: true });
+    const video = document.getElementById('video');
+    const uiCtx = document.getElementById('ui-layer').getContext('2d');
+    let stream = null;
+    let currentTab = 'page-meter';
 
-// Bracket Contexts
-const bMinusCtx = document.getElementById(&#39;b-minus&#39;).getContext(&#39;2d&#39;);
-const bZeroCtx = document.getElementById(&#39;b-zero&#39;).getContext(&#39;2d&#39;);
-const bPlusCtx = document.getElementById(&#39;b-plus&#39;).getContext(&#39;2d&#39;);
+    const arrShutter = ['1/50', '1/60', '1/125', '1/250', '1/500'];
+    const arrAperture = ['f/2.8', 'f/4.0', 'f/5.6', 'f/8.0', 'f/11'];
+    const arrIso = ['100', '200', '400', '800', '1600'];
 
-let stream = null; let currentFacingMode = &#39;environment&#39;;
-let measuredEV = 0; let evBias = 0; let liveTempK = 5500; 
-let currentTab = &#39;page-meter&#39;;
-let fcState = 0; let bracketActive = false;
-let currentGridIdx = 0; const gridOptions = [&#39;off&#39;, &#39;thirds&#39;, &#39;cross&#39;];
-let isCapturing = false;
-let frameCount = 0;
-
-let currentLat = null; let currentLon = null; let currentHeading = 0;
-
-// CANON EXPOSURE ARRAYS
-const arrShutter = [&#39;30&quot;&#39;,&#39;25&quot;&#39;,&#39;20&quot;&#39;,&#39;15&quot;&#39;,&#39;13&quot;&#39;,&#39;10&quot;&#39;,&#39;8&quot;&#39;,&#39;6&quot;&#39;,&#39;5&quot;&#39;,&#39;4&quot;&#39;,&#39;3.2&quot;&#39;,&#39;2.5&quot;&#39;,&#39;2&quot;&#39;,&#39;1.6&quot;&#39;,&#39;1.3&quot;&#39;,&#39;1&quot;&#39;,&#39;0.8&quot;&#39;,&#39;0.6&quot;&#39;,&#39;0.5&quot;&#39;,&#39;0.4&quot;&#39;,&#39;0.3&quot;&#39;,&#39;1/4&#39;,&#39;1/5&#39;,&#39;1/6&#39;,&#39;1/8&#39;,&#39;1/10&#39;,&#39;1/13&#39;,&#39;1/15&#39;,&#39;1/20&#39;,&#39;1/25&#39;,&#39;1/30&#39;,&#39;1/40&#39;,&#39;1/50&#39;,&#39;1/60&#39;,&#39;1/80&#39;,&#39;1/100&#39;,&#39;1/125&#39;,&#39;1/160&#39;,&#39;1/200&#39;,&#39;1/250&#39;,&#39;1/320&#39;,&#39;1/400&#39;,&#39;1/500&#39;,&#39;1/640&#39;,&#39;1/800&#39;,&#39;1/1000&#39;,&#39;1/1250&#39;,&#39;1/1600&#39;,&#39;1/2000&#39;,&#39;1/2500&#39;,&#39;1/3200&#39;,&#39;1/4000&#39;];
-const arrAperture = [1.2, 1.4, 1.8, 2.0, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10, 11, 13, 14, 16, 18, 20, 22];
-const arrIso = [50, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 25600];
-
-// PRIORITY ENGINE STATE
-let activeIndexes = { shutter: 33, aperture: 10, iso: 7 };
-let priorityMode = &#39;iso&#39;;
-let currentMeterMode = 0; 
-let torchActive = false;
-
-// COLOR HARMONY &amp; PANTONE MATH
-let panMode = &#39;auto&#39;; 
-let manualPoints = [{x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75}]; 
-let manualIndex = 0; 
-let extractedColors = [&#39;#333333&#39;,&#39;#333333&#39;,&#39;#333333&#39;,&#39;#333333&#39;];
-let activeColorIndex = 0; 
-
-function srgbToXyz(r,g,b) { let R=r/255,G=g/255,B=b/255; R=R&gt;0.04045?Math.pow(((R+0.055)/1.055),2.4):R/12.92; G=G&gt;0.04045?Math.pow(((G+0.055)/1.055),2.4):G/12.92; B=B&gt;0.04045?Math.pow(((B+0.055)/1.055),2.4):B/12.92; return [(R*100)*0.4124+(G*100)*0.3576+(B*100)*0.1805, (R*100)*0.2126+(G*100)*0.7152+(B*100)*0.0722, (R*100)*0.0193+(G*100)*0.1192+(B*100)*0.9505]; }
-function xyzToLab(x,y,z) { let X=x/95.047,Y=y/100.000,Z=z/108.883; X=X&gt;0.008856?Math.pow(X,1/3):(7.787*X)+(16/116); Y=Y&gt;0.008856?Math.pow(Y,1/3):(7.787*Y)+(16/116); Z=Z&gt;0.008856?Math.pow(Z,1/3):(7.787*Z)+(16/116); return [(116*Y)-16, 500*(X-Y), 200*(Y-Z)]; }
-function deltaE94(labA,labB) { let da=labA[1]-labB[1],db=labA[2]-labB[2]; let C1=Math.sqrt(labA[1]*labA[1]+labA[2]*labA[2]); let dC=C1-Math.sqrt(labB[1]*labB[1]+labB[2]*labB[2]); let dH=Math.sqrt(Math.max(0,da*da+db*db-dC*dC)); return Math.sqrt(Math.pow((labA[0]-labB[0])/1,2)+Math.pow(dC/(1+0.045*C1),2)+Math.pow(dH/(1+0.015*C1),2)); }
-const rgbToHex = (r,g,b) =&gt; &quot;#&quot; + ((1&lt;&lt;24)+(r&lt;&lt;16)+(g&lt;&lt;8)+b).toString(16).slice(1).toUpperCase();
-
-const pantoneDb = [{n:&quot;Process Yellow C&quot;,rgb:[255,242,0]},{n:&quot;Warm Red C&quot;,rgb:[249,66,58]},{n:&quot;Reflex Blue C&quot;,rgb:[0,20,137]},{n:&quot;Black 6 C&quot;,rgb:[10,10,10]},{n:&quot;PMS 123 C&quot;,rgb:[255,199,44]},{n:&quot;PMS 286 C&quot;,rgb:[0,51,160]},{n:&quot;Cool Gray 5 C&quot;,rgb:[172,174,175]},{n:&quot;PMS 485 C&quot;,rgb:[218,41,28]},{n:&quot;Green C&quot;,rgb:[0,172,61]},{n:&quot;PMS 354 C&quot;,rgb:[0,177,64]},{n:&quot;Purple C&quot;,rgb:[187,41,187]},{n:&quot;White&quot;,rgb:[255,255,255]},{n:&quot;PMS 1665 C&quot;,rgb:[255,100,30]},{n:&quot;PMS 3115 C&quot;,rgb:[0,193,213]},{n:&quot;PMS 7527 C&quot;,rgb:[220,210,190]}];
-pantoneDb.forEach(p =&gt; { const xyz = srgbToXyz(p.rgb[0], p.rgb[1], p.rgb[2]); p.lab = xyzToLab(xyz[0], xyz[1], xyz[2]); });
-
-function findClosestPantone(r,g,b) { 
-    const targetXyz = srgbToXyz(r,g,b); const targetLab = xyzToLab(targetXyz[0], targetXyz[1], targetXyz[2]); 
-    let closest = pantoneDb[0], minD = Infinity; 
-    pantoneDb.forEach(p =&gt; { const d = deltaE94(targetLab, p.lab); if(d &lt; minD) { minD = d; closest = p; } }); 
-    return closest; 
-}
-
-function rgbToHsl(r, g, b) { r/=255, g/=255, b/=255; let max = Math.max(r, g, b), min = Math.min(r, g, b); let h, s, l = (max + min) / 2; if(max == min){ h = s = 0; } else { let d = max - min; s = l &gt; 0.5 ? d / (2 - max - min) : d / (max + min); switch(max){ case r: h = (g - b) / d + (g &lt; b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; case b: h = (r - g) / d + 4; break; } h /= 6; } return [h, s, l]; }
-function hslToRgb(h, s, l) { let r, g, b; if(s == 0){ r = g = b = l; } else { let hue2rgb = function hue2rgb(p, q, t){ if(t &lt; 0) t += 1; if(t &gt; 1) t -= 1; if(t &lt; 1/6) return p + (q - p) * 6 * t; if(t &lt; 1/2) return q; if(t &lt; 2/3) return p + (q - p) * (2/3 - t) * 6; return p; }; let q = l &lt; 0.5 ? l * (1 + s) : l + s - l * s; let p = 2 * l - q; r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3); } return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]; }
-function hexToRgbArr(hex) { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0,0,0]; }
-
-function updateHarmonies(hexBase) {
-    let rgb = hexToRgbArr(hexBase); let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-    let pantoneMatch = findClosestPantone(rgb[0], rgb[1], rgb[2]);
-    let cComp = hslToRgb((h + 0.5) % 1, s, l); let hexComp = rgbToHex(...cComp);
-    let cAna1 = hslToRgb((h + 0.083) % 1, s, l); let hexAna1 = rgbToHex(...cAna1);
-    let cTri = hslToRgb((h + 0.33) % 1, s, l); let hexTri = rgbToHex(...cTri);
-
-    const activeCodeEl = document.getElementById(`ch${activeColorIndex + 1}`);
-    if(activeCodeEl) activeCodeEl.innerHTML = `${pantoneMatch.n}<br>&lt;span style=&quot;color:#888; font-size:9px;&quot;&gt;${hexBase}&lt;/span&gt;`;
-
-    document.getElementById(&#39;h-comp&#39;).style.background = hexComp; document.getElementById(&#39;h-comp&#39;).innerHTML = `Comp<br>${hexComp}`;
-    document.getElementById(&#39;h-ana1&#39;).style.background = hexAna1; document.getElementById(&#39;h-ana1&#39;).innerHTML = `Analogous<br>${hexAna1}`;
-    document.getElementById(&#39;h-tri&#39;).style.background = hexTri; document.getElementById(&#39;h-tri&#39;).innerHTML = `Triad<br>${hexTri}`;
-}
-
-function parseShutter(s) { if(s.includes(&#39;&quot;&#39;)) return parseFloat(s.replace(&#39;&quot;&#39;,&#39;&#39;)); if(s.includes(&#39;/&#39;)) { let pts = s.split(&#39;/&#39;); return parseInt(pts[0]) / parseInt(pts[1]); } return parseFloat(s); }
-function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
-
-// --- DIGITAL JOG DIALS BUILDER ---
-function buildDial(id, arr, type) {
-    const track = document.getElementById(id); track.innerHTML = &#39;&#39;;
-    const padStr = `&lt;div class=&quot;dial-item&quot; style=&quot;flex: 0 0 33.33%;&quot;&gt;&lt;/div&gt;`;
-    track.innerHTML += padStr;
-    arr.forEach((val, i) =&gt; { track.innerHTML += `&lt;div class=&quot;dial-item&quot; data-idx=&quot;${i}&quot;&gt;${val}&lt;/div&gt;`; });
-    track.innerHTML += padStr;
-    
-    track.addEventListener(&#39;scroll&#39;, () =&gt; {
-        if(priorityMode === type) return; 
-        const center = track.scrollLeft + (track.clientWidth / 2);
-        let closest = null; let minD = Infinity;
-        Array.from(track.children).forEach(child =&gt; {
-            if(!child.dataset.idx) return;
-            const cCenter = child.offsetLeft + (child.clientWidth / 2);
-            const d = Math.abs(center - cCenter);
-            if(d &lt; minD) { minD = d; closest = child; }
-            child.classList.remove(&#39;active&#39;);
+    function buildDial(id, arr) {
+        const track = document.getElementById(id);
+        track.innerHTML = '<div class="dial-item"></div>';
+        arr.forEach(val => {
+            track.innerHTML += `<div class="dial-item">${val}</div>`;
         });
-        if(closest) { closest.classList.add(&#39;active&#39;); activeIndexes[type] = parseInt(closest.dataset.idx); calculatePriority(); }
-    });
-}
-
-function syncDial(id, idx) {
-    const track = document.getElementById(id); const item = track.querySelector(`[data-idx=&quot;${idx}&quot;]`);
-    if(item) { Array.from(track.children).forEach(c =&gt; c.classList.remove(&#39;active&#39;)); item.classList.add(&#39;active&#39;); const targetScroll = item.offsetLeft - (track.clientWidth / 2) + (item.clientWidth / 2); track.scrollTo({ left: targetScroll, behavior: &#39;smooth&#39; }); }
-}
-
-// --- EXPOSURE PRIORITY MATH ---
-function calculatePriority() {
-    if(!measuredEV) return;
-    let useEV = measuredEV + evBias;
-    const N = arrAperture[activeIndexes.aperture]; const ISO = arrIso[activeIndexes.iso]; const t = parseShutter(arrShutter[activeIndexes.shutter]);
-
-    if(priorityMode === &#39;iso&#39;) {
-        let targetIso = 100 * Math.pow(2, Math.log2((N*N)/t) - useEV);
-        let closestIdx = 0; let minD = Infinity;
-        arrIso.forEach((val, i) =&gt; { const d = Math.abs(val - targetIso); if(d &lt; minD) { minD = d; closestIdx = i; }});
-        activeIndexes.iso = closestIdx; syncDial(&#39;dial-iso&#39;, closestIdx);
-    } else if (priorityMode === &#39;aperture&#39;) {
-        let targetN = Math.sqrt(t * Math.pow(2, useEV + Math.log2(ISO/100)));
-        let closestIdx = 0; let minD = Infinity;
-        arrAperture.forEach((val, i) =&gt; { const d = Math.abs(val - targetN); if(d &lt; minD) { minD = d; closestIdx = i; }});
-        activeIndexes.aperture = closestIdx; syncDial(&#39;dial-aperture&#39;, closestIdx);
-    } else if (priorityMode === &#39;shutter&#39;) {
-        let targetT = (N*N) / Math.pow(2, useEV + Math.log2(ISO/100));
-        let closestIdx = 0; let minD = Infinity;
-        arrShutter.forEach((val, i) =&gt; { const pv = parseShutter(val); const d = Math.abs(pv - targetT); if(d &lt; minD) { minD = d; closestIdx = i; }});
-        activeIndexes.shutter = closestIdx; syncDial(&#39;dial-shutter&#39;, closestIdx);
-    }
-}
-
-function setPriority(type) {
-    priorityMode = type;
-    [&#39;shutter&#39;, &#39;aperture&#39;, &#39;iso&#39;].forEach(t =&gt; {
-        const el = document.getElementById(`lock-${t}`);
-        if(t === type) { el.className = &#39;dial-lock auto&#39;; el.innerText = &#39;◎&#39;; }
-        else { el.className = &#39;dial-lock locked&#39;; el.innerText = &#39;🔒&#39;; }
-    });
-    calculatePriority();
-}
-bindSafe(&#39;lock-shutter&#39;, &#39;click&#39;, () =&gt; setPriority(&#39;shutter&#39;)); bindSafe(&#39;lock-aperture&#39;, &#39;click&#39;, () =&gt; setPriority(&#39;aperture&#39;)); bindSafe(&#39;lock-iso&#39;, &#39;click&#39;, () =&gt; setPriority(&#39;iso&#39;));
-
-// --- UI BINDINGS ---
-bindSafe(&#39;meter-mode-btn&#39;, &#39;click&#39;, (e) =&gt; { currentMeterMode = (currentMeterMode + 1) % 3; if(currentMeterMode === 0) e.currentTarget.innerText = &quot;[ ] MATRIX&quot;; else if(currentMeterMode === 1) e.currentTarget.innerText = &quot;( ) CENTER&quot;; else e.currentTarget.innerText = &quot;[•] SPOT&quot;; });
-bindSafe(&#39;torch-btn&#39;, &#39;click&#39;, async (e) =&gt; { if (!stream) return; const track = stream.getVideoTracks()[0]; try { torchActive = !torchActive; await track.applyConstraints({ advanced: [{ torch: torchActive }] }); e.currentTarget.innerText = torchActive ? &quot;🔦 TORCH ON&quot; : &quot;🔦 TORCH OFF&quot;; e.currentTarget.style.color = torchActive ? &quot;var(--canon-orange)&quot; : &quot;var(--gold)&quot;; } catch (err) { alert(&#39;Torch API not supported on this browser/lens.&#39;); torchActive = false; } });
-
-window.addEventListener(&#39;keydown&#39;, function(e) { 
-    if (currentTab === &#39;page-meter&#39;) { if (e.key === &#39;VolumeUp&#39; || e.key === &#39;AudioVolumeUp&#39;) { e.preventDefault(); evBias += 0.33; updateBiasDisplay(); } if (e.key === &#39;VolumeDown&#39; || e.key === &#39;AudioVolumeDown&#39;) { e.preventDefault(); evBias -= 0.33; updateBiasDisplay(); } }
-});
-function updateBiasDisplay() { const badge = document.getElementById(&#39;display-bias&#39;); if(Math.abs(evBias) &lt; 0.1) { badge.style.display = &#39;none&#39;; evBias = 0; } else { badge.style.display = &#39;block&#39;; badge.innerText = (evBias &gt; 0 ? &#39;+&#39; : &#39;&#39;) + evBias.toFixed(1) + &#39; EV&#39;; } }
-
-async function startCamera() {
-    if(stream) { stream.getTracks().forEach(t =&gt; t.stop()); video.srcObject = null; await new Promise(r =&gt; setTimeout(r, 500)); }
-    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error(&quot;Cam fail&quot;); }
-    if (!stream) return;
-    video.srcObject = stream;
-    video.load();
-    video.play().catch(()=&gt;{});
-    const onReady = () =&gt; { resizeCanvases(); requestAnimationFrame(liveLoop); };
-    video.onloadedmetadata = onReady;
-    video.onloadeddata = onReady;
-    if(navigator.wakeLock) { navigator.wakeLock.request(&#39;screen&#39;).catch(()=&gt;{}); }
-}
-
-bindSafe(&#39;cam-flip-btn&#39;, &#39;click&#39;, (e)=&gt;{ 
-    currentFacingMode = currentFacingMode === &#39;environment&#39; ? &#39;user&#39; : &#39;environment&#39;; 
-    torchActive = false; document.getElementById(&#39;torch-btn&#39;).innerText = &quot;🔦 TORCH OFF&quot;; document.getElementById(&#39;torch-btn&#39;).style.color = &quot;var(--gold)&quot;;
-    if(currentFacingMode === &#39;user&#39;) { video.style.filter = &#39;blur(15px) grayscale(20%)&#39;; e.currentTarget.innerText = &quot;INCIDENT SIM&quot;; e.currentTarget.style.background = &quot;var(--magenta)&quot;; } 
-    else { video.style.filter = &#39;none&#39;; e.currentTarget.innerText = &quot;REFLECTED&quot;; e.currentTarget.style.background = &quot;rgba(0,0,0,0.6)&quot;; }
-    startCamera(); 
-});
-
-function resizeCanvases() {
-    const rect = video.getBoundingClientRect(); if(rect.width===0) return;
-    [&#39;grid-layer&#39;, &#39;ui-layer&#39;, &#39;fc-layer&#39;, &#39;scout-layer&#39;].forEach(id =&gt; { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
-    const fcInt = document.getElementById(&#39;fc-internal-canvas&#39;); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
-    const hC = document.getElementById(&#39;histogram-canvas&#39;); if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
-    const bRect = document.getElementById(&#39;b-zero&#39;).getBoundingClientRect();
-    if(bRect.width &gt; 0) { [&#39;b-minus&#39;, &#39;b-zero&#39;, &#39;b-plus&#39;].forEach(id =&gt; { const c = document.getElementById(id); c.width = bRect.width; c.height = bRect.height; }); }
-    drawGrid();
-}
-window.addEventListener(&#39;resize&#39;, resizeCanvases);
-
-document.querySelectorAll(&#39;.nav-item&#39;).forEach(n =&gt; {
-    n.addEventListener(&#39;click&#39;, () =&gt; {
-        document.querySelectorAll(&#39;.nav-item&#39;).forEach(i=&gt;i.classList.remove(&#39;active&#39;)); document.querySelectorAll(&#39;.page&#39;).forEach(p=&gt;p.classList.remove(&#39;active&#39;));
-        n.classList.add(&#39;active&#39;); currentTab = n.dataset.target; 
-        const tgt = document.getElementById(currentTab); if(tgt) tgt.classList.add(&#39;active&#39;);
+        track.innerHTML += '<div class="dial-item"></div>';
         
-        const camArea = document.getElementById(&#39;persistent-cam-area&#39;);
-        if(n.dataset.cam === &quot;true&quot;) {
-            camArea.style.display = &#39;flex&#39;;
-            document.getElementById(&#39;rgb-box-ui&#39;).style.display = currentTab === &#39;page-meter&#39; ? &#39;block&#39; : &#39;none&#39;;
-            document.getElementById(&#39;cam-actions&#39;).style.display = currentTab === &#39;page-meter&#39; ? &#39;flex&#39; : &#39;none&#39;;
-        } else {
-            camArea.style.display = &#39;none&#39;;
-        }
-        resizeCanvases();
-    });
-});
-
-bindSafe(&#39;grid-toggle-btn&#39;, &#39;click&#39;, (e) =&gt; { currentGridIdx = (currentGridIdx + 1) % gridOptions.length; e.currentTarget.classList.toggle(&#39;active-toggle&#39;, currentGridIdx !== 0); drawGrid(); });
-function drawGrid() { const type = gridOptions[currentGridIdx]; const w = gridCtx.canvas.width; const h = gridCtx.canvas.height; gridCtx.clearRect(0,0,w,h); if(type === &#39;off&#39;) return; gridCtx.strokeStyle = &#39;rgba(212, 194, 161, 0.5)&#39;; gridCtx.lineWidth = 1; gridCtx.beginPath(); if(type === &#39;thirds&#39;) { gridCtx.moveTo(w/3, 0); gridCtx.lineTo(w/3, h); gridCtx.moveTo(w*2/3, 0); gridCtx.lineTo(w*2/3, h); gridCtx.moveTo(0, h/3); gridCtx.lineTo(w, h/3); gridCtx.moveTo(0, h*2/3); gridCtx.lineTo(w, h*2/3); } else if (type === &#39;cross&#39;) { gridCtx.moveTo(w/2, 0); gridCtx.lineTo(w/2, h); gridCtx.moveTo(0, h/2); gridCtx.lineTo(w, h/2); } gridCtx.stroke(); }
-
-bindSafe(&#39;fc-toggle-btn&#39;, &#39;click&#39;, (e) =&gt; { 
-    fcState = (fcState + 1) % 4; 
-    const btn = e.currentTarget; 
-    const camWrap = document.getElementById(&#39;cam-wrapper&#39;);
-    const mainHdr = document.getElementById(&#39;main-hdr&#39;);
-    if(fcState === 0) { btn.innerText = &quot;F-COL: OFF&quot;; btn.classList.remove(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;none&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
-    if(fcState === 1) { btn.innerText = &quot;F-COL: PRO&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
-    if(fcState === 2) { btn.innerText = &quot;F-COL: CLIP&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;block&#39;; camWrap.style.borderRadius=&#39;12px&#39;; mainHdr.style.display=&#39;&#39;; } 
-    if(fcState === 3) { btn.innerText = &quot;F-COL: FULL&quot;; btn.classList.add(&#39;active-toggle&#39;); document.getElementById(&#39;fc-layer&#39;).style.display=&#39;none&#39;; camWrap.style.cssText=&#39;position:fixed;inset:0;width:100vw;height:100vh;z-index:500;border-radius:0;aspect-ratio:unset;&#39;; mainHdr.style.display=&#39;none&#39;; } 
-});
-
-bindSafe(&#39;bracket-toggle-btn&#39;, &#39;click&#39;, (e) =&gt; { bracketActive = !bracketActive; document.getElementById(&#39;bracket-container&#39;).style.display = bracketActive ? &#39;flex&#39; : &#39;none&#39;; document.getElementById(&#39;main-viewfinder&#39;).style.display = bracketActive ? &#39;none&#39; : &#39;flex&#39;; e.currentTarget.classList.toggle(&#39;active-toggle&#39;, bracketActive); resizeCanvases(); });
-
-bindSafe(&#39;pan-auto&#39;, &#39;click&#39;, () =&gt; { panMode = &#39;auto&#39;; document.getElementById(&#39;pan-auto&#39;).classList.add(&#39;active&#39;); document.getElementById(&#39;pan-manual&#39;).classList.remove(&#39;active&#39;); });
-
-document.getElementById(&#39;pan-manual&#39;).addEventListener(&#39;click&#39;, () =&gt; {
-    panMode = &#39;manual&#39;;
-    document.getElementById(&#39;pan-manual&#39;).classList.add(&#39;active&#39;);
-    document.getElementById(&#39;pan-auto&#39;).classList.remove(&#39;active&#39;);
-});
-
-function updateMJPrompt() {
-    if(!extractedColors || extractedColors.length &lt; 3) return;
-    const col1 = extractedColors[0]; const col2 = extractedColors[1]; const col3 = extractedColors[2] || col2;
-    const pt1 = findClosestPantone(...hexToRgbArr(col1));
-    const pt2 = findClosestPantone(...hexToRgbArr(col2));
-    const pt3 = findClosestPantone(...hexToRgbArr(col3));
-    const prompt = `--ar 3:4 --style raw, cinematic photography, ${pt1.n} dominant colour palette, ${pt2.n} mid-tones, ${pt3.n} shadows, ${col1} ${col2} ${col3}, natural light, shot on 35mm film, photorealistic --v 6.1`;
-    const el = document.getElementById(&#39;mj-prompt-output&#39;);
-    if(el) el.value = prompt;
-}
-
-document.getElementById(&#39;btn-copy-mj&#39;) &amp;&amp; document.getElementById(&#39;btn-copy-mj&#39;).addEventListener(&#39;click&#39;, () =&gt; {
-    const el = document.getElementById(&#39;mj-prompt-output&#39;);
-    if(el) { el.select(); document.execCommand(&#39;copy&#39;); document.getElementById(&#39;btn-copy-mj&#39;).innerText = &#39;Copied!&#39;; setTimeout(()=&gt;document.getElementById(&#39;btn-copy-mj&#39;).innerText=&#39;Copy Prompt&#39;,2000); }
-});
-
-document.getElementById(&#39;btn-export-swatches&#39;) &amp;&amp; document.getElementById(&#39;btn-export-swatches&#39;).addEventListener(&#39;click&#39;, () =&gt; {
-    const c = document.createElement(&#39;canvas&#39;); c.width=900; c.height=300;
-    const cx = c.getContext(&#39;2d&#39;); cx.fillStyle=&#39;#09121c&#39;; cx.fillRect(0,0,900,300);
-    (extractedColors||[]).forEach((col,i)=&gt;{
-        const pt = findClosestPantone(...hexToRgbArr(col));
-        const x = i*225; cx.fillStyle=col; cx.fillRect(x,0,225,200);
-        cx.fillStyle=&#39;#d4c2a1&#39;; cx.font=&#39;bold 18px DM Mono&#39;; cx.fillText(pt.n, x+10, 225);
-        cx.fillStyle=&#39;#8b9bb4&#39;; cx.font=&#39;14px DM Mono&#39;; cx.fillText(col, x+10, 248);
-    });
-    cx.fillStyle=&#39;rgba(212,194,161,0.5)&#39;; cx.font=&#39;12px DM Mono&#39;;
-    cx.fillText(&#39;PR Eye v4.5 — Colour Analysis&#39;, 10, 285);
-    c.toBlob(blob=&gt;{
-        const url=URL.createObjectURL(blob); const a=document.createElement(&#39;a&#39;);
-        a.href=url; a.download=&#39;PREye_Swatches_&#39;+Date.now()+&#39;.jpg&#39;; a.click();
-        setTimeout(()=&gt;URL.revokeObjectURL(url),3000);
-    },&#39;image/jpeg&#39;,0.95);
-});
-
-bindSafe(&#39;ui-layer&#39;, &#39;pointerdown&#39;, (e) =&gt; { if(currentTab === &#39;page-color&#39; &amp;&amp; panMode === &#39;manual&#39;) { const rect = e.target.getBoundingClientRect(); manualPoints[manualIndex] = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height }; manualIndex = (manualIndex + 1) % 4; } });
-
-for(let i=1; i&lt;=4; i++) {
-    bindSafe(`p-box-${i}`, &#39;click&#39;, () =&gt; {
-        document.querySelectorAll(&#39;.pan-item&#39;).forEach(el =&gt; el.classList.remove(&#39;active-pan&#39;));
-        document.getElementById(`p-box-${i}`).classList.add(&#39;active-pan&#39;);
-        activeColorIndex = i - 1;
-        updateHarmonies(extractedColors[activeColorIndex]);
-    });
-}
-
-window.addEventListener(&#39;deviceorientation&#39;, (e) =&gt; {
-    currentHeading = e.webkitCompassHeading || Math.abs(e.alpha - 360) || 0; window.camPitch = e.beta || 0; 
-    const hEl = document.getElementById(&#39;tool-heading&#39;); if(hEl) hEl.innerText = `${Math.round(currentHeading)}°`; 
-    const sEl = document.getElementById(&#39;scout-heading&#39;); if(sEl) sEl.innerText = `${Math.round(currentHeading)}°`;
-});
-
-// --- LIVE FEED ENGINE (THROTTLED MEMORY SAFE) ---
-function liveLoop() {
-    if(video.readyState === 4 &amp;&amp; video.videoWidth &gt; 0 &amp;&amp; document.getElementById(&#39;persistent-cam-area&#39;).style.display !== &#39;none&#39;) {
-        frameCount++;
-        const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
-        if (vRatio &gt; tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
-        
-        if(bracketActive) {
-            bMinusCtx.filter = &#39;brightness(50%) contrast(110%)&#39;; bMinusCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bMinusCtx.canvas.width, bMinusCtx.canvas.height);
-            bZeroCtx.filter = &#39;none&#39;; bZeroCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bZeroCtx.canvas.width, bZeroCtx.canvas.height);
-            bPlusCtx.filter = &#39;brightness(180%) contrast(90%)&#39;; bPlusCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bPlusCtx.canvas.width, bPlusCtx.canvas.height);
-        }
-
-        // THROTTLE HEAVY MATH (Run every 5th frame for stability)
-        if (frameCount % 5 === 0) {
-            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 300, 400); 
-            const viewData = procCtx.getImageData(0,0,300,400).data;
-            
-            if(currentTab === &#39;page-meter&#39;) {
-                let rT=0, gT=0, bT=0, lumT=0, c=0; 
-                for(let y=0; y&lt;400; y++) {
-                    for(let x=0; x&lt;300; x++) {
-                        let i = (y * 300 + x) * 4; let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let weight = 1;
-                        let dist = Math.sqrt(Math.pow(x-150, 2) + Math.pow(y-200, 2));
-                        if(currentMeterMode === 1) { weight = dist &lt; 100 ? 1 : (dist &lt; 160 ? 0.5 : 0.1); } 
-                        else if(currentMeterMode === 2) { weight = dist &lt; 30 ? 1 : 0; }
-                        if(weight &gt; 0) { rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight; lumT += luma * weight; c += weight; }
-                    }
-                }
-                measuredEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 14.0); 
-                calculatePriority(); 
-                
-                let finalEV = measuredEV + evBias;
-                const bigVal = document.getElementById(&#39;ev-big-val&#39;);
-                if(bigVal) {
-                    bigVal.innerText = finalEV &gt; 0 ? `+${finalEV.toFixed(1)}` : finalEV.toFixed(1);
-                    bigVal.style.color = (finalEV &lt; -2 || finalEV &gt; 2) ? &#39;var(--red)&#39; : &#39;var(--gold)&#39;;
-                }
-                
-                const luxEst = Math.round(2.5 * Math.pow(2, finalEV));
-                const zoneEl = document.getElementById(&#39;ev-zone-label&#39;);
-                if(zoneEl) {
-                    const zones = [&#39;ZONE 0&#39;,&#39;ZONE I&#39;,&#39;ZONE II&#39;,&#39;ZONE III&#39;,&#39;ZONE IV&#39;,&#39;ZONE V&#39;,&#39;ZONE VI&#39;,&#39;ZONE VII&#39;,&#39;ZONE VIII&#39;,&#39;ZONE IX&#39;,&#39;ZONE X&#39;];
-                    const zIdx = Math.max(0, Math.min(10, Math.round(finalEV + 1)));
-                    zoneEl.innerText = zones[zIdx] || &#39;ZONE V&#39;;
-                    document.getElementById(&#39;ev-lux-label&#39;).innerText = `${luxEst} lux`;
-                }
-                
-                const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) &amp;&amp; k &gt; 0) { liveTempK = Math.round(k); const wSpan = document.getElementById(&#39;tel-wb&#39;); if(wSpan) wSpan.innerHTML = `WB &lt;span style=&quot;color:var(--gold)&quot;&gt;${liveTempK}K&lt;/span&gt;`; }
-
-                if(!bracketActive) {
-                    const hw = histCtx.canvas.width; const hh = histCtx.canvas.height; histCtx.clearRect(0,0,hw,hh); 
-                    const binsR = new Array(40).fill(0); const binsG = new Array(40).fill(0); const binsB = new Array(40).fill(0); let maxBin = 0;
-                    for(let i=0; i&lt;viewData.length; i+=4) { 
-                        let bR = Math.floor((viewData[i]/255)*39); binsR[bR]++; if(binsR[bR] &gt; maxBin) maxBin = binsR[bR];
-                        let bG = Math.floor((viewData[i+1]/255)*39); binsG[bG]++; if(binsG[bG] &gt; maxBin) maxBin = binsG[bG];
-                        let bB = Math.floor((viewData[i+2]/255)*39); binsB[bB]++; if(binsB[bB] &gt; maxBin) maxBin = binsB[bB];
-                    }
-                    const step = hw / 40; histCtx.globalCompositeOperation = &quot;screen&quot;;
-                    histCtx.strokeStyle = &#39;rgba(255,50,50,0.8)&#39;; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i&lt;40; i++) { histCtx.lineTo(i*step, hh - (maxBin &gt; 0 ? (binsR[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.strokeStyle = &#39;rgba(50,255,50,0.8)&#39;; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i&lt;40; i++) { histCtx.lineTo(i*step, hh - (maxBin &gt; 0 ? (binsG[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.strokeStyle = &#39;rgba(50,100,255,0.8)&#39;; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i&lt;40; i++) { histCtx.lineTo(i*step, hh - (maxBin &gt; 0 ? (binsB[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                    histCtx.globalCompositeOperation = &quot;source-over&quot;;
-                }
-
-                if(fcState &gt; 0 &amp;&amp; !bracketActive &amp;&amp; fcState !== 3) {
-                    fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
-                    for(let i=0; i&lt;px.length; i+=4) {
-                        let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
-                        if (fcState === 1) { 
-                            if (ire &gt;= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire &gt;= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire &gt;= 68 &amp;&amp; ire &lt;= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire &gt;= 48 &amp;&amp; ire &lt;= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire &gt;= 5 &amp;&amp; ire &lt;= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire &lt; 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
-                        } else if (fcState === 2) { 
-                            if (ire &gt;= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire &lt; 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
-                        }
-                    }
-                    fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height); const tmp = new ImageData(px, fcCtx.canvas.width, fcCtx.canvas.height); fcInternalCtx.putImageData(tmp, 0, 0); fcCtx.drawImage(document.getElementById(&#39;fc-internal-canvas&#39;), 0, 0);
-                }
-            }
-
-            if(currentTab === &#39;page-color&#39;) {
-                const pts = panMode === &#39;auto&#39; ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
-                pts.forEach((p, idx) =&gt; {
-                    const sampleX = Math.floor(p.x * 300); const sampleY = Math.floor(p.y * 400); 
-                    const pxd = procCtx.getImageData(Math.max(0, sampleX - 1), Math.max(0, sampleY - 1), 3, 3).data;
-                    let tr=0,tg=0,tb=0,pc=0; for(let i=0;i&lt;pxd.length;i+=4){ tr+=pxd[i]; tg+=pxd[i+1]; tb+=pxd[i+2]; pc++; }
-                    if(pc&gt;0) { tr=Math.round(tr/pc); tg=Math.round(tg/pc); tb=Math.round(tb/pc); }
-                    const hex = rgbToHex(tr,tg,tb); extractedColors[idx] = hex;
-                    const pt = findClosestPantone(tr,tg,tb);
-                    document.getElementById(`cs${idx+1}`).style.backgroundColor = hex; 
-                    document.getElementById(`ch${idx+1}`).innerHTML = `${pt.n}<br>&lt;span style=&quot;color:#888; font-size:9px;&quot;&gt;${hex}&lt;/span&gt;`;
-                });
-                updateHarmonies(extractedColors[activeColorIndex]);
-                if (extractedColors.length &gt;= 3) {
-                    updateMJPrompt();
-                }
-            }
-        } // End Throttle
-        
-        const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch); scoutCtx.clearRect(0,0,cw,ch);
-        
-        if(currentTab === &#39;page-meter&#39; &amp;&amp; !bracketActive) { uiCtx.strokeStyle = &#39;rgba(255,255,255,0.4)&#39;; uiCtx.lineWidth = 1; if(currentMeterMode === 1) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, cw*0.25, 0, Math.PI*2); uiCtx.stroke(); } else if(currentMeterMode === 2) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); } }
-        
-        if(currentTab === &#39;page-color&#39;) { 
-            const pts = panMode === &#39;auto&#39; ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
-            pts.forEach((p, idx) =&gt; {
-                const drawX = Math.floor(p.x * cw); const drawY = Math.floor(p.y * ch);
-                uiCtx.strokeStyle = extractedColors[idx]; uiCtx.lineWidth = 2; uiCtx.beginPath(); uiCtx.arc(drawX, drawY, 18, 0, Math.PI*2); uiCtx.stroke(); 
-                if(idx === activeColorIndex) { uiCtx.strokeStyle = &#39;#fff&#39;; uiCtx.beginPath(); uiCtx.arc(drawX, drawY, 22, 0, Math.PI*2); uiCtx.stroke(); }
+        track.addEventListener('scroll', () => {
+            const items = track.querySelectorAll('.dial-item');
+            let closest = null;
+            let minD = Infinity;
+            items.forEach(item => {
+                const d = Math.abs((track.scrollLeft + track.offsetWidth/2) - (item.offsetLeft + item.offsetWidth/2));
+                if (d < minD) { minD = d; closest = item; }
+                item.classList.remove('active');
             });
-        }
-
-        if(currentTab === &#39;page-scout&#39; &amp;&amp; window.currentSunAzimuth !== undefined) {
-            let camAlt = 90 - window.camPitch; let dAz = window.currentSunAzimuth - currentHeading; if (dAz &gt; 180) dAz -= 360; if (dAz &lt; -180) dAz += 360;
-            let dAlt = window.currentSunAltitude - camAlt; let pxPerDegX = cw / 60; let pxPerDegY = ch / 80; 
-            let sunX = (cw / 2) + (dAz * pxPerDegX); let sunY = (ch / 2) - (dAlt * pxPerDegY);
-            let horizonY = (ch / 2) + (camAlt * pxPerDegY);
-            scoutCtx.strokeStyle = &#39;rgba(212,194,161,0.5)&#39;; scoutCtx.lineWidth = 1; scoutCtx.setLineDash([5, 5]); scoutCtx.beginPath(); scoutCtx.moveTo(0, horizonY); scoutCtx.lineTo(cw, horizonY); scoutCtx.stroke(); scoutCtx.setLineDash([]); scoutCtx.fillStyle = &#39;rgba(212,194,161,0.8)&#39;; scoutCtx.font = &#39;10px DM Mono&#39;; scoutCtx.fillText(&#39;0° HORIZON&#39;, 5, horizonY - 5);
-            scoutCtx.strokeStyle = &#39;rgba(255,255,255,0.4)&#39;; scoutCtx.lineWidth = 1; scoutCtx.beginPath(); scoutCtx.moveTo(cw/2-15, ch/2); scoutCtx.lineTo(cw/2+15, ch/2); scoutCtx.stroke(); scoutCtx.beginPath(); scoutCtx.moveTo(cw/2, ch/2-15); scoutCtx.lineTo(cw/2, ch/2+15); scoutCtx.stroke();
-            scoutCtx.fillStyle = &#39;#ffb347&#39;; scoutCtx.beginPath(); scoutCtx.arc(sunX, sunY, 18, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;bold 12px DM Mono&#39;; scoutCtx.textAlign = &#39;center&#39;; scoutCtx.fillText(&#39;☀ SUN&#39;, sunX, sunY + 35); scoutCtx.fillText(`${window.currentSunAltitude.toFixed(1)}°`, sunX, sunY + 50); scoutCtx.textAlign = &#39;left&#39;;
-            if (sunX &lt; 0 || sunX &gt; cw || sunY &lt; 0 || sunY &gt; ch) { let tcx = cw/2; let tcy = ch/2; let angle = Math.atan2(sunY - tcy, sunX - tcx); let ptrX = tcx + Math.cos(angle) * (cw/2 - 30); let ptrY = tcy + Math.sin(angle) * (cw/2 - 30); scoutCtx.fillStyle = &#39;rgba(255, 179, 71, 0.9)&#39;; scoutCtx.beginPath(); scoutCtx.arc(ptrX, ptrY, 10, 0, Math.PI*2); scoutCtx.fill(); scoutCtx.fillStyle = &#39;#fff&#39;; scoutCtx.font = &#39;10px DM Mono&#39;; scoutCtx.fillText(&#39;SUN&#39;, ptrX + 15, ptrY + 4); }
-        }
+            if (closest) closest.classList.add('active');
+        });
     }
-    requestAnimationFrame(liveLoop);
-}
 
-// --- CAPTURE &amp; EXPORT ENGINES ---
-function triggerExport(blob) {
-    if(!blob) { alert(&quot;Export failed.&quot;); isCapturing = false; return; }
-    const url = URL.createObjectURL(blob); const resImg = document.getElementById(&#39;result-img&#39;); if(resImg) resImg.src = url;
-    const resOvl = document.getElementById(&#39;result-overlay&#39;); if(resOvl) resOvl.style.display = &#39;flex&#39;;
-    bindSafe(&#39;btn-share-result&#39;, &#39;click&#39;, async () =&gt; {
-        const file = new File([blob], `PREye_Export_${Date.now()}.jpg`, { type: &#39;image/jpeg&#39; });
-        if (navigator.share &amp;&amp; navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: &#39;PR Eye Export&#39; }); } catch(err) {} } else { const a = document.createElement(&#39;a&#39;); a.href = url; a.download = file.name; a.click(); }
+    async function initCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            video.srcObject = stream;
+            document.getElementById('ui-layer').width = video.clientWidth;
+            document.getElementById('ui-layer').height = video.clientHeight;
+        } catch (e) { console.error("Camera fail", e); }
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            item.classList.add('active');
+            currentTab = item.getAttribute('data-target');
+            document.getElementById(currentTab).classList.add('active');
+            
+            // Toggle camera area based on tab
+            document.getElementById('cam-section').style.display = (currentTab === 'page-release') ? 'none' : 'block';
+        });
     });
-    bindSafe(&#39;btn-close-result&#39;, &#39;click&#39;, () =&gt; { document.getElementById(&#39;result-overlay&#39;).style.display = &#39;none&#39;; URL.revokeObjectURL(url); });
-    isCapturing = false;
-}
 
-bindSafe(&#39;capture-btn&#39;, &#39;click&#39;, async () =&gt; {
-    if(isCapturing) return; isCapturing = true;
-    try {
-        const hrCan = document.getElementById(&#39;composite-canvas&#39;); hrCan.width = 1000; hrCan.height = 1500; const cCtx = hrCan.getContext(&#39;2d&#39;);
-        cCtx.fillStyle = &#39;#111&#39;; cCtx.fillRect(0,0,1000,1500); 
-        
-        const vRect = video.getBoundingClientRect();
-        if(video.videoWidth &gt; 0 &amp;&amp; video.videoHeight &gt; 0) {
-            const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
-            if (vRatio &gt; tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
-            cCtx.drawImage(video, sx, sy, sw, sh, 50, 50, 900, 1200);
-        }
-        if(fcState &gt; 0 &amp;&amp; currentTab === &#39;page-meter&#39;) cCtx.drawImage(document.getElementById(&#39;fc-layer&#39;), 0,0, vRect.width, vRect.height, 50,50, 900,1200);
-        if(currentTab === &#39;page-scout&#39;) cCtx.drawImage(document.getElementById(&#39;scout-layer&#39;), 0,0, vRect.width, vRect.height, 50,50, 900,1200);
-        
-        cCtx.fillStyle = &#39;#fff&#39;; cCtx.font = &#39;40px &quot;Permanent Marker&quot;, cursive, sans-serif&#39;;
-        let finalEV = measuredEV + evBias;
-        const sStr = arrShutter[activeIndexes.shutter]; const fVal = arrAperture[activeIndexes.aperture]; const iVal = arrIso[activeIndexes.iso];
-        
-        if(currentTab === &#39;page-meter&#39;) {
-            cCtx.fillText(`EV: ${finalEV.toFixed(1)} | ISO ${iVal} | f/${fVal} | ${sStr}s`, 70, 1330);
-        } else if (currentTab === &#39;page-scout&#39;) {
-            if (window.currentSunAzimuth !== undefined) {
-                cCtx.fillText(`Sun Azimuth: ${window.currentSunAzimuth.toFixed(1)}° | Elev: ${window.currentSunAltitude.toFixed(1)}°`, 70, 1330);
-            }
-            if (currentLat) {
-                cCtx.font = &#39;22px &quot;DM Mono&quot;, monospace&#39;; cCtx.fillStyle = &#39;#666&#39;;
-                cCtx.fillText(`Maps Link: https://www.google.com/maps/place/$$${currentLat.toFixed(5)},${currentLon.toFixed(5)}`, 70, 1480);
-            }
-        } else if (currentTab === &#39;page-color&#39;) {
-            cCtx.fillText(`Palette: ${extractedColors.join(&#39; | &#39;)}`, 70, 1330);
-        }
+    // Signatures
+    const canvas = document.getElementById('sig-model');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.addEventListener('pointerdown', () => drawing = true);
+    canvas.addEventListener('pointerup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('pointermove', (e) => {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+    });
 
-        cCtx.font = &#39;30px &quot;Permanent Marker&quot;, cursive, sans-serif&#39;; cCtx.fillStyle = &#39;#aaa&#39;; 
-        const pTitle = document.getElementById(&#39;global-project-title&#39;).value || &#39;PR Eye Capture&#39;;
-        cCtx.fillText(`${pTitle} | WB: ${liveTempK}K | ${new Date().toLocaleDateString()}`, 70, 1390);
-        if(currentLat &amp;&amp; currentTab !== &#39;page-scout&#39;) cCtx.fillText(`GPS: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`, 70, 1440);
-        
-        hrCan.toBlob(triggerExport, &#39;image/jpeg&#39;, 0.95);
-    } catch (e) { alert(&quot;Capture error.&quot;); isCapturing = false; }
-});
-
-// --- SCOUT &amp; TOOLS API ENGINE ---
-bindSafe(&#39;btn-fetch-loc&#39;, &#39;click&#39;, () =&gt; {
-    if (!navigator.geolocation) return;
-    const btnS = document.getElementById(&#39;btn-fetch-loc&#39;); btnS.innerText = &#39;Acquiring GPS...&#39;;
-    navigator.geolocation.getCurrentPosition(async (pos) =&gt; {
-        currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; 
-        
-        const mapC = document.getElementById(&#39;map-iframe-container&#39;);
-        if(mapC) mapC.innerHTML = `&lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot; style=&quot;border:0&quot; src=&quot;https://maps.google.com/maps?q=$$${currentLat},${currentLon}&amp;hl=es;z=14&amp;output=embed&quot; allowfullscreen&gt;&lt;/iframe&gt;`;
-
-        try {
-            if(typeof SunCalc !== &#39;undefined&#39;) {
-                const times = SunCalc.getTimes(new Date(), currentLat, currentLon);
-                document.getElementById(&#39;loc-sunrise&#39;).innerText = times.sunrise.toLocaleTimeString([], {hour: &#39;2-digit&#39;, minute:&#39;2-digit&#39;});
-                document.getElementById(&#39;loc-sunset&#39;).innerText = times.sunset.toLocaleTimeString([], {hour: &#39;2-digit&#39;, minute:&#39;2-digit&#39;});
-                document.getElementById(&#39;loc-golden&#39;).innerText = times.goldenHour.toLocaleTimeString([], {hour: &#39;2-digit&#39;, minute:&#39;2-digit&#39;});
-            }
-            const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&amp;longitude=${currentLon}&amp;current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m&amp;temperature_unit=celsius`);
-            if(wRes.ok) { 
-                const wData = await wRes.json(); 
-                const tt = document.getElementById(&#39;tool-temp&#39;); if(tt) tt.innerText = `${wData.current.temperature_2m} °C / ${wData.current.apparent_temperature} °C`; 
-                const tw = document.getElementById(&#39;tool-weather&#39;); if(tw) tw.innerText = `${wData.current.wind_speed_10m} km/h | ${wData.current.precipitation} mm`; 
-            }
-        } catch(e) { }
-        btnS.innerText = &#39;Sync GPS &amp; Live Data&#39;;
-    }, () =&gt; { btnS.innerText = &#39;GPS FAILED&#39;; }, { enableHighAccuracy: false, timeout: 15000 });
-});
-
-window.openSOS = (query) =&gt; { if(!currentLat) { alert(&quot;Load GPS in Scout Tab first.&quot;); return; } window.open(&#39;[https://www.google.com/maps/search/](https://www.google.com/maps/search/)&#39; + query + &#39;/@&#39; + currentLat + &#39;,&#39; + currentLon + &#39;,14z&#39;, &#39;_blank&#39;); };
-bindSafe(&#39;btn-email-notes&#39;, &#39;click&#39;, () =&gt; { const n = document.getElementById(&#39;shoot-notes&#39;); if(n) window.location.href = &#39;mailto:?subject=PR Eye Notes&amp;body=&#39; + encodeURIComponent(n.value); });
-
-// --- SOUND-REACTIVE RAVE &amp; SOS ENGINE ---
-let raveAudioCtx = null; let raveInterval = null; let raveActive = false;
-let raveMicStream = null; let raveAnalyser = null; let raveDataArray = null;
-
-function playRaveBeat() {
-    if(!document.getElementById(&#39;rave-audio-toggle&#39;).checked) return;
-    if(!raveAudioCtx) raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let now = raveAudioCtx.currentTime; const osc = raveAudioCtx.createOscillator(); const gain = raveAudioCtx.createGain();
-    osc.connect(gain); gain.connect(raveAudioCtx.destination);
-    osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-    gain.gain.setValueAtTime(1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-    osc.start(now); osc.stop(now + 0.5);
-}
-
-bindSafe(&#39;btn-start-rave&#39;, &#39;click&#39;, async () =&gt; {
-    const btn = document.getElementById(&#39;btn-start-rave&#39;);
-    const useSynth = document.getElementById(&#39;rave-audio-toggle&#39;).checked;
-
-    if(raveActive) {
-        clearInterval(raveInterval); raveActive = false; document.body.style.setProperty(&#39;background-color&#39;, &#39;#09121c&#39;, &#39;important&#39;); 
-        if(raveMicStream) { raveMicStream.getTracks().forEach(t =&gt; t.stop()); raveMicStream = null; }
-        if(raveAudioCtx) { raveAudioCtx.close(); raveAudioCtx = null; }
-        btn.innerText = &quot;START A RAVE&quot;; btn.classList.add(&#39;rave-active-btn&#39;); return;
-    }
-
-    btn.innerText = &quot;STOP THE RAVE&quot;; btn.classList.remove(&#39;rave-active-btn&#39;); raveActive = true; 
-    raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); await raveAudioCtx.resume();
-
-    if(useSynth) {
-        raveInterval = setInterval(() =&gt; { if(sosActive) return; playRaveBeat(); document.body.style.setProperty(&#39;background-color&#39;, `hsl(${Math.random() * 360}, 100%, 50%)`, &#39;important&#39;); }, 400); 
-    } else {
-        try {
-            raveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = raveAudioCtx.createMediaStreamSource(raveMicStream);
-            raveAnalyser = raveAudioCtx.createAnalyser(); raveAnalyser.fftSize = 256;
-            source.connect(raveAnalyser); raveDataArray = new Uint8Array(raveAnalyser.frequencyBinCount);
-            let rollingAvg = 0;
-            raveInterval = setInterval(() =&gt; {
-                if(sosActive) return;
-                raveAnalyser.getByteFrequencyData(raveDataArray);
-                let sum = 0; for(let i=0; i&lt;10; i++) sum += raveDataArray[i]; let bassEnergy = sum / 10;
-                rollingAvg = (rollingAvg * 0.9) + (bassEnergy * 0.1);
-                const raveSens = parseFloat(document.getElementById(&#39;rave-sensitivity&#39;)?.value || 1.5);
-                if(bassEnergy &gt; rollingAvg * raveSens &amp;&amp; bassEnergy &gt; 40) { document.body.style.setProperty(&#39;background-color&#39;, `hsl(${Math.random() * 360}, 100%, 50%)`, &#39;important&#39;); } 
-                else { document.body.style.setProperty(&#39;background-color&#39;, &#39;#09121c&#39;, &#39;important&#39;); }
-            }, 50);
-        } catch(e) { alert(&quot;Microphone access is required for sound-reactive mode.&quot;); btn.click(); }
-    }
-});
-
-let sosAudioCtx, sirenOsc, sirenGain, sirenInterval, sosActive = false;
-bindSafe(&#39;btn-sos-siren&#39;, &#39;click&#39;, () =&gt; {
-    const o = document.getElementById(&#39;sos-flash-overlay&#39;);
-    if(sosActive) {
-        clearInterval(sirenInterval); if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); } if(sosAudioCtx) sosAudioCtx.close();
-        if(o) { o.className = &#39;&#39;; o.style.display = &#39;none&#39;; }
-        sosActive = false; document.getElementById(&#39;btn-sos-siren&#39;).innerText = &quot;EMERGENCY SOS&quot;;
-    } else {
-        const sosSpeedEl = document.getElementById(&#39;sos-speed&#39;);
-        const speedHz = sosSpeedEl ? parseFloat(sosSpeedEl.value) : 3;
-        const speedSec = `${(1/speedHz).toFixed(2)}s`;
-        const isPolice = document.getElementById(&#39;sos-mode-police&#39;).classList.contains(&#39;active&#39;);
-        const isWhite = document.getElementById(&#39;sos-mode-white&#39;).classList.contains(&#39;active&#39;);
-        
-        document.getElementById(&#39;sos-flash-overlay&#39;).style.setProperty(&#39;--sos-anim&#39;, isPolice ? &#39;strobeRedBlue&#39; : isWhite ? &#39;strobeWhite&#39; : &#39;strobeAmber&#39;);
-        document.getElementById(&#39;sos-flash-overlay&#39;).style.setProperty(&#39;--sos-speed&#39;, speedSec);
-        
-        sosActive = true;
-        document.getElementById(&#39;btn-sos-siren&#39;).innerText = &quot;STOP SIREN&quot;;
-        if(o) { o.className = &#39;mode-dynamic&#39;; o.style.display = &#39;block&#39;; }
-        sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); sirenOsc = sosAudioCtx.createOscillator(); sirenGain = sosAudioCtx.createGain();
-        sirenOsc.connect(sirenGain); sirenGain.connect(sosAudioCtx.destination); sirenOsc.type = &#39;square&#39;; sirenGain.gain.value = 1; sirenOsc.start();
-        let low = true;
-        sirenInterval = setInterval(() =&gt; { let t = sosAudioCtx.currentTime; if(low) { sirenOsc.frequency.linearRampToValueAtTime(1200, t + 0.2); } else { sirenOsc.frequency.linearRampToValueAtTime(600, t + 0.2); } low = !low; }, 200);
-    }
-});
-
-// --- LEGAL PDF ENGINE ---
-bindSafe(&#39;gen-pdf-btn&#39;, &#39;click&#39;, async () =&gt; {
-    const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation: &#39;portrait&#39;, unit: &#39;mm&#39;, format: &#39;a4&#39; });
-    const pageW = 210, margin = 15, usableW = 180; let y = 15;
-    const field = id =&gt; { const el = document.getElementById(id); return el ? (el.value||&#39;&#39;) : &#39;&#39;; };
-    const date=field(&#39;r-date&#39;), loc=field(&#39;r-loc&#39;), modelName=field(&#39;r-name&#39;), comp=field(&#39;r-compensation&#39;)||&#39;None&#39;;
-    const photogName = &#39;Digby Oldridge, PR Eye Ltd | Downs Cottage, Fernham Rd, Longcot, SN7 7TG | Tel: 07879 403 618 | info@preye.co.uk&#39;;
-    
-    const addText=(text,size,bold,col, w)=&gt;{ doc.setFontSize(size||10);doc.setFont(&#39;helvetica&#39;,bold?&#39;bold&#39;:&#39;normal&#39;);doc.setTextColor(col||0); doc.splitTextToSize(text,w||usableW).forEach(l=&gt;{if(y&gt;270){doc.addPage();y=15;}doc.text(l,margin,y);y+=(size||10)*0.45;});y+=2; };
-    const addLine=()=&gt;{doc.setDrawColor(200);doc.line(margin,y,pageW-margin,y);y+=5;};
-    const addSig=(cid,lbl)=&gt;{ if(y&gt;240){doc.addPage();y=15;}addText(lbl+&#39;:&#39;,9,true); try{doc.addImage(document.getElementById(cid).toDataURL(&#39;image/png&#39;),&#39;PNG&#39;,margin,y,70,18);}catch(e){}y+=22; };
-    
-    doc.setFillColor(9,18,28);doc.rect(0,0,210,25,&#39;F&#39;); doc.setFontSize(16);doc.setFont(&#39;helvetica&#39;,&#39;bold&#39;);doc.setTextColor(212,194,161); doc.text(&#39;MODEL RELEASE FORM&#39;, pageW/2,13,{align:&#39;center&#39;}); doc.setFontSize(9);doc.setFont(&#39;helvetica&#39;,&#39;normal&#39;);doc.setTextColor(180,180,180); doc.text(&#39;PR Eye v4.5 — Professional Photography Release&#39;, pageW/2,20,{align:&#39;center&#39;});
-    y=30;doc.setTextColor(0); addText(`Shoot Date: ${date||&#39;_______________&#39;}   Location: ${loc||&#39;___________________________&#39;}`,10,true,0, usableW); addLine(); 
-    addText(&#39;PHOTOGRAPHER:&#39;,10,true); addText(photogName,9); addLine(); 
-    addText(&#39;MODEL:&#39;,10,true); addText(`Name: ${modelName||&#39;_________________________________&#39;}`,9); addText(`Compensation: ${comp}`,9); addLine();
-    addText(&#39;GRANT OF RIGHTS&#39;,10,true); addText(&#39;I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings (&quot;Content&quot;) taken of me in any media for any lawful purpose including commercial use, advertising, marketing, and promotional materials.&#39;,9); addLine(); 
-    addText(&#39;ACKNOWLEDGMENT&#39;,10,true); addText(&#39;By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release.&#39;,9); y+=4; 
-    addSig(&#39;sig-model&#39;,&#39;MODEL SIGNATURE&#39;); addText(`Date: ${date||&#39;_____________&#39;}`,9);y+=4;addLine(); 
-    addSig(&#39;sig-photog&#39;,&#39;PHOTOGRAPHER SIGNATURE&#39;); addText(`Date: ${date||&#39;_____________&#39;}`,9);
-    
-    try {
-        const pdfBlob = doc.output(&#39;blob&#39;); const pdfUrl = URL.createObjectURL(pdfBlob);
-        const dlLink = document.getElementById(&#39;pdf-dl-link&#39;); dlLink.href = pdfUrl; dlLink.download = `ModelRelease_${(modelName||&#39;Unknown&#39;).replace(/\s+/g,&#39;_&#39;)}.pdf`;
-        document.getElementById(&#39;pdf-overlay&#39;).style.display = &#39;flex&#39;;
-    } catch(err) { alert(&quot;PDF Engine failed.&quot;); }
-});
-
-let padsInit = false;
-bindSafe(&#39;nav-release&#39;, &#39;click&#39;, () =&gt; {
-    if(!padsInit) { 
-        [&#39;sig-model&#39;, &#39;sig-guardian&#39;, &#39;sig-photog&#39;].forEach(id =&gt; { const can = document.getElementById(id); if(!can) return; const c = can.getContext(&#39;2d&#39;); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false; can.style.touchAction = &#39;none&#39;; can.addEventListener(&#39;pointerdown&#39;, e=&gt;{drawing=true; const r = can.getBoundingClientRect(); c.beginPath(); c.moveTo(e.clientX-r.left, e.clientY-r.top); e.preventDefault();}); can.addEventListener(&#39;pointermove&#39;, e=&gt;{if(!drawing)return; const r = can.getBoundingClientRect(); c.lineTo(e.clientX-r.left, e.clientY-r.top); c.stroke(); e.preventDefault();}); can.addEventListener(&#39;pointerup&#39;, ()=&gt;drawing=false); can.addEventListener(&#39;pointerleave&#39;, ()=&gt;drawing=false); }); 
-        padsInit = true; 
-    }
-    const tA = document.getElementById(&#39;tog-adult&#39;); const tM = document.getElementById(&#39;tog-minor&#39;); const gS = document.getElementById(&#39;guardian-section&#39;);
-    if(tA) tA.onclick=()=&gt;{tA.classList.add(&#39;active&#39;); if(tM) tM.classList.remove(&#39;active&#39;); if(gS) gS.style.display=&#39;none&#39;;};
-    if(tM) tM.onclick=()=&gt;{tM.classList.add(&#39;active&#39;); if(tA) tA.classList.remove(&#39;active&#39;); if(gS) gS.style.display=&#39;block&#39;;};
-});
-window.clearPad = (id) =&gt; { const c = document.getElementById(id).getContext(&#39;2d&#39;); c.clearRect(0,0,1000,1000); };
-
-// --- STARTUP ---
-buildDial(&#39;dial-shutter&#39;, arrShutter, &#39;shutter&#39;); buildDial(&#39;dial-aperture&#39;, arrAperture.map(a=&gt;`F${a}`), &#39;aperture&#39;); buildDial(&#39;dial-iso&#39;, arrIso, &#39;iso&#39;);
-syncDial(&#39;dial-shutter&#39;, 33); syncDial(&#39;dial-aperture&#39;, 10); syncDial(&#39;dial-iso&#39;, 7);
-startCamera(); 
+    buildDial('dial-shutter', arrShutter);
+    buildDial('dial-aperture', arrAperture);
+    buildDial('dial-iso', arrIso);
+    initCamera();
 </script>
-
 </body>
 </html>
