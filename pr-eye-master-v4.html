@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v4.1 — Pro Toolkit</title>
+    <title>PR Eye v4.2 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,46 +13,45 @@
         :root {
             --navy: #09121c; --border: rgba(255, 255, 255, 0.08);
             --gold: #d4c2a1; --muted: #8b9bb4; --text: #f0f4f8;
-            --red: #ff4d4d; --green: #4dff4d; --blue: #4d4dff; --magenta: #ff00ff; --cyan: #00ffff;
+            --red: #ff4d4d; --blue: #0044ff; --magenta: #ff00ff; --cyan: #00ffff;
             --canon-bg: #0d141e; --canon-line: #2a3a4a; --canon-orange: #f39c12;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--navy); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background-color 0.1s ease; }
         h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         
-        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; display:flex; justify-content: space-between; align-items: center;}
+        .hdr { padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; display:flex; flex-direction: column; gap: 10px;}
+        .hdr-top { display: flex; justify-content: space-between; align-items: center; }
         .brand { font-family: 'Cormorant Garamond'; font-size: 18px; color: var(--gold); letter-spacing: 2px; font-weight: 500;}
         .telemetry-bar { display: flex; align-items: center; gap: 15px; }
         .tel-item { font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--muted);}
+        
+        .project-input { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gold); font-family: 'DM Mono'; font-size: 12px; padding: 8px; border-radius: 4px; width: 100%; text-align: center; outline: none;}
 
         .main-content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .page { display: none; } .page.active { display: block; }
 
-        /* THE NEW PRO METER UI */
         .pro-meter-display { text-align: center; margin-bottom: 15px; position: relative;}
         .ev-huge { font-size: 84px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
         .ev-huge span { font-size: 30px; color: var(--muted); letter-spacing: 0; vertical-align: top;}
         .ev-bias-badge { position: absolute; top: 10px; right: 10px; background: var(--canon-orange); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;}
 
-        /* MINIMAL TARGETING VIEWFINDER */
         .viewfinder-wrap { display: flex; gap: 10px; margin-bottom: 15px; height: 160px; }
         .cam-container { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         #ui-layer { pointer-events: auto; z-index: 5;} #grid-layer { z-index: 2; } #fc-layer { z-index: 1; opacity: 0.85; display: none;} 
         
-        /* SPLIT SCREEN BRACKET */
         #bracket-container { display: none; gap: 5px; height: 160px; margin-bottom: 15px; }
         .bracket-panel { flex: 1; position: relative; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
         .bracket-panel canvas { width: 100%; height: 100%; object-fit: cover; }
         .bracket-lbl { position: absolute; bottom: 5px; left: 5px; font-size: 9px; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 2px; font-weight: bold; color: #fff;}
 
-        /* RGB CURVES */
         .rgb-box { width: 100px; height: 100%; background: #050a0f; border-radius: 8px; border: 1px solid #444; position: relative; }
         #histogram-canvas { width: 100%; height: 100%; position: absolute; inset: 0;}
 
         .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
-        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 10px;}
+        .btn { padding: 12px; background: transparent; border: 1px solid rgba(212,194,161,0.3); color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s ease; font-size: 10px;}
         .btn:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
         .btn.solid { background: var(--gold); color: #09121c; font-weight: 700; border: none;}
         .btn.active-toggle { background: var(--gold); color: #09121c; }
@@ -61,32 +60,43 @@
         
         .ctrl-panel { border-radius: 12px; padding: 15px; margin-bottom: 12px; background: rgba(20, 36, 56, 0.4); border: 1px solid var(--border); }
         .label-txt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;}
-        
-        /* CANON HUD */
-        .canon-hud { background: var(--canon-bg); border: 1px solid #444; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
-        .canon-row { display: flex; border-bottom: 1px solid var(--canon-line); }
-        .canon-row:last-child { border-bottom: none; }
-        .canon-cell { flex: 1; padding: 12px 5px; text-align: center; border-right: 1px solid var(--canon-line); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .canon-cell:last-child { border-right: none; }
-        .c-val { font-size: 22px; font-weight: 500; color: #fff; letter-spacing: -0.5px;}
-        .c-lbl { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1px;}
-        
-        .meter-scale-container { padding: 12px; background: #080d12; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid var(--canon-line);}
-        .meter-numbers { display: flex; justify-content: space-between; width: 95%; color: #fff; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-        .meter-bar-wrap { position: relative; width: 95%; height: 10px; border-bottom: 2px solid #666; display: flex; justify-content: space-between;}
-        .tick { width: 2px; height: 5px; background: #666; align-self: flex-end; }
-        .tick.major { height: 10px; background: #fff; }
-        .meter-needle { position: absolute; top: -2px; left: 50%; width: 3px; height: 18px; background: var(--canon-orange); transform: translateX(-50%); transition: left 0.1s linear; z-index: 2;}
+        .data-txt { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 8px; }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="email"], textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: var(--gold); padding: 8px 0; border-radius: 0; outline: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; transition: 0.3s ease;}
 
-        .slider-row { display: flex; align-items: center; margin-bottom: 15px; gap: 12px;}
-        .slider-lbl { width: 35px; font-size: 11px; color: var(--muted); text-align: right; font-weight: 500;}
-        input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; margin-top: -9px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .toggle-switch { display: flex; border-radius: 50px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+        .toggle-opt { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+        .toggle-opt.active { background: var(--gold); color: #09121c; }
+
+        /* JOG DIALS UI */
+        .dial-container { display: flex; align-items: center; background: #080c11; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px; height: 50px; overflow: hidden; position: relative;}
+        .dial-label { width: 45px; background: #111; color: var(--muted); font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; border-right: 1px solid #333; z-index: 2;}
+        .dial-lock { width: 35px; background: #111; color: var(--gold); font-size: 14px; display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #333; cursor: pointer; z-index: 2; transition: 0.2s;}
+        .dial-lock.locked { color: #555; }
+        .dial-lock.auto { color: var(--cyan); background: rgba(0,255,255,0.1); font-weight: bold;}
+        .dial-track { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; height: 100%; align-items: center; position: relative;}
+        .dial-track::-webkit-scrollbar { display: none; }
+        .dial-item { flex: 0 0 33.33%; display: flex; justify-content: center; align-items: center; scroll-snap-align: center; color: #fff; font-size: 16px; font-weight: 500; height: 100%; opacity: 0.3; transition: 0.1s;}
+        .dial-item.active { opacity: 1; color: var(--canon-orange); font-size: 18px; font-weight: 700;}
+        .dial-center-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(243, 156, 18, 0.5); transform: translateX(-50%); pointer-events: none; z-index: 1;}
+
+        /* COLOR TAB SWATCHES */
+        .color-stage { height: 100px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; transition: 0.3s; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        .harmony-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .harmony-box { height: 60px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; font-size: 9px; color: #fff; text-shadow: 0 1px 2px #000; }
 
         .nav { background: rgba(9, 18, 28, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; width: 100%; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 0; color: var(--muted); font-size: 9px; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;}
         .nav-item.active { color: var(--gold); }
+
+        @keyframes pulsateGlow { 0% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } 50% { box-shadow: 0 0 40px var(--magenta), 0 0 30px var(--cyan); transform: scale(1.02); } 100% { box-shadow: 0 0 10px var(--magenta); transform: scale(1); } }
+        .rave-active-btn { animation: pulsateGlow 0.8s infinite; background: linear-gradient(45deg, var(--magenta), var(--cyan)) !important; border:none; color:#000; font-weight:900;}
+        
+        @keyframes strobeHeavyBlue { 0%, 20% {background-color: #0000ff;} 21%, 100% {background-color: #000000;} }
+        @keyframes strobeRedWhite { 0%, 49% {background-color: #ff0000;} 50%, 100% {background-color: #ffffff;} }
+        
+        #sos-flash-overlay { display: none; position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
+        .mode-heavyBlue { animation: strobeHeavyBlue 0.1s infinite; }
+        .mode-strobeRedWhite { animation: strobeRedWhite 0.2s infinite; }
 
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 20px;}
@@ -97,11 +107,13 @@
 <body>
 
     <div class="hdr">
-        <div class="brand">PR EYE v4.1</div>
-        <div class="telemetry-bar">
-            <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
-            <div class="tel-item">LUX <span id="tel-lux" style="color:var(--cyan)">--</span></div>
+        <div class="hdr-top">
+            <div class="brand">PR EYE v4.2</div>
+            <div class="telemetry-bar">
+                <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span></div>
+            </div>
         </div>
+        <input type="text" id="global-project-title" class="project-input" placeholder="Enter Project / Scene Title...">
     </div>
 
     <div class="main-content">
@@ -136,47 +148,90 @@
             <div class="action-row">
                 <button id="bracket-toggle-btn" class="btn">SPLIT SCREEN</button>
                 <button id="fc-toggle-btn" class="btn">FALSE COL</button>
-                <button id="grid-toggle-btn" class="btn">GRID</button>
+                <button id="meter-mode-btn" class="btn">[ ] MATRIX</button>
             </div>
 
-            <div class="canon-hud">
-                <div class="canon-row">
-                    <div class="canon-cell"><span class="c-lbl" style="color: var(--canon-orange);">SHUTTER</span><span class="c-val" id="hud-shutter">1/60</span></div>
-                    <div class="canon-cell"><span class="c-lbl">F-STOP</span><span class="c-val" id="hud-aperture">F5.6</span></div>
-                    <div class="canon-cell"><span class="c-box">ISO</span><span class="c-val" id="hud-iso">400</span></div>
-                </div>
-                <div class="meter-scale-container">
-                    <div class="meter-numbers"><span>-3</span><span>..</span><span>-2</span><span>..</span><span>-1</span><span>..</span><span>0</span><span>..</span><span>1</span><span>..</span><span>2</span><span>..</span><span>+3</span></div>
-                    <div class="meter-bar-wrap" id="hud-scale-wrap">
-                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major" style="height:12px;"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major"></div><div class="tick"></div><div class="tick"></div>
-                        <div class="tick major"></div>
-                        <div class="meter-needle" id="expo-marker"></div>
-                    </div>
-                </div>
-                <div class="canon-row" style="background: #0a0f16;">
-                    <div class="canon-cell" id="hud-meter-mode" style="cursor: pointer;"><span class="c-lbl">METER</span><span class="c-val" id="icon-meter-mode" style="font-size:16px; color: var(--canon-orange);">[ ]</span></div>
-                    <div class="canon-cell" id="hud-torch" style="cursor: pointer;"><span class="c-lbl">TORCH</span><span class="c-val" id="icon-torch" style="font-size:16px; color:#555;">🔦 OFF</span></div>
-                </div>
+            <p style="font-size: 9px; color: var(--cyan); text-align: center; margin: 10px 0; letter-spacing: 1px;">TAP '◎' TO SET AUTO-PRIORITY VARIABLE</p>
+            
+            <div class="dial-container">
+                <div class="dial-label">SS</div>
+                <div class="dial-track" id="dial-shutter"></div>
+                <div class="dial-lock locked" id="lock-shutter">🔒</div>
+                <div class="dial-center-mark"></div>
             </div>
-
-            <div class="slider-row"><span class="slider-lbl">SS</span><input type="range" id="slide-shutter" min="0" max="52" value="33"></div>
-            <div class="slider-row"><span class="slider-lbl">F/</span><input type="range" id="slide-aperture" min="0" max="22" value="10"></div>
-            <div class="slider-row"><span class="slider-lbl">ISO</span><input type="range" id="slide-iso" min="0" max="23" value="7"></div>
+            
+            <div class="dial-container">
+                <div class="dial-label">F/</div>
+                <div class="dial-track" id="dial-aperture"></div>
+                <div class="dial-lock locked" id="lock-aperture">🔒</div>
+                <div class="dial-center-mark"></div>
+            </div>
+            
+            <div class="dial-container">
+                <div class="dial-label">ISO</div>
+                <div class="dial-track" id="dial-iso"></div>
+                <div class="dial-lock auto" id="lock-iso">◎</div>
+                <div class="dial-center-mark"></div>
+            </div>
 
             <button id="capture-btn" class="btn solid" style="width:100%; padding:16px; font-size:18px; margin-top:10px;">CAPTURE FRAME</button>
         </div>
 
-        <div id="page-tools" class="page">
-            <div class="ctrl-panel"><h4 style="color:var(--gold);">App Architecture Note</h4><p style="color:var(--muted); font-size:11px;">Phase 1 Focus: Metering Interface Overhaul. Other tabs preserved in background.</p></div>
+        <div id="page-color" class="page">
+            <div class="ctrl-panel">
+                <h4>Colorimetry & Generative AI</h4>
+                <p style="font-size:10px; color:var(--muted); margin-bottom:12px;">Center crosshair sets the base color. Harmonies calculate automatically.</p>
+                
+                <div class="color-stage" id="color-base" style="background: #333;">HEX</div>
+                
+                <div class="harmony-grid">
+                    <div class="harmony-box" id="color-comp" style="background: #222;">Complementary</div>
+                    <div class="harmony-box" id="color-ana1" style="background: #222;">Analogous L</div>
+                    <div class="harmony-box" id="color-ana2" style="background: #222;">Analogous R</div>
+                    <div class="harmony-box" id="color-tri" style="background: #222;">Triadic</div>
+                </div>
+                
+                <button id="btn-midjourney" class="btn" style="width: 100%; border-color: var(--cyan); color: var(--cyan); margin-bottom: 10px;">📋 Copy Midjourney Prompt</button>
+                <button id="btn-export-swatch" class="btn solid" style="width: 100%;">EXPORT DIGITAL SWATCH</button>
+            </div>
+        </div>
+
+        <div id="page-scout" class="page">
+            <div class="ctrl-panel">
+                <h4>Location Scout</h4>
+                <button class="btn sm" id="btn-fetch-loc" style="margin-bottom:12px; width:100%;">Get Live GPS & Map</button>
+                
+                <div id="map-iframe-container" style="height:200px; background:#000; border-radius:8px; margin-bottom:12px; overflow:hidden; border: 1px solid #444; display: flex; align-items:center; justify-content:center; color: var(--muted); font-size: 10px;">AWAITING GPS...</div>
+                
+                <div class="row" style="margin-bottom:10px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" class="data-txt">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" class="data-txt">--:--</span></div></div>
+                <div class="row"><div class="col"><span class="label-txt">Sun Azimuth</span><span id="loc-azimuth" class="data-txt highlight">--°</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sun Elev.</span><span id="loc-altitude" class="data-txt highlight">--°</span></div></div>
+            </div>
+        </div>
+
+        <div id="page-rave" class="page" style="height: 65vh;">
+            <div class="ctrl-panel" style="text-align: center; display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: space-around;">
+                <h4 style="color: var(--magenta);">Tactical Field Utilities</h4>
+                
+                <button class="btn solid rave-active-btn" id="btn-start-rave" style="width: 100%; flex-grow: 1; font-size: 24px; border-radius: 12px; letter-spacing: 2px;">START A RAVE</button>
+                <div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin: -10px 0 10px 0;">
+                    <span style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Audio Synth:</span>
+                    <input type="checkbox" id="rave-audio-toggle" checked style="width: 20px; height: 20px;">
+                </div>
+                
+                <div style="text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
+                    <span class="label-txt" style="color:var(--red);">Siren / Flash Mode</span>
+                    <select id="sos-mode-select" style="margin-bottom: 8px; font-size: 16px; font-weight: bold;">
+                        <option value="heavyBlue">Heavy Police Blue Strobe</option>
+                        <option value="strobe">Red/White Warning Strobe</option>
+                    </select>
+                </div>
+                <button class="btn danger" id="btn-sos-siren" style="width: 100%; flex-grow: 1; font-size:22px; border-radius: 12px; font-weight: 900; letter-spacing: 2px;">EMERGENCY SIREN</button>
+            </div>
         </div>
 
     </div>
 
+    <div id="sos-flash-overlay"></div>
     <div id="result-overlay">
         <h3 style="color:#fff; margin-bottom:15px; font-family:'DM Mono', sans-serif;">Export Ready</h3>
         <img id="result-img">
@@ -188,7 +243,9 @@
 
     <div class="nav">
         <div class="nav-item active" data-target="page-meter">Meter</div>
-        <div class="nav-item" data-target="page-tools">Tools</div>
+        <div class="nav-item" data-target="page-color">Color</div>
+        <div class="nav-item" data-target="page-scout">Scout</div>
+        <div class="nav-item" data-target="page-rave">Rave</div>
     </div>
 
     <canvas id="proc-canvas" width="150" height="200"></canvas>
@@ -214,28 +271,120 @@
     let fcState = 0; let bracketActive = false;
     let currentGridIdx = 0; const gridOptions = ['off', 'thirds', 'cross'];
     let isCapturing = false;
+    let frameCount = 0; // Throttling variable
+
+    let currentLat = null; let currentLon = null;
 
     // CANON EXPOSURE ARRAYS
     const arrShutter = ['30"','25"','20"','15"','13"','10"','8"','6"','5"','4"','3.2"','2.5"','2"','1.6"','1.3"','1"','0.8"','0.6"','0.5"','0.4"','0.3"','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000'];
     const arrAperture = [1.2, 1.4, 1.8, 2.0, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10, 11, 13, 14, 16, 18, 20, 22];
     const arrIso = [50, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 25600];
     
-    let currentMeterMode = 0; let torchActive = false;
+    // PRIORITY ENGINE STATE
+    let activeIndexes = { shutter: 33, aperture: 10, iso: 7 }; // Defaults: 1/60, f/5.6, ISO 400
+    let priorityMode = 'iso'; // 'shutter', 'aperture', or 'iso'
+    let currentMeterMode = 0; 
+    let currentColorData = { hex: '#333333', comp: '#333333', ana1: '#333333', ana2: '#333333' };
 
     function parseShutter(s) { if(s.includes('"')) return parseFloat(s.replace('"','')); if(s.includes('/')) { let pts = s.split('/'); return parseInt(pts[0]) / parseInt(pts[1]); } return parseFloat(s); }
     function bindSafe(id, event, callback) { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); }
 
-    function updateHudData() {
-        document.getElementById('hud-shutter').innerText = arrShutter[document.getElementById('slide-shutter').value];
-        document.getElementById('hud-aperture').innerText = 'F' + arrAperture[document.getElementById('slide-aperture').value];
-        document.getElementById('hud-iso').innerText = arrIso[document.getElementById('slide-iso').value];
+    // --- DIGITAL JOG DIALS BUILDER ---
+    function buildDial(id, arr, type) {
+        const track = document.getElementById(id); track.innerHTML = '';
+        // Add padding elements so first/last items can center
+        const padStr = `<div class="dial-item" style="flex: 0 0 33.33%;"></div>`;
+        track.innerHTML += padStr;
+        arr.forEach((val, i) => { track.innerHTML += `<div class="dial-item" data-idx="${i}">${val}</div>`; });
+        track.innerHTML += padStr;
+        
+        track.addEventListener('scroll', () => {
+            if(priorityMode === type) return; // Don't allow manual scroll if auto-calculating
+            const center = track.scrollLeft + (track.clientWidth / 2);
+            let closest = null; let minD = Infinity;
+            Array.from(track.children).forEach(child => {
+                if(!child.dataset.idx) return;
+                const cCenter = child.offsetLeft + (child.clientWidth / 2);
+                const d = Math.abs(center - cCenter);
+                if(d < minD) { minD = d; closest = child; }
+                child.classList.remove('active');
+            });
+            if(closest) {
+                closest.classList.add('active');
+                activeIndexes[type] = parseInt(closest.dataset.idx);
+                calculatePriority();
+            }
+        });
     }
-    ['slide-shutter', 'slide-aperture', 'slide-iso'].forEach(id => bindSafe(id, 'input', updateHudData));
 
-    bindSafe('hud-meter-mode', 'click', () => { currentMeterMode = (currentMeterMode + 1) % 3; const icon = document.getElementById('icon-meter-mode'); if(currentMeterMode === 0) icon.innerText = "[ ]"; else if(currentMeterMode === 1) icon.innerText = "( )"; else icon.innerText = "[•]"; });
-    bindSafe('hud-torch', 'click', async () => { if (!stream) return; const track = stream.getVideoTracks()[0]; try { torchActive = !torchActive; await track.applyConstraints({ advanced: [{ torch: torchActive }] }); const icon = document.getElementById('icon-torch'); icon.innerText = torchActive ? "🔦 ON" : "🔦 OFF"; icon.style.color = torchActive ? "var(--canon-orange)" : "#555"; } catch (err) { alert('Torch API not supported on this browser/lens.'); torchActive = false; } });
+    function syncDial(id, idx) {
+        const track = document.getElementById(id);
+        const item = track.querySelector(`[data-idx="${idx}"]`);
+        if(item) {
+            Array.from(track.children).forEach(c => c.classList.remove('active'));
+            item.classList.add('active');
+            const targetScroll = item.offsetLeft - (track.clientWidth / 2) + (item.clientWidth / 2);
+            track.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        }
+    }
 
-    // VOLUME KEY HIJACK FOR EV BIAS
+    // --- EXPOSURE PRIORITY MATH ---
+    function calculatePriority() {
+        if(!measuredEV) return;
+        let useEV = measuredEV + evBias;
+        
+        const N = arrAperture[activeIndexes.aperture]; 
+        const ISO = arrIso[activeIndexes.iso]; 
+        const t = parseShutter(arrShutter[activeIndexes.shutter]);
+
+        if(priorityMode === 'iso') {
+            // Calculate needed ISO
+            // EV = log2(N^2 / t) - log2(ISO/100)  =>  log2(ISO/100) = log2(N^2 / t) - EV
+            let targetIso = 100 * Math.pow(2, Math.log2((N*N)/t) - useEV);
+            // Find closest ISO index
+            let closestIdx = 0; let minD = Infinity;
+            arrIso.forEach((val, i) => { const d = Math.abs(val - targetIso); if(d < minD) { minD = d; closestIdx = i; }});
+            activeIndexes.iso = closestIdx;
+            syncDial('dial-iso', closestIdx);
+        } else if (priorityMode === 'aperture') {
+            // Target N = sqrt( t * 2^(EV + log2(ISO/100)) )
+            let targetN = Math.sqrt(t * Math.pow(2, useEV + Math.log2(ISO/100)));
+            let closestIdx = 0; let minD = Infinity;
+            arrAperture.forEach((val, i) => { const d = Math.abs(val - targetN); if(d < minD) { minD = d; closestIdx = i; }});
+            activeIndexes.aperture = closestIdx;
+            syncDial('dial-aperture', closestIdx);
+        } else if (priorityMode === 'shutter') {
+            // Target t = N^2 / 2^(EV + log2(ISO/100))
+            let targetT = (N*N) / Math.pow(2, useEV + Math.log2(ISO/100));
+            let closestIdx = 0; let minD = Infinity;
+            arrShutter.forEach((val, i) => { const pv = parseShutter(val); const d = Math.abs(pv - targetT); if(d < minD) { minD = d; closestIdx = i; }});
+            activeIndexes.shutter = closestIdx;
+            syncDial('dial-shutter', closestIdx);
+        }
+    }
+
+    function setPriority(type) {
+        priorityMode = type;
+        ['shutter', 'aperture', 'iso'].forEach(t => {
+            const el = document.getElementById(`lock-${t}`);
+            if(t === type) { el.className = 'dial-lock auto'; el.innerText = '◎'; }
+            else { el.className = 'dial-lock locked'; el.innerText = '🔒'; }
+        });
+        calculatePriority();
+    }
+
+    bindSafe('lock-shutter', 'click', () => setPriority('shutter'));
+    bindSafe('lock-aperture', 'click', () => setPriority('aperture'));
+    bindSafe('lock-iso', 'click', () => setPriority('iso'));
+
+    // --- BINDINGS ---
+    bindSafe('meter-mode-btn', 'click', (e) => { 
+        currentMeterMode = (currentMeterMode + 1) % 3; 
+        if(currentMeterMode === 0) e.currentTarget.innerText = "[ ] MATRIX"; 
+        else if(currentMeterMode === 1) e.currentTarget.innerText = "( ) CENTER"; 
+        else e.currentTarget.innerText = "[•] SPOT"; 
+    });
+
     window.addEventListener('keydown', function(e) { 
         if (currentTab === 'page-meter') {
             if (e.key === 'VolumeUp' || e.key === 'AudioVolumeUp') { e.preventDefault(); evBias += 0.33; updateBiasDisplay(); }
@@ -256,19 +405,10 @@
         video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); }; 
     }
     
-    // SIMULATED INCIDENT DOME
     bindSafe('cam-flip-btn', 'click', (e)=>{ 
         currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; 
-        torchActive = false; document.getElementById('icon-torch').style.color='#555'; document.getElementById('icon-torch').innerText='🔦 OFF';
-        if(currentFacingMode === 'user') {
-            video.style.filter = 'blur(15px) grayscale(20%)';
-            e.currentTarget.innerText = "INCIDENT SIM";
-            e.currentTarget.style.background = "var(--magenta)";
-        } else {
-            video.style.filter = 'none';
-            e.currentTarget.innerText = "REFLECTED";
-            e.currentTarget.style.background = "rgba(0,0,0,0.6)";
-        }
+        if(currentFacingMode === 'user') { video.style.filter = 'blur(15px) grayscale(20%)'; e.currentTarget.innerText = "INCIDENT SIM"; e.currentTarget.style.background = "var(--magenta)"; } 
+        else { video.style.filter = 'none'; e.currentTarget.innerText = "REFLECTED"; e.currentTarget.style.background = "rgba(0,0,0,0.6)"; }
         startCamera(); 
     });
 
@@ -276,13 +416,9 @@
         const rect = video.getBoundingClientRect(); if(rect.width===0) return;
         ['grid-layer', 'ui-layer', 'fc-layer'].forEach(id => { const c = document.getElementById(id); if(c) {c.width = rect.width; c.height = rect.height;} });
         const fcInt = document.getElementById('fc-internal-canvas'); if(fcInt) {fcInt.width = rect.width; fcInt.height = rect.height;}
-        
         const hC = document.getElementById('histogram-canvas'); if(hC) { const hRect = hC.getBoundingClientRect(); hC.width = hRect.width; hC.height = hRect.height; }
-        
         const bRect = document.getElementById('b-zero').getBoundingClientRect();
-        if(bRect.width > 0) {
-            ['b-minus', 'b-zero', 'b-plus'].forEach(id => { const c = document.getElementById(id); c.width = bRect.width; c.height = bRect.height; });
-        }
+        if(bRect.width > 0) { ['b-minus', 'b-zero', 'b-plus'].forEach(id => { const c = document.getElementById(id); c.width = bRect.width; c.height = bRect.height; }); }
         drawGrid();
     }
     window.addEventListener('resize', resizeCanvases);
@@ -301,28 +437,50 @@
     
     bindSafe('fc-toggle-btn', 'click', (e) => { fcState = (fcState + 1) % 3; const btn = e.currentTarget; if(fcState === 0) { btn.innerText = "FALSE COL"; btn.classList.remove('active-toggle'); document.getElementById('fc-layer').style.display='none'; } if(fcState === 1) { btn.innerText = "F-COL: PRO"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } if(fcState === 2) { btn.innerText = "F-COL: CLIP"; btn.classList.add('active-toggle'); document.getElementById('fc-layer').style.display='block'; } });
     
-    bindSafe('bracket-toggle-btn', 'click', (e) => { 
-        bracketActive = !bracketActive; 
-        document.getElementById('bracket-container').style.display = bracketActive ? 'flex' : 'none'; 
-        document.getElementById('main-viewfinder').style.display = bracketActive ? 'none' : 'flex'; 
-        e.currentTarget.classList.toggle('active-toggle', bracketActive); 
-        resizeCanvases(); 
-    });
+    bindSafe('bracket-toggle-btn', 'click', (e) => { bracketActive = !bracketActive; document.getElementById('bracket-container').style.display = bracketActive ? 'flex' : 'none'; document.getElementById('main-viewfinder').style.display = bracketActive ? 'none' : 'flex'; e.currentTarget.classList.toggle('active-toggle', bracketActive); resizeCanvases(); });
 
-    function updateExpoBar() {
-        if(measuredEV === null || measuredEV === undefined) return;
-        let useEV = measuredEV + evBias;
+    // --- COLOR HARMONY MATH ---
+    function rgbToHsl(r, g, b) { r/=255, g/=255, b/=255; let max = Math.max(r, g, b), min = Math.min(r, g, b); let h, s, l = (max + min) / 2; if(max == min){ h = s = 0; } else { let d = max - min; s = l > 0.5 ? d / (2 - max - min) : d / (max + min); switch(max){ case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; case b: h = (r - g) / d + 4; break; } h /= 6; } return [h, s, l]; }
+    function hslToRgb(h, s, l) { let r, g, b; if(s == 0){ r = g = b = l; } else { let hue2rgb = function hue2rgb(p, q, t){ if(t < 0) t += 1; if(t > 1) t -= 1; if(t < 1/6) return p + (q - p) * 6 * t; if(t < 1/2) return q; if(t < 2/3) return p + (q - p) * (2/3 - t) * 6; return p; }; let q = l < 0.5 ? l * (1 + s) : l + s - l * s; let p = 2 * l - q; r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3); } return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]; }
+    function rgbToHex(r,g,b) { return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase(); }
+
+    function updateColors(r,g,b) {
+        let [h, s, l] = rgbToHsl(r,g,b);
+        let hexBase = rgbToHex(r,g,b);
         
-        const N = arrAperture[document.getElementById('slide-aperture').value]; const ISO = arrIso[document.getElementById('slide-iso').value]; const sStr = arrShutter[document.getElementById('slide-shutter').value]; const t = parseShutter(sStr);
-        let diff = useEV - (Math.log2((N*N)/t) - Math.log2(ISO/100));
+        let cComp = hslToRgb((h + 0.5) % 1, s, l);
+        let hexComp = rgbToHex(...cComp);
         
-        let percent = Math.max(0, Math.min(100, 50 + (diff * (50/3))));
-        const marker = document.getElementById('expo-marker'); if(marker) { marker.style.left = `${percent}%`; marker.style.background = (percent < 10 || percent > 90) ? 'var(--red)' : 'var(--canon-orange)'; }
+        let cAna1 = hslToRgb((h + 0.083) % 1, s, l);
+        let hexAna1 = rgbToHex(...cAna1);
+        
+        let cAna2 = hslToRgb((h - 0.083 + 1) % 1, s, l);
+        let hexAna2 = rgbToHex(...cAna2);
+        
+        let cTri = hslToRgb((h + 0.33) % 1, s, l);
+        let hexTri = rgbToHex(...cTri);
+
+        currentColorData = { hex: hexBase, comp: hexComp, ana1: hexAna1, ana2: hexAna2 };
+
+        document.getElementById('color-base').style.background = hexBase; document.getElementById('color-base').innerText = hexBase;
+        document.getElementById('color-comp').style.background = hexComp; document.getElementById('color-comp').innerHTML = `Comp<br>${hexComp}`;
+        document.getElementById('color-ana1').style.background = hexAna1; document.getElementById('color-ana1').innerHTML = `Ana L<br>${hexAna1}`;
+        document.getElementById('color-ana2').style.background = hexAna2; document.getElementById('color-ana2').innerHTML = `Ana R<br>${hexAna2}`;
+        document.getElementById('color-tri').style.background = hexTri; document.getElementById('color-tri').innerHTML = `Triad<br>${hexTri}`;
     }
 
-    // --- LIVE FEED ENGINE ---
+    bindSafe('btn-midjourney', 'click', (e) => {
+        const title = document.getElementById('global-project-title').value || 'Subject';
+        const prompt = `A cinematic, highly detailed photograph of ${title}, featuring a primary color palette of ${currentColorData.hex}, balanced with complementary lighting in ${currentColorData.comp}, and analogous geometric background patterns in ${currentColorData.ana1} and ${currentColorData.ana2}. 8k resolution, photorealistic, shot on 35mm lens, highly detailed --ar 16:9 --style raw`;
+        navigator.clipboard.writeText(prompt);
+        e.currentTarget.innerText = "✅ COPIED TO CLIPBOARD";
+        setTimeout(() => e.currentTarget.innerText = "📋 Copy Midjourney Prompt", 2000);
+    });
+
+    // --- LIVE FEED ENGINE (THROTTLED) ---
     function liveLoop() {
         if(video.readyState === 4 && video.videoWidth > 0) {
+            frameCount++;
             const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
             if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
             
@@ -333,117 +491,246 @@
                 bPlusCtx.filter = 'brightness(180%) contrast(90%)'; bPlusCtx.drawImage(video, sx, sy, sw, sh, 0, 0, bPlusCtx.canvas.width, bPlusCtx.canvas.height);
             }
 
-            procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200); const viewData = procCtx.getImageData(0,0,150,200).data;
-            
-            let rT=0, gT=0, bT=0, lumT=0, c=0; 
-            for(let y=0; y<200; y++) {
-                for(let x=0; x<150; x++) {
-                    let i = (y * 150 + x) * 4; let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let weight = 1;
-                    if(currentMeterMode === 1) { let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2)); weight = dist < 50 ? 1 : (dist < 80 ? 0.5 : 0.1); } else if(currentMeterMode === 2) { let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2)); weight = dist < 15 ? 1 : 0; }
-                    if(weight > 0) { rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight; lumT += luma * weight; c += weight; }
-                }
-            }
-            
-            measuredEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 12.5); 
-            
-            // HUGE EV DISPLAY
-            let finalEV = measuredEV + evBias;
-            const evDisplay = document.getElementById('display-ev');
-            if(evDisplay) {
-                let evStr = finalEV.toFixed(1);
-                evDisplay.innerHTML = `${evStr}<span>EV</span>`;
-            }
-            
-            // LUX ESTIMATION (Rough approximation from EV)
-            const luxEst = Math.round(2.5 * Math.pow(2, finalEV));
-            const luxEl = document.getElementById('tel-lux');
-            if(luxEl) luxEl.innerText = luxEst;
+            // THROTTLE HEAVY MATH TO EVERY 5TH FRAME (~12fps for math)
+            if (frameCount % 5 === 0) {
+                procCtx.drawImage(video, sx, sy, sw, sh, 0, 0, 150, 200); const viewData = procCtx.getImageData(0,0,150,200).data;
+                
+                let rT=0, gT=0, bT=0, lumT=0, c=0; 
+                let centerR=0, centerG=0, centerB=0, centerC=0;
 
-            updateExpoBar();
-            
-            const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); const wSpan = document.getElementById('tel-wb'); if(wSpan) wSpan.innerHTML = `WB <span style="color:var(--gold)">${liveTempK}K</span>`; }
-            
-            // RGB WAVEFORM
-            if(!bracketActive) {
-                const hw = histCtx.canvas.width; const hh = histCtx.canvas.height; histCtx.clearRect(0,0,hw,hh); 
-                const binsR = new Array(40).fill(0); const binsG = new Array(40).fill(0); const binsB = new Array(40).fill(0); let maxBin = 0;
-                for(let i=0; i<viewData.length; i+=4) { 
-                    let bR = Math.floor((viewData[i]/255)*39); binsR[bR]++; if(binsR[bR] > maxBin) maxBin = binsR[bR];
-                    let bG = Math.floor((viewData[i+1]/255)*39); binsG[bG]++; if(binsG[bG] > maxBin) maxBin = binsG[bG];
-                    let bB = Math.floor((viewData[i+2]/255)*39); binsB[bB]++; if(binsB[bB] > maxBin) maxBin = binsB[bB];
-                }
-                const step = hw / 40;
-                histCtx.globalCompositeOperation = "screen";
-                // Red
-                histCtx.strokeStyle = 'rgba(255,50,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsR[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                // Green
-                histCtx.strokeStyle = 'rgba(50,255,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsG[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                // Blue
-                histCtx.strokeStyle = 'rgba(50,100,255,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsB[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
-                histCtx.globalCompositeOperation = "source-over";
-            }
-            
-            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch); 
-            
-            if(currentTab === 'page-meter' && !bracketActive) { uiCtx.strokeStyle = 'rgba(255,255,255,0.4)'; uiCtx.lineWidth = 1; if(currentMeterMode === 1) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, cw*0.25, 0, Math.PI*2); uiCtx.stroke(); } else if(currentMeterMode === 2) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); } }
+                for(let y=0; y<200; y++) {
+                    for(let x=0; x<150; x++) {
+                        let i = (y * 150 + x) * 4; let luma = 0.299*viewData[i] + 0.587*viewData[i+1] + 0.114*viewData[i+2]; let weight = 1;
+                        let dist = Math.sqrt(Math.pow(x-75, 2) + Math.pow(y-100, 2));
+                        
+                        if(currentMeterMode === 1) { weight = dist < 50 ? 1 : (dist < 80 ? 0.5 : 0.1); } 
+                        else if(currentMeterMode === 2) { weight = dist < 15 ? 1 : 0; }
+                        
+                        if(weight > 0) { rT += viewData[i] * weight; gT += viewData[i+1] * weight; bT += viewData[i+2] * weight; lumT += luma * weight; c += weight; }
 
-            if(fcState > 0 && !bracketActive) {
-                fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
-                for(let i=0; i<px.length; i+=4) {
-                    let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
-                    if (fcState === 1) { 
-                        if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
-                    } else if (fcState === 2) { 
-                        if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
+                        // Color Extraction at dead center (10px radius)
+                        if(currentTab === 'page-color' && dist < 10) { centerR += viewData[i]; centerG += viewData[i+1]; centerB += viewData[i+2]; centerC++; }
                     }
                 }
-                fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height); const tmp = new ImageData(px, fcCtx.canvas.width, fcCtx.canvas.height); fcInternalCtx.putImageData(tmp, 0, 0); fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0);
-            }
+                
+                measuredEV = Math.log2((Math.max(1, lumT / c) / 255) * 100 / 12.5); 
+                calculatePriority(); // Update UI dials
+                
+                let finalEV = measuredEV + evBias;
+                const evDisplay = document.getElementById('display-ev');
+                if(evDisplay) evDisplay.innerHTML = `${finalEV.toFixed(1)}<span>EV</span>`;
+                
+                const k = Math.round(5500 * ((bT/c)/(rT/c))); if(!isNaN(k) && k > 0) { liveTempK = Math.round(k); const wSpan = document.getElementById('tel-wb'); if(wSpan) wSpan.innerHTML = `WB <span style="color:var(--gold)">${liveTempK}K</span>`; }
+                
+                if(currentTab === 'page-color' && centerC > 0) { updateColors(centerR/centerC, centerG/centerC, centerB/centerC); }
+
+                // RGB WAVEFORM
+                if(!bracketActive && currentTab === 'page-meter') {
+                    const hw = histCtx.canvas.width; const hh = histCtx.canvas.height; histCtx.clearRect(0,0,hw,hh); 
+                    const binsR = new Array(40).fill(0); const binsG = new Array(40).fill(0); const binsB = new Array(40).fill(0); let maxBin = 0;
+                    for(let i=0; i<viewData.length; i+=4) { 
+                        let bR = Math.floor((viewData[i]/255)*39); binsR[bR]++; if(binsR[bR] > maxBin) maxBin = binsR[bR];
+                        let bG = Math.floor((viewData[i+1]/255)*39); binsG[bG]++; if(binsG[bG] > maxBin) maxBin = binsG[bG];
+                        let bB = Math.floor((viewData[i+2]/255)*39); binsB[bB]++; if(binsB[bB] > maxBin) maxBin = binsB[bB];
+                    }
+                    const step = hw / 40; histCtx.globalCompositeOperation = "screen";
+                    histCtx.strokeStyle = 'rgba(255,50,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsR[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                    histCtx.strokeStyle = 'rgba(50,255,50,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsG[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                    histCtx.strokeStyle = 'rgba(50,100,255,0.8)'; histCtx.lineWidth = 2; histCtx.beginPath(); histCtx.moveTo(0, hh); for(let i=0; i<40; i++) { histCtx.lineTo(i*step, hh - (maxBin > 0 ? (binsB[i] / maxBin) * (hh * 0.9) : 0)); } histCtx.stroke();
+                    histCtx.globalCompositeOperation = "source-over";
+                }
+
+                if(fcState > 0 && !bracketActive) {
+                    fcInternalCtx.drawImage(video, sx, sy, sw, sh, 0, 0, fcCtx.canvas.width, fcCtx.canvas.height); const px = fcInternalCtx.getImageData(0, 0, fcCtx.canvas.width, fcCtx.canvas.height).data;
+                    for(let i=0; i<px.length; i+=4) {
+                        let ire = ((0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) / 255) * 100;
+                        if (fcState === 1) { 
+                            if (ire >= 95) { px[i]=255; px[i+1]=50; px[i+2]=50; px[i+3]=200; } else if (ire >= 85) { px[i]=255; px[i+1]=200; px[i+2]=0; px[i+3]=200; } else if (ire >= 68 && ire <= 72) { px[i]=255; px[i+1]=105; px[i+2]=180; px[i+3]=200; } else if (ire >= 48 && ire <= 52) { px[i]=0; px[i+1]=255; px[i+2]=0; px[i+3]=200; } else if (ire >= 5 && ire <= 10) { px[i]=128; px[i+1]=0; px[i+2]=128; px[i+3]=200; } else if (ire < 5) { px[i]=50; px[i+1]=50; px[i+2]=255; px[i+3]=200; } else { px[i]=0; px[i+1]=0; px[i+2]=0; px[i+3]=0; }
+                        } else if (fcState === 2) { 
+                            if (ire >= 95) { px[i]=255; px[i+1]=0; px[i+2]=0; px[i+3]=200; } else if (ire < 5) { px[i]=0; px[i+1]=0; px[i+2]=255; px[i+3]=200; } else { px[i+3]=0; } 
+                        }
+                    }
+                    fcCtx.clearRect(0,0,fcCtx.canvas.width,fcCtx.canvas.height); const tmp = new ImageData(px, fcCtx.canvas.width, fcCtx.canvas.height); fcInternalCtx.putImageData(tmp, 0, 0); fcCtx.drawImage(document.getElementById('fc-internal-canvas'), 0, 0);
+                }
+            } // End Throttle
+            
+            const cw = uiCtx.canvas.width; const ch = uiCtx.canvas.height; uiCtx.clearRect(0,0,cw,ch); 
+            if(currentTab === 'page-meter' && !bracketActive) { uiCtx.strokeStyle = 'rgba(255,255,255,0.4)'; uiCtx.lineWidth = 1; if(currentMeterMode === 1) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, cw*0.25, 0, Math.PI*2); uiCtx.stroke(); } else if(currentMeterMode === 2) { uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); } }
+            if(currentTab === 'page-color') { uiCtx.strokeStyle = currentColorData.comp; uiCtx.lineWidth = 2; uiCtx.beginPath(); uiCtx.arc(cw/2, ch/2, 10, 0, Math.PI*2); uiCtx.stroke(); }
         }
         
         requestAnimationFrame(liveLoop);
     }
 
-    // --- CAPTURE ENGINE ---
+    // --- CAPTURE ENGINES ---
+    function triggerExport(blob) {
+        if(!blob) { alert("Export failed."); isCapturing = false; return; }
+        const url = URL.createObjectURL(blob); const resImg = document.getElementById('result-img'); if(resImg) resImg.src = url;
+        const resOvl = document.getElementById('result-overlay'); if(resOvl) resOvl.style.display = 'flex';
+        bindSafe('btn-share-result', 'click', async () => {
+            const file = new File([blob], `PREye_Export_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'PR Eye Export' }); } catch(err) {} } else { const a = document.createElement('a'); a.href = url; a.download = file.name; a.click(); }
+        });
+        bindSafe('btn-close-result', 'click', () => { document.getElementById('result-overlay').style.display = 'none'; URL.revokeObjectURL(url); });
+        isCapturing = false;
+    }
+
     bindSafe('capture-btn', 'click', async () => {
         if(isCapturing) return; isCapturing = true;
         try {
-            const hrCan = document.getElementById('composite-canvas'); hrCan.width = 1000; hrCan.height = 1500;
-            const cCtx = hrCan.getContext('2d');
-            cCtx.fillStyle = '#f8f8f8'; cCtx.fillRect(0,0,1000,1500); 
+            const hrCan = document.getElementById('composite-canvas'); hrCan.width = 1000; hrCan.height = 1500; const cCtx = hrCan.getContext('2d');
+            cCtx.fillStyle = '#111'; cCtx.fillRect(0,0,1000,1500); 
             
             if(video.videoWidth > 0 && video.videoHeight > 0) {
                 const vRatio = video.videoWidth / video.videoHeight; const tRatio = 3/4; let sx, sy, sw, sh;
                 if (vRatio > tRatio) { sh = video.videoHeight; sw = video.videoHeight * tRatio; sx = (video.videoWidth - sw)/2; sy = 0; } else { sw = video.videoWidth; sh = video.videoWidth / tRatio; sx = 0; sy = (video.videoHeight - sh)/2; }
                 cCtx.drawImage(video, sx, sy, sw, sh, 50, 50, 900, 1200);
             }
+            if(fcState > 0) cCtx.drawImage(document.getElementById('fc-layer'), 0,0, video.getBoundingClientRect().width, video.getBoundingClientRect().height, 50,50, 900,1200);
             
-            cCtx.fillStyle = '#1a1a1a'; cCtx.font = '40px "Permanent Marker", cursive, sans-serif';
+            cCtx.fillStyle = '#fff'; cCtx.font = '40px "Permanent Marker", cursive, sans-serif';
             let finalEV = measuredEV + evBias;
-            const sStr = arrShutter[document.getElementById('slide-shutter').value]; const fVal = arrAperture[document.getElementById('slide-aperture').value]; const iVal = arrIso[document.getElementById('slide-iso').value];
+            const sStr = arrShutter[activeIndexes.shutter]; const fVal = arrAperture[activeIndexes.aperture]; const iVal = arrIso[activeIndexes.iso];
             cCtx.fillText(`EV: ${finalEV.toFixed(1)} | ISO ${iVal} | f/${fVal} | ${sStr}s`, 70, 1330);
-            cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#444'; cCtx.fillText(`WB: ${liveTempK}K | ${new Date().toLocaleDateString()}`, 70, 1390);
+            cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#aaa'; 
             
-            hrCan.toBlob(blob => {
-                if(!blob) { alert("Export failed."); isCapturing = false; return; }
-                const url = URL.createObjectURL(blob);
-                const resImg = document.getElementById('result-img'); if(resImg) resImg.src = url;
-                const resOvl = document.getElementById('result-overlay'); if(resOvl) resOvl.style.display = 'flex';
-                
-                bindSafe('btn-share-result', 'click', async () => {
-                    const file = new File([blob], `PREye_Capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
-                    if (navigator.share && navigator.canShare({ files: [file] })) {
-                        try { await navigator.share({ files: [file], title: 'PR Eye Capture' }); } catch(err) { console.log(err); }
-                    } else { const a = document.createElement('a'); a.href = url; a.download = file.name; a.click(); }
-                });
-                bindSafe('btn-close-result', 'click', () => { const resOvl = document.getElementById('result-overlay'); if(resOvl) resOvl.style.display = 'none'; URL.revokeObjectURL(url); });
-                isCapturing = false;
-            }, 'image/jpeg', 0.95);
-        } catch (e) { alert("Capture system error."); console.error(e); isCapturing = false; }
+            const pTitle = document.getElementById('global-project-title').value || 'PR Eye Capture';
+            cCtx.fillText(`${pTitle} | WB: ${liveTempK}K | ${new Date().toLocaleDateString()}`, 70, 1390);
+            if(currentLat) cCtx.fillText(`Google Maps Link: http://google.com/maps?q=${currentLat.toFixed(5)},${currentLon.toFixed(5)}`, 70, 1440);
+            
+            hrCan.toBlob(triggerExport, 'image/jpeg', 0.95);
+        } catch (e) { alert("Capture error."); isCapturing = false; }
+    });
+
+    bindSafe('btn-export-swatch', 'click', async () => {
+        if(isCapturing) return; isCapturing = true;
+        try {
+            const hrCan = document.getElementById('composite-canvas'); hrCan.width = 1000; hrCan.height = 1000; const cCtx = hrCan.getContext('2d');
+            cCtx.fillStyle = '#09121c'; cCtx.fillRect(0,0,1000,1000); 
+            
+            cCtx.fillStyle = currentColorData.hex; cCtx.fillRect(50, 50, 900, 450);
+            cCtx.fillStyle = '#fff'; cCtx.font = '80px "DM Mono", monospace'; cCtx.fillText(currentColorData.hex, 80, 460);
+            
+            cCtx.fillStyle = currentColorData.comp; cCtx.fillRect(50, 520, 440, 200); cCtx.fillStyle = '#fff'; cCtx.font = '40px "DM Mono"'; cCtx.fillText('Comp: ' + currentColorData.comp, 70, 700);
+            cCtx.fillStyle = currentColorData.ana1; cCtx.fillRect(510, 520, 210, 200); cCtx.fillStyle = '#fff'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(currentColorData.ana1, 530, 700);
+            cCtx.fillStyle = currentColorData.ana2; cCtx.fillRect(740, 520, 210, 200); cCtx.fillStyle = '#fff'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(currentColorData.ana2, 760, 700);
+            
+            const pTitle = document.getElementById('global-project-title').value || 'Generative Palette';
+            cCtx.fillStyle = 'var(--gold)'; cCtx.font = '50px "Cormorant Garamond", serif'; cCtx.fillText(pTitle, 50, 820);
+            cCtx.fillStyle = '#888'; cCtx.font = '30px "DM Mono"'; cCtx.fillText(`Exported via PR Eye v4.2 | ${new Date().toLocaleDateString()}`, 50, 880);
+
+            hrCan.toBlob(triggerExport, 'image/jpeg', 0.95);
+        } catch (e) { alert("Swatch error."); isCapturing = false; }
+    });
+
+    // --- SCOUT API ENGINE ---
+    bindSafe('btn-fetch-loc', 'click', () => {
+        if (!navigator.geolocation) return;
+        const btnS = document.getElementById('btn-fetch-loc'); btnS.innerText = 'Acquiring GPS...';
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            currentLat = pos.coords.latitude; currentLon = pos.coords.longitude; 
+            
+            // Iframe Map Re-implementation
+            const mapC = document.getElementById('map-iframe-container');
+            if(mapC) mapC.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${currentLat},${currentLon}&hl=es;z=14&amp;output=embed" allowfullscreen></iframe>`;
+
+            try {
+                const sRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${currentLat}&lng=${currentLon}&formatted=0`);
+                if(sRes.ok) {
+                    const sData = await sRes.json();
+                    if (sData.status === 'OK' && sData.results) {
+                      document.getElementById('loc-sunrise').innerText = new Date(sData.results.sunrise).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                      document.getElementById('loc-sunset').innerText = new Date(sData.results.sunset).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                }
+            } catch(e) { }
+            btnS.innerText = 'Get Live GPS & Map';
+        }, () => { btnS.innerText = 'GPS FAILED'; }, { enableHighAccuracy: false, timeout: 15000 });
+    });
+
+    // --- RAVE SYNTH & SOS ENGINE ---
+    let raveAudioCtx = null; let raveInterval = null; let raveActive = false;
+    
+    function playRaveBeat() {
+        if(!document.getElementById('rave-audio-toggle').checked) return;
+        if(!raveAudioCtx) raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let now = raveAudioCtx.currentTime;
+        const osc = raveAudioCtx.createOscillator(); const gain = raveAudioCtx.createGain();
+        osc.connect(gain); gain.connect(raveAudioCtx.destination);
+        osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
+        gain.gain.setValueAtTime(1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
+    }
+
+    bindSafe('btn-start-rave', 'click', async () => {
+        const btn = document.getElementById('btn-start-rave');
+        if(raveActive) {
+            clearInterval(raveInterval); raveActive = false;
+            document.body.style.setProperty('background-color', '#09121c', 'important'); 
+            btn.innerText = "START A RAVE"; btn.classList.add('rave-active-btn'); return;
+        }
+        
+        if(document.getElementById('rave-audio-toggle').checked) {
+            raveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            await raveAudioCtx.resume();
+        }
+
+        btn.innerText = "STOP THE RAVE"; btn.classList.remove('rave-active-btn');
+        raveActive = true; 
+        
+        raveInterval = setInterval(() => {
+            if(sosActive) return; 
+            playRaveBeat();
+            document.body.style.setProperty('background-color', `hsl(${Math.random() * 360}, 100%, 50%)`, 'important'); 
+        }, 400); // ~150 BPM Techno
+    });
+
+    let sosAudioCtx, sirenOsc, sirenGain, sirenInterval, sosActive = false;
+    bindSafe('btn-sos-siren', 'click', () => {
+        const o = document.getElementById('sos-flash-overlay');
+        const mode = document.getElementById('sos-mode-select').value;
+        
+        if(sosActive) {
+            clearInterval(sirenInterval); 
+            if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); } if(sosAudioCtx) sosAudioCtx.close();
+            if(o) { o.className = ''; o.style.display = 'none'; }
+            sosActive = false; document.getElementById('btn-sos-siren').innerText = "EMERGENCY SIREN";
+        } else {
+            sosActive = true; document.getElementById('btn-sos-siren').innerText = "STOP SIREN";
+            if(o) { 
+                o.className = mode === 'heavyBlue' ? 'mode-heavyBlue' : 'mode-strobeRedWhite'; 
+                o.style.display = 'block'; 
+            }
+            
+            sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            sirenOsc = sosAudioCtx.createOscillator(); sirenGain = sosAudioCtx.createGain();
+            sirenOsc.connect(sirenGain); sirenGain.connect(sosAudioCtx.destination);
+            sirenOsc.type = 'square'; sirenGain.gain.value = 1; sirenOsc.start();
+            
+            let low = true;
+            sirenInterval = setInterval(() => {
+                let t = sosAudioCtx.currentTime;
+                if(low) { sirenOsc.frequency.linearRampToValueAtTime(1200, t + 0.2); } else { sirenOsc.frequency.linearRampToValueAtTime(600, t + 0.2); }
+                low = !low;
+            }, 200);
+        }
     });
 
     // --- STARTUP ---
-    startCamera(); updateHudData();
+    buildDial('dial-shutter', arrShutter, 'shutter');
+    buildDial('dial-aperture', arrAperture.map(a=>'F'+a), 'aperture');
+    buildDial('dial-iso', arrIso, 'iso');
+    syncDial('dial-shutter', 33); syncDial('dial-aperture', 10); syncDial('dial-iso', 7);
+    
+    startCamera(); 
+    
+    setInterval(() => {
+        if (currentLat !== null && currentLon !== null && typeof SunCalc !== 'undefined') { 
+            const pos = SunCalc.getPosition(new Date(), currentLat, currentLon); const az = (pos.azimuth * 180 / Math.PI + 180) % 360; const alt = pos.altitude * 180 / Math.PI; 
+            const azEl = document.getElementById('loc-azimuth'); const altEl = document.getElementById('loc-altitude'); 
+            if(azEl) azEl.innerText = az.toFixed(1) + '°'; if(altEl) altEl.innerText = alt.toFixed(1) + '°'; 
+        }
+    }, 1000);
 </script>
 </body>
 </html>
