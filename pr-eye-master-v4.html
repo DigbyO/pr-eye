@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PR Eye v2.5 — Pro Toolkit</title>
+    <title>PR Eye v2.7 — Pro Toolkit</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 
     <style>
         :root {
@@ -55,7 +56,7 @@
         .expo-scale { flex: 1; height: 3px; background: rgba(255,255,255,0.1); margin: 0 15px; position: relative; border-radius: 2px;}
         .expo-marker { position: absolute; top: 50%; left: 50%; width: 2px; height: 16px; background: var(--gold); transform: translate(-50%, -50%); transition: left 0.1s linear; }
 
-        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .pan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .pan-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; height: 60px; }
         .pan-swatch { width: 40%; transition: background-color 0.1s; }
         .pan-data { width: 60%; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
@@ -75,13 +76,17 @@
 
         #result-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #result-img { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid var(--border); }
+        
+        #yt-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #000; flex-direction: column; align-items: center; justify-content: center; }
+        #yt-overlay iframe { position: absolute; inset: 0; width: 100vw; height: 100vh; pointer-events: auto; }
+        
         canvas#proc-canvas, canvas#fc-internal-canvas, canvas#composite-canvas { display: none; position: absolute; top: -9999px; left: -9999px; }
     </style>
 </head>
 <body>
 
     <div class="hdr">
-        <div class="hdr-top"><div class="brand">PR EYE v2.5</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
+        <div class="hdr-top"><div class="brand">PR EYE v2.7</div><button id="cam-flip-btn" class="btn" style="max-width:50px; padding:0;">🔄</button></div>
         <div class="telemetry-bar">
             <div class="tel-item" id="tel-ev">EV <span style="color:var(--green)">0.0</span></div>
             <div class="tel-item" id="tel-wb">WB <span style="color:var(--gold)">5500K</span> <span id="tel-tint" style="color:var(--magenta)">0</span></div>
@@ -137,10 +142,6 @@
         <div id="page-color" class="page">
             <div class="ctrl-panel">
                 <h4>Color Palette Match</h4>
-                <div class="toggle-switch">
-                    <div id="pan-auto" class="toggle-opt active">AUTO TRACK</div>
-                    <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
-                </div>
                 <div class="pan-grid">
                     <div class="pan-item"><div class="pan-swatch" id="cs1"></div><div class="pan-data"><div class="pan-code" id="cn1">---</div><div class="pan-hex" id="ch1">---</div></div></div>
                     <div class="pan-item"><div class="pan-swatch" id="cs2"></div><div class="pan-data"><div class="pan-code" id="cn2">---</div><div class="pan-hex" id="ch2">---</div></div></div>
@@ -152,6 +153,10 @@
                     <div id="rule-30" style="width: 30%; background: #444; color:#fff;">30%</div>
                     <div id="rule-10" style="width: 10%; background: #666; color:#fff;">10%</div>
                 </div>
+                <div class="toggle-switch" style="margin-top: 20px; margin-bottom: 0;">
+                    <div id="pan-auto" class="toggle-opt active">AUTO TRACK</div>
+                    <div id="pan-manual" class="toggle-opt">MANUAL PTS</div>
+                </div>
             </div>
         </div>
 
@@ -160,8 +165,10 @@
                 <h4>Ephemeris Scout</h4>
                 <button class="btn sm" id="btn-fetch-loc-scout" style="margin-bottom:10px; width:100%;">Refresh GPS Data</button>
                 <div id="scout-map-container" style="height:150px; background:#000; border-radius:8px; margin-bottom:10px; overflow:hidden; display:flex; align-items:center; justify-content:center;"></div>
+                
                 <div class="row" style="margin-bottom:5px;"><div class="col"><span class="label-txt">Sunrise</span><span id="loc-sunrise" style="font-size:12px;">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sunset</span><span id="loc-sunset" style="font-size:12px;">--:--</span></div></div>
-                <div class="row"><div class="col"><span class="label-txt">Golden Hour</span><span id="loc-golden" style="font-size:12px; color:var(--gold);">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Heading</span><span id="scout-heading" style="font-size:12px;">0°</span></div></div>
+                <div class="row" style="margin-bottom:5px;"><div class="col"><span class="label-txt">Golden Hour</span><span id="loc-golden" style="font-size:12px; color:var(--gold);">--:--</span></div><div class="col" style="text-align:right;"><span class="label-txt">Heading</span><span id="scout-heading" style="font-size:12px;">0°</span></div></div>
+                <div class="row"><div class="col"><span class="label-txt">Sun Azimuth</span><span id="loc-azimuth" style="font-size:12px; color:var(--gold);">--°</span></div><div class="col" style="text-align:right;"><span class="label-txt">Sun Elev.</span><span id="loc-altitude" style="font-size:12px; color:var(--gold);">--°</span></div></div>
             </div>
         </div>
 
@@ -252,9 +259,10 @@
             <button class="btn" id="btn-close-result" style="flex:1; border-color:#fff; color:#fff;">CLOSE</button>
         </div>
     </div>
+    
     <div id="yt-overlay">
-        <iframe id="yt-iframe" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        <button class="btn danger" onclick="document.getElementById('yt-overlay').style.display='none'; document.getElementById('yt-iframe').src='';" style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:10000; padding:15px 30px;">CLOSE VIDEO</button>
+        <iframe id="yt-iframe" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        <button class="btn danger" onclick="document.getElementById('yt-overlay').style.display='none'; document.getElementById('yt-iframe').src='';" style="position:absolute; bottom:40px; left:50%; transform:translateX(-50%); z-index:10001; padding:15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.8);">CLOSE VIDEO</button>
     </div>
     
     <div class="nav">
@@ -323,7 +331,7 @@
         if(stream) { stream.getTracks().forEach(t => t.stop()); video.srcObject = null; await new Promise(r => setTimeout(r, 200)); }
         try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: currentFacingMode } } }); } catch(e) { console.error("Cam fail"); }
         video.srcObject = stream; video.play();
-        video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); fetchLocData(); }; // Auto-fetch GPS on start
+        video.onloadedmetadata = () => { resizeCanvases(); requestAnimationFrame(liveLoop); fetchLocData(); }; 
     }
     bindSafe('cam-flip-btn', 'click', ()=>{ currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment'; startCamera(); });
 
@@ -484,22 +492,30 @@
                 }
             }
             
-            // Scout Mapping
+            // Scout Mapping (Astro Engine)
             if(currentTab === 'page-scout') {
                 scoutCtx.save(); scoutCtx.translate(swCtx/2, shCtx/2); scoutCtx.rotate(-currentHeading * Math.PI / 180);
-                scoutCtx.strokeStyle = 'rgba(212,194,161,0.4)'; scoutCtx.lineWidth = 1; scoutCtx.beginPath(); scoutCtx.moveTo(0, -40); scoutCtx.lineTo(-8, -25); scoutCtx.lineTo(8, -25); scoutCtx.closePath(); scoutCtx.stroke(); 
-                scoutCtx.fillStyle = 'var(--gold)'; scoutCtx.font = '12px DM Mono'; scoutCtx.fillText('N', -4, -50); scoutCtx.fillText('S', -4, 60); scoutCtx.fillText('E', 50, 4); scoutCtx.fillText('W', -60, 4);
                 
-                if(sunriseTime && sunsetTime) {
-                    let sunProgress = Math.max(0, Math.min(1, (new Date() - sunriseTime) / (sunsetTime - sunriseTime)));
-                    const startAngle = (-90 - currentHeading) * Math.PI/180; const endAngle = (90 - currentHeading) * Math.PI/180;
-                    scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, startAngle, endAngle); scoutCtx.setLineDash([4, 4]); scoutCtx.stroke(); scoutCtx.setLineDash([]);
-                    if(sunProgress > 0 && sunProgress < 1) { 
-                        const ca2 = startAngle+(sunProgress*(endAngle-startAngle)); 
-                        scoutCtx.fillStyle='#ffb347'; scoutCtx.font='bold 10px DM Mono'; 
-                        scoutCtx.fillText('SUN', 100*Math.cos(ca2)>0?100*Math.cos(ca2)+8:100*Math.cos(ca2)-30, 100*Math.sin(ca2)+4); 
-                        scoutCtx.beginPath(); scoutCtx.arc(100*Math.cos(ca2), 100*Math.sin(ca2), 6, 0, Math.PI*2); scoutCtx.fill();
-                    }
+                // Draw Radar Grid
+                scoutCtx.strokeStyle = 'rgba(212,194,161,0.2)'; scoutCtx.lineWidth = 1; 
+                scoutCtx.beginPath(); scoutCtx.arc(0,0, 100, 0, Math.PI*2); scoutCtx.stroke(); // Horizon
+                scoutCtx.beginPath(); scoutCtx.arc(0,0, 50, 0, Math.PI*2); scoutCtx.stroke(); // 45 degree elev
+                scoutCtx.beginPath(); scoutCtx.moveTo(0, -100); scoutCtx.lineTo(0, 100); scoutCtx.moveTo(-100, 0); scoutCtx.lineTo(100, 0); scoutCtx.stroke(); // Crosshairs
+
+                scoutCtx.fillStyle = 'var(--gold)'; scoutCtx.font = '12px DM Mono'; scoutCtx.fillText('N', -4, -105); scoutCtx.fillText('S', -4, 115); scoutCtx.fillText('E', 105, 4); scoutCtx.fillText('W', -115, 4);
+                
+                // Draw Live Sun Pos
+                if (window.currentSunAzimuth !== undefined && window.currentSunAltitude > 0) {
+                    const sunRad = (window.currentSunAzimuth - 90) * Math.PI / 180;
+                    const sunDist = 100 * (1 - (window.currentSunAltitude / 90)); // Map altitude: 90=0 dist, 0=100 dist
+                    
+                    scoutCtx.fillStyle='#ffb347'; scoutCtx.font='bold 10px DM Mono'; 
+                    scoutCtx.fillText('SUN', sunDist*Math.cos(sunRad)+8, sunDist*Math.sin(sunRad)+4); 
+                    scoutCtx.beginPath(); scoutCtx.arc(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad), 6, 0, Math.PI*2); scoutCtx.fill();
+                    
+                    // Target Line
+                    scoutCtx.strokeStyle = 'rgba(255, 179, 71, 0.4)'; scoutCtx.setLineDash([2, 4]);
+                    scoutCtx.beginPath(); scoutCtx.moveTo(0,0); scoutCtx.lineTo(sunDist*Math.cos(sunRad), sunDist*Math.sin(sunRad)); scoutCtx.stroke(); scoutCtx.setLineDash([]);
                 }
                 scoutCtx.restore();
             }
@@ -567,8 +583,25 @@
             if(currentTab === 'page-scout') {
                 const ghText = goldenHourTime ? goldenHourTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A';
                 cCtx.fillText(`Golden Hour: ${ghText}`, 70, 1415);
+                if (window.currentSunAzimuth !== undefined) {
+                    cCtx.font = '22px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#666';
+                    cCtx.fillText(`Sun Azimuth: ${window.currentSunAzimuth.toFixed(1)}° | Elev: ${window.currentSunAltitude.toFixed(1)}°`, 450, 1415);
+                }
                 cCtx.font = '30px "Permanent Marker", cursive, sans-serif'; cCtx.fillStyle = '#444'; cCtx.fillText(`${new Date().toLocaleDateString()} - Location Scout`, 70, 1440);
             } else if(currentTab === 'page-color') {
+                const ptsRaw = panMode === 'auto' ? [ {x:0.25,y:0.25}, {x:0.75,y:0.25}, {x:0.25,y:0.75}, {x:0.75,y:0.75} ] : manualPoints;
+                ptsRaw.forEach((p, idx) => {
+                    if (lastPanExtraction[idx]) {
+                        const drawX = 50 + (p.x * 900); const drawY = 50 + (p.y * _imgH);
+                        cCtx.beginPath(); cCtx.arc(drawX, drawY, 20, 0, Math.PI*2);
+                        cCtx.lineWidth = 4; cCtx.strokeStyle = lastPanExtraction[idx].hex; cCtx.stroke();
+                        cCtx.lineWidth = 2; cCtx.strokeStyle = '#ffffff'; cCtx.stroke();
+                        cCtx.fillStyle = '#ffffff'; cCtx.font = 'bold 16px "DM Mono", monospace';
+                        cCtx.fillText(idx+1, drawX + 25, drawY - 25);
+                    }
+                });
+
+                cCtx.fillStyle = '#1a1a1a'; cCtx.font = '40px "Permanent Marker", cursive, sans-serif';
                 cCtx.fillText(`Color Palette:`, 70, 1290); 
                 cCtx.font = '28px "Permanent Marker", cursive, sans-serif';
                 lastPanExtraction.forEach((col, idx) => { 
@@ -610,7 +643,7 @@
         } catch (e) { alert("Capture system error."); console.error(e); isCapturing = false; }
     });
 
-    // --- UTILITIES (GPS, API, TOOLS) ---
+    // --- UTILITIES & ASTRO ENGINE ---
     const fetchLocData = () => {
         if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
         const btnS = document.getElementById('btn-fetch-loc-scout'); if(btnS) { btnS.disabled = true; btnS.innerText = 'Locating...'; }
@@ -624,12 +657,10 @@
             const _mapTileUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + currentLat + ',' + currentLon + '&zoom=14&size=800x250&markers=' + currentLat + ',' + currentLon + ',red-pushpin';
             const _mapImg = new Image(); _mapImg.crossOrigin = 'anonymous';
             _mapImg.onload = () => { window._scoutMapImage = _mapImg; }; 
-            // Fallback for strict CORS blocks
-            _mapImg.onerror = () => { console.warn("Static Map Blocked. Relying on text fallback."); window._scoutMapImage = null; };
-            _mapImg.src = _mapTileUrl;
+            _mapImg.onerror = () => { window._scoutMapImage = null; };
+            _mapImg.src = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(_mapTileUrl);
 
             try {
-                // Live Temp in Celsius
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current_weather=true&temperature_unit=celsius`);
                 if(wRes.ok) {
                     const wData = await wRes.json(); 
@@ -716,7 +747,6 @@
             sirenOsc1.connect(sirenGain1); sirenOsc2.connect(sirenGain2);
             sirenGain1.connect(sosAudioCtx.destination); sirenGain2.connect(sosAudioCtx.destination);
             
-            // UK HI-LO SIREN (435Hz / 580Hz)
             sirenOsc1.type = 'square'; sirenOsc2.type = 'square';
             sirenOsc1.frequency.value = 435; sirenOsc2.frequency.value = 580;
             sirenGain1.gain.value = 1; sirenGain2.gain.value = 0;
@@ -754,7 +784,7 @@
         doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(212,194,161);
         doc.text('MODEL RELEASE FORM',pageW/2,13,{align:'center'});
         doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
-        doc.text('PR Eye v2.5 — Professional Photography Release',pageW/2,20,{align:'center'});
+        doc.text('PR Eye v2.7 — Professional Photography Release',pageW/2,20,{align:'center'});
         y=30;doc.setTextColor(0);
         addText('Shoot Date: '+(date||'_______________')+'   Location: '+(loc||'___________________________'),10,true);
         addLine();
@@ -811,7 +841,7 @@
     
     bindSafe('btn-wa-release', 'click', () => {
         const rD = document.getElementById('r-date'); const rL = document.getElementById('r-loc'); const rN = document.getElementById('r-name');
-        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.5\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
+        const msg = encodeURIComponent('MODEL RELEASE — PR Eye v2.7\nPhotographer: Digby Oldridge, PR Eye Ltd\nShoot Date: '+(rD?rD.value:'N/A')+'\nLocation: '+(rL?rL.value:'N/A')+'\nModel: '+(rN?rN.value:'N/A')+'\n\nContact: info@preye.co.uk | Tel: 07879 403 618');
         window.open('https://wa.me/?text='+msg,'_blank');
     });
 
@@ -833,15 +863,34 @@
     });
     window.clearPad = (id) => { const c = document.getElementById(id).getContext('2d'); c.clearRect(0,0,1000,1000); };
     
-    // --- STARTUP ---
+    // --- STARTUP & REAL-TIME LOOPS ---
     startCamera();
+    
     setInterval(() => {
+        // GH Timer
         if(goldenHourTime) { 
             const diff = goldenHourTime - new Date(); 
             const locG = document.getElementById('loc-golden');
-            if(!locG) return;
-            if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); locG.innerText = `${h}h ${m}m ${s}s`; } 
-            else { locG.innerText = "Active"; } 
+            if(locG) {
+                if(diff > 0) { const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); locG.innerText = `${h}h ${m}m ${s}s`; } 
+                else { locG.innerText = "Active"; }
+            }
+        }
+        
+        // SunCalc Live Loop
+        if (currentLat !== null && currentLon !== null && typeof SunCalc !== 'undefined') {
+            const pos = SunCalc.getPosition(new Date(), currentLat, currentLon);
+            const az = (pos.azimuth * 180 / Math.PI + 180) % 360; // Convert to compass
+            const alt = pos.altitude * 180 / Math.PI;             // Convert to degrees
+            
+            const azEl = document.getElementById('loc-azimuth');
+            const altEl = document.getElementById('loc-altitude');
+            
+            if(azEl) azEl.innerText = az.toFixed(1) + '°';
+            if(altEl) altEl.innerText = alt.toFixed(1) + '°';
+            
+            window.currentSunAzimuth = az;
+            window.currentSunAltitude = alt;
         }
     }, 1000);
 </script>
