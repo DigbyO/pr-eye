@@ -883,4 +883,33 @@
         addText('PHOTOGRAPHER:',10,true); addText(photogName,9); addLine(); 
         addText('MODEL:',10,true); addText('Name: '+(modelName||'_________________________________'),9); addText('Compensation: '+comp,9); addLine();
         addText('GRANT OF RIGHTS',10,true); addText('I hereby grant to the Photographer, their clients, assigns, licensees, and successors the irrevocable, perpetual, worldwide, royalty-free right to use, reproduce, publish, distribute, modify, and exploit all photographs, video, audio, and recordings ("Content") taken of me in any media for any lawful purpose including commercial use, advertising, marketing, and promotional materials.',9); addLine(); 
-        addText('ACKNOWLEDGMENT',10,true); addText('By signing below, I acknowledge that I have read, understood, and agree to
+        addText('ACKNOWLEDGMENT',10,true); addText('By signing below, I acknowledge that I have read, understood, and agree to all terms of this Release.',9); y+=4; 
+        addSig('sig-model','MODEL SIGNATURE'); addText('Date: '+(date||'_____________'),9);y+=4;addLine(); 
+        addSig('sig-photog','PHOTOGRAPHER SIGNATURE'); addText('Date: '+(date||'_____________'),9);
+        
+        try {
+            const pdfBlob = doc.output('blob'); const pdfUrl = URL.createObjectURL(pdfBlob);
+            const dlLink = document.getElementById('pdf-dl-link'); dlLink.href = pdfUrl; dlLink.download = 'ModelRelease_'+(modelName||'Unknown').replace(/\s+/g,'_')+'.pdf';
+            document.getElementById('pdf-overlay').style.display = 'flex';
+        } catch(err) { alert("PDF Engine failed."); }
+    });
+
+    let padsInit = false;
+    bindSafe('nav-release', 'click', () => {
+        if(!padsInit) { 
+            ['sig-model', 'sig-guardian', 'sig-photog'].forEach(id => { const can = document.getElementById(id); if(!can) return; const c = can.getContext('2d'); can.width = can.parentElement.clientWidth; can.height = 100; let drawing = false; can.style.touchAction = 'none'; can.addEventListener('pointerdown', e=>{drawing=true; const r = can.getBoundingClientRect(); c.beginPath(); c.moveTo(e.clientX-r.left, e.clientY-r.top); e.preventDefault();}); can.addEventListener('pointermove', e=>{if(!drawing)return; const r = can.getBoundingClientRect(); c.lineTo(e.clientX-r.left, e.clientY-r.top); c.stroke(); e.preventDefault();}); can.addEventListener('pointerup', ()=>drawing=false); can.addEventListener('pointerleave', ()=>drawing=false); }); 
+            padsInit = true; 
+        }
+        const tA = document.getElementById('tog-adult'); const tM = document.getElementById('tog-minor'); const gS = document.getElementById('guardian-section');
+        if(tA) tA.onclick=()=>{tA.classList.add('active'); if(tM) tM.classList.remove('active'); if(gS) gS.style.display='none';};
+        if(tM) tM.onclick=()=>{tM.classList.add('active'); if(tA) tA.classList.remove('active'); if(gS) gS.style.display='block';};
+    });
+    window.clearPad = (id) => { const c = document.getElementById(id).getContext('2d'); c.clearRect(0,0,1000,1000); };
+
+    // --- STARTUP ---
+    buildDial('dial-shutter', arrShutter, 'shutter'); buildDial('dial-aperture', arrAperture.map(a=>'F'+a), 'aperture'); buildDial('dial-iso', arrIso, 'iso');
+    syncDial('dial-shutter', 33); syncDial('dial-aperture', 10); syncDial('dial-iso', 7);
+    startCamera(); 
+</script>
+</body>
+</html>
