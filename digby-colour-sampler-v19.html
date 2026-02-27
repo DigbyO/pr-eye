@@ -451,6 +451,7 @@ a{color:var(--accent);text-decoration:none}
 #pb-empty div:last-child{font-size:12px;line-height:1.6}
 #pb-suggest-panel{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px;margin-top:2px}
 #pb-suggest-panel .pb-theme-row{display:flex;gap:5px;flex-wrap:wrap}
+#pb-wheel-picker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;gap:8px}
 .pb-theme-btn{font-size:9px;padding:4px 9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;-webkit-tap-highlight-color:transparent}
 .pb-theme-btn:active,.pb-theme-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
@@ -1080,14 +1081,36 @@ a{color:var(--accent);text-decoration:none}
       <div id="palette-builder-panel">
         <div id="pb-grid"></div>
         <div id="pb-actions">
-          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromWheel()">+ Wheel</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleWheelPicker()">+ Wheel</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()">✦ Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()">🎨 Swatch</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
         </div>
-        <div id="pb-suggest-panel">
+
+        <!-- Inline wheel colour picker -->
+        <div id="pb-wheel-picker" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Pick a colour</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="color" id="pb-color-input" value="#C09870"
+              oninput="PaletteBuilder.syncColorPicker(this.value)"
+              style="width:52px;height:52px;border-radius:8px;border:none;padding:0;cursor:pointer;background:none">
+            <div style="flex:1">
+              <div id="pb-color-preview" style="height:28px;border-radius:6px;background:#C09870;border:1px solid var(--border);margin-bottom:6px"></div>
+              <input type="text" id="pb-hex-input" value="#C09870" maxlength="7" placeholder="#RRGGBB"
+                oninput="PaletteBuilder.syncHexInput(this.value)"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:12px">
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-p btn-sm" style="flex:1" onclick="PaletteBuilder.addFromPickerInput()">+ Add to Palette</button>
+            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.syncFromWheel()">← Use Wheel</button>
+            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.closeWheelPicker()">Done</button>
+          </div>
+        </div>
+
+        <div id="pb-suggest-panel" style="display:none">
           <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Choose a theme to suggest from:</div>
           <div class="pb-theme-row">
             <button class="pb-theme-btn on" data-t="harmony" onclick="PaletteBuilder.setSuggestTheme(this)">Harmony</button>
@@ -1106,6 +1129,7 @@ a{color:var(--accent);text-decoration:none}
             <button class="btn btn-s btn-sm" onclick="PaletteBuilder.closeSuggest()">Done</button>
           </div>
         </div>
+
         <div id="pb-lib-picker" style="display:none">
           <div id="pb-lib-label">Pick from library:</div>
           <div id="pb-lib-chips"></div>
@@ -1442,7 +1466,8 @@ const CS = {
   _shiftHsl(hex,dh,ds,dl){
     const{r,g,b}=this.hexToRgb(hex);
     const{h,s,l}=this.rgbToHsl(r,g,b);
-    return this.hslToHex((h+dh+360)%360,Math.max(0,Math.min(1,s+ds)),Math.max(0,Math.min(1,l+dl)));
+    // rgbToHsl returns s,l as 0-100; hslToHex expects 0-1 — normalize before applying delta
+    return this.hslToHex((h+dh+360)%360,Math.max(0,Math.min(1,s/100+ds)),Math.max(0,Math.min(1,l/100+dl)));
   },
   _shiftLab(hex,newL,da,db){
     const{r,g,b}=this.hexToRgb(hex);
@@ -4561,6 +4586,37 @@ const PaletteBuilder = {
 
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
+  // ── INLINE WHEEL PICKER ─────────────────────────────────────────
+  toggleWheelPicker() {
+    const p = document.getElementById('pb-wheel-picker');
+    const showing = p.style.display === 'flex';
+    p.style.display = showing ? 'none' : 'flex';
+    if (!showing) this.syncFromWheel(); // prime with current wheel colour
+  },
+  closeWheelPicker() {
+    document.getElementById('pb-wheel-picker').style.display = 'none';
+  },
+  syncFromWheel() {
+    const hex = ColourWheel.getCurrentHex();
+    this._setPickerHex(hex);
+  },
+  syncColorPicker(hex) { this._setPickerHex(hex); },
+  syncHexInput(val) {
+    if (/^#[0-9a-f]{6}$/i.test(val)) this._setPickerHex(val);
+  },
+  _setPickerHex(hex) {
+    const ci = document.getElementById('pb-color-input');
+    const hi = document.getElementById('pb-hex-input');
+    const pv = document.getElementById('pb-color-preview');
+    if (ci) ci.value = hex;
+    if (hi) hi.value = hex.toUpperCase();
+    if (pv) pv.style.background = hex;
+  },
+  addFromPickerInput() {
+    const hex = document.getElementById('pb-hex-input')?.value;
+    if (hex) this.addColour(hex);
+  },
+
   addFromLibrary() {
     const all = DS.all();
     if (!all.length) { App.toast('Library is empty'); return; }
@@ -4578,7 +4634,8 @@ const PaletteBuilder = {
   // ── THEMED SUGGEST ─────────────────────────────────────────────
   toggleSuggest() {
     const p = document.getElementById('pb-suggest-panel');
-    p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+    const showing = p.style.display === 'flex';
+    p.style.display = showing ? 'none' : 'flex';
   },
 
   closeSuggest() {
