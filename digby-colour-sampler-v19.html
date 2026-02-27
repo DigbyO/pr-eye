@@ -536,9 +536,7 @@ a{color:var(--accent);text-decoration:none}
       </div>
 
       <!-- Camera queue bar — appears when colours are queued -->
-      <div id="cam-queue-bar" style="position:absolute;bottom:80px;left:0;right:0;z-index:7;
-        background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:8px 12px;
-        display:none;align-items:center;gap:8px;flex-wrap:nowrap">
+      <div id="cam-queue-bar" style="display:none">
         <div id="cam-queue-swatches" style="display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
         <div id="cam-queue-count" style="font-size:10px;color:rgba(255,255,255,.5);flex-shrink:0;white-space:nowrap"></div>
         <button class="btn btn-p btn-sm" style="flex-shrink:0" onclick="Sampler.saveQueue()">Save All</button>
@@ -1625,7 +1623,7 @@ const App={
       <div class="set-sec">Network</div>
       <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online — API enrichment active':'Offline — local data only'}</span></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">2.0</span></div>
+      <div class="set-row"><div class="set-l">Version 3.0</span></div>
       <div class="set-row"><div class="set-l">Made by</div><span style="font-size:11px;color:var(--muted)">Digby — PR Eye Ltd</span></div>
     </div>`);
   },
@@ -1883,12 +1881,11 @@ const Sampler={
   bindCameraTouch(){
     const wrap=document.getElementById('sampler-cam-wrap');
     const moveHandler=(ev)=>{
+      // Check for button tap BEFORE preventDefault — otherwise onclick never fires
+      if(ev.target?.tagName==='BUTTON'||ev.target?.closest('button'))return;
       ev.preventDefault();
       const touch=ev.touches?ev.touches[0]:ev;
       const rect=wrap.getBoundingClientRect();
-      // Don't pick if touching buttons
-      const tag=ev.target?.tagName;
-      if(tag==='BUTTON'||ev.target?.closest('button'))return;
       this.sampleX=Math.max(0,Math.min(1,(touch.clientX-rect.left)/rect.width));
       this.sampleY=Math.max(0,Math.min(1,(touch.clientY-rect.top)/rect.height));
       this.movePicker(touch.clientX-rect.left,touch.clientY-rect.top);
