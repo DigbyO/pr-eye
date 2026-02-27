@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="theme-color-meta" content="#0c0c0c">
+<title>Digby's Colour Sampler</title>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Digby%27s+Colour+Sampler%22%2C%22short_name%22%3A%22Colour+Sampler%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230c0c0c%22%2C%22theme_color%22%3A%22%230c0c0c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgo%3D%22%2C%22sizes%22%3A%22192x192%22%7D%5D%7D">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0c0c;--surface:#181818;--surface2:#222;--surface3:#2a2a2a;
+  --border:#2e2e2e;--text:#f0ede8;--muted:#777;--faint:#444;
+  --accent:#c8a96e;--accent2:#8a7048;--danger:#c0392b;--ok:#2ecc71;
+  --tab-h:62px;--top-h:48px;
+  --sharpie:'Permanent Marker',cursive;--mono:'Space Mono',monospace;
+  --r:12px;--rs:6px;--shadow:0 4px 24px rgba(0,0,0,.6);--tr:.18s cubic-bezier(.4,0,.2,1);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*,::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:var(--mono);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;touch-action:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+a{color:var(--accent);text-decoration:none}
+#app{display:flex;flex-direction:column;height:100dvh;height:-webkit-fill-available;overflow:hidden;position:relative}
+#top{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;z-index:20}
+#title{font-family:var(--sharpie);font-size:18px;display:flex;align-items:center;gap:8px}
+#last-dot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--border);transition:background .4s;flex-shrink:0}
+#top-r{display:flex;align-items:center;gap:8px}
+#online{width:7px;height:7px;border-radius:50%;background:var(--faint);transition:background .4s}
+#online.on{background:var(--ok)}
+.icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:var(--rs);color:var(--muted);transition:all var(--tr)}
+.icon-btn:active{background:var(--surface2);color:var(--text)}
+#modules{flex:1;overflow:hidden;position:relative}
+.module{position:absolute;inset:0;display:none;overflow:hidden}
+.module.active{display:flex;flex-direction:column}
+.mod-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--tab-h) + 16px + var(--safe-bottom))}
+#tabs{height:var(--tab-h);padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:20}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--faint);transition:color var(--tr);font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;position:relative}
+.tab.on{color:var(--accent)}
+.tab svg{width:20px;height:20px}
+.tab::after{content:'';position:absolute;bottom:0;left:25%;right:25%;height:2px;background:var(--accent);transform:scaleX(0);transition:transform var(--tr)}
+.tab.on::after{transform:scaleX(1)}
+.card{margin:0 12px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sec{padding:14px 16px 6px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;border-radius:var(--rs);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;transition:all var(--tr);white-space:nowrap}
+.btn-p{background:var(--accent);color:#0c0c0c;font-weight:700}
+.btn-p:active{background:#d4b87a}
+.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-s:active{background:var(--surface3)}
+.btn-g{color:var(--muted)}
+.btn-d{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 11px;font-size:10px}
+.tog-group{display:flex;background:var(--surface2);border-radius:var(--rs);padding:3px;gap:2px}
+.tog-btn{flex:1;padding:6px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--muted);transition:all var(--tr)}
+.tog-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.sw{width:40px;height:22px;background:var(--surface3);border-radius:11px;position:relative;cursor:pointer;transition:background var(--tr);flex-shrink:0}
+.sw.on{background:var(--accent)}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw.on::after{left:21px}
+#toast{position:fixed;bottom:calc(var(--tab-h) + 20px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 18px;border-radius:20px;font-size:12px;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+#ov.open{display:flex}
+#ov-panel{width:100%;max-height:88dvh;background:var(--surface);border-radius:var(--r) var(--r) 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:su .28s cubic-bezier(.4,0,.2,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.ov-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 14px}
+.ov-title{font-family:var(--sharpie);font-size:22px;padding:0 18px 14px}
+#sampler-cam-wrap{position:relative;flex:1;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#picker-crosshair{position:absolute;width:70px;height:70px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;top:50%;left:50%;transition:top .05s, left .05s}
+#picker-crosshair svg{width:70px;height:70px}
+#live-bar{position:absolute;bottom:0;left:0;right:0;z-index:6;background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);padding:28px 14px 12px;display:flex;align-items:center;gap:10px}
+#live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
+#live-info{flex:1;min-width:0}
+#live-hex{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
+#live-name{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#live-k{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+#cam-collection{position:absolute;top:10px;right:10px;z-index:6;display:flex;flex-direction:column;gap:5px;align-items:center}
+.cam-swatch-mini{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.3);box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+.cam-swatch-mini:active{transform:scale(.9)}
+#cam-count-badge{background:rgba(0,0,0,.7);color:rgba(255,255,255,.6);font-size:9px;padding:2px 5px;border-radius:8px;font-family:var(--mono)}
+#capture-row{position:absolute;bottom:80px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+#cap-btn{width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--accent),0 4px 16px rgba(0,0,0,.5);transition:transform .1s;-webkit-tap-highlight-color:transparent}
+#cap-btn:active{transform:scale(.93)}
+#cap-inner{width:46px;height:46px;border-radius:50%;background:var(--accent)}
+#cap-queue-badge{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;font-family:var(--mono);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#cap-btn{position:relative}
+.cap-side-btn{padding:8px 13px;border-radius:20px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;background:rgba(0,0,0,.6);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent}
+.cap-side-btn.on{background:var(--accent);color:#000;border-color:var(--accent)}
+#lut-badge{position:absolute;top:10px;left:10px;z-index:6;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:5px 10px;font-size:10px;color:var(--accent);display:none;cursor:pointer}
+#lut-badge.show{display:block}
+#mode-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:8px;flex-shrink:0}
+#save-wrap{background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;display:none}
+#save-wrap.show{display:block}
+#save-swatch{height:60px;width:100%}
+#save-body{padding:10px 12px 12px;display:flex;gap:8px;align-items:center}
+#save-name{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;font-family:var(--sharpie);font-size:16px;color:var(--text)}
+#save-name:focus{outline:none;border-color:var(--accent)}
+#save-meta{padding:0 12px 8px;font-size:10px;color:var(--muted);line-height:1.8}
+#upload-wrap{flex:1;overflow:hidden;position:relative;background:#000;display:none}
+#upload-wrap.show{display:block}
+#upload-canvas{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
+#no-cam{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:rgba(255,255,255,.5);font-size:13px;text-align:center;padding:20px;z-index:3;display:none}
+#no-cam.show{display:flex}
+#gallery-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+#gal-count{font-size:11px;color:var(--muted)}
+#gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
+.polaroid{background:#fff;padding:7px 7px 26px;border-radius:2px;box-shadow:0 3px 12px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.15);cursor:pointer;transition:transform .18s;user-select:none;-webkit-user-select:none}
+.polaroid:active{transform:scale(.96)}
+.pol-block{width:100%;aspect-ratio:1;border-radius:1px;margin-bottom:5px}
+.pol-name{font-family:var(--sharpie);font-size:11px;color:#1a1a1a;text-align:center;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pol-hex{font-family:'Space Mono',monospace;font-size:8px;color:#777;text-align:center;margin-top:2px}
+.pol-match{font-family:'Space Mono',monospace;font-size:7px;color:#aaa;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gal-empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)}
+.gal-empty h3{font-size:15px;margin-bottom:8px}
+.gal-empty p{font-size:12px;line-height:1.6}
+#gallery-actions{padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+#gal-631-view{display:none;padding:12px}
+#gal-631-view.show{display:block}
+.rule-block{height:120px;border-radius:var(--r);margin-bottom:8px;display:flex;align-items:flex-end;padding:10px}
+.rule-label{font-family:var(--sharpie);font-size:18px;color:rgba(255,255,255,.8)}
+#detail-body{padding:0 16px 28px}
+#det-swatch{width:100%;height:120px;border-radius:var(--r);margin-bottom:14px}
+#det-name{font-family:var(--sharpie);font-size:26px;margin-bottom:10px}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.det-val{background:var(--surface2);border-radius:var(--rs);padding:9px 11px}
+.det-vl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
+.det-v{font-size:12px;font-weight:700}
+.det-match{display:flex;align-items:center;gap:9px;background:var(--surface2);border-radius:var(--rs);padding:9px 11px;margin-bottom:7px}
+.det-ms{width:30px;height:30px;border-radius:4px;flex-shrink:0}
+.det-mi{flex:1}
+.det-mb{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.det-mn{font-size:13px;font-weight:700;margin:1px 0}
+.det-mc{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+#exp-root-bar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+#exp-root-sw{width:42px;height:42px;border-radius:var(--rs);flex-shrink:0}
+#exp-root-chips{display:flex;gap:7px;padding:10px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--border)}
+.exp-chip{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:border-color var(--tr),transform var(--tr);flex-shrink:0}
+.exp-chip.on{border-color:var(--accent);transform:scale(1.1)}
+.harm-row{display:flex;gap:5px;padding:0 12px 10px}
+.harm-sw{flex:1;height:44px;border-radius:var(--rs);cursor:pointer;position:relative;transition:transform .12s}
+.harm-sw:active{transform:scale(.93)}
+.harm-hex{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;color:rgba(255,255,255,.65);font-family:var(--mono)}
+.lut-card{margin:0 12px 9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.lut-head{padding:11px 13px;border-bottom:1px solid var(--border)}
+.lut-name{font-size:13px;font-weight:700}
+.lut-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.lut-sws{display:flex;gap:5px;padding:9px 13px;align-items:center}
+.lut-sw{width:30px;height:30px;border-radius:4px}
+.lut-arr{font-size:12px;color:var(--faint);margin:0 1px}
+.lut-acts{display:flex;gap:7px;padding:0 13px 12px;flex-wrap:wrap}
+.mood-row{display:flex;align-items:center;gap:9px;padding:7px 14px}
+.mood-l{font-size:10px;color:var(--muted);width:56px;flex-shrink:0}
+.mood-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.mood-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.mood-v{font-size:10px;color:var(--muted);width:34px;text-align:right}
+.split-grad{height:56px;border-radius:var(--rs);margin:8px 12px}
+.c1-box{margin:12px;background:var(--surface2);border-radius:var(--r);padding:13px}
+.c1-box h4{font-size:11px;color:var(--accent);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
+.c1-box li{font-size:11px;color:var(--muted);margin-bottom:4px;line-height:1.5;margin-left:14px}
+.c1-box code{background:var(--surface3);padding:1px 4px;border-radius:3px;font-family:var(--mono);font-size:10px;color:var(--accent)}
+.prom-chips{display:flex;gap:8px;padding:4px 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.prom-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.prom-sw{width:44px;height:44px;border-radius:50%;border:3px solid transparent;transition:border-color var(--tr),transform var(--tr)}
+.prom-chip.on .prom-sw{border-color:var(--accent);transform:scale(1.1)}
+.prom-label{font-size:8px;color:var(--muted);text-align:center;max-width:52px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.prom-sec-label{display:flex;align-items:baseline;gap:7px}
+.prom-multi-hint{font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;font-weight:600;opacity:.9}
+.prom-single-hint{font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400}
+.prom-pill-grid{display:flex;flex-wrap:wrap;gap:7px;padding:0 12px 16px;align-items:center}
+.prom-pill-group-label{width:100%;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:6px;margin-bottom:0px;font-weight:600}
+.prom-pill{font-size:13px;padding:9px 15px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:all .15s;-webkit-tap-highlight-color:transparent;white-space:nowrap;letter-spacing:.01em;font-weight:500;line-height:1}
+.prom-pill.on{background:var(--accent);border-color:var(--accent);color:#1a1208;font-weight:700}
+.prom-pill:active{transform:scale(.93)}
+.prom-pill:not(.on):hover{border-color:var(--muted);color:var(--text)}
+#prompt-out{margin:0 12px 10px;background:#1e1e1e;border:1px solid var(--accent);border-radius:var(--r);padding:20px;font-size:12px;line-height:1.8;color:var(--text);min-height:110px;white-space:pre-wrap;box-shadow:inset 0 2px 8px rgba(0,0,0,.45)}
+#prompt-acts{display:flex;gap:7px;padding:0 12px 12px;flex-wrap:wrap}
+.shop-banner{margin:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:14px;text-align:center}
+.shop-banner a{font-family:var(--sharpie);font-size:20px;color:var(--accent)}
+.shop-banner p{font-size:10px;color:var(--muted);margin-top:4px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);gap:10px}
+.set-row:last-child{border-bottom:none}
+.set-l{font-size:13px}
+.set-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.set-sec{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:14px 0 6px}
+#set-body{padding:0 16px 32px}
+.colgen-swatches{display:flex;height:130px;border-radius:var(--r);overflow:hidden;gap:2px}
+.colgen-swatch{flex:1;position:relative;cursor:pointer;transition:flex .2s}
+.colgen-swatch:active{flex:1.4}
+.colgen-swatch-info{position:absolute;bottom:0;left:0;right:0;padding:5px 6px;background:linear-gradient(transparent,rgba(0,0,0,.6));line-height:1.4}
+.colgen-name{font-size:8px;font-weight:700;font-family:var(--sharpie);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.colgen-hex{font-size:7px;font-family:var(--mono);opacity:.8}
+.colgen-pan{font-size:6px;font-family:var(--mono);opacity:.55}
+.colgen-swatch-acts{position:absolute;top:4px;right:4px;display:flex;gap:3px}
+.colgen-add-btn{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.colgen-add-btn:active{background:rgba(0,0,0,.7)}
+.sw-section-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.sw-colour-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sw-colour-chip{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer;position:relative;transition:transform .15s,border-color .15s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.sw-colour-chip.on{border-color:rgba(255,255,255,.8)}
+.sw-colour-chip:not(.on){opacity:.4}
+.sw-chip-tick{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.harm-sw{position:relative}
+.harm-add-btn{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;opacity:0;transition:opacity .15s;-webkit-tap-highlight-color:transparent;font-family:var(--mono)}
+.harm-sw:hover .harm-add-btn,.harm-sw:active .harm-add-btn{opacity:1}
+@media(hover:none){.harm-add-btn{opacity:.7}}
+.trio-sw{position:relative}
+.trio-add-btn{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);cursor:pointer;opacity:0;transition:opacity .15s;-webkit-tap-highlight-color:transparent;font-family:var(--mono)}
+.trio-sw:hover .trio-add-btn,.trio-sw:active .trio-add-btn{opacity:1}
+@media(hover:none){.trio-add-btn{opacity:.75}}
+.exp-chip-seed{border:2px dashed rgba(255,255,255,.25)!important}
+.lut-cat{display:inline-block;font-size:7px;text-transform:uppercase;letter-spacing:.1em;padding:2px 6px;border-radius:10px;font-family:var(--mono);margin-bottom:5px;font-weight:700}
+.lut-cat-warm{background:#4a2a0a;color:#f5a623}
+.lut-cat-cool{background:#0a1a3a;color:#5bc8ff}
+.lut-cat-cinema{background:#1a0a2a;color:#c084fc}
+.lut-cat-film{background:#1a1a0a;color:#a3c55b}
+.lut-cat-mono{background:#1a1a1a;color:#888}
+.lut-cat-extreme{background:#2a0a0a;color:#ff4444}
+.lut-grad{height:28px;border-radius:5px;margin:7px 0 5px;overflow:hidden;display:flex}
+.lut-grad-seg{flex:1;display:flex;flex-direction:column}
+.lut-grad-top{flex:1;border-bottom:1px solid rgba(255,255,255,.1)}
+.lut-grad-bot{flex:1}
+#trio-section{padding:0 0 4px}
+#trio-mode-row{display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px}
+.trio-mode-btn{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.trio-mode-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
+#trio-display{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
+.trio-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+.trio-swatches{display:flex;height:80px}
+.trio-sw{flex:1;position:relative;cursor:pointer;transition:flex .2s}
+.trio-sw:active{flex:1.3}
+.trio-sw-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:4px 6px 5px;font-family:var(--mono);font-size:7px;color:rgba(255,255,255,.85);line-height:1.5}
+.trio-meta{padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.trio-label{font-size:11px;font-weight:700;color:var(--text)}
+.trio-sublabel{font-size:9px;color:var(--muted);margin-top:1px}
+.trio-acts{display:flex;gap:5px;flex-shrink:0}
+#palette-builder-panel{padding:12px;display:flex;flex-direction:column;gap:10px}
+#pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default}
+.pb-slot-colour{flex:1;min-height:0}
+.pb-slot-info{background:#fff;padding:5px 6px 4px;display:flex;flex-direction:column;gap:1px}
+.pb-slot-name{font-family:var(--sharpie);font-size:10px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-slot-hex{font-family:var(--mono);font-size:7px;color:#666}
+.pb-slot-pan{font-family:var(--mono);font-size:6px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-slot-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pb-slot-rm:active{background:rgba(0,0,0,.8)}
+.pb-slot-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
+.pb-slot-empty:active{border-color:var(--accent);color:var(--accent)}
+#pb-actions{display:flex;gap:6px;flex-wrap:wrap}
+#pb-lib-picker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px}
+#pb-lib-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+#pb-lib-chips{display:flex;gap:7px;flex-wrap:wrap}
+.pb-lib-chip{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:transform .15s,border-color .15s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.pb-lib-chip:active{transform:scale(.9);border-color:var(--accent)}
+#pb-empty{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:40px 20px;text-align:center;color:var(--muted)}
+#pb-empty div:first-child{font-size:15px;font-weight:700}
+#pb-empty div:last-child{font-size:12px;line-height:1.6}
+#export-canvas{display:none}
+.sw-ratio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sw-ratio-btn{background:var(--surface2);border:2px solid var(--border);border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;transition:all var(--tr)}
+.sw-ratio-btn.on{border-color:var(--accent);background:rgba(200,169,110,.1)}
+.sw-ratio-btn .ratio-preview{margin:0 auto 5px;background:var(--accent);border-radius:2px;opacity:.7}
+.sw-ratio-btn .ratio-label{font-size:10px;color:var(--muted)}
+.sw-layout-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.sw-layout-btn{background:var(--surface2);border:2px solid var(--border);border-radius:var(--rs);padding:12px 8px;text-align:center;cursor:pointer;transition:all var(--tr)}
+.sw-layout-btn.on{border-color:var(--accent);background:rgba(200,169,110,.1)}
+.sw-layout-btn .layout-label{font-size:11px;color:var(--muted);margin-top:4px}
+.sw-preview-wrap{background:var(--surface2);border-radius:var(--rs);padding:12px;margin-bottom:14px;text-align:center}
+#sw-preview-canvas{max-width:100%;border-radius:4px}
+body.light{--bg:#f5f2ed;--surface:#fff;--surface2:#ede9e3;--surface3:#e0dbd3;--border:#d0cab8;--text:#1a1208;--muted:#7a6e5a;--faint:#bbb8b0}
+body.light .polaroid{box-shadow:0 2px 8px rgba(0,0,0,.18),0 5px 16px rgba(0,0,0,.1)}
+body.light #tabs{background:#fff;border-top:1px solid var(--border)}
+body.light .module{background:var(--bg)}
+#theme-btn{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all var(--tr)}
+#gal-search-row{padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;gap:7px;align-items:center}
+#gal-search{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 14px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
+#gal-search::placeholder{color:var(--faint)}
+#gal-search:focus{border-color:var(--accent)}
+#gal-search-clear{font-size:14px;color:var(--muted);cursor:pointer;padding:4px;display:none}
+.polaroid.selected{outline:3px solid var(--accent);outline-offset:2px}
+#gal-multi-bar{display:none;padding:8px 12px;background:rgba(200,169,110,.12);border-bottom:1px solid rgba(200,169,110,.3);align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+#gal-multi-bar.show{display:flex}
+#gal-multi-info{font-size:11px;color:var(--accent);flex:1}
+.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default;transition:opacity .15s,transform .15s}
+.pb-slot.drag-over{border-color:var(--accent);transform:scale(1.03)}
+.pb-slot.dragging{opacity:.4}
+.pb-drag-handle{position:absolute;top:4px;left:4px;width:18px;height:18px;background:rgba(0,0,0,.45);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:grab;color:rgba(255,255,255,.6);font-size:9px;line-height:1}
+.pb-drag-handle:active{cursor:grabbing}
+.exp-fmt-btn{flex:1;min-width:calc(50% - 4px);background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 8px;font-size:11px;text-align:center;cursor:pointer;transition:all var(--tr);color:var(--text)}
+.exp-fmt-btn:hover,.exp-fmt-btn:active{border-color:var(--accent);background:rgba(200,169,110,.1);color:var(--accent)}
+#share-link-wrap{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;margin-top:8px;display:none}
+#share-link-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;color:var(--muted);font-family:var(--mono);font-size:9px;word-break:break-all}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="top">
+  <div id="title"><div id="last-dot"></div>Digby's Colour Sampler</div>
+  <div id="top-r">
+    <div id="online" title="Network"></div>
+    <button id="theme-btn" title="Toggle light/dark" onclick="App.toggleTheme()">🌙</button>
+    <button class="icon-btn" onclick="App.openSettings()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+  </div>
+</div>
+<div id="modules">
+  <div class="module active" id="mod-sampler">
+    <div id="mode-bar">
+      <button class="cap-side-btn on" id="btn-mode-cam" onclick="Sampler.setMode('camera')">📷 Camera</button>
+      <button class="cap-side-btn" id="btn-mode-wheel" onclick="Sampler.setMode('wheel')">🌈 Picker</button>
+      <button class="cap-side-btn" id="btn-mode-up" onclick="Sampler.setMode('upload')">🖼 Upload</button>
+      <div style="flex:1"></div>
+      <div id="gal-tog-wrap" class="tog-group" style="width:auto">
+        <button class="tog-btn on" onclick="Sampler.setCamCount(3)" id="ct3">3</button>
+        <button class="tog-btn" onclick="Sampler.setCamCount(6)" id="ct6">6</button>
+        <button class="tog-btn" onclick="Sampler.setCamCount(9)" id="ct9">9</button>
+      </div>
+    </div>
+    <div id="sampler-cam-wrap">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <canvas id="cam-canvas"></canvas>
+      <div id="picker-crosshair">
+        <svg viewBox="0 0 70 70" fill="none">
+          <circle cx="35" cy="35" r="32" stroke="white" stroke-width="1.5" stroke-dasharray="5 3" opacity=".75"/>
+          <circle cx="35" cy="35" r="5" fill="none" stroke="white" stroke-width="2" opacity=".9"/>
+          <line x1="35" y1="3" x2="35" y2="15" stroke="white" stroke-width="1.5" opacity=".6"/>
+          <line x1="35" y1="55" x2="35" y2="67" stroke="white" stroke-width="1.5" opacity=".6"/>
+          <line x1="3" y1="35" x2="15" y2="35" stroke="white" stroke-width="1.5" opacity=".6"/>
+          <line x1="55" y1="35" x2="67" y2="35" stroke="white" stroke-width="1.5" opacity=".6"/>
+        </svg>
+      </div>
+      <div id="cam-collection"><div id="cam-count-badge">0</div></div>
+      <div id="lut-badge" onclick="Sampler.toggleLut()">Grade ON ✕</div>
+      <div id="capture-row">
+        <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
+        <button id="cap-btn" onclick="Sampler.capture()">
+          <div id="cap-inner"></div>
+          <div id="cap-queue-badge" style="display:none">0</div>
+        </button>
+        <button class="cap-side-btn" id="flip-btn" onclick="Sampler.flipCamera()">Flip</button>
+      </div>
+      <div id="cam-queue-bar" style="display:none;position:absolute;bottom:80px;left:0;right:0;z-index:7;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:8px 12px;display:none;align-items:center;gap:8px;flex-wrap:nowrap">
+        <div id="cam-queue-swatches" style="display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
+        <div id="cam-queue-count" style="font-size:10px;color:rgba(255,255,255,.5);flex-shrink:0;white-space:nowrap"></div>
+        <button class="btn btn-p btn-sm" style="flex-shrink:0" onclick="Sampler.saveQueue()">Save All</button>
+        <button class="btn btn-s btn-sm" style="flex-shrink:0;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.6)" onclick="Sampler.clearQueue()">✕</button>
+      </div>
+      <div id="live-bar">
+        <div id="live-swatch"></div>
+        <div id="live-info">
+          <div id="live-hex">#------</div>
+          <div id="live-name">Tap to move picker</div>
+          <div id="live-k"></div>
+        </div>
+        <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
+      </div>
+      <div id="no-cam">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <div style="font-size:15px;font-weight:700" id="no-cam-title">Camera Unavailable</div>
+        <div style="font-size:12px;text-align:center;line-height:1.8;max-width:290px" id="no-cam-msg">Detecting browser...</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-p btn-sm" onclick="Sampler.startCamera()">↺ Retry</button>
+          <button class="btn btn-s btn-sm" onclick="Sampler.setMode('wheel')">🌈 Colour Picker</button>
+          <button class="btn btn-s btn-sm" onclick="Sampler.setMode('upload')">🖼 Upload Image</button>
+        </div>
+        <div id="cam-diag" style="margin-top:10px;background:rgba(255,255,255,.07);border-radius:8px;padding:10px 14px;font-size:9px;font-family:monospace;color:rgba(255,255,255,.45);line-height:1.8;text-align:left;max-width:290px;word-break:break-all"></div>
+      </div>
+    </div>
+    <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
+      <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0">
+        <button class="btn btn-s btn-sm" onclick="document.getElementById('up-input').click()">Change</button>
+        <div id="up-pick-queue" style="display:flex;gap:5px;flex:1;overflow-x:auto"></div>
+        <div id="up-live-swatch" style="width:28px;height:28px;border-radius:4px;background:#888;border:2px solid var(--border);flex-shrink:0"></div>
+        <div id="up-live-hex" style="font-size:10px;flex-shrink:0;min-width:60px"></div>
+      </div>
+      <div id="up-queue-bar" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 12px;flex-shrink:0;align-items:center;gap:8px;flex-wrap:wrap">
+        <span id="up-queue-info" style="font-size:11px;color:var(--muted);flex:1"></span>
+        <button class="btn btn-p btn-sm" onclick="Sampler.saveQueue()">Save All</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
+      </div>
+      <div style="position:relative;flex:1;overflow:hidden">
+        <canvas id="upload-canvas" style="display:block;width:100%;height:100%;object-fit:contain;touch-action:none"></canvas>
+      </div>
+    </div>
+    <input type="file" id="up-input" accept="image/*" style="display:none" onchange="Sampler.loadUpload(this)">
+    <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:4">
+        <div id="wheel-preview" style="width:52px;height:52px;border-radius:var(--r);border:2px solid var(--border);flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="wheel-hex" style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1">#888888</div>
+          <div id="wheel-name" style="font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+          <div id="wheel-matches" style="font-size:9px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        </div>
+        <button class="btn btn-p btn-sm" style="flex-shrink:0;font-size:15px;padding:10px 16px" onclick="Sampler.captureFromWheel()">＋</button>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <canvas id="wheel-canvas" width="260" height="260" style="border-radius:50%;touch-action:none;cursor:crosshair;max-width:min(260px,80vw);height:auto"></canvas>
+        <div style="width:100%;max-width:300px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 10px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">L</div>
+          <input type="range" id="wheel-lightness" min="5" max="95" value="50" style="width:100%;accent-color:var(--accent)" oninput="ColourWheel.updateFromSliders()">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">S</div>
+          <input type="range" id="wheel-sat" min="5" max="100" value="70" style="width:100%;accent-color:var(--accent)" oninput="ColourWheel.updateFromSliders()">
+        </div>
+        <canvas id="hue-strip" width="300" height="28" style="border-radius:var(--rs);width:100%;max-width:300px;touch-action:none;cursor:crosshair"></canvas>
+        <details style="width:100%;max-width:300px">
+          <summary style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;cursor:pointer;list-style:none;padding:4px 0">▸ Manual input (HSL / Hex)</summary>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:8px">
+            <div>
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">H</div>
+              <input type="number" id="wheel-h-in" min="0" max="360" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:7px 6px;color:var(--text);font-family:var(--mono);font-size:13px" oninput="ColourWheel.fromHSL()">
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">S</div>
+              <input type="number" id="wheel-s-in" min="0" max="100" value="70" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:7px 6px;color:var(--text);font-family:var(--mono);font-size:13px" oninput="ColourWheel.fromHSL()">
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">L</div>
+              <input type="number" id="wheel-l-in" min="0" max="100" value="50" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:7px 6px;color:var(--text);font-family:var(--mono);font-size:13px" oninput="ColourWheel.fromHSL()">
+            </div>
+          </div>
+          <div style="margin-top:7px">
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Hex</div>
+            <input type="text" id="wheel-hex-in" maxlength="7" placeholder="#A3724F" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:14px" oninput="ColourWheel.fromHex(this.value)">
+          </div>
+        </details>
+        <div id="wheel-queue-bar" style="display:none;width:100%;max-width:300px;background:var(--surface2);border-radius:var(--rs);padding:10px 12px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em">Queued colours</div>
+          <div id="wheel-queue-swatches" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px"></div>
+          <div style="display:flex;gap:7px">
+            <button class="btn btn-p btn-sm" style="flex:1" onclick="Sampler.saveQueue()">Save All</button>
+            <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="save-wrap">
+      <div id="save-swatch"></div>
+      <div id="save-meta"></div>
+      <div id="save-body">
+        <input id="save-name" type="text" placeholder="Name this colour..." maxlength="40">
+        <button class="btn btn-p btn-sm" onclick="Sampler.saveColour()">Save</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.dismissSave()">✕</button>
+      </div>
+    </div>
+  </div>
+  <div class="module" id="mod-gallery">
+    <div id="gallery-toolbar">
+      <span id="gal-count">0 colours</span>
+      <div class="tog-group">
+        <button class="tog-btn" onclick="Gallery.setView('3')" id="gv3">3</button>
+        <button class="tog-btn on" onclick="Gallery.setView('6')" id="gv6">6</button>
+        <button class="tog-btn" onclick="Gallery.setView('9')" id="gv9">9</button>
+        <button class="tog-btn" onclick="Gallery.setView('631')" id="gv631" title="60-30-10 rule">60/30/10</button>
+      </div>
+    </div>
+    <div id="gal-search-row">
+      <input id="gal-search" type="search" placeholder="Search name, hex, Pantone…" oninput="Gallery.applySearch(this.value)" onsearch="Gallery.applySearch(this.value)">
+      <span id="gal-search-clear" onclick="Gallery.clearSearch()">✕</span>
+      <button class="btn btn-s btn-sm" onclick="Gallery.toggleMultiSelect()" id="gal-ms-btn" title="Multi-select">☑</button>
+    </div>
+    <div id="gal-multi-bar">
+      <span id="gal-multi-info">0 selected</span>
+      <button class="btn btn-s btn-sm" onclick="Gallery.msSelectAll()">All</button>
+      <button class="btn btn-s btn-sm" onclick="Gallery.msSelectNone()">None</button>
+      <button class="btn btn-p btn-sm" onclick="Gallery.msExport()">Export…</button>
+      <button class="btn btn-d btn-sm" onclick="Gallery.msDelete()">Delete</button>
+    </div>
+    <div class="mod-scroll">
+      <div id="gallery-actions" style="display:none">
+        <button class="btn btn-s btn-sm" onclick="SwatchExport.openAs('polaroids')">Polaroid Sheet</button>
+        <button class="btn btn-p btn-sm" onclick="SwatchExport.open()">🎨 Swatch Export</button>
+        <button class="btn btn-s btn-sm" onclick="Gallery.shareAll()">Share</button>
+        <button class="btn btn-s btn-sm" onclick="Gallery.copyShareLink()">🔗 Link</button>
+      </div>
+      <div id="gal-631-view"></div>
+      <div id="gallery-grid"></div>
+    </div>
+  </div>
+  <div class="module" id="mod-explorer">
+    <div class="mod-scroll">
+      <div class="sec">Root Colour</div>
+      <div class="card">
+        <div id="exp-root-bar">
+          <div id="exp-root-sw"></div>
+          <div style="flex:1">
+            <div id="exp-root-name" style="font-size:14px;font-weight:700">Select a colour below</div>
+            <div id="exp-root-hex" style="font-size:11px;color:var(--muted)"></div>
+          </div>
+          <button class="btn btn-s btn-sm" title="Generate a random beautiful palette" onclick="Explorer.randomPalette()">✦ Random</button>
+        </div>
+        <div id="exp-root-chips"></div>
+        <div id="exp-seed-note" style="display:none;font-size:10px;color:var(--muted);padding:4px 12px 8px;line-height:1.5">✦ Seed palette shown — sample real colours to see your own library here</div>
+      </div>
+      <div class="sec">Colour Harmonies</div>
+      <div class="card" id="harm-card" style="padding:10px 0 4px"><div id="harm-container"></div></div>
+      <div class="sec">Mood Analysis</div>
+      <div class="card" id="mood-card" style="padding:8px 0"><div id="mood-bars"></div></div>
+      <div class="sec">Split Tone</div>
+      <div class="card">
+        <div class="split-grad" id="split-grad"></div>
+        <div style="padding:0 12px 11px;display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-s btn-sm" onclick="Explorer.dlSplitLut()">Download LUT</button>
+          <button class="btn btn-s btn-sm" onclick="Explorer.addSplit()">Add to Library</button>
+        </div>
+      </div>
+      <div class="sec">Aesthetic Colour Generator</div>
+      <div id="colgen-section" style="padding:0 0 4px">
+        <div id="colgen-mode-row" style="display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px">
+          <button class="trio-mode-btn on" data-a="japandi" onclick="ColourGenerator.setAesthetic(this)">Japandi</button>
+          <button class="trio-mode-btn" data-a="nordic" onclick="ColourGenerator.setAesthetic(this)">Nordic</button>
+          <button class="trio-mode-btn" data-a="darkAcademia" onclick="ColourGenerator.setAesthetic(this)">Dark Academia</button>
+          <button class="trio-mode-btn" data-a="cottagecore" onclick="ColourGenerator.setAesthetic(this)">Cottagecore</button>
+          <button class="trio-mode-btn" data-a="memphis" onclick="ColourGenerator.setAesthetic(this)">Memphis</button>
+          <button class="trio-mode-btn" data-a="coastal" onclick="ColourGenerator.setAesthetic(this)">Coastal</button>
+          <button class="trio-mode-btn" data-a="bauhaus" onclick="ColourGenerator.setAesthetic(this)">Bauhaus</button>
+          <button class="trio-mode-btn" data-a="artDeco" onclick="ColourGenerator.setAesthetic(this)">Art Deco</button>
+          <button class="trio-mode-btn" data-a="maximalist" onclick="ColourGenerator.setAesthetic(this)">Maximalist</button>
+          <button class="trio-mode-btn" data-a="brutalist" onclick="ColourGenerator.setAesthetic(this)">Brutalist</button>
+          <button class="trio-mode-btn" data-a="wabisabi" onclick="ColourGenerator.setAesthetic(this)">Wabi-Sabi</button>
+          <button class="trio-mode-btn" data-a="parisian" onclick="ColourGenerator.setAesthetic(this)">Parisian</button>
+        </div>
+        <div id="colgen-desc" style="padding:2px 12px 8px;font-size:10px;color:var(--muted);line-height:1.5"></div>
+        <div id="colgen-palette" style="padding:0 12px 12px"></div>
+      </div>
+      <div class="sec">3-Colour Trio Generator</div>
+      <div id="trio-section">
+        <div id="trio-mode-row">
+          <button class="trio-mode-btn on" data-m="complementary" onclick="Explorer.setTrioMode(this)">Complementary</button>
+          <button class="trio-mode-btn" data-m="contrast" onclick="Explorer.setTrioMode(this)">Contrast</button>
+          <button class="trio-mode-btn" data-m="bold" onclick="Explorer.setTrioMode(this)">Bold</button>
+          <button class="trio-mode-btn" data-m="subtle" onclick="Explorer.setTrioMode(this)">Subtle</button>
+          <button class="trio-mode-btn" data-m="radical" onclick="Explorer.setTrioMode(this)">Radical</button>
+          <button class="trio-mode-btn" data-m="editorial" onclick="Explorer.setTrioMode(this)">Editorial</button>
+        </div>
+        <div id="trio-display"></div>
+      </div>
+      <div class="sec">Cinematic Grades</div>
+      <div id="lut-cards"></div>
+      <div class="c1-box">
+        <h4>Capture One — Import LUT</h4>
+        <ol>
+          <li>Download <code>.cube</code> file above</li>
+          <li>AirDrop to your Mac</li>
+          <li><strong>Styles &amp; Presets</strong> → right-click → <strong>Open User Styles</strong></li>
+          <li>Place <code>.cube</code> in <code>ICC Profiles &amp; Camera LUTs</code></li>
+          <li>Restart Capture One — appears under <strong>Color → LUT</strong></li>
+          <li>For tethered live view: apply LUT in <strong>Live View</strong> overlay</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="module" id="mod-prompter">
+    <div class="mod-scroll">
+      <div class="sec">Colours <span id="prom-sel-count" style="color:var(--accent);font-weight:700"></span></div>
+      <div class="prom-chips" id="prom-chips"></div>
+      <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span></div>
+      <div class="prom-pill-grid" id="subject-grid">
+        <div class="prom-pill-group-label">Botanical</div>
+        <button class="prom-pill" data-g="subject" data-v="florals">Florals</button>
+        <button class="prom-pill" data-g="subject" data-v="foliage">Foliage</button>
+        <button class="prom-pill" data-g="subject" data-v="botanicals">Botanicals</button>
+        <button class="prom-pill" data-g="subject" data-v="ferns">Ferns</button>
+        <button class="prom-pill" data-g="subject" data-v="herbs and spices">Herbs</button>
+        <button class="prom-pill" data-g="subject" data-v="fruit and berries">Fruit</button>
+        <button class="prom-pill" data-g="subject" data-v="mushrooms and fungi">Fungi</button>
+        <div class="prom-pill-group-label">Fauna</div>
+        <button class="prom-pill" data-g="subject" data-v="birds in flight and perched">Birds</button>
+        <button class="prom-pill" data-g="subject" data-v="butterflies and moths">Butterflies</button>
+        <button class="prom-pill" data-g="subject" data-v="insects and beetles">Insects</button>
+        <button class="prom-pill" data-g="subject" data-v="fish and marine life">Fish</button>
+        <button class="prom-pill" data-g="subject" data-v="shells and coral">Shells</button>
+        <button class="prom-pill" data-g="subject" data-v="deer and woodland animals">Animals</button>
+        <button class="prom-pill" data-g="subject" data-v="exotic birds and plumage">Exotic Birds</button>
+        <div class="prom-pill-group-label">Geometric</div>
+        <button class="prom-pill" data-g="subject" data-v="geometric tessellation">Tessellation</button>
+        <button class="prom-pill" data-g="subject" data-v="ogee and trellis forms">Trellis</button>
+        <button class="prom-pill" data-g="subject" data-v="chevron and herringbone">Chevron</button>
+        <button class="prom-pill" data-g="subject" data-v="diamond lattice">Lattice</button>
+        <button class="prom-pill" data-g="subject" data-v="stars and snowflakes">Stars</button>
+        <button class="prom-pill" data-g="subject" data-v="interlocking circles">Circles</button>
+        <div class="prom-pill-group-label">Decorative</div>
+        <button class="prom-pill" data-g="subject" data-v="classical damask motifs">Damask</button>
+        <button class="prom-pill" data-g="subject" data-v="toile de jouy pastoral scene">Toile</button>
+        <button class="prom-pill" data-g="subject" data-v="chinoiserie pagodas and blossom">Chinoiserie</button>
+        <button class="prom-pill" data-g="subject" data-v="heraldic crests and shields">Heraldic</button>
+        <button class="prom-pill" data-g="subject" data-v="celestial suns moons and stars">Celestial</button>
+        <button class="prom-pill" data-g="subject" data-v="abstract gestural marks">Abstract</button>
+        <button class="prom-pill" data-g="subject" data-v="paisley and ikat forms">Paisley</button>
+        <button class="prom-pill" data-g="subject" data-v="architectural columns and arches">Architectural</button>
+      </div>
+      <div class="sec prom-sec-label">Art Medium <span class="prom-multi-hint">multi-select</span></div>
+      <div class="prom-pill-grid" id="medium-grid">
+        <div class="prom-pill-group-label">Print</div>
+        <button class="prom-pill" data-g="medium" data-v="etching">Etching</button>
+        <button class="prom-pill" data-g="medium" data-v="woodblock print">Woodblock</button>
+        <button class="prom-pill" data-g="medium" data-v="screen print">Screen Print</button>
+        <button class="prom-pill" data-g="medium" data-v="linocut print">Linocut</button>
+        <button class="prom-pill" data-g="medium" data-v="risograph print">Risograph</button>
+        <button class="prom-pill" data-g="medium" data-v="engraving">Engraving</button>
+        <button class="prom-pill" data-g="medium" data-v="stencil print">Stencil</button>
+        <div class="prom-pill-group-label">Painted</div>
+        <button class="prom-pill" data-g="medium" data-v="watercolour illustration">Watercolour</button>
+        <button class="prom-pill" data-g="medium" data-v="gouache painting">Gouache</button>
+        <button class="prom-pill" data-g="medium" data-v="oil painting">Oil Painting</button>
+        <button class="prom-pill" data-g="medium" data-v="pastel drawing">Pastel</button>
+        <button class="prom-pill" data-g="medium" data-v="acrylic painting">Acrylic</button>
+        <div class="prom-pill-group-label">Drawing</div>
+        <button class="prom-pill" data-g="medium" data-v="pen and ink illustration">Pen &amp; Ink</button>
+        <button class="prom-pill" data-g="medium" data-v="pencil drawing">Pencil</button>
+        <button class="prom-pill" data-g="medium" data-v="charcoal drawing">Charcoal</button>
+        <div class="prom-pill-group-label">Digital</div>
+        <button class="prom-pill" data-g="medium" data-v="flat vector illustration">Flat Vector</button>
+        <button class="prom-pill" data-g="medium" data-v="collage and mixed media">Collage</button>
+        <button class="prom-pill" data-g="medium" data-v="digital illustration">Digital</button>
+      </div>
+      <div class="sec prom-sec-label">Period &amp; Era <span class="prom-single-hint">single</span></div>
+      <div class="prom-pill-grid" id="era-grid">
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="">None</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="medieval illuminated manuscript style">Medieval</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Gothic cathedral style">Gothic</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Renaissance period style">Renaissance</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Georgian period style">Georgian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Regency period style">Regency</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Victorian era style">Victorian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Edwardian era style">Edwardian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Nouveau style">Art Nouveau</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Deco style">Art Deco</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Bauhaus design style">Bauhaus</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="mid-century modern style">Mid-Century</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1960s psychedelic style">1960s</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Pop Art style">Pop Art</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1970s retro style">1970s</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1980s design style">1980s</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Brutalist design style">Brutalist</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="contemporary design style">Contemporary</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Japanese Meiji period style">Meiji Japan</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="William Morris Arts and Crafts style">Arts &amp; Crafts</button>
+      </div>
+      <div class="sec prom-sec-label">Pattern Repeat <span class="prom-single-hint">single</span></div>
+      <div class="prom-pill-grid" id="repeat-grid">
+        <button class="prom-pill prom-pill-single on" data-g="repeat" data-v="seamless repeat pattern">Seamless</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless half-drop repeat pattern">Half-Drop</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless brick repeat pattern">Brick</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless stripe pattern">Stripe</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless check pattern">Check</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless trellis pattern">Trellis</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless damask repeat">Damask</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless toile de jouy repeat">Toile</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless ogee repeat pattern">Ogee</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="ditsy print scattered motif">Ditsy</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="large scale statement repeat">Large Scale</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="dense allover pattern no ground visible">Allover</button>
+      </div>
+      <div class="sec prom-sec-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Batch Mode
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:10px;color:var(--muted)">Wraps multi-selections in {}</div>
+          <div class="sw" id="batch-toggle" onclick="Prompter.toggleBatch(this)"></div>
+        </div>
+      </div>
+      <div id="batch-hint" style="display:none;padding:0 12px 10px;font-size:10px;color:var(--muted);line-height:1.6">
+        MJ will generate one image per combination — e.g. <span style="color:var(--accent);font-family:var(--mono)">{etching, woodblock print}</span> creates 2 separate renders.<br>Select multiple Mediums or Subjects to activate.
+      </div>
+      <div id="wallpaper-panel" style="display:none;margin:0 12px 12px">
+        <div class="card" style="margin:0">
+          <div style="padding:11px 13px;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:700;color:var(--accent)">Colour + Pattern Notes</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Based on your selected colours</div>
+          </div>
+          <div id="wallpaper-suggestions" style="padding:11px 13px;font-size:11px;color:var(--muted);line-height:1.7"></div>
+        </div>
+      </div>
+      <div class="sec">MJ Parameters</div>
+      <div style="padding:0 12px 14px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:12px">--tile (seamless)</div>
+          <div class="sw on" id="tile-toggle" onclick="Prompter.toggleParam(this,'tile')"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:12px;min-width:60px">Aspect</div>
+          <div class="tog-group" id="ar-tog" style="flex:1">
+            <button class="tog-btn on" data-ar="1:1" onclick="Prompter.setAr(this)">1:1</button>
+            <button class="tog-btn" data-ar="4:5" onclick="Prompter.setAr(this)">4:5</button>
+            <button class="tog-btn" data-ar="2:3" onclick="Prompter.setAr(this)">2:3</button>
+            <button class="tog-btn" data-ar="3:4" onclick="Prompter.setAr(this)">3:4</button>
+            <button class="tog-btn" data-ar="1:2" onclick="Prompter.setAr(this)">1:2</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:12px;min-width:60px">Version</div>
+          <div class="tog-group" id="ver-tog" style="flex:1;flex-wrap:wrap">
+            <button class="tog-btn" data-ver="--v 8" onclick="Prompter.setVer(this)">v8</button>
+            <button class="tog-btn" data-ver="--v 7" onclick="Prompter.setVer(this)">v7</button>
+            <button class="tog-btn on" data-ver="--v 6.1" onclick="Prompter.setVer(this)">v6.1</button>
+            <button class="tog-btn" data-ver="--v 6" onclick="Prompter.setVer(this)">v6</button>
+            <button class="tog-btn" data-ver="--niji 6" onclick="Prompter.setVer(this)">niji 6</button>
+            <button class="tog-btn" data-ver="--niji 5" onclick="Prompter.setVer(this)">niji 5</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:12px;min-width:60px">Quality</div>
+          <div class="tog-group" id="q-tog" style="flex:1">
+            <button class="tog-btn" data-q="--q .25" onclick="Prompter.setQ(this)">.25</button>
+            <button class="tog-btn" data-q="--q .5" onclick="Prompter.setQ(this)">.5</button>
+            <button class="tog-btn on" data-q="--q 1" onclick="Prompter.setQ(this)">1</button>
+            <button class="tog-btn" data-q="--q 2" onclick="Prompter.setQ(this)">2</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:12px">--style raw</div>
+          <div class="sw on" id="raw-toggle" onclick="Prompter.toggleParam(this,'raw')"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:12px">Stylize</div>
+            <div id="stylize-val" style="font-size:10px;color:var(--accent);font-family:var(--mono)">--s 100</div>
+          </div>
+          <input type="range" id="stylize-range" min="0" max="1000" step="50" value="100" style="flex:1;max-width:160px;margin-left:12px;accent-color:var(--accent)" oninput="Prompter.setStylize(this.value)">
+        </div>
+      </div>
+      <div class="sec">Generated Prompt</div>
+      <div id="prompt-out">Select colours and tap Generate...</div>
+      <div id="prompt-char-bar" style="display:flex;justify-content:flex-end;padding:0 12px 4px;gap:6px;align-items:center">
+        <div id="prompt-char-warn" style="font-size:10px;color:#e87040;display:none">⚠ Approaching Midjourney 4000 char limit</div>
+        <div id="prompt-char-count" style="font-size:10px;color:var(--muted);font-family:var(--mono)"></div>
+      </div>
+      <div id="prompt-acts">
+        <button class="btn btn-p btn-sm" onclick="Prompter.generate()">Generate</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.copy()">Copy</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.share()">Share</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.openMJ()" title="Copy prompt and open Midjourney">Open MJ ↗</button>
+      </div>
+      <div class="shop-banner">
+        <a href="https://digby.shop" target="_blank">digby.shop</a>
+        <p>Print your palette creations as art products</p>
+      </div>
+    </div>
+  </div>
+  <div class="module" id="mod-palette">
+    <div class="mod-scroll">
+      <div id="palette-builder-panel">
+        <div id="pb-grid"></div>
+        <div id="pb-actions">
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromWheel()">+ Wheel</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.suggest()">✦ Suggest</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
+          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">PNG</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.showExportFormats()">Export…</button>
+        </div>
+        <div id="pb-drag-hint" style="text-align:center;font-size:9px;color:var(--faint);padding:4px 0 0;display:none">drag to reorder</div>
+        <div id="pb-lib-picker" style="display:none">
+          <div id="pb-lib-label">Pick from library:</div>
+          <div id="pb-lib-chips"></div>
+          <button class="btn btn-s btn-sm" style="margin-top:4px" onclick="PaletteBuilder.closeLibPicker()">Cancel</button>
+        </div>
+        <div id="pb-empty" style="display:none">
+          <div>No colours yet</div>
+          <div>Add from the Colour Wheel, your Library, or let Suggest build a harmony</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="tabs">
+  <button class="tab on" id="tab-sampler" onclick="App.setTab('sampler')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+    Sampler
+  </button>
+  <button class="tab" id="tab-gallery" onclick="App.setTab('gallery')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Gallery
+  </button>
+  <button class="tab" id="tab-explorer" onclick="App.setTab('explorer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+    Explorer
+  </button>
+  <button class="tab" id="tab-prompter" onclick="App.setTab('prompter')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Prompter
+  </button>
+  <button class="tab" id="tab-palette" onclick="App.setTab('palette')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="11" r="1.5" fill="currentColor"/><circle cx="16" cy="15" r="1.5" fill="currentColor"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/><circle cx="8" cy="15" r="1.5" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+    Palette
+  </button>
+</div>
+</div>
+<div id="ov" onclick="App.closeOv(event)">
+  <div id="ov-panel"><div class="ov-handle"></div><div id="ov-content"></div></div>
+</div>
+<div id="toast"></div>
+<canvas id="export-canvas"></canvas>
+<canvas id="sw-preview-canvas" style="display:none"></canvas>
+<script>
+const PANTONE=[
+  {code:"100 C",name:"Pale Yellow",hex:"#F4ED7C"},{code:"102 C",name:"Bright Yellow",hex:"#F9E11E"},
+  {code:"109 C",name:"Yellow",hex:"#F6D02F"},{code:"116 C",name:"Minion Yellow",hex:"#FFCD00"},
+  {code:"123 C",name:"Saffron",hex:"#FFC72C"},{code:"130 C",name:"Amber",hex:"#E8A820"},
+  {code:"137 C",name:"Golden Orange",hex:"#F99B20"},{code:"144 C",name:"Orange Peel",hex:"#E87722"},
+  {code:"151 C",name:"Bright Orange",hex:"#FF7900"},{code:"158 C",name:"Deep Orange",hex:"#E96B27"},
+  {code:"165 C",name:"Orange",hex:"#FF6720"},{code:"172 C",name:"Pumpkin",hex:"#FA5C28"},
+  {code:"179 C",name:"Poppy Red",hex:"#E45033"},{code:"185 C",name:"Red",hex:"#E4002B"},
+  {code:"186 C",name:"True Red",hex:"#C8102E"},{code:"187 C",name:"Dark Red",hex:"#B22222"},
+  {code:"192 C",name:"Coral Red",hex:"#ED4C67"},{code:"199 C",name:"Crimson",hex:"#CC2529"},
+  {code:"200 C",name:"Carmine",hex:"#BA0C2F"},{code:"206 C",name:"Cherry",hex:"#A50034"},
+  {code:"213 C",name:"Hot Pink",hex:"#E8457C"},{code:"220 C",name:"Magenta Rose",hex:"#C5007C"},
+  {code:"226 C",name:"Magenta",hex:"#D0006F"},{code:"232 C",name:"Pink",hex:"#E878A0"},
+  {code:"238 C",name:"Flamingo",hex:"#E87DAA"},{code:"244 C",name:"Blush",hex:"#EDAEC9"},
+  {code:"250 C",name:"Lavender Pink",hex:"#D5A0C2"},{code:"256 C",name:"Light Purple",hex:"#C6A0C6"},
+  {code:"261 C",name:"Orchid",hex:"#9B4F96"},{code:"267 C",name:"Purple",hex:"#522398"},
+  {code:"268 C",name:"Dark Purple",hex:"#44246A"},{code:"269 C",name:"Plum",hex:"#3D1A6E"},
+  {code:"281 C",name:"Navy",hex:"#003087"},{code:"286 C",name:"Royal Blue",hex:"#003DA5"},
+  {code:"293 C",name:"Blue",hex:"#005EB8"},{code:"300 C",name:"Cobalt Blue",hex:"#005BAC"},
+  {code:"306 C",name:"Process Blue",hex:"#00B5E2"},{code:"312 C",name:"Cyan",hex:"#00A9CE"},
+  {code:"319 C",name:"Sky Blue",hex:"#00B0B9"},{code:"326 C",name:"Turquoise",hex:"#009F9D"},
+  {code:"333 C",name:"Mint",hex:"#00A591"},{code:"340 C",name:"Emerald",hex:"#007A53"},
+  {code:"347 C",name:"Green",hex:"#009A44"},{code:"354 C",name:"Bright Green",hex:"#00B140"},
+  {code:"361 C",name:"Leaf Green",hex:"#43B02A"},{code:"368 C",name:"Grass Green",hex:"#64A70B"},
+  {code:"375 C",name:"Lime Green",hex:"#97D700"},{code:"382 C",name:"Yellow Green",hex:"#C4D600"},
+  {code:"397 C",name:"Olive",hex:"#A09300"},{code:"404 C",name:"Khaki",hex:"#8E7C52"},
+  {code:"412 C",name:"Dark Taupe",hex:"#5C4D3C"},{code:"416 C",name:"Grey",hex:"#8E9089"},
+  {code:"417 C",name:"Warm Grey",hex:"#8D8573"},{code:"418 C",name:"Med Grey",hex:"#707372"},
+  {code:"419 C",name:"Dark Grey",hex:"#363534"},{code:"420 C",name:"Light Grey",hex:"#C7C9C7"},
+  {code:"425 C",name:"Steel",hex:"#5E6062"},{code:"426 C",name:"Graphite",hex:"#3F4041"},
+  {code:"430 C",name:"Blue Grey",hex:"#8D9CA8"},{code:"432 C",name:"Storm Grey",hex:"#4D606E"},
+  {code:"433 C",name:"Midnight",hex:"#2B3D4F"},{code:"472 C",name:"Peach",hex:"#EFA98A"},
+  {code:"474 C",name:"Salmon",hex:"#EE9070"},{code:"475 C",name:"Coral",hex:"#E8714A"},
+  {code:"476 C",name:"Rust",hex:"#994830"},{code:"477 C",name:"Mahogany",hex:"#7A3826"},
+  {code:"478 C",name:"Burnt Sienna",hex:"#9D4E2A"},{code:"484 C",name:"Tomato",hex:"#C74B30"},
+  {code:"485 C",name:"Bright Red",hex:"#DA291C"},{code:"490 C",name:"Ruby",hex:"#8B0000"},
+  {code:"505 C",name:"Burgundy",hex:"#6B1A2A"},{code:"511 C",name:"Eggplant",hex:"#5E2750"},
+  {code:"518 C",name:"Mauve",hex:"#8C5D84"},{code:"524 C",name:"Wisteria",hex:"#A9869C"},
+  {code:"546 C",name:"Teal",hex:"#1B5E6A"},{code:"553 C",name:"Forest",hex:"#2C5545"},
+  {code:"560 C",name:"Hunter Green",hex:"#2A4536"},{code:"567 C",name:"Sage",hex:"#6B8E7B"},
+  {code:"574 C",name:"Olive Green",hex:"#7A7B40"},{code:"581 C",name:"Dark Olive",hex:"#605E2A"},
+  {code:"7499 C",name:"Ivory",hex:"#EDE8D5"},{code:"7500 C",name:"Ecru",hex:"#DEDAD0"},
+  {code:"7502 C",name:"Sand",hex:"#CCBA99"},{code:"7504 C",name:"Caramel",hex:"#B09060"},
+  {code:"7526 C",name:"Antique Bronze",hex:"#A07850"},{code:"7527 C",name:"Stone",hex:"#C4B7A6"},
+  {code:"7528 C",name:"Linen",hex:"#C9B99A"},{code:"7529 C",name:"Warm Sand",hex:"#C3A882"},
+  {code:"7530 C",name:"Tan",hex:"#B59675"},{code:"7531 C",name:"Hazel",hex:"#9C7E5E"},
+  {code:"7532 C",name:"Brown",hex:"#7A5C42"},{code:"7534 C",name:"Bone",hex:"#DCCFB3"},
+  {code:"7539 C",name:"Pearl",hex:"#DDD8CC"},{code:"7541 C",name:"Ice",hex:"#DDE3E8"},
+  {code:"7542 C",name:"Sky",hex:"#A2B4C0"},{code:"7543 C",name:"Fog",hex:"#9EA8B0"},
+  {code:"7544 C",name:"Haze",hex:"#7D8F99"},{code:"7545 C",name:"Slate Blue",hex:"#5A7084"},
+  {code:"7546 C",name:"Ocean",hex:"#2E4F6A"},{code:"7547 C",name:"Deep Sea",hex:"#1A2E3D"},
+  {code:"Black C",name:"Black",hex:"#2B2B2C"},{code:"White",name:"White",hex:"#F2F0EB"},
+  {code:"Warm Gray 1 C",name:"Warm White",hex:"#E4DED8"},{code:"Warm Gray 11 C",name:"Warm Black",hex:"#5B4F4E"},
+  {code:"7688 C",name:"Steel Blue",hex:"#4472A8"},{code:"7692 C",name:"Cornflower",hex:"#5B84C0"},
+];
+</script>
+<script>
+const LG=[
+  {code:"LG 1",name:"China Clay",hex:"#DEDAD0",url:"https://www.littlegreene.com/china-clay"},
+  {code:"LG 5",name:"Whisper",hex:"#E2DDD4",url:"https://www.littlegreene.com/whisper"},
+  {code:"LG 6",name:"Ashes of Roses",hex:"#D4A89C",url:"https://www.littlegreene.com/ashes-of-roses"},
+  {code:"LG 7",name:"Adventurer",hex:"#C08070",url:"https://www.littlegreene.com/adventurer"},
+  {code:"LG 9",name:"Rusling",hex:"#8B5A4A",url:"https://www.littlegreene.com/rusling"},
+  {code:"LG 11",name:"Shrimp Pink",hex:"#E8A8A0",url:"https://www.littlegreene.com/shrimp-pink"},
+  {code:"LG 12",name:"Tuscany",hex:"#C89090",url:"https://www.littlegreene.com/tuscany"},
+  {code:"LG 14",name:"Baked Cherry",hex:"#7A3028",url:"https://www.littlegreene.com/baked-cherry"},
+  {code:"LG 15",name:"Bronze Red",hex:"#8C3C28",url:"https://www.littlegreene.com/bronze-red"},
+  {code:"LG 19",name:"Orangerie",hex:"#D07040",url:"https://www.littlegreene.com/orangerie"},
+  {code:"LG 21",name:"Orange Aurora",hex:"#D88050",url:"https://www.littlegreene.com/orange-aurora"},
+  {code:"LG 23",name:"Terra di Sienna",hex:"#C07050",url:"https://www.littlegreene.com/terra-di-sienna"},
+  {code:"LG 24",name:"Heat",hex:"#B86040",url:"https://www.littlegreene.com/heat"},
+  {code:"LG 25",name:"Hollyhock",hex:"#D8A0A0",url:"https://www.littlegreene.com/hollyhock"},
+  {code:"LG 27",name:"Button",hex:"#D8C0B0",url:"https://www.littlegreene.com/button"},
+  {code:"LG 28",name:"50s Magnolia",hex:"#EDE0C8",url:"https://www.littlegreene.com/50s-magnolia"},
+  {code:"LG 29",name:"Beauvais Lilac",hex:"#C0B8D0",url:"https://www.littlegreene.com/beauvais-lilac"},
+  {code:"LG 30",name:"Regency Fawn",hex:"#C8B8A0",url:"https://www.littlegreene.com/regency-fawn"},
+  {code:"LG 31",name:"Roman Plaster",hex:"#D0C0A8",url:"https://www.littlegreene.com/roman-plaster"},
+  {code:"LG 33",name:"Linen Wash",hex:"#E0D8C8",url:"https://www.littlegreene.com/linen-wash"},
+  {code:"LG 37",name:"Stock",hex:"#E8D8C0",url:"https://www.littlegreene.com/stock"},
+  {code:"LG 39",name:"Clay",hex:"#C09870",url:"https://www.littlegreene.com/clay"},
+  {code:"LG 40",name:"Silt",hex:"#B0A080",url:"https://www.littlegreene.com/silt"},
+  {code:"LG 41",name:"Whitening",hex:"#F0ECE0",url:"https://www.littlegreene.com/whitening"},
+  {code:"LG 42",name:"Creamerie",hex:"#EEE0C0",url:"https://www.littlegreene.com/creamerie"},
+  {code:"LG 44",name:"Straw Colour",hex:"#E0C888",url:"https://www.littlegreene.com/straw-colour"},
+  {code:"LG 47",name:"Mister David",hex:"#D0C070",url:"https://www.littlegreene.com/mister-david"},
+  {code:"LG 49",name:"First Light",hex:"#E8E0C8",url:"https://www.littlegreene.com/first-light"},
+  {code:"LG 52",name:"French Stone",hex:"#C8C0A0",url:"https://www.littlegreene.com/french-stone"},
+  {code:"LG 53",name:"Light Gold",hex:"#D0B860",url:"https://www.littlegreene.com/light-gold"},
+  {code:"LG 54",name:"Indian Sand",hex:"#C8A870",url:"https://www.littlegreene.com/indian-sand"},
+  {code:"LG 55",name:"Cream Colour",hex:"#E8D8A8",url:"https://www.littlegreene.com/cream-colour"},
+  {code:"LG 57",name:"Lead White",hex:"#E8E4D8",url:"https://www.littlegreene.com/lead-white"},
+  {code:"LG 61",name:"Ivory",hex:"#F0ECD8",url:"https://www.littlegreene.com/ivory"},
+  {code:"LG 64",name:"Bath Stone",hex:"#C8B888",url:"https://www.littlegreene.com/bath-stone"},
+  {code:"LG 65",name:"Stone Pale Cool",hex:"#D8D0C0",url:"https://www.littlegreene.com/stone-pale-cool"},
+  {code:"LG 68",name:"Stargazer",hex:"#686078",url:"https://www.littlegreene.com/stargazer"},
+  {code:"LG 74",name:"White Lead",hex:"#ECEAE0",url:"https://www.littlegreene.com/white-lead"},
+  {code:"LG 76",name:"Acre",hex:"#C0C8A0",url:"https://www.littlegreene.com/acre"},
+  {code:"LG 77",name:"Portland Stone",hex:"#D0C8A8",url:"https://www.littlegreene.com/portland-stone"},
+  {code:"LG 81",name:"Clockface",hex:"#F0ECE4",url:"https://www.littlegreene.com/clockface"},
+  {code:"LG 105",name:"Slaked Lime",hex:"#F0EEE8",url:"https://www.littlegreene.com/slaked-lime"},
+  {code:"LG 109",name:"Welcome",hex:"#D8D4C8",url:"https://www.littlegreene.com/welcome"},
+  {code:"LG 113",name:"French Grey",hex:"#A8A898",url:"https://www.littlegreene.com/french-grey"},
+  {code:"LG 114",name:"Mid Lead Colour",hex:"#888878",url:"https://www.littlegreene.com/mid-lead-colour"},
+  {code:"LG 117",name:"Lead Colour",hex:"#B0A890",url:"https://www.littlegreene.com/lead-colour"},
+  {code:"LG 118",name:"Dark Lead Colour",hex:"#686058",url:"https://www.littlegreene.com/dark-lead-colour"},
+  {code:"LG 130",name:"Joanna",hex:"#98C0A0",url:"https://www.littlegreene.com/joanna"},
+  {code:"LG 132",name:"Chamois",hex:"#D0B888",url:"https://www.littlegreene.com/chamois"},
+  {code:"LG 141",name:"Firefly",hex:"#D89870",url:"https://www.littlegreene.com/firefly"},
+  {code:"LG 142",name:"Mushroom",hex:"#A89888",url:"https://www.littlegreene.com/mushroom"},
+  {code:"LG 143",name:"Rolling Fog",hex:"#C0B8B0",url:"https://www.littlegreene.com/rolling-fog"},
+  {code:"LG 144",name:"Attic",hex:"#B0A898",url:"https://www.littlegreene.com/attic"},
+  {code:"LG 148",name:"Carys",hex:"#8898A8",url:"https://www.littlegreene.com/carys"},
+  {code:"LG 200",name:"Hicks Blue",hex:"#2A4060",url:"https://www.littlegreene.com/hicks-blue"},
+  {code:"LG 215",name:"Aquamarine",hex:"#78B8B8",url:"https://www.littlegreene.com/aquamarine"},
+  {code:"LG 217",name:"Drizzle",hex:"#A0B0B8",url:"https://www.littlegreene.com/drizzle"},
+  {code:"LG 220",name:"Sage",hex:"#8A9880",url:"https://www.littlegreene.com/sage"},
+  {code:"LG 221",name:"Green Stone Pale",hex:"#A8B898",url:"https://www.littlegreene.com/green-stone-pale"},
+  {code:"LG 225",name:"Vert De Terre",hex:"#789068",url:"https://www.littlegreene.com/vert-de-terre"},
+  {code:"LG 235",name:"Puck",hex:"#3A6858",url:"https://www.littlegreene.com/puck"},
+  {code:"LG 240",name:"Green Verditer",hex:"#5A9880",url:"https://www.littlegreene.com/green-verditer"},
+  {code:"LG 250",name:"Woad",hex:"#304860",url:"https://www.littlegreene.com/woad"},
+  {code:"LG 255",name:"Paean Black",hex:"#201E1C",url:"https://www.littlegreene.com/paean-black"},
+  {code:"LG 260",name:"Bone",hex:"#E8E0D0",url:"https://www.littlegreene.com/bone"},
+  {code:"LG 265",name:"Pollen",hex:"#D0C040",url:"https://www.littlegreene.com/pollen"},
+  {code:"LG 275",name:"Sencha",hex:"#607850",url:"https://www.littlegreene.com/sencha"},
+  {code:"LG 280",name:"Livid",hex:"#708070",url:"https://www.littlegreene.com/livid"},
+  {code:"LG 285",name:"Apple Smiles",hex:"#88A838",url:"https://www.littlegreene.com/apple-smiles"},
+  {code:"LG 295",name:"Kigali",hex:"#184860",url:"https://www.littlegreene.com/kigali"},
+  {code:"LG 300",name:"Steel",hex:"#7898B0",url:"https://www.littlegreene.com/steel"},
+  {code:"LG 305",name:"Lead",hex:"#606878",url:"https://www.littlegreene.com/lead"},
+  {code:"LG 315",name:"Tuscan Red",hex:"#903028",url:"https://www.littlegreene.com/tuscan-red"},
+];
+const FB=[
+  {code:"No.1",name:"White Tie",hex:"#F0EBE0",url:"https://www.farrow-ball.com/colours/white-tie"},
+  {code:"No.2",name:"Bone",hex:"#E8E0D0",url:"https://www.farrow-ball.com/colours/bone"},
+  {code:"No.3",name:"Off-White",hex:"#EDE8DC",url:"https://www.farrow-ball.com/colours/off-white"},
+  {code:"No.4",name:"Old White",hex:"#D8D2C2",url:"https://www.farrow-ball.com/colours/old-white"},
+  {code:"No.5",name:"Lime White",hex:"#E8E5D5",url:"https://www.farrow-ball.com/colours/lime-white"},
+  {code:"No.6",name:"Pointing",hex:"#EFE9DA",url:"https://www.farrow-ball.com/colours/pointing"},
+  {code:"No.7",name:"Wimborne White",hex:"#F2EFDE",url:"https://www.farrow-ball.com/colours/wimborne-white"},
+  {code:"No.8",name:"String",hex:"#D8CEB8",url:"https://www.farrow-ball.com/colours/string"},
+  {code:"No.9",name:"Archive",hex:"#D0C8B0",url:"https://www.farrow-ball.com/colours/archive"},
+  {code:"No.10",name:"Drop Cloth",hex:"#CEC4AE",url:"https://www.farrow-ball.com/colours/drop-cloth"},
+  {code:"No.11",name:"Savage Ground",hex:"#C0B498",url:"https://www.farrow-ball.com/colours/savage-ground"},
+  {code:"No.12",name:"Jitney",hex:"#C8BC9A",url:"https://www.farrow-ball.com/colours/jitney"},
+  {code:"No.22",name:"Clunch",hex:"#DDD8C8",url:"https://www.farrow-ball.com/colours/clunch"},
+  {code:"No.26",name:"Lamp Room Gray",hex:"#C0BEB2",url:"https://www.farrow-ball.com/colours/lamp-room-gray"},
+  {code:"No.27",name:"Mole's Breath",hex:"#8A8880",url:"https://www.farrow-ball.com/colours/moles-breath"},
+  {code:"No.28",name:"Manor House Gray",hex:"#9A9890",url:"https://www.farrow-ball.com/colours/manor-house-gray"},
+  {code:"No.29",name:"Plummett",hex:"#9A9C98",url:"https://www.farrow-ball.com/colours/plummett"},
+  {code:"No.30",name:"Hardwick White",hex:"#B8B8A8",url:"https://www.farrow-ball.com/colours/hardwick-white"},
+  {code:"No.31",name:"Purbeck Stone",hex:"#C0BCAA",url:"https://www.farrow-ball.com/colours/purbeck-stone"},
+  {code:"No.32",name:"Pavilion Gray",hex:"#BBBAB0",url:"https://www.farrow-ball.com/colours/pavilion-gray"},
+  {code:"No.33",name:"Cornforth White",hex:"#D4D0C8",url:"https://www.farrow-ball.com/colours/cornforth-white"},
+  {code:"No.40",name:"Elephant's Breath",hex:"#B8B0A2",url:"https://www.farrow-ball.com/colours/elephants-breath"},
+  {code:"No.42",name:"Skimming Stone",hex:"#D4CCBA",url:"https://www.farrow-ball.com/colours/skimming-stone"},
+  {code:"No.43",name:"Stony Ground",hex:"#C8C0A8",url:"https://www.farrow-ball.com/colours/stony-ground"},
+  {code:"No.44",name:"Elephant Gray",hex:"#A8A89A",url:"https://www.farrow-ball.com/colours/elephant-gray"},
+  {code:"No.57",name:"Pink Ground",hex:"#E8D0C0",url:"https://www.farrow-ball.com/colours/pink-ground"},
+  {code:"No.58",name:"Setting Plaster",hex:"#E0C4B0",url:"https://www.farrow-ball.com/colours/setting-plaster"},
+  {code:"No.59",name:"Dead Salmon",hex:"#D0A898",url:"https://www.farrow-ball.com/colours/dead-salmon"},
+  {code:"No.64",name:"Nancy's Blushes",hex:"#E8C8C0",url:"https://www.farrow-ball.com/colours/nancys-blushes"},
+  {code:"No.65",name:"Fox Red",hex:"#9A5040",url:"https://www.farrow-ball.com/colours/fox-red"},
+  {code:"No.67",name:"Cinder Rose",hex:"#D0A0A0",url:"https://www.farrow-ball.com/colours/cinder-rose"},
+  {code:"No.70",name:"Charlotte's Locks",hex:"#E06838",url:"https://www.farrow-ball.com/colours/charlottes-locks"},
+  {code:"No.72",name:"Book Room Red",hex:"#8C3030",url:"https://www.farrow-ball.com/colours/book-room-red"},
+  {code:"No.73",name:"Blazer",hex:"#B83828",url:"https://www.farrow-ball.com/colours/blazer"},
+  {code:"No.74",name:"Picture Gallery Red",hex:"#A03428",url:"https://www.farrow-ball.com/colours/picture-gallery-red"},
+  {code:"No.75",name:"Incarnadine",hex:"#B84038",url:"https://www.farrow-ball.com/colours/incarnadine"},
+  {code:"No.83",name:"Rangwali",hex:"#C84870",url:"https://www.farrow-ball.com/colours/rangwali"},
+  {code:"No.93",name:"Hague Blue",hex:"#2E4B5A",url:"https://www.farrow-ball.com/colours/hague-blue"},
+  {code:"No.94",name:"Pitch Blue",hex:"#1A3048",url:"https://www.farrow-ball.com/colours/pitch-blue"},
+  {code:"No.220",name:"Bone China Blue",hex:"#C0C8D0",url:"https://www.farrow-ball.com/colours/bone-china-blue"},
+  {code:"No.232",name:"Borrowed Light",hex:"#D0D8E0",url:"https://www.farrow-ball.com/colours/borrowed-light"},
+  {code:"No.233",name:"Blackened",hex:"#C8CDD0",url:"https://www.farrow-ball.com/colours/blackened"},
+  {code:"No.235",name:"Strong White",hex:"#E4E0D8",url:"https://www.farrow-ball.com/colours/strong-white"},
+  {code:"No.284",name:"Down Pipe",hex:"#6A7070",url:"https://www.farrow-ball.com/colours/down-pipe"},
+  {code:"No.292",name:"Mizzle",hex:"#A8A898",url:"https://www.farrow-ball.com/colours/mizzle"},
+  {code:"No.80",name:"Dayroom Yellow",hex:"#E8D090",url:"https://www.farrow-ball.com/colours/dayroom-yellow"},
+  {code:"No.203",name:"Babouche",hex:"#E8C040",url:"https://www.farrow-ball.com/colours/babouche"},
+  {code:"No.217",name:"Churlish Green",hex:"#A0A868",url:"https://www.farrow-ball.com/colours/churlish-green"},
+  {code:"No.47",name:"Vert de Terre",hex:"#B0B898",url:"https://www.farrow-ball.com/colours/vert-de-terre"},
+  {code:"No.301",name:"Cromarty",hex:"#A8B8B8",url:"https://www.farrow-ball.com/colours/cromarty"},
+  {code:"No.302",name:"Dix Blue",hex:"#9AABB0",url:"https://www.farrow-ball.com/colours/dix-blue"},
+  {code:"No.89",name:"Parma Gray",hex:"#B8C0D0",url:"https://www.farrow-ball.com/colours/parma-gray"},
+  {code:"No.87",name:"Lulworth Blue",hex:"#8898B0",url:"https://www.farrow-ball.com/colours/lulworth-blue"},
+  {code:"No.88",name:"Oval Room Blue",hex:"#8A9AAA",url:"https://www.farrow-ball.com/colours/oval-room-blue"},
+  {code:"No.243",name:"Teresa's Green",hex:"#90A898",url:"https://www.farrow-ball.com/colours/teresas-green"},
+  {code:"No.272",name:"Arsenic",hex:"#788878",url:"https://www.farrow-ball.com/colours/arsenic"},
+  {code:"No.57",name:"Railings",hex:"#3A3C3C",url:"https://www.farrow-ball.com/colours/railings"},
+  {code:"No.256",name:"Pelt",hex:"#5A4868",url:"https://www.farrow-ball.com/colours/pelt"},
+  {code:"No.254",name:"Brinjal",hex:"#6A3850",url:"https://www.farrow-ball.com/colours/brinjal"},
+  {code:"No.48",name:"Brassica",hex:"#7A5868",url:"https://www.farrow-ball.com/colours/brassica"},
+  {code:"No.260",name:"De Nimes",hex:"#8090A8",url:"https://www.farrow-ball.com/colours/de-nimes"},
+  {code:"No.281",name:"Vardo",hex:"#486870",url:"https://www.farrow-ball.com/colours/vardo"},
+  {code:"No.286",name:"Inchyra Blue",hex:"#5A7080",url:"https://www.farrow-ball.com/colours/inchyra-blue"},
+  {code:"No.287",name:"St Giles Blue",hex:"#5868A0",url:"https://www.farrow-ball.com/colours/st-giles-blue"},
+];
+const EB=[
+  {code:"EB-001",name:"Fossil",hex:"#D8D0C0",url:"https://earthbornpaints.co.uk/colours/fossil"},
+  {code:"EB-002",name:"White Rabbit",hex:"#EDEAE0",url:"https://earthbornpaints.co.uk/colours/white-rabbit"},
+  {code:"EB-003",name:"Flint",hex:"#C8C4B8",url:"https://earthbornpaints.co.uk/colours/flint"},
+  {code:"EB-004",name:"Earthborn White",hex:"#F0EDE5",url:"https://earthbornpaints.co.uk/colours/earthborn-white"},
+  {code:"EB-005",name:"Bone",hex:"#E0D8C8",url:"https://earthbornpaints.co.uk/colours/bone"},
+  {code:"EB-006",name:"Seagull",hex:"#DCDCD0",url:"https://earthbornpaints.co.uk/colours/seagull"},
+  {code:"EB-007",name:"Portland Stone",hex:"#C8C0A8",url:"https://earthbornpaints.co.uk/colours/portland-stone"},
+  {code:"EB-008",name:"Hay",hex:"#D8C898",url:"https://earthbornpaints.co.uk/colours/hay"},
+  {code:"EB-009",name:"Pebble Shore",hex:"#C0B898",url:"https://earthbornpaints.co.uk/colours/pebble-shore"},
+  {code:"EB-010",name:"Sandpiper",hex:"#C8B890",url:"https://earthbornpaints.co.uk/colours/sandpiper"},
+  {code:"EB-011",name:"Clay",hex:"#B0A080",url:"https://earthbornpaints.co.uk/colours/clay"},
+  {code:"EB-012",name:"Sand Castle",hex:"#D8C898",url:"https://earthbornpaints.co.uk/colours/sand-castle"},
+  {code:"EB-013",name:"Shoreline",hex:"#B8B098",url:"https://earthbornpaints.co.uk/colours/shoreline"},
+  {code:"EB-014",name:"Bluff",hex:"#A89878",url:"https://earthbornpaints.co.uk/colours/bluff"},
+  {code:"EB-015",name:"Mudlark",hex:"#907860",url:"https://earthbornpaints.co.uk/colours/mudlark"},
+  {code:"EB-016",name:"Warm Stone",hex:"#C4B090",url:"https://earthbornpaints.co.uk/colours/warm-stone"},
+  {code:"EB-017",name:"Terracotta",hex:"#C07850",url:"https://earthbornpaints.co.uk/colours/terracotta"},
+  {code:"EB-018",name:"Red Ochre",hex:"#A85840",url:"https://earthbornpaints.co.uk/colours/red-ochre"},
+  {code:"EB-019",name:"Burnt Earth",hex:"#8A4030",url:"https://earthbornpaints.co.uk/colours/burnt-earth"},
+  {code:"EB-020",name:"Deep Red",hex:"#702828",url:"https://earthbornpaints.co.uk/colours/deep-red"},
+  {code:"EB-021",name:"Blossom",hex:"#E8C0B8",url:"https://earthbornpaints.co.uk/colours/blossom"},
+  {code:"EB-022",name:"Rose Hip",hex:"#D8907A",url:"https://earthbornpaints.co.uk/colours/rose-hip"},
+  {code:"EB-023",name:"Wild Thyme",hex:"#80906A",url:"https://earthbornpaints.co.uk/colours/wild-thyme"},
+  {code:"EB-024",name:"Sage",hex:"#98A882",url:"https://earthbornpaints.co.uk/colours/sage"},
+  {code:"EB-025",name:"Grass",hex:"#688050",url:"https://earthbornpaints.co.uk/colours/grass"},
+  {code:"EB-026",name:"Leaf",hex:"#506840",url:"https://earthbornpaints.co.uk/colours/leaf"},
+  {code:"EB-027",name:"Fern",hex:"#607858",url:"https://earthbornpaints.co.uk/colours/fern"},
+  {code:"EB-028",name:"Forest",hex:"#3A5038",url:"https://earthbornpaints.co.uk/colours/forest"},
+  {code:"EB-029",name:"Lichen",hex:"#909878",url:"https://earthbornpaints.co.uk/colours/lichen"},
+  {code:"EB-030",name:"Mint",hex:"#A8C0A8",url:"https://earthbornpaints.co.uk/colours/mint"},
+  {code:"EB-031",name:"Duck Egg",hex:"#A8C0B8",url:"https://earthbornpaints.co.uk/colours/duck-egg"},
+  {code:"EB-032",name:"Sea Mist",hex:"#B0C8C8",url:"https://earthbornpaints.co.uk/colours/sea-mist"},
+  {code:"EB-033",name:"Teal",hex:"#508090",url:"https://earthbornpaints.co.uk/colours/teal"},
+  {code:"EB-034",name:"Blue Duck",hex:"#6898A8",url:"https://earthbornpaints.co.uk/colours/blue-duck"},
+  {code:"EB-035",name:"Skies",hex:"#88A8C0",url:"https://earthbornpaints.co.uk/colours/skies"},
+  {code:"EB-036",name:"Pale Wedgwood",hex:"#A0B8D0",url:"https://earthbornpaints.co.uk/colours/pale-wedgwood"},
+  {code:"EB-037",name:"Cornflower",hex:"#6880A8",url:"https://earthbornpaints.co.uk/colours/cornflower"},
+  {code:"EB-038",name:"Indigo",hex:"#405880",url:"https://earthbornpaints.co.uk/colours/indigo"},
+  {code:"EB-039",name:"Navy",hex:"#283850",url:"https://earthbornpaints.co.uk/colours/navy"},
+  {code:"EB-040",name:"Slate",hex:"#708090",url:"https://earthbornpaints.co.uk/colours/slate"},
+  {code:"EB-041",name:"Charcoal",hex:"#505058",url:"https://earthbornpaints.co.uk/colours/charcoal"},
+  {code:"EB-042",name:"Black",hex:"#282828",url:"https://earthbornpaints.co.uk/colours/black"},
+  {code:"EB-043",name:"Lavender",hex:"#B0A8C8",url:"https://earthbornpaints.co.uk/colours/lavender"},
+  {code:"EB-044",name:"Heather",hex:"#9880A0",url:"https://earthbornpaints.co.uk/colours/heather"},
+  {code:"EB-045",name:"Mauve",hex:"#C0A8B8",url:"https://earthbornpaints.co.uk/colours/mauve"},
+  {code:"EB-046",name:"Mulberry",hex:"#7A5070",url:"https://earthbornpaints.co.uk/colours/mulberry"},
+  {code:"EB-047",name:"Plum",hex:"#583050",url:"https://earthbornpaints.co.uk/colours/plum"},
+  {code:"EB-048",name:"Wisteria",hex:"#C8B8D8",url:"https://earthbornpaints.co.uk/colours/wisteria"},
+  {code:"EB-049",name:"Mist",hex:"#D0D0D8",url:"https://earthbornpaints.co.uk/colours/mist"},
+  {code:"EB-050",name:"Storm",hex:"#9898A8",url:"https://earthbornpaints.co.uk/colours/storm"},
+];
+</script>
