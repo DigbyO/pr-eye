@@ -453,11 +453,14 @@ a{color:var(--accent);text-decoration:none}
 .share-opt-btn:active{background:rgba(200,169,110,.15)}
 .share-opt-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
 .share-opt-label{flex:1}
-;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px;margin-top:2px}
-#pb-suggest-panel .pb-theme-row{display:flex;gap:5px;flex-wrap:wrap}
+#pb-suggest-panel{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;flex-direction:column;gap:0;margin-top:6px}
+#pb-theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.pb-theme-card{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.pb-theme-card.on{border-color:var(--accent);background:rgba(200,169,110,.1)}
+.pb-theme-card-swatches{display:flex;gap:2px;flex-shrink:0}
+.pb-theme-card-dot{width:11px;height:11px;border-radius:50%}
+.pb-theme-card-name{font-size:12px;font-weight:600;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #pb-wheel-picker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;gap:8px}
-.pb-theme-btn{font-size:12px;padding:7px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;-webkit-tap-highlight-color:transparent;transition:all .15s}
-.pb-theme-btn:active,.pb-theme-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* hidden */
 #export-canvas{display:none}
@@ -1116,23 +1119,13 @@ a{color:var(--accent);text-decoration:none}
         </div>
 
         <div id="pb-suggest-panel" style="display:none">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Choose a theme to suggest from:</div>
-          <div class="pb-theme-row">
-            <button class="pb-theme-btn on" data-t="harmony" onclick="PaletteBuilder.setSuggestTheme(this)">Harmony</button>
-            <button class="pb-theme-btn" data-t="sunset"  onclick="PaletteBuilder.setSuggestTheme(this)">Sunset</button>
-            <button class="pb-theme-btn" data-t="forest"  onclick="PaletteBuilder.setSuggestTheme(this)">Forest</button>
-            <button class="pb-theme-btn" data-t="ocean"   onclick="PaletteBuilder.setSuggestTheme(this)">Ocean</button>
-            <button class="pb-theme-btn" data-t="urban"   onclick="PaletteBuilder.setSuggestTheme(this)">Urban</button>
-            <button class="pb-theme-btn" data-t="desert"  onclick="PaletteBuilder.setSuggestTheme(this)">Desert</button>
-            <button class="pb-theme-btn" data-t="floral"  onclick="PaletteBuilder.setSuggestTheme(this)">Floral</button>
-            <button class="pb-theme-btn" data-t="nordic"  onclick="PaletteBuilder.setSuggestTheme(this)">Nordic</button>
-            <button class="pb-theme-btn" data-t="dark"    onclick="PaletteBuilder.setSuggestTheme(this)">Dark</button>
+          <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:10px;letter-spacing:.01em">Choose a theme</div>
+          <div id="pb-theme-grid"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+            <button class="btn btn-p btn-sm" style="padding:10px" onclick="PaletteBuilder.suggestFromTheme()">+ Add One</button>
+            <button class="btn btn-s btn-sm" style="padding:10px" onclick="PaletteBuilder.fillFromTheme()">Fill All Gaps</button>
           </div>
-          <div style="display:flex;gap:6px;margin-top:6px">
-            <button class="btn btn-p btn-sm" onclick="PaletteBuilder.suggestFromTheme()">+ Add Suggestion</button>
-            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.fillFromTheme()">Fill Palette</button>
-            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.closeSuggest()">Done</button>
-          </div>
+          <button class="btn btn-s btn-sm" style="width:100%;margin-top:8px" onclick="PaletteBuilder.closeSuggest()">Done</button>
         </div>
 
         <div id="pb-lib-picker" style="display:none">
@@ -2716,9 +2709,9 @@ const Gallery={
         <div class="det-val"><div class="det-vl">Source</div><div class="det-v" style="font-size:11px">${c.source}</div></div>
       </div>
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
-      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${lg.url}','_blank')">Order ↗</button></div>`:''})()}
-      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${fb.url}','_blank')">Order ↗</button></div>`:''})()}
-      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${eb.url}','_blank')">Order ↗</button></div>`:''})()}
+      ${(()=>{const _lg=CS.nearestLG(c.lab)||c.littleGreene;return _lg?`<div class="det-match"><div class="det-ms" style="background:${_lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${_lg.name}</div><div class="det-mc">${_lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${_lg.url}','_blank')">Order ↗</button></div>`:''})()}
+      ${(()=>{const _fb=CS.nearestFB(c.lab)||c.farrowBall;return _fb?`<div class="det-match"><div class="det-ms" style="background:${_fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${_fb.name}</div><div class="det-mc">${_fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${_fb.url}','_blank')">Order ↗</button></div>`:''})()}
+      ${(()=>{const _eb=CS.nearestEB(c.lab)||c.earthborn;return _eb?`<div class="det-match"><div class="det-ms" style="background:${_eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${_eb.name}</div><div class="det-mc">${_eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${_eb.url}','_blank')">Order ↗</button></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
@@ -4893,17 +4886,47 @@ const PaletteBuilder = {
   toggleSuggest() {
     const p = document.getElementById('pb-suggest-panel');
     const showing = p.style.display === 'flex';
-    p.style.display = showing ? 'none' : 'flex';
+    if (showing) { p.style.display = 'none'; return; }
+    // Render theme grid fresh each time
+    this._renderThemeGrid();
+    p.style.display = 'flex';
+  },
+
+  _renderThemeGrid() {
+    const grid = document.getElementById('pb-theme-grid');
+    if (!grid) return;
+    const themeList = [
+      { key:'harmony', label:'Harmony',  icon:'🎵' },
+      { key:'sunset',  label:'Sunset',   icon:'🌅' },
+      { key:'forest',  label:'Forest',   icon:'🌲' },
+      { key:'ocean',   label:'Ocean',    icon:'🌊' },
+      { key:'urban',   label:'Urban',    icon:'🏙' },
+      { key:'desert',  label:'Desert',   icon:'🏜' },
+      { key:'floral',  label:'Floral',   icon:'🌸' },
+      { key:'nordic',  label:'Nordic',   icon:'❄️' },
+      { key:'dark',    label:'Dark',     icon:'🌑' },
+    ];
+    grid.innerHTML = themeList.map(t => {
+      const colours = this.THEMES[t.key];
+      const dots = colours
+        ? colours.slice(0,4).map(h => `<div class="pb-theme-card-dot" style="background:${h}"></div>`).join('')
+        : '<div class="pb-theme-card-dot" style="background:var(--accent)"></div>';
+      const on = this.suggestTheme === t.key ? ' on' : '';
+      return `<div class="pb-theme-card${on}" onclick="PaletteBuilder.setSuggestTheme('${t.key}',this)">
+        <div class="pb-theme-card-swatches">${dots}</div>
+        <div class="pb-theme-card-name">${t.icon} ${t.label}</div>
+      </div>`;
+    }).join('');
   },
 
   closeSuggest() {
     document.getElementById('pb-suggest-panel').style.display = 'none';
   },
 
-  setSuggestTheme(btn) {
-    document.querySelectorAll('.pb-theme-btn').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    this.suggestTheme = btn.dataset.t;
+  setSuggestTheme(key, el) {
+    this.suggestTheme = key;
+    document.querySelectorAll('.pb-theme-card').forEach(b => b.classList.remove('on'));
+    if (el) el.classList.add('on');
   },
 
   _themeCandidate() {
