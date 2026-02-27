@@ -262,14 +262,14 @@ a{color:var(--accent);text-decoration:none}
 #det-name{font-family:var(--sharpie);font-size:26px;margin-bottom:10px}
 .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
 .det-val{background:var(--surface2);border-radius:var(--rs);padding:9px 11px}
-.det-vl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
+.det-vl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;font-weight:600}
 .det-v{font-size:12px;font-weight:700}
 .det-match{display:flex;align-items:center;gap:9px;background:var(--surface2);border-radius:var(--rs);padding:9px 11px;margin-bottom:7px}
 .det-ms{width:30px;height:30px;border-radius:4px;flex-shrink:0}
 .det-mi{flex:1}
-.det-mb{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.det-mb{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
 .det-mn{font-size:13px;font-weight:700;margin:1px 0}
-.det-mc{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.det-mc{font-size:11px;color:var(--muted);font-family:var(--mono)}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* ══════════════════════════════════════════
@@ -285,10 +285,10 @@ a{color:var(--accent);text-decoration:none}
 .harm-sw:active{transform:scale(.93)}
 .harm-hex{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;color:rgba(255,255,255,.65);font-family:var(--mono)}
 .mood-row{display:flex;align-items:center;gap:9px;padding:7px 14px}
-.mood-l{font-size:10px;color:var(--muted);width:56px;flex-shrink:0}
+.mood-l{font-size:12px;color:var(--text);width:68px;flex-shrink:0;font-weight:500}
 .mood-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
 .mood-fill{height:100%;border-radius:3px;transition:width .5s ease}
-.mood-v{font-size:10px;color:var(--muted);width:34px;text-align:right}
+.mood-v{font-size:12px;color:var(--muted);width:42px;text-align:right;font-family:var(--mono)}
 .split-grad{height:56px;border-radius:var(--rs);margin:8px 12px}
 .c1-box{margin:12px;background:var(--surface2);border-radius:var(--r);padding:13px}
 .c1-box h4{font-size:11px;color:var(--accent);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
@@ -387,12 +387,12 @@ a{color:var(--accent);text-decoration:none}
 /* ── SAMPLE LUT GENERATOR ── */
 #slut-zones{display:flex;gap:8px}
 .slut-zone{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.slut-zone-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono)}
+.slut-zone-label{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .slut-swatch{width:100%;height:52px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
 .slut-swatch:active{transform:scale(.95)}
 .slut-zone.active .slut-swatch{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.35)}
-.slut-hex{font-size:9px;font-family:var(--mono);color:var(--muted)}
-.slut-pick-btn{width:100%;font-size:9px !important;padding:3px 4px !important}
+.slut-hex{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.slut-pick-btn{width:100%;font-size:10px !important;padding:5px 4px !important}
 /* keep lut-grad for split tone */
 .lut-grad{height:28px;border-radius:5px;margin:7px 0 5px;overflow:hidden;display:flex}
 .lut-grad-seg{flex:1;display:flex;flex-direction:column}
@@ -403,9 +403,9 @@ a{color:var(--accent);text-decoration:none}
 #trio-section{padding:0 0 4px}
 #trio-mode-row{display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px}
 #trio-count-row{display:flex;align-items:center;gap:6px;padding:4px 12px 8px}
-.trio-count-btn{font-size:10px;font-weight:700;width:28px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.trio-count-btn{font-size:12px;font-weight:700;width:34px;height:30px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
 .trio-count-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
-.trio-mode-btn{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.trio-mode-btn{font-size:11px;letter-spacing:.01em;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .trio-mode-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
 #trio-display{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
 .trio-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--surface)}
@@ -414,8 +414,8 @@ a{color:var(--accent);text-decoration:none}
 .trio-sw:active{flex:1.3}
 .trio-sw-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:4px 6px 5px;font-family:var(--mono);font-size:7px;color:rgba(255,255,255,.85);line-height:1.5}
 .trio-meta{padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.trio-label{font-size:11px;font-weight:700;color:var(--text)}
-.trio-sublabel{font-size:9px;color:var(--muted);margin-top:1px}
+.trio-label{font-size:14px;font-weight:700;color:var(--text);line-height:1.2}
+.trio-sublabel{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
 .trio-acts{display:flex;gap:5px;flex-shrink:0}
 
 /* ── WIDE GRADIENT PREVIEW (replaces old tiny dots) ── */
@@ -433,9 +433,9 @@ a{color:var(--accent);text-decoration:none}
 .pb-slot-save{position:absolute;top:4px;right:26px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pb-slot-save:active{background:var(--accent)}
 .pb-slot-info{background:#fff;padding:5px 6px 4px;display:flex;flex-direction:column;gap:1px}
-.pb-slot-name{font-family:var(--sharpie);font-size:10px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb-slot-hex{font-family:var(--mono);font-size:7px;color:#666}
-.pb-slot-pan{font-family:var(--mono);font-size:6px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-slot-name{font-family:var(--sharpie);font-size:12px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-slot-hex{font-family:var(--mono);font-size:9px;color:#555}
+.pb-slot-pan{font-family:var(--mono);font-size:8px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pb-slot-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pb-slot-rm:active{background:rgba(0,0,0,.8)}
 .pb-slot-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
@@ -449,10 +449,14 @@ a{color:var(--accent);text-decoration:none}
 #pb-empty{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:40px 20px;text-align:center;color:var(--muted)}
 #pb-empty div:first-child{font-size:15px;font-weight:700}
 #pb-empty div:last-child{font-size:12px;line-height:1.6}
-#pb-suggest-panel{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px;margin-top:2px}
+.share-opt-btn{display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:var(--surface2);border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;font-size:15px;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-weight:500;text-align:left;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.share-opt-btn:active{background:rgba(200,169,110,.15)}
+.share-opt-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+.share-opt-label{flex:1}
+;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px;margin-top:2px}
 #pb-suggest-panel .pb-theme-row{display:flex;gap:5px;flex-wrap:wrap}
 #pb-wheel-picker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;gap:8px}
-.pb-theme-btn{font-size:9px;padding:4px 9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;-webkit-tap-highlight-color:transparent}
+.pb-theme-btn{font-size:12px;padding:7px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;-webkit-tap-highlight-color:transparent;transition:all .15s}
 .pb-theme-btn:active,.pb-theme-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* hidden */
@@ -707,7 +711,7 @@ a{color:var(--accent);text-decoration:none}
           <div id="exp-root-sw"></div>
           <div style="flex:1">
             <div id="exp-root-name" style="font-size:14px;font-weight:700">Select a colour below</div>
-            <div id="exp-root-hex" style="font-size:11px;color:var(--muted)"></div>
+            <div id="exp-root-hex" style="font-size:12px;color:var(--muted);font-family:var(--mono)"></div>
           </div>
           <button class="btn btn-s btn-sm" onclick="SwatchExport.openFromHexes([Explorer.rootHex])" title="Export this colour as swatch">🎨</button>
         </div>
@@ -778,7 +782,7 @@ a{color:var(--accent);text-decoration:none}
           <button class="trio-mode-btn"     data-a="wabisabi"     onclick="ColourGenerator.setAesthetic(this)">Wabi-Sabi</button>
           <button class="trio-mode-btn"     data-a="parisian"     onclick="ColourGenerator.setAesthetic(this)">Parisian</button>
         </div>
-        <div id="colgen-desc" style="padding:2px 12px 8px;font-size:10px;color:var(--muted);line-height:1.5"></div>
+        <div id="colgen-desc" style="padding:4px 12px 10px;font-size:12px;color:var(--muted);line-height:1.6"></div>
         <div id="colgen-palette" style="padding:0 12px 12px"></div>
       </div>
 
@@ -1085,6 +1089,7 @@ a{color:var(--accent);text-decoration:none}
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()">✦ Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share ↗</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()">🎨 Swatch</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
         </div>
@@ -1172,6 +1177,16 @@ a{color:var(--accent);text-decoration:none}
 </div><!-- /app -->
 
 <!-- OVERLAY -->
+
+<!-- ═══ SHARE SHEET ═══ -->
+<div id="share-sheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end">
+  <div style="width:100%;background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:16px 16px 28px;animation:su .22s cubic-bezier(.4,0,.2,1)">
+    <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div>
+    <div id="share-title" style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Share</div>
+    <div style="display:flex;flex-direction:column;gap:9px" id="share-options"></div>
+    <button class="btn btn-s" style="width:100%;margin-top:14px" onclick="App.closeShare()">Cancel</button>
+  </div>
+</div>
 <div id="ov" onclick="App.closeOv(event)">
   <div id="ov-panel"><div class="ov-handle"></div><div id="ov-content"></div></div>
 </div>
@@ -1781,6 +1796,41 @@ const App={
     App.refresh();
   },
   forceCloseOv(){document.getElementById('ov').classList.remove('open');App.refresh()},
+
+  // ── SHARE SHEET ─────────────────────────────────────────────────
+  share(title, text, url){
+    const sheet = document.getElementById('share-sheet');
+    const opts  = document.getElementById('share-options');
+    const tEl   = document.getElementById('share-title');
+    tEl.textContent = title || 'Share';
+
+    const fullUrl  = url || 'https://digby.shop';
+    const body     = text || '';
+    const waText   = encodeURIComponent(body + (url ? '\n' + fullUrl : ''));
+    const mailBody = encodeURIComponent(body + (url ? '\n\n' + fullUrl : ''));
+    const mailSubj = encodeURIComponent(title || 'Colours from Digby Colour Sampler');
+
+    let html = '';
+    // Native share (iOS/Android gets best experience)
+    if (navigator.share) {
+      html += `<button class="share-opt-btn" onclick="navigator.share({title:${JSON.stringify(title||'')},text:${JSON.stringify(body)},url:${JSON.stringify(fullUrl)}}).catch(()=>{});App.closeShare()">
+        <span class="share-opt-icon">📲</span><span class="share-opt-label">Share via…</span></button>`;
+    }
+    html += `<button class="share-opt-btn" onclick="window.open('https://wa.me/?text=${waText}','_blank','noopener');App.closeShare()">
+      <span class="share-opt-icon" style="color:#25D366">💬</span><span class="share-opt-label">WhatsApp</span></button>`;
+    html += `<button class="share-opt-btn" onclick="window.open('mailto:?subject=${mailSubj}&body=${mailBody}','_blank');App.closeShare()">
+      <span class="share-opt-icon">✉️</span><span class="share-opt-label">Email</span></button>`;
+    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(body + (url?'\n'+fullUrl:''))}).then(()=>App.toast('Copied!'));App.closeShare()">
+      <span class="share-opt-icon">📋</span><span class="share-opt-label">Copy to Clipboard</span></button>`;
+
+    opts.innerHTML = html;
+    sheet.style.display = 'flex';
+    sheet.onclick = e => { if (e.target === sheet) this.closeShare(); };
+  },
+
+  closeShare(){
+    document.getElementById('share-sheet').style.display = 'none';
+  },
 
   openSettings(){
     const all=DS.all();
@@ -2575,12 +2625,13 @@ const Gallery={
         <div class="det-val"><div class="det-vl">Source</div><div class="det-v" style="font-size:11px">${c.source}</div></div>
       </div>
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
-      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><a href="${lg.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
-      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><a href="${fb.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
-      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><a href="${eb.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
+      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${lg.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
+      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${fb.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
+      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${eb.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
+        <button class="btn btn-s btn-sm" onclick="Gallery.shareOne('${c.id}')">Share ↗</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.exportOne('${c.id}',true)">Export PNG</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.exportOne('${c.id}',false)">Clean PNG</button>
         <button class="btn btn-d btn-sm" onclick="Gallery.del('${c.id}')">Delete</button>
@@ -2656,9 +2707,23 @@ const Gallery={
     a.download='digby-60-30-10.png';a.click();App.toast('60-30-10 exported');
   },
 
+  shareOne(id){
+    const c=DS.get(id);if(!c)return;
+    const lg=(c.littleGreene||CS.nearestLG(c.lab))?.name||'N/A';
+    const fb=(c.farrowBall||CS.nearestFB(c.lab))?.name||'N/A';
+    const eb=(c.earthborn||CS.nearestEB(c.lab))?.name||'N/A';
+    const text=`🎨 ${c.name} — ${c.hex.toUpperCase()}\nLRV: ${c.lrv}% · ${c.hsl.h}° ${c.hsl.s}% ${c.hsl.l}%\n🟫 Little Greene: ${lg}\n⬜ Farrow & Ball: ${fb}\n🌿 Earthborn: ${eb}\nvia digby.shop`;
+    App.forceCloseOv();
+    setTimeout(()=>App.share(c.name, text, 'https://digby.shop'), 150);
+  },
+
   shareAll(){
-    if(navigator.share){navigator.share({title:"Digby's Colour Sampler",text:`My colours: ${DS.all().map(c=>c.name).join(', ')}`,url:'https://digby.shop'}).catch(()=>{})}
-    else App.toast('Share not available');
+    const all=DS.all();
+    if(!all.length){App.toast('No colours to share');return}
+    const names=all.map(c=>c.name).join(', ');
+    const hexes=all.map(c=>c.hex.toUpperCase()).join(' ');
+    const text=`My colours: ${names}\nHex: ${hexes}`;
+    App.share("My Colour Library", text, 'https://digby.shop');
   }
 };
 </script>
@@ -2977,6 +3042,7 @@ const Explorer={
                     onclick="SwatchExport.openFromHexes(${JSON.stringify(hexList).replace(/"/g,"'")},'polaroids')">🎨 Swatch</button>
             <button class="btn btn-p btn-sm"
                     onclick="Explorer._exportTrio(${JSON.stringify(hexList).replace(/"/g,"'")},'${v.label}')">Export PNG</button>
+            <button class="btn btn-s btn-sm" onclick="Explorer._shareTrio(${JSON.stringify(hexList).replace(/"/g,"'")},'${v.label}')">Share ↗</button>
           </div>
         </div>
       </div>`;
@@ -2990,6 +3056,11 @@ const Explorer={
   _saveTrioAll(hexes){
     hexes.forEach(hex=>{ const e=DS.makeEntry(hex,'explorer'); DS.add(e); });
     App.refresh(); App.toast(`${hexes.length} colours saved to library`);
+  },
+  _shareTrio(hexes, label){
+    const lines = hexes.map(hex => `• ${CS.autoName(hex)} ${hex.toUpperCase()}`).join('\n');
+    const text = `🎨 ${label} colour palette\n${lines}\nvia digby.shop`;
+    App.share(label + ' Palette', text, 'https://digby.shop');
   },
   _exportTrio(hexes, label){
     const W=560, H=340, PAD=20;
@@ -4759,6 +4830,13 @@ const PaletteBuilder = {
       html += `<div class="pb-slot-empty" onclick="PaletteBuilder.addFromWheel()">+</div>`;
     }
     grid.innerHTML = html;
+  },
+
+  sharePalette() {
+    if (!this.colours.length) { App.toast('Add colours first'); return; }
+    const lines = this.colours.map(c => `• ${c.name} ${c.hex.toUpperCase()}`).join('\n');
+    const text = `🎨 My Palette\n${lines}\nvia digby.shop`;
+    App.share('My Colour Palette', text, 'https://digby.shop');
   },
 
   swatchExport() {
