@@ -425,8 +425,13 @@ a{color:var(--accent);text-decoration:none}
 .lut-grad-bot{flex:1}
 #palette-builder-panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 #pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default}
-.pb-slot-colour{flex:1;min-height:0}
+.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default;transition:opacity .2s,transform .2s}
+.pb-slot.dragging{opacity:.4;transform:scale(.96)}
+.pb-slot.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.4)}
+.pb-slot-colour{flex:1;min-height:0;position:relative}
+.pb-slot-drag{position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:4px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.8);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:grab;-webkit-tap-highlight-color:transparent;touch-action:none}
+.pb-slot-save{position:absolute;top:4px;right:26px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pb-slot-save:active{background:var(--accent)}
 .pb-slot-info{background:#fff;padding:5px 6px 4px;display:flex;flex-direction:column;gap:1px}
 .pb-slot-name{font-family:var(--sharpie);font-size:10px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pb-slot-hex{font-family:var(--mono);font-size:7px;color:#666}
@@ -444,6 +449,10 @@ a{color:var(--accent);text-decoration:none}
 #pb-empty{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:40px 20px;text-align:center;color:var(--muted)}
 #pb-empty div:first-child{font-size:15px;font-weight:700}
 #pb-empty div:last-child{font-size:12px;line-height:1.6}
+#pb-suggest-panel{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;flex-direction:column;gap:8px;margin-top:2px}
+#pb-suggest-panel .pb-theme-row{display:flex;gap:5px;flex-wrap:wrap}
+.pb-theme-btn{font-size:9px;padding:4px 9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;-webkit-tap-highlight-color:transparent}
+.pb-theme-btn:active,.pb-theme-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* hidden */
 #export-canvas{display:none}
@@ -735,6 +744,12 @@ a{color:var(--accent);text-decoration:none}
           <button class="trio-mode-btn"     data-m="subtle"        onclick="Explorer.setTrioMode(this)">Subtle</button>
           <button class="trio-mode-btn"     data-m="radical"       onclick="Explorer.setTrioMode(this)">Radical</button>
           <button class="trio-mode-btn"     data-m="editorial"     onclick="Explorer.setTrioMode(this)">Editorial</button>
+          <button class="trio-mode-btn"     data-m="pastel"        onclick="Explorer.setTrioMode(this)">Pastel</button>
+          <button class="trio-mode-btn"     data-m="acid"          onclick="Explorer.setTrioMode(this)">Acid</button>
+          <button class="trio-mode-btn"     data-m="fluorescent"   onclick="Explorer.setTrioMode(this)">Fluorescent</button>
+          <button class="trio-mode-btn"     data-m="fadedGlory"    onclick="Explorer.setTrioMode(this)">Faded Glory</button>
+          <button class="trio-mode-btn"     data-m="earth"         onclick="Explorer.setTrioMode(this)">Earth</button>
+          <button class="trio-mode-btn"     data-m="nightclub"     onclick="Explorer.setTrioMode(this)">Night</button>
         </div>
         <div id="trio-count-row">
           <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)">Colours</span>
@@ -807,6 +822,10 @@ a{color:var(--accent);text-decoration:none}
         </div>
 
         <!-- Preview gradient: shows neutral ramp → graded ramp -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)">Preview</span>
+          <button id="slut-preview-toggle" class="btn btn-s btn-sm" onclick="Explorer.slutTogglePreview()" style="font-size:9px;padding:2px 8px">👁 Hide</button>
+        </div>
         <div id="slut-preview" style="margin-bottom:10px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
           <div id="slut-preview-before" style="display:flex;height:18px"></div>
           <div id="slut-preview-after"  style="display:flex;height:18px"></div>
@@ -1063,10 +1082,29 @@ a{color:var(--accent);text-decoration:none}
         <div id="pb-actions">
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromWheel()">+ Wheel</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
-          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.suggest()">✦ Suggest</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()">✦ Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()">🎨 Swatch</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
+        </div>
+        <div id="pb-suggest-panel">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Choose a theme to suggest from:</div>
+          <div class="pb-theme-row">
+            <button class="pb-theme-btn on" data-t="harmony" onclick="PaletteBuilder.setSuggestTheme(this)">Harmony</button>
+            <button class="pb-theme-btn" data-t="sunset"  onclick="PaletteBuilder.setSuggestTheme(this)">Sunset</button>
+            <button class="pb-theme-btn" data-t="forest"  onclick="PaletteBuilder.setSuggestTheme(this)">Forest</button>
+            <button class="pb-theme-btn" data-t="ocean"   onclick="PaletteBuilder.setSuggestTheme(this)">Ocean</button>
+            <button class="pb-theme-btn" data-t="urban"   onclick="PaletteBuilder.setSuggestTheme(this)">Urban</button>
+            <button class="pb-theme-btn" data-t="desert"  onclick="PaletteBuilder.setSuggestTheme(this)">Desert</button>
+            <button class="pb-theme-btn" data-t="floral"  onclick="PaletteBuilder.setSuggestTheme(this)">Floral</button>
+            <button class="pb-theme-btn" data-t="nordic"  onclick="PaletteBuilder.setSuggestTheme(this)">Nordic</button>
+            <button class="pb-theme-btn" data-t="dark"    onclick="PaletteBuilder.setSuggestTheme(this)">Dark</button>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn btn-p btn-sm" onclick="PaletteBuilder.suggestFromTheme()">+ Add Suggestion</button>
+            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.fillFromTheme()">Fill Palette</button>
+            <button class="btn btn-s btn-sm" onclick="PaletteBuilder.closeSuggest()">Done</button>
+          </div>
         </div>
         <div id="pb-lib-picker" style="display:none">
           <div id="pb-lib-label">Pick from library:</div>
@@ -2512,9 +2550,9 @@ const Gallery={
         <div class="det-val"><div class="det-vl">Source</div><div class="det-v" style="font-size:11px">${c.source}</div></div>
       </div>
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
-      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><a href="${lg.url}" target="_blank" class="btn btn-s btn-sm">Order</a></div>`:''})()}
-      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><a href="${fb.url}" target="_blank" class="btn btn-s btn-sm">Order</a></div>`:''})()}
-      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><a href="${eb.url}" target="_blank" class="btn btn-s btn-sm">Order</a></div>`:''})()}
+      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><a href="${lg.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
+      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><a href="${fb.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
+      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><a href="${eb.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-s btn-sm">Order</a></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
@@ -2763,9 +2801,69 @@ const Explorer={
       label:'Editorial',
       desc:'High-fashion: root anchors, supported by a cool neutral and a hue disruptor',
       build(root,h,CS){
-        const neutral   = CS._desaturate(CS._shiftHsl(root, 0, -.6, .18), .7); // lifted cool neutral — not the root
+        const neutral   = CS._desaturate(CS._shiftHsl(root, 0, -.6, .18), .7);
         const disruptor = CS._shiftHsl(root, 40, .05, .08);
         return [[root,'Anchor'],[neutral,'Neutral'],[disruptor,'Disruptor']];
+      }
+    },
+    pastel:{
+      label:'Pastel',
+      desc:'Lifted, desaturated, soft — like chalk dust and watercolour washes',
+      build(root,h,CS){
+        const soft1 = CS._shiftHsl(root, 0,   -.45, .28);
+        const soft2 = CS._shiftHsl(root, 55,  -.5,  .22);
+        const soft3 = CS._shiftHsl(root, 180, -.4,  .25);
+        return [[soft1,'Soft A'],[soft2,'Soft B'],[soft3,'Whisper']];
+      }
+    },
+    acid:{
+      label:'Acid',
+      desc:'Maximum chroma, hue-rotated, psychedelic — not for the faint-hearted',
+      build(root,h,CS){
+        const charged = CS._boostChroma(root, 2.2);
+        const rotate1 = CS._boostChroma(CS._shiftHsl(root, 110, .15, -.05), 2.0);
+        const rotate2 = CS._boostChroma(CS._shiftHsl(root, 220, .1,  .05),  1.8);
+        return [[charged,'Charged'],[rotate1,'Mutant'],[rotate2,'Reactor']];
+      }
+    },
+    fluorescent:{
+      label:'Fluorescent',
+      desc:'High-key, near-neon — colours that read in UV as much as daylight',
+      build(root,h,CS){
+        const neon1 = CS._shiftHsl(root, 0,   .3, .18);
+        const neon2 = CS._shiftHsl(root, 85,  .35, .15);
+        const neon3 = CS._shiftHsl(root, 175, .28, .12);
+        return [[CS._boostChroma(neon1,1.6),'Flare'],[CS._boostChroma(neon2,1.5),'Blaze'],[CS._boostChroma(neon3,1.4),'Pulse']];
+      }
+    },
+    fadedGlory:{
+      label:'Faded Glory',
+      desc:'Sun-bleached, time-worn — saturated pasts seen through a dusty lens',
+      build(root,h,CS){
+        const faded1 = CS._desaturate(CS._shiftHsl(root, 0,  -.35, .12), .55);
+        const faded2 = CS._desaturate(CS._shiftHsl(root, 25, -.3,  .08), .5);
+        const faded3 = CS._desaturate(CS._shiftHsl(root, -20,-.4,  .18), .6);
+        return [[faded1,'Worn'],[faded2,'Dusty'],[faded3,'Ghost']];
+      }
+    },
+    earth:{
+      label:'Earth',
+      desc:'Ochres, siennas and raw umbers — pigments drawn directly from the ground',
+      build(root,h,CS){
+        const warm    = CS._shiftHsl(root, -18, .08, -.08);
+        const neutral = CS._desaturate(CS._shiftHsl(root, 12, -.2, .05), .3);
+        const deep    = CS._shiftHsl(root, -8, .05, -.2);
+        return [[warm,'Ochre'],[neutral,'Clay'],[deep,'Umber']];
+      }
+    },
+    nightclub:{
+      label:'Night',
+      desc:'Deep shadows, electric accents — the palette of neon signs on wet tarmac',
+      build(root,h,CS){
+        const dark    = CS._shiftLab(root, 12, 0, 0);
+        const electric= CS._boostChroma(CS._shiftHsl(root, 160, .2, .2), 1.8);
+        const void_   = CS._shiftLab(root, 6, 0, 0);
+        return [[dark,'Void'],[electric,'Neon'],[void_,'Shadow']];
       }
     }
   },
@@ -2912,6 +3010,14 @@ const Explorer={
     strength: 72,
     lut: null,
     pickingZone: null
+  },
+
+  slutTogglePreview(){
+    const preview = document.getElementById('slut-preview');
+    const btn     = document.getElementById('slut-preview-toggle');
+    const hidden  = preview.style.display === 'none';
+    preview.style.display = hidden ? 'block' : 'none';
+    btn.textContent = hidden ? '👁 Hide' : '👁 Show';
   },
 
   slutUpdateStrength(val){
@@ -4277,9 +4383,19 @@ const ColourGenerator = {
     const aes = this.AESTHETICS[this.aesthetic];
     if (!aes) return;
 
-    // Pick a palette variant — cycle through on each render for freshness
-    const idx = Math.floor(Math.random() * aes.palettes.length);
-    this.currentPalette = aes.palettes[idx];
+    // Pick a base palette, then apply random jitter so every regenerate looks fresh
+    const base = aes.palettes[Math.floor(Math.random() * aes.palettes.length)];
+    // Jitter: random HSL shifts within the aesthetic's tone — big enough to feel different,
+    // small enough to stay in-family
+    const jitter = () => ({
+      dh: (Math.random() - 0.5) * 28,   // ±14° hue
+      ds: (Math.random() - 0.5) * 0.18, // ±9% saturation
+      dl: (Math.random() - 0.5) * 0.16  // ±8% lightness
+    });
+    this.currentPalette = base.map(hex => {
+      const j = jitter();
+      return CS._shiftHsl(hex, j.dh, j.ds, j.dl);
+    });
 
     const desc = document.getElementById('colgen-desc');
     const pal  = document.getElementById('colgen-palette');
@@ -4398,6 +4514,21 @@ const ColourGenerator = {
 const PaletteBuilder = {
   MAX: 9,
   colours: [],
+  suggestTheme: 'harmony',
+  _dragIdx: null,
+
+  // ── THEME PALETTES for Suggest ──────────────────────────────────
+  THEMES: {
+    harmony:  null, // derived from current palette
+    sunset:   ['#E8662A','#E8A830','#C84860','#1A1228','#F0D890'],
+    forest:   ['#2D4A1E','#5A8040','#A8C878','#3C2A1A','#90B060'],
+    ocean:    ['#0A3050','#1870A0','#50B0D8','#A8D8E8','#E0F0F8'],
+    urban:    ['#2A2A2A','#4A4A4A','#9A9A9A','#E8E0D0','#C84020'],
+    desert:   ['#C89050','#A06830','#D8B870','#7A4820','#E8D8B0'],
+    floral:   ['#E87090','#C050A0','#7030A0','#E8B0C8','#F0E0EC'],
+    nordic:   ['#B8C9D4','#7A9BAA','#364855','#EEF1F3','#C4D8E0'],
+    dark:     ['#0A0A14','#1A1428','#2A2040','#6040A0','#C080E0'],
+  },
 
   _makeEntry(hex) {
     const rgb = CS.hexToRgb(hex);
@@ -4419,9 +4550,16 @@ const PaletteBuilder = {
     App.toast(`${CS.autoName(hex)} added`);
   },
 
-  addFromWheel() {
-    this.addColour(ColourWheel.getCurrentHex());
+  saveToLib(idx) {
+    const c = this.colours[idx];
+    if (!c) return;
+    const e = DS.makeEntry(c.hex, 'palette');
+    DS.add(e);
+    App.refresh();
+    App.toast(`${e.name} saved to library`);
   },
+
+  addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
   addFromLibrary() {
     const all = DS.all();
@@ -4435,39 +4573,105 @@ const PaletteBuilder = {
     picker.style.display = 'flex';
   },
 
-  closeLibPicker() {
-    document.getElementById('pb-lib-picker').style.display = 'none';
+  closeLibPicker() { document.getElementById('pb-lib-picker').style.display = 'none'; },
+
+  // ── THEMED SUGGEST ─────────────────────────────────────────────
+  toggleSuggest() {
+    const p = document.getElementById('pb-suggest-panel');
+    p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
   },
 
-  suggest() {
-    if (!this.colours.length) { this.addFromWheel(); return; }
-    if (this.colours.length >= this.MAX) { App.toast(`Palette full (max ${this.MAX})`); return; }
-    const root = this.colours[this.colours.length - 1].hex;
-    const harms = CS.harmonies(root);
-    const candidates = [
-      ...harms.complementary, ...harms.analogous,
-      ...harms.triadic, ...harms.splitComp, ...harms.mono
-    ].filter(h => h && !this._isDuplicate(h));
-    if (!candidates.length) { App.toast('No new suggestions available'); return; }
+  closeSuggest() {
+    document.getElementById('pb-suggest-panel').style.display = 'none';
+  },
+
+  setSuggestTheme(btn) {
+    document.querySelectorAll('.pb-theme-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    this.suggestTheme = btn.dataset.t;
+  },
+
+  _themeCandidate() {
+    const theme = this.suggestTheme;
+    if (theme === 'harmony') {
+      // Fall back to harmony-based suggest
+      const root = this.colours.length ? this.colours[this.colours.length-1].hex : ColourWheel.getCurrentHex();
+      const harms = CS.harmonies(root);
+      const cands = [...harms.complementary, ...harms.analogous, ...harms.triadic, ...harms.splitComp, ...harms.mono]
+        .filter(h => h && !this._isDuplicate(h));
+      if (!cands.length) return null;
+      const toLab = c => CS.rgbToLab(...Object.values(CS.hexToRgb(c)));
+      const existing = this.colours.map(c => toLab(c.hex));
+      return cands.reduce((w, hex) => {
+        const lab = toLab(hex);
+        const minDE = existing.length ? Math.min(...existing.map(e => CS.dE(lab, e))) : 100;
+        return minDE > w.score ? { hex, score: minDE } : w;
+      }, { hex: cands[0], score: -1 }).hex;
+    }
+    // Theme palettes — pick least similar to existing
+    const base = this.THEMES[theme];
+    if (!base) return null;
+    // Jitter for freshness
+    const candidates = base.map(h => CS._shiftHsl(h, (Math.random()-.5)*20, (Math.random()-.5)*.15, (Math.random()-.5)*.12))
+      .filter(h => !this._isDuplicate(h));
+    if (!candidates.length) return null;
     const toLab = c => CS.rgbToLab(...Object.values(CS.hexToRgb(c)));
     const existing = this.colours.map(c => toLab(c.hex));
-    const best = candidates.reduce((winner, hex) => {
-      const lab  = toLab(hex);
-      const minDE = Math.min(...existing.map(e => CS.dE(lab, e)));
-      return minDE > winner.score ? { hex, score: minDE } : winner;
-    }, { hex: candidates[0], score: -1 });
-    this.addColour(best.hex);
+    return candidates.reduce((w, hex) => {
+      const lab = toLab(hex);
+      const minDE = existing.length ? Math.min(...existing.map(e => CS.dE(lab, e))) : 100;
+      return minDE > w.score ? { hex, score: minDE } : w;
+    }, { hex: candidates[0], score: -1 }).hex;
   },
 
-  remove(index) {
-    this.colours.splice(index, 1);
-    this.render();
+  suggestFromTheme() {
+    if (this.colours.length >= this.MAX) { App.toast(`Palette full (max ${this.MAX})`); return; }
+    const hex = this._themeCandidate();
+    if (!hex) { App.toast('No new suggestions'); return; }
+    this.addColour(hex);
   },
 
-  clear() {
-    this.colours = [];
+  fillFromTheme() {
+    const slots = this.MAX - this.colours.length;
+    if (!slots) { App.toast('Palette full'); return; }
+    let added = 0;
+    for (let i = 0; i < slots * 3 && added < slots; i++) {
+      const hex = this._themeCandidate();
+      if (hex && !this._isDuplicate(hex)) { this.colours.push(this._makeEntry(hex)); added++; }
+    }
     this.render();
-    App.toast('Palette cleared');
+    App.toast(`${added} colours added`);
+  },
+
+  remove(index) { this.colours.splice(index, 1); this.render(); },
+
+  clear() { this.colours = []; this.render(); App.toast('Palette cleared'); },
+
+  // ── DRAG TO REORDER ────────────────────────────────────────────
+  _onDragStart(e, idx) {
+    this._dragIdx = idx;
+    e.currentTarget.classList.add('dragging');
+    if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', idx); }
+  },
+  _onDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('.pb-slot').forEach(s => s.classList.remove('drag-over'));
+  },
+  _onDragOver(e, idx) {
+    e.preventDefault();
+    document.querySelectorAll('.pb-slot').forEach(s => s.classList.remove('drag-over'));
+    const el = document.querySelectorAll('.pb-slot')[idx];
+    if (el) el.classList.add('drag-over');
+  },
+  _onDrop(e, idx) {
+    e.preventDefault();
+    document.querySelectorAll('.pb-slot').forEach(s => s.classList.remove('drag-over'));
+    const from = this._dragIdx;
+    if (from === null || from === idx) return;
+    const moved = this.colours.splice(from, 1)[0];
+    this.colours.splice(idx, 0, moved);
+    this._dragIdx = null;
+    this.render();
   },
 
   render() {
@@ -4477,14 +4681,21 @@ const PaletteBuilder = {
     empty.style.display = this.colours.length === 0 ? 'flex' : 'none';
     let html = '';
     this.colours.forEach((c, i) => {
-      html += `<div class="pb-slot">
-        <div class="pb-slot-colour" style="background:${c.hex}"></div>
+      html += `<div class="pb-slot" draggable="true"
+                 ondragstart="PaletteBuilder._onDragStart(event,${i})"
+                 ondragend="PaletteBuilder._onDragEnd(event)"
+                 ondragover="PaletteBuilder._onDragOver(event,${i})"
+                 ondrop="PaletteBuilder._onDrop(event,${i})">
+        <div class="pb-slot-colour" style="background:${c.hex}">
+          <div class="pb-slot-drag" title="Drag to reorder">⠿</div>
+          <button class="pb-slot-save" onclick="PaletteBuilder.saveToLib(${i})" title="Save to library">＋</button>
+          <button class="pb-slot-rm"   onclick="PaletteBuilder.remove(${i})" title="Remove">✕</button>
+        </div>
         <div class="pb-slot-info">
           <div class="pb-slot-name">${c.name}</div>
           <div class="pb-slot-hex">${c.hex.toUpperCase()}</div>
           <div class="pb-slot-pan">${c.pantone}</div>
         </div>
-        <button class="pb-slot-rm" onclick="PaletteBuilder.remove(${i})">✕</button>
       </div>`;
     });
     for (let i = 0; i < this.MAX - this.colours.length; i++) {
@@ -4500,82 +4711,43 @@ const PaletteBuilder = {
 
   exportPNG() {
     if (!this.colours.length) { App.toast('Add colours first'); return; }
-    const cols = 3, CARD_W = 260, CARD_H = 320, PAD = 20, GAP = 12, INFO_H = 72;
-    const rows = Math.ceil(this.colours.length / cols);
-    const W = cols * CARD_W + (cols - 1) * GAP + PAD * 2;
-    const H = rows * CARD_H + (rows - 1) * GAP + PAD * 2 + 36;
+    const n = this.colours.length;
+    const W = 600, PAD = 20, SWATCH_H = 200, INFO_H = 72;
+    const sw = (W - PAD*2) / n;
+    const H  = SWATCH_H + INFO_H + PAD*2 + 36;
     const canvas = document.getElementById('export-canvas');
-    canvas.width = W; canvas.height = H;
+    canvas.width=W; canvas.height=H;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#f2efe9';
-    ctx.fillRect(0, 0, W, H);
-
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, W, H);
     this.colours.forEach((c, i) => {
-      const col = i % cols, row = Math.floor(i / cols);
-      const x = PAD + col * (CARD_W + GAP);
-      const y = PAD + row * (CARD_H + GAP);
-      // Shadow + card
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.22)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5;
-      ctx.fillStyle = '#ffffff';
-      this._roundRect(ctx, x, y, CARD_W, CARD_H, 4, 4); ctx.fill();
-      ctx.restore();
-      // Colour block
-      const colourH = CARD_H - INFO_H;
+      const x = PAD + i * sw;
+      const rgb=CS.hexToRgb(c.hex), lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);
+      const pan=CS.nearestPantone(lab), lrv=CS.lrv(lab);
+      const onDark=lrv<50;
       ctx.fillStyle = c.hex;
-      this._roundRect(ctx, x, y, CARD_W, colourH, 4, 0); ctx.fill();
-      // LRV watermark
-      const rgb = CS.hexToRgb(c.hex);
-      const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-      const lrv = CS.lrv(lab);
-      ctx.fillStyle = lrv < 45 ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.35)';
-      ctx.font = '9px Space Mono,monospace'; ctx.textAlign = 'right';
-      ctx.fillText(`LRV ${lrv}%`, x + CARD_W - 8, y + colourH - 8);
-      // Info strip
-      const iy = y + colourH;
-      ctx.fillStyle = '#ffffff';
-      this._roundRect(ctx, x, iy, CARD_W, INFO_H, 0, 4); ctx.fill();
-      ctx.fillStyle = '#e4e1da'; ctx.fillRect(x + 10, iy, CARD_W - 20, 1);
-      // Name
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = `bold 15px 'Permanent Marker',cursive`; ctx.textAlign = 'left';
-      let name = c.name;
-      while (ctx.measureText(name).width > CARD_W - 20 && name.length > 2) name = name.slice(0,-1);
-      ctx.fillText(name, x + 10, iy + 20);
-      // HEX
-      ctx.fillStyle = '#444'; ctx.font = '10px Space Mono,monospace';
-      ctx.fillText(c.hex.toUpperCase(), x + 10, iy + 37);
-      // Pantone
-      ctx.fillStyle = '#999'; ctx.font = '9px Space Mono,monospace';
-      ctx.fillText(`Pantone ${c.pantone}`, x + 10, iy + 52);
-      // Colour dot
-      ctx.beginPath(); ctx.arc(x + CARD_W - 18, iy + 34, 10, 0, Math.PI * 2);
-      ctx.fillStyle = c.hex; ctx.fill();
-      ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillRect(x, PAD, sw - 2, SWATCH_H);
+      ctx.fillStyle = onDark ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.3)';
+      ctx.font = '7px Space Mono,monospace'; ctx.textAlign = 'right';
+      ctx.fillText(`LRV ${lrv}%`, x + sw - 5, PAD + SWATCH_H - 5);
+      const iy = PAD + SWATCH_H;
+      ctx.fillStyle = '#2a2a2a'; ctx.fillRect(x, iy + 2, sw - 2, INFO_H);
+      ctx.fillStyle = '#e8e5e0'; ctx.font = `bold 11px 'Permanent Marker',cursive`; ctx.textAlign = 'center';
+      ctx.fillText(c.name.slice(0,12), x + sw/2, iy + 18);
+      ctx.fillStyle = '#888'; ctx.font = '8px Space Mono,monospace';
+      ctx.fillText(c.hex.toUpperCase(), x + sw/2, iy + 32);
+      ctx.fillStyle = '#555'; ctx.font = '7px Space Mono,monospace';
+      ctx.fillText(pan?.code||'', x + sw/2, iy + 44);
     });
-
-    // Footer
-    ctx.fillStyle = '#aaa'; ctx.font = '9px Space Mono,monospace'; ctx.textAlign = 'center';
-    ctx.fillText(
-      `Digby's Colour Sampler · digby.shop · ${new Date().toLocaleDateString('en-GB')}`,
-      W / 2, H - 12
-    );
+    ctx.fillStyle = '#555'; ctx.font = '9px Space Mono,monospace'; ctx.textAlign = 'left';
+    ctx.fillText('PALETTE', PAD, H - 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(`digby.shop · Spectrum 1.0 · ${new Date().toLocaleDateString('en-GB')}`, W - PAD, H - 10);
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
-    a.download = `palette-${Date.now()}.png`;
-    a.click();
+    a.download = `palette-${Date.now()}.png`; a.click();
     App.toast('Palette exported');
   },
 
-  _roundRect(ctx, x, y, w, h, topR = 4, bottomR = 4) {
-    ctx.beginPath();
-    ctx.moveTo(x + topR, y);
-    ctx.lineTo(x + w - topR, y); ctx.arcTo(x + w, y, x + w, y + topR, topR);
-    ctx.lineTo(x + w, y + h - bottomR); ctx.arcTo(x + w, y + h, x + w - bottomR, y + h, bottomR);
-    ctx.lineTo(x + bottomR, y + h); ctx.arcTo(x, y + h, x, y + h - bottomR, bottomR);
-    ctx.lineTo(x, y + topR); ctx.arcTo(x, y, x + topR, y, topR);
-    ctx.closePath();
-  },
 };
 </script>
 
