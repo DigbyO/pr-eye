@@ -536,7 +536,7 @@ a{color:var(--accent);text-decoration:none}
       </div>
 
       <!-- Camera queue bar — appears when colours are queued -->
-      <div id="cam-queue-bar" style="display:none;position:absolute;bottom:80px;left:0;right:0;z-index:7;
+      <div id="cam-queue-bar" style="position:absolute;bottom:80px;left:0;right:0;z-index:7;
         background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:8px 12px;
         display:none;align-items:center;gap:8px;flex-wrap:nowrap">
         <div id="cam-queue-swatches" style="display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
@@ -2373,7 +2373,7 @@ const Gallery={
       <div class="pol-name">${c.name}</div>
       <div class="pol-hex">${c.hex.toUpperCase()}</div>
       <div class="pol-match">${c.pantone?.code||''}</div>
-      <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}` </div>
+      <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
     </div>`;
   },
 
@@ -2420,9 +2420,9 @@ const Gallery={
       const toastEl = document.getElementById('toast');
       if(toastEl){
         toastEl.innerHTML = 'Deleted &nbsp;<span onclick="DS.undoRemove()" style="text-decoration:underline;cursor:pointer;font-weight:700">Undo</span>';
-        toastEl.style.opacity='1';
-        clearTimeout(App._toastTimer);
-        App._toastTimer = setTimeout(()=>{ toastEl.style.opacity='0'; toastEl.innerHTML=''; }, 7000);
+        toastEl.classList.add('show');
+        clearTimeout(App._toastT);
+        App._toastT = setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.innerHTML=''; }, 7000);
       }
     }
   },
@@ -3708,8 +3708,6 @@ const SwatchExport = {
     this._watermark(ctx,W,H,scale);
   },
 
-,
-
   renderPolaroids(ctx, W, H, colours, scale) {
     const n = colours.length;
     const cols = Math.min(4, Math.ceil(Math.sqrt(n)));
@@ -3817,8 +3815,6 @@ const SwatchExport = {
     });
     this._watermark(ctx,W,H,scale);
   },
-
-,
 
   _watermark(ctx,W,H,scale) {
     ctx.fillStyle='rgba(150,150,150,0.5)';
