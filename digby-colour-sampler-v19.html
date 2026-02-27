@@ -284,14 +284,6 @@ a{color:var(--accent);text-decoration:none}
 .harm-sw{flex:1;height:44px;border-radius:var(--rs);cursor:pointer;position:relative;transition:transform .12s}
 .harm-sw:active{transform:scale(.93)}
 .harm-hex{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;color:rgba(255,255,255,.65);font-family:var(--mono)}
-.lut-card{margin:0 12px 9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.lut-head{padding:11px 13px;border-bottom:1px solid var(--border)}
-.lut-name{font-size:13px;font-weight:700}
-.lut-desc{font-size:10px;color:var(--muted);margin-top:2px}
-.lut-sws{display:flex;gap:5px;padding:9px 13px;align-items:center}
-.lut-sw{width:30px;height:30px;border-radius:4px}
-.lut-arr{font-size:12px;color:var(--faint);margin:0 1px}
-.lut-acts{display:flex;gap:7px;padding:0 13px 12px;flex-wrap:wrap}
 .mood-row{display:flex;align-items:center;gap:9px;padding:7px 14px}
 .mood-l{font-size:10px;color:var(--muted);width:56px;flex-shrink:0}
 .mood-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
@@ -392,20 +384,20 @@ a{color:var(--accent);text-decoration:none}
 /* Seed chips get a subtle dashed border to distinguish from library chips */
 .exp-chip-seed{ border:2px dashed rgba(255,255,255,.25)!important }
 
-/* ── LUT CATEGORY BADGES ── */
-.lut-cat{display:inline-block;font-size:7px;text-transform:uppercase;letter-spacing:.1em;padding:2px 6px;border-radius:10px;font-family:var(--mono);margin-bottom:5px;font-weight:700}
-.lut-cat-warm{background:#4a2a0a;color:#f5a623}
-.lut-cat-cool{background:#0a1a3a;color:#5bc8ff}
-.lut-cat-cinema{background:#1a0a2a;color:#c084fc}
-.lut-cat-film{background:#1a1a0a;color:#a3c55b}
-.lut-cat-mono{background:#1a1a1a;color:#888}
-.lut-cat-extreme{background:#2a0a0a;color:#ff4444}
-/* Gradient preview bar replaces tiny before/after dots */
-.lut-preview-bar{height:36px;border-radius:6px;margin:8px 0 6px;position:relative;overflow:hidden}
-.lut-preview-segments{display:flex;height:100%;border-radius:6px;overflow:hidden}
-.lut-seg{flex:1;position:relative}
-.lut-seg-before{height:50%;border-bottom:1px solid rgba(0,0,0,.3)}
-.lut-seg-after{height:50%}
+/* ── SAMPLE LUT GENERATOR ── */
+#slut-zones{display:flex;gap:8px}
+.slut-zone{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.slut-zone-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono)}
+.slut-swatch{width:100%;height:52px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+.slut-swatch:active{transform:scale(.95)}
+.slut-zone.active .slut-swatch{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.35)}
+.slut-hex{font-size:9px;font-family:var(--mono);color:var(--muted)}
+.slut-pick-btn{width:100%;font-size:9px !important;padding:3px 4px !important}
+/* keep lut-grad for split tone */
+.lut-grad{height:28px;border-radius:5px;margin:7px 0 5px;overflow:hidden;display:flex}
+.lut-grad-seg{flex:1;display:flex;flex-direction:column}
+.lut-grad-top{flex:1;border-bottom:1px solid rgba(255,255,255,.1)}
+.lut-grad-bot{flex:1}
 
 /* ── TRIO GENERATOR ── */
 #trio-section{padding:0 0 4px}
@@ -774,18 +766,80 @@ a{color:var(--accent);text-decoration:none}
         <div id="trio-display"></div>
       </div>
 
-      <div class="sec">Cinematic Grades</div>
-      <div id="lut-cards"></div>
+      <div class="sec">Sample-Based LUT Generator</div>
+      <div class="card" id="sample-lut-card" style="padding:12px">
+        <div style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px">
+          Assign sampled colours to tonal zones. The app builds a real .cube LUT that pushes your image toward those colours — shadows, midtones and highlights independently.
+        </div>
+
+        <!-- Zone pickers -->
+        <div id="slut-zones" style="display:flex;gap:8px;margin-bottom:10px">
+          <!-- Shadow -->
+          <div class="slut-zone" id="slut-zone-shadow">
+            <div class="slut-zone-label">Shadows</div>
+            <div class="slut-swatch" id="slut-sw-shadow" onclick="Explorer.slutPickZone('shadow')" style="background:#1a1a2e"></div>
+            <div class="slut-hex" id="slut-hex-shadow">#1A1A2E</div>
+            <button class="btn btn-s btn-sm slut-pick-btn" onclick="Explorer.slutPickZone('shadow')">Pick</button>
+          </div>
+          <!-- Midtone -->
+          <div class="slut-zone" id="slut-zone-mid">
+            <div class="slut-zone-label">Midtones</div>
+            <div class="slut-swatch" id="slut-sw-mid" onclick="Explorer.slutPickZone('mid')" style="background:#C09870"></div>
+            <div class="slut-hex" id="slut-hex-mid">#C09870</div>
+            <button class="btn btn-s btn-sm slut-pick-btn" onclick="Explorer.slutPickZone('mid')">Pick</button>
+          </div>
+          <!-- Highlight -->
+          <div class="slut-zone" id="slut-zone-high">
+            <div class="slut-zone-label">Highlights</div>
+            <div class="slut-swatch" id="slut-sw-high" onclick="Explorer.slutPickZone('high')" style="background:#f0e8d8"></div>
+            <div class="slut-hex" id="slut-hex-high">#F0E8D8</div>
+            <button class="btn btn-s btn-sm slut-pick-btn" onclick="Explorer.slutPickZone('high')">Pick</button>
+          </div>
+        </div>
+
+        <!-- Strength slider -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);flex-shrink:0">Strength</span>
+          <input type="range" id="slut-strength" min="10" max="100" value="72"
+            oninput="Explorer.slutUpdateStrength(this.value)"
+            style="flex:1;accent-color:var(--accent)">
+          <span id="slut-strength-val" style="font-size:10px;color:var(--accent);font-family:var(--mono);min-width:28px;text-align:right">72%</span>
+        </div>
+
+        <!-- Preview gradient: shows neutral ramp → graded ramp -->
+        <div id="slut-preview" style="margin-bottom:10px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
+          <div id="slut-preview-before" style="display:flex;height:18px"></div>
+          <div id="slut-preview-after"  style="display:flex;height:18px"></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="Explorer.slutGenerate()">⚙ Generate LUT</button>
+          <button class="btn btn-s btn-sm" id="slut-live-btn"  onclick="Explorer.slutLive()"     disabled>📷 Live</button>
+          <button class="btn btn-s btn-sm" id="slut-dl-btn"    onclick="Explorer.slutDownload()"  disabled>⬇ .cube</button>
+          <button class="btn btn-s btn-sm" id="slut-swatch-btn" onclick="Explorer.slutSwatch()"   disabled>🎨 Swatch</button>
+        </div>
+
+        <!-- Library picker overlay (hidden) -->
+        <div id="slut-picker-overlay" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:7px">
+            Tap a saved colour to assign it — or use the root colour above
+          </div>
+          <div id="slut-picker-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-s btn-sm" onclick="Explorer.slutAssignRoot()">Use Root Colour</button>
+            <button class="btn btn-s btn-sm" onclick="Explorer.slutCancelPick()">Cancel</button>
+          </div>
+        </div>
+      </div>
 
       <div class="c1-box">
-        <h4>Capture One — Import LUT</h4>
+        <h4>Using your .cube in Capture One</h4>
         <ol>
-          <li>Download <code>.cube</code> file above</li>
-          <li>AirDrop to your Mac</li>
+          <li>Tap <strong>⬇ .cube</strong> above and AirDrop to your Mac</li>
           <li><strong>Styles & Presets</strong> → right-click → <strong>Open User Styles</strong></li>
-          <li>Place <code>.cube</code> in <code>ICC Profiles & Camera LUTs</code></li>
+          <li>Place <code>.cube</code> in <code>ICC Profiles &amp; Camera LUTs</code></li>
           <li>Restart Capture One — appears under <strong>Color → LUT</strong></li>
-          <li>For tethered live view: apply LUT in <strong>Live View</strong> overlay</li>
         </ol>
       </div>
     </div>
@@ -1465,6 +1519,54 @@ const CS = {
     return{l:Math.max(0,Math.min(100,l)),a:Math.max(-128,Math.min(127,a)),b:Math.max(-128,Math.min(127,b))};
   },
   genLut(baseHex,style){const bRgb=this.hexToRgb(baseHex);const bLab=this.rgbToLab(bRgb.r,bRgb.g,bRgb.b);const sz=17,lut=[];for(let bi=0;bi<sz;bi++)for(let gi=0;gi<sz;gi++)for(let ri=0;ri<sz;ri++){const r=ri/(sz-1)*255,g=gi/(sz-1)*255,b=bi/(sz-1)*255;const lab=this.rgbToLab(r,g,b);const m=this.applyStyle(lab,bLab,style);const rgb=this.labToRgb(m.l,m.a,m.b);lut.push([rgb.r/255,rgb.g/255,rgb.b/255])}return lut},
+
+  // Build a real bespoke 3D LUT from sampled shadow / midtone / highlight colours.
+  // For each point in the 17³ grid, compute input luminance and smoothly interpolate
+  // in LAB space toward the appropriate target colour, preserving hue relationships.
+  genLutFromSamples(shadowHex, midHex, highHex, strength=0.72){
+    const toL = hex => { const {r,g,b}=this.hexToRgb(hex); return this.rgbToLab(r,g,b); };
+    const sL=toL(shadowHex), mL=toL(midHex), hL=toL(highHex);
+    const sz=17, lut=[];
+    // Smooth cosine blend weight — keeps transitions free of banding
+    const blend = t => (1 - Math.cos(t * Math.PI)) / 2;
+    for(let bi=0;bi<sz;bi++) for(let gi=0;gi<sz;gi++) for(let ri=0;ri<sz;ri++){
+      const r=ri/(sz-1)*255, g=gi/(sz-1)*255, b=bi/(sz-1)*255;
+      const lab = this.rgbToLab(r,g,b);
+      const lum = lab.l / 100; // 0=black → 1=white
+
+      // Three-zone influence: shadows 0-0.4, mids 0.3-0.7, highs 0.6-1.0
+      // Zones overlap — colour pushes blend gracefully across the tonal range
+      let tA, tB, tC; // weights for shadow, mid, highlight
+      if(lum < 0.35){
+        tA = blend(Math.min(1, (0.35 - lum) / 0.35));
+        tB = 1 - tA; tC = 0;
+      } else if(lum < 0.65){
+        const t = (lum - 0.35) / 0.30;
+        tA = 0; tC = blend(t); tB = 1 - tC;
+      } else {
+        tC = blend(Math.min(1, (lum - 0.65) / 0.35));
+        tB = 1 - tC; tA = 0;
+      }
+
+      // Target LAB = weighted blend of the three sample colours
+      const tLab = {
+        l: sL.l*tA + mL.l*tB + hL.l*tC,
+        a: sL.a*tA + mL.a*tB + hL.a*tC,
+        b: sL.b*tA + mL.b*tB + hL.b*tC
+      };
+
+      // Mix input toward target by strength, keeping input luminance mostly intact
+      const out = {
+        l: Math.max(0, Math.min(100, lab.l * (1 - strength*0.15) + tLab.l * (strength*0.15))),
+        a: lab.a * (1 - strength) + tLab.a * strength,
+        b: lab.b * (1 - strength) + tLab.b * strength
+      };
+
+      const rgb2 = this.labToRgb(out.l, out.a, out.b);
+      lut.push([rgb2.r/255, rgb2.g/255, rgb2.b/255]);
+    }
+    return lut;
+  },
   lutToCube(lut,title){let s=`TITLE "${title}"\nDOMAIN_MIN 0.0 0.0 0.0\nDOMAIN_MAX 1.0 1.0 1.0\nLUT_3D_SIZE 17\n\n`;for(const[r,g,b]of lut)s+=`${r.toFixed(6)} ${g.toFixed(6)} ${b.toFixed(6)}\n`;return s},
   applyLutToData(d,lut){const sz=17;for(let i=0;i<d.length;i+=4){const r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255;const ri=Math.min(sz-2,Math.floor(r*(sz-1)));const gi=Math.min(sz-2,Math.floor(g*(sz-1)));const bi=Math.min(sz-2,Math.floor(b*(sz-1)));const idx=bi*sz*sz+gi*sz+ri;if(idx<lut.length){const[lr,lg,lb]=lut[idx];d[i]=Math.round(lr*255);d[i+1]=Math.round(lg*255);d[i+2]=Math.round(lb*255)}}return d},
 };
@@ -1653,6 +1755,16 @@ const App={
 
   setActiveLut(style,name,baseHex){
     this.activeLut=CS.genLut(baseHex,style);
+    this.activeLutName=name;
+    const badge=document.getElementById('lut-badge');
+    badge.textContent=`${name} ✕`;
+    badge.classList.add('show');
+    Sampler.lutOn=true;
+    App.toast(`Grade: ${name}`)
+  },
+
+  setActiveLutRaw(lutArray,name){
+    this.activeLut=lutArray;
     this.activeLutName=name;
     const badge=document.getElementById('lut-badge');
     badge.textContent=`${name} ✕`;
@@ -2496,22 +2608,6 @@ const Explorer={
 
   SEEDS:['#C1440E','#1B4F72','#6D8B3A','#8B1A4A','#2E4057','#D4A017'],
 
-  LUTS:[
-    {s:'warmPush',   n:'Warm Push',      d:'Root colour bleeds into shadows & mids — golden intimacy',           cat:'warm'},
-    {s:'coolPush',   n:'Cool Distance',  d:'Opposing push — cyan tension, psychological withdrawal',              cat:'cool'},
-    {s:'tealOrange', n:'Teal & Orange',  d:'Hollywood blockbuster — teal shadows vs orange skin',                 cat:'cinema'},
-    {s:'bleach',     n:'Bleach Bypass',  d:'Skip the bleach bath — desaturated, gritty, lifted blacks',           cat:'film'},
-    {s:'cross',      n:'Cross Process',  d:'E6 slide film in C41 chemicals — acid colour shift',                  cat:'film'},
-    {s:'mood',       n:'Mood Mono',      d:'Single-hue world — everything becomes your root colour',              cat:'mono'},
-    {s:'brutalist',  n:'Brutalist',      d:'Concrete & steel — crushed blacks, blown whites, zero mercy',         cat:'extreme'},
-    {s:'infrared',   n:'Infrared',       d:'IR film simulation — greens go bright gold, blues collapse to black',  cat:'extreme'},
-    {s:'duotone',    n:'Duotone',        d:'Two-colour world only — root + complement, nothing else survives',     cat:'extreme'},
-    {s:'acid',       n:'Acid Bath',      d:'Maximum chroma, hue rotation, psychedelic overload',                  cat:'extreme'},
-    {s:'silver',     n:'Silver Halide',  d:'Near-monochrome — root hue haunts the midtones like a memory',       cat:'mono'},
-    {s:'faded',      n:'Faded Print',    d:'Found footage — lifted blacks, haze, colour memory not colour fact',  cat:'film'},
-    {s:'punk',       n:'Punk',           d:'Complement flip, contrast maxed, hostile to subtlety',                cat:'extreme'},
-    {s:'wabi',       n:'Wabi-Sabi',      d:'Japanese restraint — imperfect, muted, deeply considered',            cat:'warm'},
-  ],
 
   // Called when the Explorer tab is opened
   onOpen(){
@@ -2579,7 +2675,6 @@ const Explorer={
     document.getElementById('split-grad').style.background =
       `linear-gradient(to right,${h.splitTone.shadows},${h.splitTone.highlights})`;
     this.renderTrio();
-    this.renderLuts();
   },
 
   // ── Harmony swatches: tap swatch → new root, + button → add to lib ──
@@ -2809,85 +2904,187 @@ const Explorer={
     App.toast('Trio exported');
   },
 
-  // ── LUT CARDS ───────────────────────────────────────────────────
-  renderLuts(){
-    const bLab = CS.rgbToLab(...Object.values(CS.hexToRgb(this.rootHex)));
-    const ramp  = ['#111111','#2a2a2a','#555555','#888888','#aaaaaa','#cccccc','#eeeeee'];
-    const catLabel = {warm:'Warm',cool:'Cool',cinema:'Cinema',film:'Film',mono:'Mono',extreme:'⚡ Extreme'};
+  // ── SAMPLE-BASED LUT GENERATOR ─────────────────────────────────
+  _slutState: {
+    shadow:  '#1a1a2e',
+    mid:     '#C09870',
+    high:    '#f0e8d8',
+    strength: 72,
+    lut: null,
+    pickingZone: null
+  },
 
-    document.getElementById('lut-cards').innerHTML = this.LUTS.map(p=>{
+  slutUpdateStrength(val){
+    this._slutState.strength = +val;
+    document.getElementById('slut-strength-val').textContent = val + '%';
+  },
+
+  slutPickZone(zone){
+    const s = this._slutState;
+    s.pickingZone = zone;
+    document.querySelectorAll('.slut-zone').forEach(el => el.classList.remove('active'));
+    document.getElementById('slut-zone-'+zone)?.classList.add('active');
+    const all = DS.all();
+    const overlay = document.getElementById('slut-picker-overlay');
+    const chips   = document.getElementById('slut-picker-chips');
+    overlay.style.display = 'block';
+    chips.innerHTML = all.length
+      ? all.map(c=>`
+          <div onclick="Explorer.slutAssignColour('${c.hex}')"
+               title="${c.name||c.hex}"
+               style="width:36px;height:36px;border-radius:6px;background:${c.hex};
+                      border:2px solid var(--border);cursor:pointer;flex-shrink:0"></div>`
+        ).join('')
+      : `<div style="font-size:10px;color:var(--muted)">No colours saved — sample some first</div>`;
+  },
+
+  slutAssignColour(hex){
+    const zone = this._slutState.pickingZone;
+    if(!zone) return;
+    this._slutState[zone] = hex;
+    this._slutApplyZoneHex(zone, hex);
+    this.slutCancelPick();
+    this.slutUpdatePreview();
+  },
+
+  slutAssignRoot(){
+    if(!this._slutState.pickingZone) return;
+    this.slutAssignColour(this.rootHex);
+  },
+
+  slutCancelPick(){
+    this._slutState.pickingZone = null;
+    document.querySelectorAll('.slut-zone').forEach(el=>el.classList.remove('active'));
+    document.getElementById('slut-picker-overlay').style.display = 'none';
+  },
+
+  _slutApplyZoneHex(zone, hex){
+    document.getElementById('slut-sw-'+zone).style.background = hex;
+    document.getElementById('slut-hex-'+zone).textContent = hex.toUpperCase();
+  },
+
+  slutUpdatePreview(){
+    const s = this._slutState;
+    const ramp = ['#111','#222','#444','#666','#888','#aaa','#ccc','#eee','#fff'];
+    const before = document.getElementById('slut-preview-before');
+    const after  = document.getElementById('slut-preview-after');
+    if(!before||!after) return;
+    before.innerHTML = ramp.map(h=>`<div style="flex:1;background:${h}"></div>`).join('');
+    try {
+      const lut = CS.genLutFromSamples(s.shadow, s.mid, s.high, s.strength/100);
       const graded = ramp.map(hex=>{
-        const lab = CS.rgbToLab(...Object.values(CS.hexToRgb(hex)));
-        const m   = CS.applyStyle(lab, bLab, p.s);
-        return CS.rgbToHex(...Object.values(CS.labToRgb(m.l,m.a,m.b)));
+        const {r,g,b} = CS.hexToRgb(hex);
+        const ri = Math.min(16, Math.round(r/255*16));
+        const gi = Math.min(16, Math.round(g/255*16));
+        const bi = Math.min(16, Math.round(b/255*16));
+        const idx = bi*17*17 + gi*17 + ri;
+        const [lr,lg,lb] = lut[idx] || [r/255,g/255,b/255];
+        return CS.rgbToHex(Math.round(lr*255), Math.round(lg*255), Math.round(lb*255));
       });
-      const gradHTML = `<div class="lut-grad">${ramp.map((h,i)=>`
-        <div class="lut-grad-seg">
-          <div class="lut-grad-top" style="background:${h}"></div>
-          <div class="lut-grad-bot" style="background:${graded[i]}"></div>
-        </div>`).join('')}</div>`;
-      return `<div class="lut-card">
-        <div class="lut-head">
-          <span class="lut-cat lut-cat-${p.cat}">${catLabel[p.cat]||p.cat}</span>
-          <div class="lut-name">${p.n}</div>
-          <div class="lut-desc">${p.d}</div>
-        </div>
-        ${gradHTML}
-        <div class="lut-acts">
-          <button class="btn btn-s btn-sm" onclick="Explorer.setLive('${p.s}','${p.n}')">📷 Live</button>
-          <button class="btn btn-s btn-sm" onclick="Explorer.dl('${p.s}','${p.n}')">⬇ .cube</button>
-          <button class="btn btn-s btn-sm" onclick="Explorer.exportGradeSwatch('${p.s}','${p.n}')">🎨 Swatch</button>
-        </div>
-      </div>`;
-    }).join('');
+      after.innerHTML = graded.map(h=>`<div style="flex:1;background:${h}"></div>`).join('');
+    } catch(e) {
+      after.innerHTML = ramp.map(h=>`<div style="flex:1;background:${h}"></div>`).join('');
+    }
+  },
+
+  slutGenerate(){
+    const s = this._slutState;
+    App.toast('Building LUT…');
+    setTimeout(()=>{
+      try {
+        s.lut = CS.genLutFromSamples(s.shadow, s.mid, s.high, s.strength/100);
+        this.slutUpdatePreview();
+        ['slut-live-btn','slut-dl-btn','slut-swatch-btn'].forEach(id=>{
+          document.getElementById(id).disabled = false;
+        });
+        App.toast('LUT ready — preview updated');
+      } catch(e) {
+        App.toast('Error building LUT');
+        console.error(e);
+      }
+    }, 30);
+  },
+
+  slutLive(){
+    const s = this._slutState;
+    if(!s.lut){ App.toast('Generate LUT first'); return; }
+    App.setActiveLutRaw(s.lut, 'Sample LUT');
+    App.setTab('sampler');
+  },
+
+  slutDownload(){
+    const s = this._slutState;
+    if(!s.lut){ App.toast('Generate LUT first'); return; }
+    const title = `Digby Sample LUT S${s.shadow} M${s.mid} H${s.high}`;
+    const cube = CS.lutToCube(s.lut, title);
+    const blob = new Blob([cube], {type:'text/plain'});
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `digby-sample-lut-${Date.now()}.cube`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    App.toast('.cube downloaded');
+  },
+
+  slutSwatch(){
+    const s = this._slutState;
+    if(!s.lut){ App.toast('Generate LUT first'); return; }
+    const ramp = ['#111','#333','#555','#777','#999','#bbb','#ddd','#fff'];
+    const graded = ramp.map(hex=>{
+      const {r,g,b} = CS.hexToRgb(hex);
+      const ri = Math.min(16, Math.round(r/255*16));
+      const gi = Math.min(16, Math.round(g/255*16));
+      const bi = Math.min(16, Math.round(b/255*16));
+      const idx = bi*17*17 + gi*17 + ri;
+      const [lr,lg,lb] = s.lut[idx] || [r/255,g/255,b/255];
+      return CS.rgbToHex(Math.round(lr*255), Math.round(lg*255), Math.round(lb*255));
+    });
+    const W=640, H=300, PAD=16;
+    const canvas = document.getElementById('export-canvas');
+    canvas.width=W; canvas.height=H;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle='#1a1a1a'; ctx.fillRect(0,0,W,H);
+    const zones = [{hex:s.shadow,label:'Shadows'},{hex:s.mid,label:'Midtones'},{hex:s.high,label:'Highlights'}];
+    zones.forEach((z,i)=>{
+      ctx.fillStyle=z.hex; ctx.fillRect(PAD+i*52, PAD, 46, 46);
+      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='6px Space Mono,monospace'; ctx.textAlign='center';
+      ctx.fillText(z.label, PAD+i*52+23, PAD+58);
+    });
+    const segW=(W-PAD*2)/ramp.length;
+    ramp.forEach((h,i)=>{
+      const x=PAD+i*segW;
+      ctx.fillStyle=h;        ctx.fillRect(x, 80,  segW-2, 80);
+      ctx.fillStyle=graded[i];ctx.fillRect(x, 162, segW-2, 80);
+    });
+    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(PAD,158,W-PAD*2,2);
+    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='7px Space Mono,monospace'; ctx.textAlign='left';
+    ctx.fillText('ORIGINAL', PAD+2, 75); ctx.fillText('GRADED', PAD+2, 157);
+    ctx.fillStyle='#fff'; ctx.font="bold 13px 'Permanent Marker',cursive"; ctx.textAlign='left';
+    ctx.fillText('Sample LUT', PAD, H-PAD-5);
+    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font='7px Space Mono,monospace';
+    ctx.fillText(`${s.shadow} · ${s.mid} · ${s.high} · ${s.strength}% · digby.shop`, PAD, H-PAD+7);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `digby-sample-lut-swatch-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    App.toast('Swatch exported');
   },
 
   addToLib(hex){
     const e=DS.makeEntry(hex,'explorer'); DS.add(e); App.refresh();
     App.toast(`${e.name} added`);
   },
-  setLive(style,name){ App.setActiveLut(style,name,this.rootHex); App.setTab('sampler'); },
-  dl(style,name){
-    const lut  = CS.genLut(this.rootHex,style);
-    const cube = CS.lutToCube(lut,`${name} (${this.rootHex})`);
+  dlSplitLut(){
+    const lut = CS.genLut(this.rootHex,'coolPush');
+    const cube = CS.lutToCube(lut,`Split Tone (${this.rootHex})`);
     const b=new Blob([cube],{type:'text/plain'});
     const u=URL.createObjectURL(b);
     const a=document.createElement('a'); a.href=u;
-    a.download=`digby-${style}-${this.rootHex.replace('#','')}.cube`; a.click();
+    a.download=`digby-split-${this.rootHex.replace('#','')}.cube`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(u); App.toast('.cube ready');
   },
-  exportGradeSwatch(style,name){
-    const tests  = ['#111','#333','#666','#999','#ccc','#eee'];
-    const bLab   = CS.rgbToLab(...Object.values(CS.hexToRgb(this.rootHex)));
-    const graded = tests.map(hex=>{
-      const lab = CS.rgbToLab(...Object.values(CS.hexToRgb(hex)));
-      const m   = CS.applyStyle(lab,bLab,style);
-      return CS.rgbToHex(...Object.values(CS.labToRgb(m.l,m.a,m.b)));
-    });
-    const W=640, H=260, PAD=16;
-    const canvas = document.getElementById('export-canvas');
-    canvas.width=W; canvas.height=H;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle='#1a1a1a'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle=this.rootHex; ctx.fillRect(PAD,PAD,56,H-PAD*2);
-    const segW = (W-PAD*3-56)/tests.length;
-    tests.forEach((h,i)=>{
-      const x=PAD+64+i*segW, halfH=(H-PAD*2)/2-1;
-      ctx.fillStyle=h;        ctx.fillRect(x, PAD,          segW-3, halfH);
-      ctx.fillStyle=graded[i];ctx.fillRect(x, PAD+halfH+2,  segW-3, halfH);
-    });
-    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.fillRect(PAD+64, H/2-1, W-PAD-64, 1);
-    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='7px Space Mono,monospace'; ctx.textAlign='left';
-    ctx.fillText('ORIGINAL',PAD+66,H/2-4); ctx.fillText('GRADED',PAD+66,H/2+9);
-    ctx.fillStyle='#fff'; ctx.font=`bold 16px 'Permanent Marker',cursive`; ctx.textAlign='left';
-    ctx.fillText(name, PAD+72, H-PAD-8);
-    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='8px Space Mono,monospace';
-    ctx.fillText(`Root ${this.rootHex.toUpperCase()} · digby.shop`, PAD+72, H-PAD+5);
-    const a=document.createElement('a'); a.href=canvas.toDataURL('image/png');
-    a.download=`grade-${style}-${this.rootHex.replace('#','')}.png`; a.click();
-    App.toast(`${name} swatch exported`);
-  },
-  dlSplitLut(){ this.dl('coolPush','Split Tone'); },
   addSplit(){
     const h=CS.harmonies(this.rootHex);
     [h.splitTone.shadows,h.splitTone.highlights].forEach(hex=>this.addToLib(hex));
