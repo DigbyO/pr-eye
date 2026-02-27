@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" id="theme-color-meta" content="#0c0c0c">
 <title>Digby's Colour Sampler</title>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Digby%27s+Colour+Sampler%22%2C%22short_name%22%3A%22Colour+Sampler%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230c0c0c%22%2C%22theme_color%22%3A%22%230c0c0c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgo%3D%22%2C%22sizes%22%3A%22192x192%22%7D%5D%7D">
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -467,46 +465,6 @@ a{color:var(--accent);text-decoration:none}
 .sw-layout-btn .layout-label{font-size:11px;color:var(--muted);margin-top:4px}
 .sw-preview-wrap{background:var(--surface2);border-radius:var(--rs);padding:12px;margin-bottom:14px;text-align:center}
 #sw-preview-canvas{max-width:100%;border-radius:4px}
-
-/* ── LIGHT THEME ── */
-body.light{
-  --bg:#f5f2ed;--surface:#fff;--surface2:#ede9e3;--surface3:#e0dbd3;
-  --border:#d0cab8;--text:#1a1208;--muted:#7a6e5a;--faint:#bbb8b0;
-}
-body.light .polaroid{box-shadow:0 2px 8px rgba(0,0,0,.18),0 5px 16px rgba(0,0,0,.1)}
-body.light #tabs{background:#fff;border-top:1px solid var(--border)}
-body.light .module{background:var(--bg)}
-
-/* ── THEME TOGGLE ── */
-#theme-btn{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all var(--tr)}
-
-/* ── GALLERY SEARCH ── */
-#gal-search-row{padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;gap:7px;align-items:center}
-#gal-search{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 14px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
-#gal-search::placeholder{color:var(--faint)}
-#gal-search:focus{border-color:var(--accent)}
-#gal-search-clear{font-size:14px;color:var(--muted);cursor:pointer;padding:4px;display:none}
-
-/* ── MULTI-SELECT ── */
-.polaroid.selected{outline:3px solid var(--accent);outline-offset:2px}
-#gal-multi-bar{display:none;padding:8px 12px;background:rgba(200,169,110,.12);border-bottom:1px solid rgba(200,169,110,.3);align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
-#gal-multi-bar.show{display:flex}
-#gal-multi-info{font-size:11px;color:var(--accent);flex:1}
-
-/* ── PALETTE DRAG ── */
-.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default;transition:opacity .15s,transform .15s}
-.pb-slot.drag-over{border-color:var(--accent);transform:scale(1.03)}
-.pb-slot.dragging{opacity:.4}
-.pb-drag-handle{position:absolute;top:4px;left:4px;width:18px;height:18px;background:rgba(0,0,0,.45);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:grab;color:rgba(255,255,255,.6);font-size:9px;line-height:1}
-.pb-drag-handle:active{cursor:grabbing}
-
-/* ── EXPORT FORMATS ── */
-.exp-fmt-btn{flex:1;min-width:calc(50% - 4px);background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 8px;font-size:11px;text-align:center;cursor:pointer;transition:all var(--tr);color:var(--text)}
-.exp-fmt-btn:hover,.exp-fmt-btn:active{border-color:var(--accent);background:rgba(200,169,110,.1);color:var(--accent)}
-
-/* ── SHARE LINK ── */
-#share-link-wrap{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;margin-top:8px;display:none}
-#share-link-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;color:var(--muted);font-family:var(--mono);font-size:9px;word-break:break-all}
 </style>
 </head>
 <body>
@@ -517,7 +475,6 @@ body.light .module{background:var(--bg)}
   <div id="title"><div id="last-dot"></div>Digby's Colour Sampler</div>
   <div id="top-r">
     <div id="online" title="Network"></div>
-    <button id="theme-btn" title="Toggle light/dark" onclick="App.toggleTheme()">🌙</button>
     <button class="icon-btn" onclick="App.openSettings()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </button>
@@ -725,26 +682,11 @@ body.light .module{background:var(--bg)}
         <button class="tog-btn" onclick="Gallery.setView('631')" id="gv631" title="60-30-10 rule">60/30/10</button>
       </div>
     </div>
-    <!-- Search -->
-    <div id="gal-search-row">
-      <input id="gal-search" type="search" placeholder="Search name, hex, Pantone…" oninput="Gallery.applySearch(this.value)" onsearch="Gallery.applySearch(this.value)">
-      <span id="gal-search-clear" onclick="Gallery.clearSearch()">✕</span>
-      <button class="btn btn-s btn-sm" onclick="Gallery.toggleMultiSelect()" id="gal-ms-btn" title="Multi-select">☑</button>
-    </div>
-    <!-- Multi-select action bar -->
-    <div id="gal-multi-bar">
-      <span id="gal-multi-info">0 selected</span>
-      <button class="btn btn-s btn-sm" onclick="Gallery.msSelectAll()">All</button>
-      <button class="btn btn-s btn-sm" onclick="Gallery.msSelectNone()">None</button>
-      <button class="btn btn-p btn-sm" onclick="Gallery.msExport()">Export…</button>
-      <button class="btn btn-d btn-sm" onclick="Gallery.msDelete()">Delete</button>
-    </div>
     <div class="mod-scroll">
       <div id="gallery-actions" style="display:none">
         <button class="btn btn-s btn-sm" onclick="SwatchExport.openAs('polaroids')">Polaroid Sheet</button>
         <button class="btn btn-p btn-sm" onclick="SwatchExport.open()">🎨 Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.shareAll()">Share</button>
-        <button class="btn btn-s btn-sm" onclick="Gallery.copyShareLink()">🔗 Link</button>
       </div>
       <!-- 60-30-10 view -->
       <div id="gal-631-view"></div>
@@ -764,7 +706,6 @@ body.light .module{background:var(--bg)}
             <div id="exp-root-name" style="font-size:14px;font-weight:700">Select a colour below</div>
             <div id="exp-root-hex" style="font-size:11px;color:var(--muted)"></div>
           </div>
-          <button class="btn btn-s btn-sm" title="Generate a random beautiful palette" onclick="Explorer.randomPalette()">✦ Random</button>
         </div>
         <div id="exp-root-chips"></div>
         <div id="exp-seed-note" style="display:none;font-size:10px;color:var(--muted);padding:4px 12px 8px;line-height:1.5">
@@ -1061,10 +1002,8 @@ body.light .module{background:var(--bg)}
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.suggest()">✦ Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
-          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">PNG</button>
-          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.showExportFormats()">Export…</button>
+          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
         </div>
-        <div id="pb-drag-hint" style="text-align:center;font-size:9px;color:var(--faint);padding:4px 0 0;display:none">drag to reorder</div>
         <div id="pb-lib-picker" style="display:none">
           <div id="pb-lib-label">Pick from library:</div>
           <div id="pb-lib-chips"></div>
@@ -1618,52 +1557,7 @@ const App={
   activeLutName:'',
   online:false,
 
-  _lightMode: false,
-
-  toggleTheme() {
-    this._lightMode = !this._lightMode;
-    document.body.classList.toggle('light', this._lightMode);
-    const btn = document.getElementById('theme-btn');
-    if (btn) btn.textContent = this._lightMode ? '🌑' : '🌙';
-    const meta = document.getElementById('theme-color-meta');
-    if (meta) meta.content = this._lightMode ? '#f5f2ed' : '#0c0c0c';
-    // Persist preference
-    try { localStorage.setItem('digby_theme', this._lightMode ? 'light' : 'dark'); } catch(e) {}
-  },
-
-  _loadShareLink() {
-    // Import library from #p=base64 in URL
-    try {
-      const hash = location.hash;
-      if (!hash.startsWith('#p=')) return;
-      const b64 = hash.slice(3);
-      const json = decodeURIComponent(escape(atob(b64)));
-      const compact = JSON.parse(json);
-      if (!Array.isArray(compact)) return;
-      let added = 0;
-      compact.forEach(item => {
-        if (!item.h || !/^#[0-9a-f]{6}$/i.test(item.h)) return;
-        if (DS.all().find(c => c.hex.toLowerCase() === item.h.toLowerCase())) return;
-        const entry = DS.makeEntry(item.h, 'shared');
-        if (item.n) entry.name = item.n;
-        DS.add(entry);
-        added++;
-      });
-      if (added) {
-        this.toast(`Imported ${added} shared colour${added!==1?'s':''}!`);
-        history.replaceState(null, '', location.pathname); // clean URL
-      }
-    } catch(e) { console.warn('Share link import failed', e); }
-  },
-
   init(){
-    // Restore theme preference
-    try {
-      const saved = localStorage.getItem('digby_theme');
-      if (saved === 'light') { this._lightMode = true; document.body.classList.add('light'); const btn = document.getElementById('theme-btn'); if(btn) btn.textContent = '🌑'; }
-    } catch(e) {}
-
-    this._loadShareLink();
     this.checkOnline();
     window.addEventListener('online',()=>this.setOnline(true));
     window.addEventListener('offline',()=>this.setOnline(false));
@@ -2392,9 +2286,6 @@ const Sampler={
 <script>
 const Gallery={
   view:'6',
-  searchQuery: '',
-  multiSelect: false,
-  selected: new Set(),
 
   setView(v){
     this.view=v;
@@ -2402,86 +2293,9 @@ const Gallery={
     this.render();
   },
 
-  applySearch(q) {
-    this.searchQuery = q.trim().toLowerCase();
-    document.getElementById('gal-search-clear').style.display = this.searchQuery ? 'block' : 'none';
-    this.render();
-  },
-
-  clearSearch() {
-    this.searchQuery = '';
-    document.getElementById('gal-search').value = '';
-    document.getElementById('gal-search-clear').style.display = 'none';
-    this.render();
-  },
-
-  filteredColours() {
-    const all = DS.all();
-    if (!this.searchQuery) return all;
-    const q = this.searchQuery;
-    return all.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.hex.toLowerCase().includes(q) ||
-      (c.pantone?.code||'').toLowerCase().includes(q) ||
-      (c.pantone?.name||'').toLowerCase().includes(q) ||
-      (c.littleGreene?.name||'').toLowerCase().includes(q) ||
-      (c.farrowBall?.name||'').toLowerCase().includes(q)
-    );
-  },
-
-  toggleMultiSelect() {
-    this.multiSelect = !this.multiSelect;
-    this.selected = new Set();
-    document.getElementById('gal-ms-btn').classList.toggle('on', this.multiSelect);
-    document.getElementById('gal-multi-bar').classList.toggle('show', this.multiSelect);
-    this.render();
-  },
-
-  msToggle(id) {
-    if (this.selected.has(id)) this.selected.delete(id);
-    else this.selected.add(id);
-    this._updateMsInfo();
-    // Update just this polaroid's class without full re-render
-    document.querySelectorAll('.polaroid').forEach(el => {
-      if (el.dataset.id === id) el.classList.toggle('selected', this.selected.has(id));
-    });
-  },
-
-  msSelectAll()  { this.selected = new Set(this.filteredColours().map(c=>c.id)); this._updateMsInfo(); this.render(); },
-  msSelectNone() { this.selected = new Set(); this._updateMsInfo(); this.render(); },
-
-  _updateMsInfo() {
-    const el = document.getElementById('gal-multi-info');
-    if (el) el.textContent = `${this.selected.size} selected`;
-  },
-
-  msDelete() {
-    if (!this.selected.size) { App.toast('Nothing selected'); return; }
-    if (!confirm(`Delete ${this.selected.size} colour${this.selected.size>1?'s':''}?`)) return;
-    this.selected.forEach(id => DS.remove(id));
-    this.selected = new Set();
-    this.multiSelect = false;
-    document.getElementById('gal-multi-bar').classList.remove('show');
-    document.getElementById('gal-ms-btn').classList.remove('on');
-    App.refresh();
-    App.toast(`Deleted`);
-  },
-
-  msExport() {
-    if (!this.selected.size) { App.toast('Nothing selected'); return; }
-    const colours = DS.all().filter(c => this.selected.has(c.id));
-    // Load into PaletteBuilder temporarily for export
-    PaletteBuilder.colours = colours.map(c => PaletteBuilder._makeEntry(c.hex));
-    PaletteBuilder._openExportFormats(colours);
-  },
-
   render(){
-    const all = DS.all();
-    const filtered = this.filteredColours();
-    const countEl = document.getElementById('gal-count');
-    countEl.textContent = this.searchQuery
-      ? `${filtered.length} / ${all.length} colours`
-      : `${all.length} colour${all.length!==1?'s':''}`;
+    const all=DS.all();
+    document.getElementById('gal-count').textContent=`${all.length} colour${all.length!==1?'s':''}`;
     document.getElementById('gallery-actions').style.display=all.length?'flex':'none';
 
     const grid=document.getElementById('gallery-grid');
@@ -2500,13 +2314,11 @@ const Gallery={
     const cols={'3':1,'6':2,'9':3}[this.view]||2;
     grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
 
-    if(!filtered.length){
-      grid.innerHTML=this.searchQuery
-        ? `<div class="gal-empty"><h3>No matches</h3><p>Try a different search term</p></div>`
-        : `<div class="gal-empty"><h3>No colours yet</h3><p>Use the Sampler to capture colours from the real world</p></div>`;
+    if(!all.length){
+      grid.innerHTML=`<div class="gal-empty"><h3>No colours yet</h3><p>Use the Sampler to capture colours from the real world</p></div>`;
       return;
     }
-    grid.innerHTML=filtered.map(c=>this.polaroidHTML(c)).join('');
+    grid.innerHTML=all.map(c=>this.polaroidHTML(c)).join('');
   },
 
   render631(all, el) {
@@ -2544,19 +2356,13 @@ const Gallery={
 
   polaroidHTML(c){
     const angle=(parseInt(c.id.slice(-3),36)%9-4)*0.7;
-    const sel = this.multiSelect && this.selected.has(c.id);
-    const clickHandler = this.multiSelect
-      ? `Gallery.msToggle('${c.id}')`
-      : `Gallery.openDetail('${c.id}')`;
-    return`<div class="polaroid${sel?' selected':''}" style="transform:rotate(${angle}deg)" data-id="${c.id}" role="button" tabindex="0" aria-label="${c.name} — ${c.hex.toUpperCase()}" onclick="${clickHandler}" onkeydown="if(event.key==='Enter'||event.key===' '){${clickHandler}}">
-      ${sel?'<div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;color:#1a1a1a;z-index:2">✓</div>':''}
+    return`<div class="polaroid" style="transform:rotate(${angle}deg)" role="button" tabindex="0" aria-label="${c.name} — ${c.hex.toUpperCase()}" onclick="Gallery.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Gallery.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
       <div class="pol-name">${c.name}</div>
       <div class="pol-hex">${c.hex.toUpperCase()}</div>
       <div class="pol-match">${c.pantone?.code||''}</div>
       <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}` </div>
     </div>`;
-  },
   },
 
   openDetail(id){
@@ -2657,26 +2463,6 @@ const Gallery={
   shareAll(){
     if(navigator.share){navigator.share({title:"Digby's Colour Sampler",text:`My colours: ${DS.all().map(c=>c.name).join(', ')}`,url:'https://digby.shop'}).catch(()=>{})}
     else App.toast('Share not available');
-  },
-
-  copyShareLink() {
-    const colours = DS.all();
-    if (colours.length) {
-      // Encode library as compact Base64 — hex + name only to keep URL short
-      const compact = colours.map(c => ({ h: c.hex, n: c.name }));
-      const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
-      const url = `${location.href.split('#')[0]}#p=${b64}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(() => App.toast('Share link copied!'));
-      } else {
-        // Fallback: show in overlay
-        App.openOv(`<div style="padding:20px">
-          <div class="ov-title">🔗 Share Link</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Copy this URL to share your ${colours.length} colour${colours.length!==1?'s':''}</div>
-          <textarea onclick="this.select()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px;color:var(--muted);font-family:var(--mono);font-size:9px;resize:none;height:80px">${url}</textarea>
-        </div>`);
-      }
-    }
   }
 };
 </script>
@@ -2713,29 +2499,6 @@ const Explorer={
     }
     this.render();
     ColourGenerator.render();
-  },
-
-  // Pick a random aesthetic and random palette from it, set root to first colour, save all to library
-  randomPalette() {
-    const aesKeys = Object.keys(ColourGenerator.AESTHETICS);
-    const aesKey  = aesKeys[Math.floor(Math.random() * aesKeys.length)];
-    const aes     = ColourGenerator.AESTHETICS[aesKey];
-    const palette = aes.palettes[Math.floor(Math.random() * aes.palettes.length)];
-
-    // Save colours into library
-    let added = 0;
-    palette.forEach(hex => {
-      if (!DS.all().find(c => c.hex.toLowerCase() === hex.toLowerCase())) {
-        DS.add(DS.makeEntry(hex, 'generated'));
-        added++;
-      }
-    });
-
-    // Update ColourGenerator aesthetic and set root to first colour
-    ColourGenerator.aesthetic = aesKey;
-    this.setRoot(palette[0]);
-    App.refresh();
-    App.toast(`✦ ${aes.name} — ${added} colour${added!==1?'s':''} added`);
   },
 
   init(){ this.render(); },
@@ -4403,23 +4166,14 @@ const PaletteBuilder = {
     App.toast('Palette cleared');
   },
 
-  _dragIdx: null,
-
   render() {
     const grid  = document.getElementById('pb-grid');
     const empty = document.getElementById('pb-empty');
-    const hint  = document.getElementById('pb-drag-hint');
     if (!grid) return;
     empty.style.display = this.colours.length === 0 ? 'flex' : 'none';
-    if (hint) hint.style.display = this.colours.length > 1 ? 'block' : 'none';
     let html = '';
     this.colours.forEach((c, i) => {
-      html += `<div class="pb-slot" draggable="true" data-idx="${i}"
-          ondragstart="PaletteBuilder._onDragStart(event,${i})"
-          ondragover="PaletteBuilder._onDragOver(event,${i})"
-          ondragend="PaletteBuilder._onDragEnd(event)"
-          ondrop="PaletteBuilder._onDrop(event,${i})">
-        <div class="pb-drag-handle" title="Drag to reorder">⠿</div>
+      html += `<div class="pb-slot">
         <div class="pb-slot-colour" style="background:${c.hex}"></div>
         <div class="pb-slot-info">
           <div class="pb-slot-name">${c.name}</div>
@@ -4435,157 +4189,7 @@ const PaletteBuilder = {
     grid.innerHTML = html;
   },
 
-  _onDragStart(e, idx) {
-    this._dragIdx = idx;
-    e.currentTarget.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  },
-  _onDragOver(e, idx) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    document.querySelectorAll('.pb-slot').forEach((el,i) => el.classList.toggle('drag-over', i === idx));
-  },
-  _onDrop(e, idx) {
-    e.preventDefault();
-    if (this._dragIdx === null || this._dragIdx === idx) return;
-    const moved = this.colours.splice(this._dragIdx, 1)[0];
-    this.colours.splice(idx, 0, moved);
-    this.render();
-  },
-  _onDragEnd(e) {
-    this._dragIdx = null;
-    document.querySelectorAll('.pb-slot').forEach(el => { el.classList.remove('dragging','drag-over'); });
-  },
-
-  showExportFormats() {
-    const colours = this.colours;
-    if (!colours.length) { App.toast('Add colours first'); return; }
-    this._openExportFormats(colours);
-  },
-
-  _openExportFormats(colours) {
-    App.openOv(`<div style="padding:0 16px 32px">
-      <div class="ov-title">📦 Export Formats</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">${colours.length} colour${colours.length!==1?'s':''}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <button class="exp-fmt-btn" onclick="PaletteBuilder._expCSS()">CSS Variables</button>
-        <button class="exp-fmt-btn" onclick="PaletteBuilder._expTailwind()">Tailwind Config</button>
-        <button class="exp-fmt-btn" onclick="PaletteBuilder._expFigma()">Figma Variables JSON</button>
-        <button class="exp-fmt-btn" onclick="PaletteBuilder._expASE()">Adobe ASE</button>
-        <button class="exp-fmt-btn" onclick="PaletteBuilder._expPNG()">PNG Sheet</button>
-      </div>
-    </div>`);
-  },
-
-  _expCSS() {
-    const vars = this.colours.map((c,i) => {
-      const slug = c.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-      return `  --color-${slug}: ${c.hex}; /* ${c.hex.toUpperCase()} · LRV ${Math.round(CS.lrv(CS.rgbToLab(...Object.values(CS.hexToRgb(c.hex)))))}% */`;
-    }).join('\n');
-    const css = `:root {\n${vars}\n}`;
-    this._download('colours.css', css, 'text/css');
-    App.toast('CSS variables exported');
-  },
-
-  _expTailwind() {
-    const colors = {};
-    this.colours.forEach(c => {
-      const slug = c.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-      colors[slug] = c.hex;
-    });
-    const config = `/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: ${JSON.stringify(colors, null, 8).replace(/^{/,'').replace(/}$/,'      }')}\n    }\n  }\n}`;
-    this._download('tailwind.colors.js', config, 'application/javascript');
-    App.toast('Tailwind config exported');
-  },
-
-  _expFigma() {
-    // Figma Variables JSON format
-    const collections = [{
-      name: "Digby Palette",
-      modes: [{ name: "Value", modeId: "mode-1" }],
-      variableCollectionId: "vc-digby",
-      variables: this.colours.map((c, i) => {
-        const rgb = CS.hexToRgb(c.hex);
-        const slug = c.name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
-        return {
-          id: `var-${i}`,
-          name: `${slug}`,
-          description: `${c.hex.toUpperCase()} · ${c.pantone||''}`,
-          type: "COLOR",
-          valuesByMode: {
-            "mode-1": { r: rgb.r/255, g: rgb.g/255, b: rgb.b/255, a: 1 }
-          }
-        };
-      })
-    }];
-    this._download('figma-variables.json', JSON.stringify({ collections }, null, 2), 'application/json');
-    App.toast('Figma variables exported');
-  },
-
-  _expASE() {
-    // Adobe Swatch Exchange — binary format
-    // Header: ASEF, version 1.0, block count
-    const colours = this.colours;
-    const enc = new TextEncoder();
-    const blocks = colours.map(c => {
-      const rgb = CS.hexToRgb(c.hex);
-      const nameUtf16 = [];
-      const name = c.name.slice(0,32);
-      for (let i = 0; i < name.length; i++) nameUtf16.push(name.charCodeAt(i));
-      nameUtf16.push(0); // null terminator
-      const nameLen = nameUtf16.length; // length in UTF-16 chars
-      // Block: type(2) + length(4) + nameLen(2) + name(nameLen*2) + colorSpace(4) + RGB(12) + colorType(2)
-      const blockDataLen = 2 + nameLen*2 + 4 + 4*3 + 2;
-      const buf = new ArrayBuffer(2 + 4 + blockDataLen);
-      const dv = new DataView(buf);
-      let o = 0;
-      dv.setUint16(o, 0x0001); o+=2;   // color entry block type
-      dv.setUint32(o, blockDataLen); o+=4;
-      dv.setUint16(o, nameLen); o+=2;
-      for (const cp of nameUtf16) { dv.setUint16(o, cp); o+=2; }
-      // Color space: RGB\0
-      dv.setUint8(o,'R'.charCodeAt(0)); dv.setUint8(o+1,'G'.charCodeAt(0));
-      dv.setUint8(o+2,'B'.charCodeAt(0)); dv.setUint8(o+3,' '.charCodeAt(0)); o+=4;
-      dv.setFloat32(o, rgb.r/255); o+=4;
-      dv.setFloat32(o, rgb.g/255); o+=4;
-      dv.setFloat32(o, rgb.b/255); o+=4;
-      dv.setUint16(o, 0); // 0 = global
-      return buf;
-    });
-
-    const header = new ArrayBuffer(12);
-    const hv = new DataView(header);
-    hv.setUint8(0,0x41);hv.setUint8(1,0x53);hv.setUint8(2,0x45);hv.setUint8(3,0x46); // ASEF
-    hv.setUint16(4,1); hv.setUint16(6,0); // version 1.0
-    hv.setUint32(8, colours.length);
-
-    const total = 12 + blocks.reduce((s,b) => s+b.byteLength, 0);
-    const out = new Uint8Array(total);
-    out.set(new Uint8Array(header), 0);
-    let pos = 12;
-    blocks.forEach(b => { out.set(new Uint8Array(b), pos); pos += b.byteLength; });
-
-    this._downloadBinary('digby-palette.ase', out);
-    App.toast('Adobe ASE exported');
-  },
-
-  _expPNG() { this.exportPNG(); App.forceCloseOv(); },
-
-  _download(filename, text, mime='text/plain') {
-    const blob = new Blob([text], { type: mime });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  },
-
-  _downloadBinary(filename, uint8) {
-    const blob = new Blob([uint8], { type: 'application/octet-stream' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  },
+  exportPNG() {
     if (!this.colours.length) { App.toast('Add colours first'); return; }
     const cols = 3, CARD_W = 260, CARD_H = 320, PAD = 20, GAP = 12, INFO_H = 72;
     const rows = Math.ceil(this.colours.length / cols);
