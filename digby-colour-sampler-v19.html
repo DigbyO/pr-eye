@@ -704,6 +704,7 @@ a{color:var(--accent);text-decoration:none}
             <div id="exp-root-name" style="font-size:14px;font-weight:700">Select a colour below</div>
             <div id="exp-root-hex" style="font-size:11px;color:var(--muted)"></div>
           </div>
+          <button class="btn btn-s btn-sm" onclick="SwatchExport.openFromHexes([Explorer.rootHex])" title="Export this colour as swatch">🎨</button>
         </div>
         <div id="exp-root-chips"></div>
         <div id="exp-seed-note" style="display:none;font-size:10px;color:var(--muted);padding:4px 12px 8px;line-height:1.5">
@@ -1623,7 +1624,7 @@ const App={
       <div class="set-sec">Network</div>
       <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online — API enrichment active':'Offline — local data only'}</span></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version 3.0</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">2.0</span></div>
       <div class="set-row"><div class="set-l">Made by</div><span style="font-size:11px;color:var(--muted)">Digby — PR Eye Ltd</span></div>
     </div>`);
   },
@@ -2503,7 +2504,10 @@ const Explorer={
 
   // Called when the Explorer tab is opened
   onOpen(){
-    if(Sampler.currentHex && /^#[0-9a-f]{6}$/i.test(Sampler.currentHex)){
+    // Only pull from Sampler if no colour was explicitly set via setRoot()
+    if(this._pendingRoot){
+      this._pendingRoot = false; // consume the flag
+    } else if(Sampler.currentHex && /^#[0-9a-f]{6}$/i.test(Sampler.currentHex)){
       this.rootHex = Sampler.currentHex;
     }
     this.render();
@@ -2514,6 +2518,7 @@ const Explorer={
 
   setRoot(h){
     this.rootHex = h;
+    this._pendingRoot = true; // signal to onOpen() not to override with Sampler colour
     this.render();
   },
 
@@ -2570,7 +2575,10 @@ const Explorer={
       ['mono','Monochromatic']
     ];
     document.getElementById('harm-container').innerHTML = defs.map(([k,label])=>`
-      <div style="padding:2px 12px 0;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${label}</div>
+      <div style="padding:2px 12px 0;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between">
+        <span>${label}</span>
+        <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 7px" onclick="SwatchExport.openFromHexes(${JSON.stringify(h[k])},'polaroids')" title="Export ${label} as swatches">🎨</button>
+      </div>
       <div class="harm-row">${h[k].map(hex=>`
         <div class="harm-sw" style="background:${hex}"
              onclick="Explorer.setRoot('${hex}')"
@@ -2693,8 +2701,10 @@ const Explorer={
           <div class="trio-acts">
             <button class="btn btn-s btn-sm"
                     onclick="Explorer._saveTrioAll(${JSON.stringify(hexList)})">+ All</button>
+            <button class="btn btn-s btn-sm"
+                    onclick="SwatchExport.openFromHexes(${JSON.stringify(hexList)},'polaroids')">🎨 Swatch</button>
             <button class="btn btn-p btn-sm"
-                    onclick="Explorer._exportTrio(${JSON.stringify(hexList)},'${v.label}')">Export</button>
+                    onclick="Explorer._exportTrio(${JSON.stringify(hexList)},'${v.label}')">Export PNG</button>
           </div>
         </div>
       </div>`;
@@ -2740,7 +2750,8 @@ const Explorer={
       W/2, H-8
     );
     const a=document.createElement('a'); a.href=canvas.toDataURL('image/png');
-    a.download=`trio-${this.trioMode}-${Date.now()}.png`; a.click();
+    a.download=`trio-${this.trioMode}-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     App.toast('Trio exported');
   },
 
@@ -3377,6 +3388,7 @@ const SwatchExport = {
   includeText: true,
   bgColor: '#1a1a1a',
   selectedIds: new Set(),
+  _ephemeral: [], // temp colour objects for hexes not in library
 
   RATIOS: [
     {id:'1:1',    label:'Square',    w:1,   h:1,   note:'Tile, Instagram, mood board'},
@@ -3429,8 +3441,35 @@ const SwatchExport = {
     setTimeout(() => this.preview(), 100);
   },
 
+  // Open swatch export pre-loaded with specific hex values (e.g. from Explorer)
+  // Hex values already in the library use their existing entry; others are created in-memory
+  openFromHexes(hexes, layoutHint) {
+    if (!hexes || !hexes.length) { App.toast('No colours to export'); return; }
+    const lib = DS.all();
+    this._ephemeral = [];
+    this.selectedIds = new Set();
+    hexes.forEach(hex => {
+      const existing = lib.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+      if (existing) {
+        this.selectedIds.add(existing.id);
+      } else {
+        // Build a full colour object without saving to library
+        const entry = DS.makeEntry(hex, 'explorer');
+        this._ephemeral.push(entry);
+        this.selectedIds.add(entry.id);
+      }
+    });
+    if (layoutHint) this.layout = layoutHint;
+    App.openOv(this.buildPanel());
+    setTimeout(() => this.preview(), 100);
+  },
+
   selectedColours() {
-    return DS.all().filter(c => this.selectedIds.has(c.id));
+    const libMap = new Map(DS.all().map(c => [c.id, c]));
+    const ephMap = new Map((this._ephemeral || []).map(c => [c.id, c]));
+    return [...this.selectedIds]
+      .map(id => libMap.get(id) || ephMap.get(id))
+      .filter(Boolean);
   },
 
   buildPanel() {
