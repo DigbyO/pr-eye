@@ -726,6 +726,26 @@ a{color:var(--accent);text-decoration:none}
         </div>
       </div>
 
+      <div class="sec">Colour Generator</div>
+      <div id="trio-section">
+        <div id="trio-mode-row">
+          <button class="trio-mode-btn on"  data-m="complementary" onclick="Explorer.setTrioMode(this)">Complementary</button>
+          <button class="trio-mode-btn"     data-m="contrast"      onclick="Explorer.setTrioMode(this)">Contrast</button>
+          <button class="trio-mode-btn"     data-m="bold"          onclick="Explorer.setTrioMode(this)">Bold</button>
+          <button class="trio-mode-btn"     data-m="subtle"        onclick="Explorer.setTrioMode(this)">Subtle</button>
+          <button class="trio-mode-btn"     data-m="radical"       onclick="Explorer.setTrioMode(this)">Radical</button>
+          <button class="trio-mode-btn"     data-m="editorial"     onclick="Explorer.setTrioMode(this)">Editorial</button>
+        </div>
+        <div id="trio-count-row">
+          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)">Colours</span>
+          <button class="trio-count-btn on" data-n="3" onclick="Explorer.setTrioCount(3)">3</button>
+          <button class="trio-count-btn"    data-n="4" onclick="Explorer.setTrioCount(4)">4</button>
+          <button class="trio-count-btn"    data-n="6" onclick="Explorer.setTrioCount(6)">6</button>
+          <button class="trio-count-btn"    data-n="9" onclick="Explorer.setTrioCount(9)">9</button>
+        </div>
+        <div id="trio-display"></div>
+      </div>
+
       <div class="sec">Aesthetic Colour Generator</div>
       <div id="colgen-section" style="padding:0 0 4px">
         <div id="colgen-mode-row" style="display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px">
@@ -744,26 +764,6 @@ a{color:var(--accent);text-decoration:none}
         </div>
         <div id="colgen-desc" style="padding:2px 12px 8px;font-size:10px;color:var(--muted);line-height:1.5"></div>
         <div id="colgen-palette" style="padding:0 12px 12px"></div>
-      </div>
-
-      <div class="sec">3-Colour Trio Generator</div>
-      <div id="trio-section">
-        <div id="trio-mode-row">
-          <button class="trio-mode-btn on"  data-m="complementary" onclick="Explorer.setTrioMode(this)">Complementary</button>
-          <button class="trio-mode-btn"     data-m="contrast"      onclick="Explorer.setTrioMode(this)">Contrast</button>
-          <button class="trio-mode-btn"     data-m="bold"          onclick="Explorer.setTrioMode(this)">Bold</button>
-          <button class="trio-mode-btn"     data-m="subtle"        onclick="Explorer.setTrioMode(this)">Subtle</button>
-          <button class="trio-mode-btn"     data-m="radical"       onclick="Explorer.setTrioMode(this)">Radical</button>
-          <button class="trio-mode-btn"     data-m="editorial"     onclick="Explorer.setTrioMode(this)">Editorial</button>
-        </div>
-        <div id="trio-count-row">
-          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)">Colours</span>
-          <button class="trio-count-btn on" data-n="3" onclick="Explorer.setTrioCount(3)">3</button>
-          <button class="trio-count-btn"    data-n="4" onclick="Explorer.setTrioCount(4)">4</button>
-          <button class="trio-count-btn"    data-n="6" onclick="Explorer.setTrioCount(6)">6</button>
-          <button class="trio-count-btn"    data-n="9" onclick="Explorer.setTrioCount(9)">9</button>
-        </div>
-        <div id="trio-display"></div>
       </div>
 
       <div class="sec">Sample-Based LUT Generator</div>
@@ -1065,6 +1065,7 @@ a{color:var(--accent);text-decoration:none}
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.suggest()">✦ Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()">🎨 Swatch</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
         </div>
         <div id="pb-lib-picker" style="display:none">
@@ -1736,7 +1737,7 @@ const App={
       <div class="set-sec">Network</div>
       <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online — API enrichment active':'Offline — local data only'}</span></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">2.0</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 1.0</span></div>
       <div class="set-row"><div class="set-l">Made by</div><span style="font-size:11px;color:var(--muted)">Digby — PR Eye Ltd</span></div>
     </div>`);
   },
@@ -2760,12 +2761,11 @@ const Explorer={
     },
     editorial:{
       label:'Editorial',
-      desc:'High-fashion: one neutral, one statement, one disruptor',
+      desc:'High-fashion: root anchors, supported by a cool neutral and a hue disruptor',
       build(root,h,CS){
-        const neutral   = CS._desaturate(root, .85);
-        const statement = h.complementary[1];
-        const disruptor = CS._shiftHsl(root, 35, -.1, .15);
-        return [[neutral,'Neutral'],[statement,'Statement'],[disruptor,'Disruptor']];
+        const neutral   = CS._desaturate(CS._shiftHsl(root, 0, -.6, .18), .7); // lifted cool neutral — not the root
+        const disruptor = CS._shiftHsl(root, 40, .05, .08);
+        return [[root,'Anchor'],[neutral,'Neutral'],[disruptor,'Disruptor']];
       }
     }
   },
@@ -4491,6 +4491,11 @@ const PaletteBuilder = {
       html += `<div class="pb-slot-empty" onclick="PaletteBuilder.addFromWheel()">+</div>`;
     }
     grid.innerHTML = html;
+  },
+
+  swatchExport() {
+    if (!this.colours.length) { App.toast('Add colours first'); return; }
+    SwatchExport.openFromHexes(this.colours.map(c => c.hex), 'polaroids');
   },
 
   exportPNG() {
