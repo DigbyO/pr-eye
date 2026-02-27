@@ -1182,7 +1182,10 @@ a{color:var(--accent);text-decoration:none}
 <div id="share-sheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end">
   <div style="width:100%;background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:16px 16px 28px;animation:su .22s cubic-bezier(.4,0,.2,1)">
     <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div>
-    <div id="share-title" style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Share</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
+      <img id="share-image-preview" src="" alt="" style="display:none;width:72px;height:86px;border-radius:6px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-shrink:0">
+      <div id="share-title" style="font-size:15px;font-weight:700;color:var(--text);padding-top:2px;line-height:1.3">Share</div>
+    </div>
     <div style="display:flex;flex-direction:column;gap:9px" id="share-options"></div>
     <button class="btn btn-s" style="width:100%;margin-top:14px" onclick="App.closeShare()">Cancel</button>
   </div>
@@ -1798,6 +1801,72 @@ const App={
   forceCloseOv(){document.getElementById('ov').classList.remove('open');App.refresh()},
 
   // ── SHARE SHEET ─────────────────────────────────────────────────
+  shareWithImage(title, text, pngDataUrl){
+    const sheet  = document.getElementById('share-sheet');
+    const opts   = document.getElementById('share-options');
+    const tEl    = document.getElementById('share-title');
+    tEl.textContent = title || 'Share';
+
+    // Show polaroid preview at top of sheet
+    const preview = document.getElementById('share-image-preview');
+    if(preview && pngDataUrl){
+      preview.src = pngDataUrl;
+      preview.style.display = 'block';
+    }
+
+    const waText   = encodeURIComponent(text);
+    const mailBody = encodeURIComponent(text);
+    const mailSubj = encodeURIComponent(title || 'Colour from Digby Colour Sampler');
+
+    let html = '';
+
+    // Try Web Share API Level 2 (image file sharing — iOS Safari 15+, Android Chrome)
+    const canShareFiles = navigator.canShare && navigator.canShare({files:[new File([''],`${title}.png`,{type:'image/png'})]});
+    if(canShareFiles){
+      html += `<button class="share-opt-btn" id="share-native-img-btn">
+        <span class="share-opt-icon">📲</span><span class="share-opt-label">Share Image via…</span></button>`;
+    } else if(navigator.share){
+      html += `<button class="share-opt-btn" onclick="navigator.share({title:${JSON.stringify(title||'')},text:${JSON.stringify(text)}}).catch(()=>{});App.closeShare()">
+        <span class="share-opt-icon">📲</span><span class="share-opt-label">Share via…</span></button>`;
+    }
+    html += `<button class="share-opt-btn" onclick="window.open('https://wa.me/?text=${waText}','_blank');App.closeShare()">
+      <span class="share-opt-icon" style="color:#25D366">💬</span><span class="share-opt-label">WhatsApp</span></button>`;
+    html += `<button class="share-opt-btn" onclick="window.open('mailto:?subject=${mailSubj}&body=${mailBody}','_blank');App.closeShare()">
+      <span class="share-opt-icon">✉️</span><span class="share-opt-label">Email</span></button>`;
+    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(text)}).then(()=>App.toast('Copied!'));App.closeShare()">
+      <span class="share-opt-icon">📋</span><span class="share-opt-label">Copy Text</span></button>`;
+    if(pngDataUrl){
+      html += `<button class="share-opt-btn" onclick="App._downloadPolaroid(${JSON.stringify(pngDataUrl)},${JSON.stringify(title)});App.closeShare()">
+        <span class="share-opt-icon">⬇️</span><span class="share-opt-label">Save Polaroid PNG</span></button>`;
+    }
+
+    opts.innerHTML = html;
+    sheet.style.display = 'flex';
+    sheet.onclick = e => { if(e.target===sheet) this.closeShare(); };
+
+    // Wire up the native image share button after DOM insertion
+    if(canShareFiles && pngDataUrl){
+      const btn = document.getElementById('share-native-img-btn');
+      if(btn) btn.onclick = async()=>{
+        try{
+          const res = await fetch(pngDataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], `${title}.png`, {type:'image/png'});
+          await navigator.share({title, text, files:[file]});
+          App.closeShare();
+        }catch(e){ if(e.name!=='AbortError') App.toast('Share failed'); }
+      };
+    }
+  },
+
+  _downloadPolaroid(dataUrl, title){
+    const a=document.createElement('a');
+    a.href=dataUrl;
+    a.download=`${(title||'colour').replace(/[^a-z0-9]/gi,'-').toLowerCase()}-polaroid.png`;
+    a.click();
+    App.toast('Polaroid saved');
+  },
+
   share(title, text, url){
     const sheet = document.getElementById('share-sheet');
     const opts  = document.getElementById('share-options');
@@ -1816,7 +1885,7 @@ const App={
       html += `<button class="share-opt-btn" onclick="navigator.share({title:${JSON.stringify(title||'')},text:${JSON.stringify(body)},url:${JSON.stringify(fullUrl)}}).catch(()=>{});App.closeShare()">
         <span class="share-opt-icon">📲</span><span class="share-opt-label">Share via…</span></button>`;
     }
-    html += `<button class="share-opt-btn" onclick="window.open('https://wa.me/?text=${waText}','_blank','noopener');App.closeShare()">
+    html += `<button class="share-opt-btn" onclick="window.open('https://wa.me/?text=${waText}','_blank');App.closeShare()">
       <span class="share-opt-icon" style="color:#25D366">💬</span><span class="share-opt-label">WhatsApp</span></button>`;
     html += `<button class="share-opt-btn" onclick="window.open('mailto:?subject=${mailSubj}&body=${mailBody}','_blank');App.closeShare()">
       <span class="share-opt-icon">✉️</span><span class="share-opt-label">Email</span></button>`;
@@ -1830,6 +1899,8 @@ const App={
 
   closeShare(){
     document.getElementById('share-sheet').style.display = 'none';
+    const prev = document.getElementById('share-image-preview');
+    if (prev) { prev.style.display = 'none'; prev.src = ''; }
   },
 
   openSettings(){
@@ -1851,7 +1922,16 @@ const App={
       <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online — API enrichment active':'Offline — local data only'}</span></div>
       <div class="set-sec">About</div>
       <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 1.0</span></div>
-      <div class="set-row"><div class="set-l">Made by</div><span style="font-size:11px;color:var(--muted)">Digby — PR Eye Ltd</span></div>
+      <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
+      <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
+      <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
+        <button class="btn btn-p" style="width:100%;font-size:14px;padding:13px"
+          onclick="window.open('https://digby.shop','_blank');App.forceCloseOv()">
+          🛍 Visit digby.shop
+        </button>
+      </div>
     </div>`);
   },
 
@@ -2612,7 +2692,18 @@ const Gallery={
   },
 
   openDetail(id){
-    const c=DS.get(id);if(!c)return;
+    let c=DS.get(id);if(!c)return;
+    // Hydrate old entries that may be missing lab/paint fields (saved before these were added)
+    if(!c.lab){const rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);}
+    if(!c.hsl){const rgb=CS.hexToRgb(c.hex);c.hsl=CS.rgbToHsl(rgb.r,rgb.g,rgb.b);}
+    if(!c.lrv&&c.lrv!==0){c.lrv=CS.lrv(c.lab);}
+    if(!c.kelvin){const rgb=CS.hexToRgb(c.hex);c.kelvin=CS.kelvin(rgb);}
+    if(!c.farrowBall){c.farrowBall=CS.nearestFB(c.lab);}
+    if(!c.earthborn){c.earthborn=CS.nearestEB(c.lab);}
+    if(!c.littleGreene){c.littleGreene=CS.nearestLG(c.lab);}
+    // Persist hydration so next open is instant
+    DS.update(id, {lab:c.lab,hsl:c.hsl,lrv:c.lrv,kelvin:c.kelvin,
+      farrowBall:c.farrowBall,earthborn:c.earthborn,littleGreene:c.littleGreene});
     App.openOv(`<div id="detail-body">
       <div id="det-swatch" style="background:${c.hex}"></div>
       <div id="det-name" style="font-family:'Permanent Marker',cursive;font-size:26px;margin-bottom:10px">${c.name}</div>
@@ -2625,9 +2716,9 @@ const Gallery={
         <div class="det-val"><div class="det-vl">Source</div><div class="det-v" style="font-size:11px">${c.source}</div></div>
       </div>
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
-      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${lg.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
-      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${fb.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
-      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${eb.url}','_blank','noopener')">Order ↗</button></div>`:''})()}
+      ${(()=>{const lg=c.littleGreene||CS.nearestLG(c.lab);return lg?`<div class="det-match"><div class="det-ms" style="background:${lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${lg.name}</div><div class="det-mc">${lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${lg.url}','_blank')">Order ↗</button></div>`:''})()}
+      ${(()=>{const fb=c.farrowBall||CS.nearestFB(c.lab);return fb?`<div class="det-match"><div class="det-ms" style="background:${fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${fb.name}</div><div class="det-mc">${fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${fb.url}','_blank')">Order ↗</button></div>`:''})()}
+      ${(()=>{const eb=c.earthborn||CS.nearestEB(c.lab);return eb?`<div class="det-match"><div class="det-ms" style="background:${eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${eb.name}</div><div class="det-mc">${eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();window.open('${eb.url}','_blank')">Order ↗</button></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
@@ -2708,13 +2799,109 @@ const Gallery={
   },
 
   shareOne(id){
-    const c=DS.get(id);if(!c)return;
-    const lg=(c.littleGreene||CS.nearestLG(c.lab))?.name||'N/A';
-    const fb=(c.farrowBall||CS.nearestFB(c.lab))?.name||'N/A';
-    const eb=(c.earthborn||CS.nearestEB(c.lab))?.name||'N/A';
-    const text=`🎨 ${c.name} — ${c.hex.toUpperCase()}\nLRV: ${c.lrv}% · ${c.hsl.h}° ${c.hsl.s}% ${c.hsl.l}%\n🟫 Little Greene: ${lg}\n⬜ Farrow & Ball: ${fb}\n🌿 Earthborn: ${eb}\nvia digby.shop`;
+    // Hydrate before sharing too
+    let c=DS.get(id);if(!c)return;
+    if(!c.lab){const rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);}
+    if(!c.hsl){const rgb=CS.hexToRgb(c.hex);c.hsl=CS.rgbToHsl(rgb.r,rgb.g,rgb.b);}
+    if(!c.lrv&&c.lrv!==0){c.lrv=CS.lrv(c.lab);}
+    if(!c.farrowBall){c.farrowBall=CS.nearestFB(c.lab);}
+    if(!c.earthborn){c.earthborn=CS.nearestEB(c.lab);}
+    if(!c.littleGreene){c.littleGreene=CS.nearestLG(c.lab);}
+
+    const lg=c.littleGreene?.name||'N/A';
+    const fb=c.farrowBall?.name||'N/A';
+    const eb=c.earthborn?.name||'N/A';
+    // Text without digby.shop link (per user preference — shop in settings instead)
+    const text=`🎨 ${c.name}\n${c.hex.toUpperCase()} · LRV ${c.lrv}%\nLittle Greene: ${lg}\nFarrow & Ball: ${fb}\nEarthborn: ${eb}`;
+
+    // Render polaroid on the hidden export canvas
+    const pngDataUrl = this._renderSharePolaroid(c);
+
     App.forceCloseOv();
-    setTimeout(()=>App.share(c.name, text, 'https://digby.shop'), 150);
+    setTimeout(()=>App.shareWithImage(c.name, text, pngDataUrl), 150);
+  },
+
+  _renderSharePolaroid(c){
+    const canvas = document.getElementById('export-canvas');
+    const W=400, H=480;
+    canvas.width=W; canvas.height=H;
+    const ctx=canvas.getContext('2d');
+    const rgb=CS.hexToRgb(c.hex);
+    const lrv=c.lrv||CS.lrv(c.lab||CS.rgbToLab(rgb.r,rgb.g,rgb.b));
+    const onDark=lrv<50;
+    const textCol=onDark?'rgba(255,255,255,.92)':'rgba(0,0,0,.82)';
+    const mutedCol=onDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.4)';
+
+    // White polaroid card
+    ctx.fillStyle='#ffffff';
+    ctx.shadowColor='rgba(0,0,0,.18)';
+    ctx.shadowBlur=24;
+    ctx.shadowOffsetY=6;
+    roundRect(ctx,20,20,W-40,H-40,12);
+    ctx.fill();
+    ctx.shadowColor='transparent';
+
+    // Colour block
+    ctx.fillStyle=c.hex;
+    roundRect(ctx,36,36,W-72,H-180,8);
+    ctx.fill();
+
+    // Hex overlay bottom-right of swatch
+    ctx.fillStyle=onDark?'rgba(0,0,0,.4)':'rgba(255,255,255,.5)';
+    ctx.fillRect(W-36-90,H-180-28,90,22);
+    ctx.fillStyle=onDark?'rgba(255,255,255,.85)':'rgba(0,0,0,.75)';
+    ctx.font='bold 11px "Space Mono",monospace';
+    ctx.textAlign='right';
+    ctx.fillText(c.hex.toUpperCase(),W-36-6,H-180-10);
+
+    // Name
+    ctx.fillStyle='#1a1a1a';
+    ctx.font='bold 22px "Permanent Marker",cursive';
+    ctx.textAlign='left';
+    ctx.fillText(c.name,36,H-120);
+
+    // Paint matches
+    const lg=c.littleGreene?.name||'—';
+    const fb=c.farrowBall?.name||'—';
+    const eb=c.earthborn?.name||'—';
+    ctx.font='11px "Space Mono",monospace';
+    ctx.fillStyle='#555';
+    const matches=[
+      ['LG',lg,c.littleGreene?.hex],
+      ['F&B',fb,c.farrowBall?.hex],
+      ['EB',eb,c.earthborn?.hex]
+    ];
+    matches.forEach(([brand,name,hex],i)=>{
+      const y=H-96+i*22;
+      // Brand swatch dot
+      if(hex){ctx.fillStyle=hex;ctx.beginPath();ctx.arc(44,y-3,6,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle='#888';
+      ctx.font='9px "Space Mono",monospace';
+      ctx.textAlign='left';
+      ctx.fillText(brand,54,y);
+      ctx.fillStyle='#333';
+      ctx.font='11px -apple-system,sans-serif';
+      ctx.fillText(name.length>22?name.slice(0,21)+'…':name,80,y);
+    });
+
+    // Footer
+    ctx.fillStyle='#c8a96e';
+    ctx.font='bold 10px "Space Mono",monospace';
+    ctx.textAlign='right';
+    ctx.fillText('digby.shop',W-36,H-28);
+    ctx.fillStyle='#aaa';
+    ctx.font='9px "Space Mono",monospace';
+    ctx.fillText('Spectrum 1.0 · Digby Colour Sampler',36,H-28);
+
+    function roundRect(ctx,x,y,w,h,r){
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+      ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+      ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+      ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+    }
+
+    return canvas.toDataURL('image/png');
   },
 
   shareAll(){
