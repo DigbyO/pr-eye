@@ -410,6 +410,9 @@ a{color:var(--accent);text-decoration:none}
 /* ── TRIO GENERATOR ── */
 #trio-section{padding:0 0 4px}
 #trio-mode-row{display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px}
+#trio-count-row{display:flex;align-items:center;gap:6px;padding:4px 12px 8px}
+.trio-count-btn{font-size:10px;font-weight:700;width:28px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.trio-count-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
 .trio-mode-btn{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .15s;-webkit-tap-highlight-color:transparent}
 .trio-mode-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
 #trio-display{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
@@ -760,6 +763,13 @@ a{color:var(--accent);text-decoration:none}
           <button class="trio-mode-btn"     data-m="subtle"        onclick="Explorer.setTrioMode(this)">Subtle</button>
           <button class="trio-mode-btn"     data-m="radical"       onclick="Explorer.setTrioMode(this)">Radical</button>
           <button class="trio-mode-btn"     data-m="editorial"     onclick="Explorer.setTrioMode(this)">Editorial</button>
+        </div>
+        <div id="trio-count-row">
+          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)">Colours</span>
+          <button class="trio-count-btn on" data-n="3" onclick="Explorer.setTrioCount(3)">3</button>
+          <button class="trio-count-btn"    data-n="4" onclick="Explorer.setTrioCount(4)">4</button>
+          <button class="trio-count-btn"    data-n="6" onclick="Explorer.setTrioCount(6)">6</button>
+          <button class="trio-count-btn"    data-n="9" onclick="Explorer.setTrioCount(9)">9</button>
         </div>
         <div id="trio-display"></div>
       </div>
@@ -2482,6 +2492,7 @@ const Gallery={
 const Explorer={
   rootHex:'#C09870',
   trioMode:'complementary',
+  trioCount: 3,
 
   SEEDS:['#C1440E','#1B4F72','#6D8B3A','#8B1A4A','#2E4057','#D4A017'],
 
@@ -2526,6 +2537,12 @@ const Explorer={
     document.querySelectorAll('.trio-mode-btn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on');
     this.trioMode = btn.dataset.m;
+    this.renderTrio();
+  },
+
+  setTrioCount(n){
+    this.trioCount = n;
+    document.querySelectorAll('.trio-count-btn').forEach(b=>b.classList.toggle('on', +b.dataset.n === n));
     this.renderTrio();
   },
 
@@ -2661,9 +2678,46 @@ const Explorer={
   renderTrio(){
     const mode   = this._trioModes[this.trioMode];
     const h      = CS.harmonies(this.rootHex);
-    const trios  = mode.build(this.rootHex, h, CS);
+    const base   = mode.build(this.rootHex, h, CS); // always [[hex,role],...] x 3
+    const count  = this.trioCount || 3;
     const el     = document.getElementById('trio-display');
     if(!el) return;
+
+    // Expand base 3 to target count using harmony-derived extras
+    const expand = (pairs, n) => {
+      if(n <= 3) return pairs.slice(0, n);
+      const extras = [
+        [CS._shiftHsl(this.rootHex,  15, .05,  .08), 'Warm Shift'],
+        [CS._shiftHsl(this.rootHex, -15, .05, -.08), 'Cool Shift'],
+        [CS._shiftHsl(pairs[1][0],   20, .10,  .12), 'Accent Light'],
+        [CS._shiftHsl(pairs[1][0],  -20, .10, -.12), 'Accent Deep'],
+        [CS._shiftHsl(pairs[2][0],   30, -.15, .05), 'Tonal A'],
+        [CS._shiftHsl(pairs[2][0],  -30, -.15,-.05), 'Tonal B'],
+        [CS._shiftHsl(this.rootHex,  60, .08,  .05), 'Split A'],
+        [CS._shiftHsl(this.rootHex, -60, .08, -.05), 'Split B'],
+        [CS._shiftLightness(pairs[1][0], 15),         'Mid Light'],
+      ];
+      const out = [...pairs];
+      for(const candidate of extras){
+        if(out.length >= n) break;
+        const tooClose = out.some(([eh])=>
+          CS.dE(
+            CS.rgbToLab(...Object.values(CS.hexToRgb(eh))),
+            CS.rgbToLab(...Object.values(CS.hexToRgb(candidate[0])))
+          ) < 8
+        );
+        if(!tooClose) out.push(candidate);
+      }
+      // Pad with lightness variants if still short
+      while(out.length < n){
+        const src = out[out.length % 3];
+        out.push([CS._shiftLightness(src[0], out.length % 2 === 0 ? 15 : -15), `Variant ${out.length-2}`]);
+      }
+      return out.slice(0, n);
+    };
+
+    const trios   = expand(base, count);
+    const swatchH = count <= 3 ? 80 : count <= 6 ? 68 : 54;
 
     const variants = [
       {label:mode.label,     desc:mode.desc,                                        shift:0},
@@ -2679,13 +2733,13 @@ const Explorer={
       });
       const hexList = swatches.map(s=>s.hex);
       return `<div class="trio-card">
-        <div class="trio-swatches">
+        <div class="trio-swatches" style="height:${swatchH}px">
           ${swatches.map(s=>`
             <div class="trio-sw" style="background:${s.hex}"
                  onclick="Explorer.setRoot('${s.hex}')"
                  title="Explore ${s.hex}">
               <div class="trio-sw-info" style="color:${s.onDark?'rgba(255,255,255,.9)':'rgba(0,0,0,.75)'}">
-                <div style="font-weight:700">${s.role}</div>
+                ${count <= 6 ? `<div style="font-weight:700">${s.role}</div>` : ''}
                 <div>${s.hex.toUpperCase()}</div>
               </div>
               <button class="trio-add-btn"
@@ -2717,7 +2771,7 @@ const Explorer={
   },
   _saveTrioAll(hexes){
     hexes.forEach(hex=>{ const e=DS.makeEntry(hex,'explorer'); DS.add(e); });
-    App.refresh(); App.toast('3 colours saved to library');
+    App.refresh(); App.toast(`${hexes.length} colours saved to library`);
   },
   _exportTrio(hexes, label){
     const W=560, H=340, PAD=20;
