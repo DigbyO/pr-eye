@@ -1872,6 +1872,10 @@ const Sampler={
 
   flipCamera(){
     this.camFront=!this.camFront;
+    if(this.stream){
+      this.stream.getTracks().forEach(t=>{try{t.stop();}catch(e){}});
+      this.stream=null;
+    }
     App.toast(this.camFront?'Front camera':'Rear camera');
     this.startCamera();
   },
@@ -1988,6 +1992,8 @@ const Sampler={
 
   toggleFreeze(){
     this.frozen=!this.frozen;
+    const v=document.getElementById('cam-video');
+    if(this.frozen){v.pause();}else{v.play().catch(()=>{});}
     const b=document.getElementById('freeze-btn');
     b.classList.toggle('on',this.frozen);
     b.textContent=this.frozen?'Unfreeze':'Freeze';
@@ -2118,7 +2124,13 @@ const Sampler={
 
   saveQueue(){
     if(!this.pickQueue.length)return;
+    const FIFO_MAX=9;
     const saved=this.pickQueue.map(hex=>{
+      const lib=DS.all();
+      if(lib.length>=FIFO_MAX){
+        // Remove oldest (last in array) to keep gallery at exactly 9
+        DS.remove(lib[lib.length-1].id);
+      }
       const e=DS.makeEntry(hex,this.mode);DS.add(e);return e.name;
     });
     this.pickQueue=[];
@@ -3835,7 +3847,9 @@ const SwatchExport = {
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download=`digby-${sel.length}colours-${this.layout}.png`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     App.toast(`${sel.length} colour${sel.length>1?'s':''} exported`);
   },
 
