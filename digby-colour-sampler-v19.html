@@ -1161,10 +1161,9 @@ a{color:var(--accent);text-decoration:none}
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()"> Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
-          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shareURL()">Share URL</button>
-          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.exportJSON()">JSON</button>
+          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()"> Swatch</button>
-          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
         </div>
 
         <!-- Inline wheel colour picker -->
@@ -2844,7 +2843,7 @@ const Gallery={
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
       ${(()=>{const _lg=CS.nearestLG(c.lab)||c.littleGreene;return _lg?`<div class="det-match"><div class="det-ms" style="background:${_lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${_lg.name}</div><div class="det-mc">${_lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_lg.url}')">Order </button></div>`:''})()}
       ${(()=>{const _fb=CS.nearestFB(c.lab)||c.farrowBall;return _fb?`<div class="det-match"><div class="det-ms" style="background:${_fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${_fb.name}</div><div class="det-mc">${_fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_fb.url}')">Order </button></div>`:''})()}
-      ${(()=>{const _eb=CS.nearestEB(c.lab)||c.earthborn;return _eb?`<div class="det-match"><div class="det-ms" style="background:${_eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${_eb.name}</div><div class="det-mc">${_eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink(_eb.url || ('https://earthbornpaints.co.uk/?s='+encodeURIComponent(_eb.name)))">Order ⇗</button></div>`:''})()}
+      ${(()=>{const _eb=CS.nearestEB(c.lab)||c.earthborn;return _eb?`<div class="det-match"><div class="det-ms" style="background:${_eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${_eb.name}</div><div class="det-mc">${_eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('https://earthbornpaints.co.uk/?s='+encodeURIComponent(_eb.name))">Search ⇗</button></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
@@ -5048,6 +5047,16 @@ const PaletteBuilder = {
     App.toast(`${e.name} saved to library`);
   },
 
+  saveAll() {
+    if (!this.colours.length) { App.toast('No colours in palette'); return; }
+    this.colours.forEach(c => {
+      const e = DS.makeEntry(c.hex, 'palette');
+      DS.add(e);
+    });
+    App.refresh();
+    App.toast(`${this.colours.length} colour${this.colours.length > 1 ? 's' : ''} saved to library ✓`);
+  },
+
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
   //  INLINE WHEEL PICKER 
@@ -5240,8 +5249,8 @@ const PaletteBuilder = {
                  ondrop="PaletteBuilder._onDrop(event,${i})">
         <div class="pb-slot-colour" style="background:${c.hex}">
           <div class="pb-slot-drag" title="Drag to reorder"></div>
-          <button class="pb-slot-save" onclick="PaletteBuilder.saveToLib(${i})" title="Save to library"></button>
-          <button class="pb-slot-rm"   onclick="PaletteBuilder.remove(${i})" title="Remove"></button>
+          <button class="pb-slot-save" onclick="PaletteBuilder.saveToLib(${i})" title="Save to library">+</button>
+          <button class="pb-slot-rm"   onclick="PaletteBuilder.remove(${i})" title="Remove">−</button>
         </div>
         <div class="pb-slot-info">
           <div class="pb-slot-name">${c.name}</div>
@@ -5437,27 +5446,76 @@ const CVDSim = {
   },
 
   /**
-   * Apply CVD simulation via CSS filter on #app — reliable across all
-   * dynamically-rendered swatches without DOM traversal.
+   * Apply CVD simulation by transforming the background-color of every
+   * swatch element in the current DOM via the JS matrix multiply.
+   * This is the only approach that works reliably in iOS Safari PWA mode
+   * (CSS filter on #app breaks position:fixed overlays in WebKit).
+   *
+   * Elements are found by class and by inline background:#hex style.
+   * Original values are stored in data-orig-bg for restoration.
    */
   _applyToUI() {
+    // Remove old simulated values first (handles mode switches)
+    document.querySelectorAll('[data-orig-bg]').forEach(el => {
+      el.style.background = el.dataset.origBg;
+      delete el.dataset.origBg;
+    });
+
+    // Also clear any lingering CSS filter from old approach
     const app = document.getElementById('app');
-    if (!app) return;
-    const filterMap = {
-      normal:        'none',
-      deuteranopia:  'url(#cvd-deuteranopia)',
-      protanopia:    'url(#cvd-protanopia)',
-      tritanopia:    'url(#cvd-tritanopia)',
-      achromatopsia: 'grayscale(100%) contrast(1.05)',
-    };
-    app.style.filter = filterMap[this.mode] || 'none';
-    // Keep per-swatch data-orig-bg logic for JS-only consumers
+    if (app) app.style.filter = 'none';
+
+    // Manage the persistent status banner
+    const bannerId = '_cvd_banner';
+    let banner = document.getElementById(bannerId);
     if (this.mode === 'normal') {
-      document.querySelectorAll('[data-orig-bg]').forEach(el => {
-        el.style.background = el.dataset.origBg;
-        delete el.dataset.origBg;
-      });
+      if (banner) banner.remove();
+      return;
     }
+
+    // Create/update the status banner so user knows simulation is active
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = bannerId;
+      banner.style.cssText = [
+        'position:fixed','top:0','left:0','right:0','z-index:9999',
+        'background:rgba(80,40,140,.92)','color:#fff','font-size:10px',
+        'font-family:var(--mono)','text-align:center','padding:4px 8px',
+        'display:flex','align-items:center','justify-content:center','gap:8px',
+        'letter-spacing:.04em'
+      ].join(';');
+      document.body.appendChild(banner);
+    }
+    banner.innerHTML = `👁 ${this.LABELS[this.mode]} simulation active
+      <button style="background:none;border:1px solid rgba(255,255,255,.5);color:#fff;
+        border-radius:4px;padding:1px 7px;font-size:9px;cursor:pointer;margin-left:6px"
+        onclick="CVDSim.setMode('normal')">Exit</button>`;
+
+    // Find all swatch-like elements: those with inline background:#hex
+    // Covers gallery cards, prompter chips, palette builder slots, harmony swatches, etc.
+    const hexRe = /^#([0-9a-fA-F]{6})$/;
+    const candidates = document.querySelectorAll(
+      '.harm-sw,.pb-slot-colour,.colgen-swatch,.pol-block,.rule-block,' +
+      '.gal-card,[class*="swatch"],[class*="chip"],[class*="sw"]'
+    );
+    // Also catch anything with a plain inline background: #xxxxxx style
+    const allEls = new Set([...candidates,
+      ...Array.from(document.querySelectorAll('*')).filter(el => {
+        const bg = el.style.background || el.style.backgroundColor;
+        return bg && hexRe.test(bg.trim());
+      })
+    ]);
+
+    allEls.forEach(el => {
+      const bg = (el.style.background || el.style.backgroundColor || '').trim();
+      const m  = bg.match(/#([0-9a-fA-F]{6})/i);
+      if (!m) return;
+      const origHex = '#' + m[1];
+      const simHex  = this.simulate(origHex, this.mode);
+      if (simHex === origHex) return; // no change, skip
+      el.dataset.origBg = el.style.background || el.style.backgroundColor;
+      el.style.background = simHex;
+    });
   },
 
   /**
@@ -5662,6 +5720,7 @@ const AutoPalette = {
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-p btn-sm" onclick="AutoPalette._saveAll(window._apHexes)">+ Save All</button>
+        <button class="btn btn-s btn-sm" onclick="AutoPalette.exportPolaroid(window._apHexes)">📷 Polaroid</button>
         <button class="btn btn-s btn-sm" style="margin-left:auto" onclick="document.getElementById('_ap_panel').remove()">Close</button>
       </div>
     </div>`;
@@ -5684,6 +5743,108 @@ const AutoPalette = {
     App.refresh();
     App.toast(hexes.length + ' colour' + (hexes.length > 1 ? 's' : '') + ' saved to library');
     document.getElementById('_ap_panel')?.remove();
+  },
+
+  /**
+   * Export uploaded image + auto-palette swatches as a Polaroid-style PNG.
+   * Layout:
+   *   [28px white border top & sides]
+   *   [uploaded photo, cropped to fill]
+   *   [swatch strip — one block per hex, hex code below each]
+   *   [96px white bottom footer — brand byline]
+   *   [28px white border bottom]
+   */
+  exportPolaroid(hexes) {
+    if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
+    const img = Sampler.uploadImg;
+    if (!img) { App.toast('Upload a photo first'); return; }
+
+    const SCALE   = 2;          // HiDPI / retina
+    const BORDER  = 28 * SCALE;
+    const FOOT_H  = 96 * SCALE; // white footer height
+    const SW_H    = 56 * SCALE; // swatch block height inside footer
+    const CARD_W  = 380 * SCALE;
+
+    // Photo height: maintain aspect ratio, capped at ~70% of typical screen
+    const rawRatio  = img.naturalWidth / img.naturalHeight;
+    const photoW    = CARD_W - BORDER * 2;
+    const photoH    = Math.round(photoW / rawRatio);
+    const CARD_H    = BORDER + photoH + FOOT_H + BORDER;
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = CARD_W;
+    canvas.height = CARD_H;
+    const ctx = canvas.getContext('2d');
+
+    // ── Polaroid white card ───────────────────────────────────────
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+    // ── Subtle drop shadow (draw card slightly inset on transparent bg) ──
+    // (We keep it simple: just the white fill is the "polaroid" feel)
+
+    // ── Photo ─────────────────────────────────────────────────────
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(BORDER, BORDER, photoW, photoH);
+    ctx.clip();
+    ctx.drawImage(img, BORDER, BORDER, photoW, photoH);
+    ctx.restore();
+
+    // ── Photo inner shadow overlay (subtle depth) ─────────────────
+    const shadow = ctx.createLinearGradient(BORDER, BORDER, BORDER, BORDER + photoH);
+    shadow.addColorStop(0,   'rgba(0,0,0,.12)');
+    shadow.addColorStop(0.1, 'rgba(0,0,0,0)');
+    shadow.addColorStop(0.9, 'rgba(0,0,0,0)');
+    shadow.addColorStop(1,   'rgba(0,0,0,.18)');
+    ctx.fillStyle = shadow;
+    ctx.fillRect(BORDER, BORDER, photoW, photoH);
+
+    // ── Colour swatch strip ────────────────────────────────────────
+    const n      = hexes.length;
+    const swW    = Math.floor(photoW / n);
+    const swY    = BORDER + photoH + Math.round((FOOT_H - SW_H) * 0.25);
+    const labelY = swY + SW_H + Math.round(6 * SCALE);
+
+    hexes.forEach((hex, i) => {
+      const x = BORDER + i * swW;
+
+      // Swatch block with rounded top corners
+      const r = 5 * SCALE;
+      ctx.beginPath();
+      ctx.moveTo(x + r, swY);
+      ctx.lineTo(x + swW - r, swY);
+      ctx.quadraticCurveTo(x + swW, swY, x + swW, swY + r);
+      ctx.lineTo(x + swW, swY + SW_H);
+      ctx.lineTo(x, swY + SW_H);
+      ctx.lineTo(x, swY + r);
+      ctx.quadraticCurveTo(x, swY, x + r, swY);
+      ctx.closePath();
+      ctx.fillStyle = hex;
+      ctx.fill();
+
+      // Hex code label centred under each swatch
+      const lrv    = CS.lrv(CS.rgbToLab(CS.hexToRgb(hex).r, CS.hexToRgb(hex).g, CS.hexToRgb(hex).b));
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font      = `${Math.round(7.5 * SCALE)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText(hex.toUpperCase(), x + swW / 2, labelY);
+    });
+
+    // ── Brand byline ───────────────────────────────────────────────
+    ctx.fillStyle   = '#aaaaaa';
+    ctx.font        = `${Math.round(7 * SCALE)}px monospace`;
+    ctx.textAlign   = 'right';
+    ctx.fillText('digby.shop', CARD_W - BORDER, CARD_H - Math.round(9 * SCALE));
+
+    // ── Download ──────────────────────────────────────────────────
+    const a = document.createElement('a');
+    a.href     = canvas.toDataURL('image/png');
+    a.download = 'spectrum-palette-polaroid.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    App.toast('Polaroid exported ✓');
   }
 };
 
