@@ -327,7 +327,7 @@ a{color:var(--accent);text-decoration:none}
    MODULE 4  PROMPTER
  */
 .prom-chips{display:flex;gap:8px;padding:4px 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.prom-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.prom-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;background:none;border:none;padding:4px 2px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .prom-sw{width:44px;height:44px;border-radius:50%;border:3px solid transparent;transition:border-color var(--tr),transform var(--tr)}
 .prom-chip.on .prom-sw{border-color:var(--accent);transform:scale(1.1)}
 .prom-label{font-size:8px;color:var(--muted);text-align:center;max-width:52px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -595,6 +595,7 @@ a{color:var(--accent);text-decoration:none}
       <!-- Capture row -->
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
+        <button class="cap-side-btn" onclick="AutoPalette.fromCamera()" title="Extract palette from camera view">🎨</button>
         <button id="cap-btn" onclick="Sampler.capture()">
           <div id="cap-inner"></div>
           <div id="cap-queue-badge" style="display:none">0</div>
@@ -1040,6 +1041,7 @@ a{color:var(--accent);text-decoration:none}
       <!-- PATTERN REPEAT -->
       <div class="sec prom-sec-label">Pattern Repeat <span class="prom-single-hint">single</span></div>
       <div class="prom-pill-grid" id="repeat-grid">
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="__none__" style="border-color:var(--muted);color:var(--muted)">No Pattern</button>
         <button class="prom-pill prom-pill-single on" data-g="repeat" data-v="seamless repeat pattern">Seamless</button>
         <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless half-drop repeat pattern">Half-Drop</button>
         <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless brick repeat pattern">Brick</button>
@@ -1865,8 +1867,15 @@ const App={
 
   //  BULLETPROOF LINK OPENER 
   openLink(url){
-    // window.open with no features arg preserves user gesture on iOS Safari
-    window.open(url,'_blank');
+    // window.open is blocked in iOS standalone PWA mode.
+    // Creating and clicking a real <a> element bypasses this restriction.
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   },
 
   closeOv(e){
@@ -2003,7 +2012,7 @@ const App={
       <div class="set-row"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 2.2</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 2.5</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3662,15 +3671,14 @@ const Prompter={
       ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">Sample some colours first</div>'
       :!vis.length
       ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">No colours match filter</div>'
-      :vis.map(c=>`<div class="prom-chip ${this.sel.has(c.id)?'on':''}"
-          role="button" tabindex="0"
+      :vis.map(c=>`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
+          type="button"
           aria-label="${c.name}  ${this.sel.has(c.id)?'selected':'not selected'}"
           aria-pressed="${this.sel.has(c.id)}"
-          onclick="Prompter.toggleColour('${c.id}')"
-          onkeydown="if(event.key==='Enter'||event.key===' '){Prompter.toggleColour('${c.id}')}">
+          onclick="Prompter.toggleColour('${c.id}')">
           <div class="prom-sw" style="background:${c.hex}"></div>
           <div class="prom-label">${c.name}</div>
-        </div>`).join('');;
+        </button>`).join('');;
   },
 
   filterChips(q){
@@ -3762,8 +3770,8 @@ const Prompter={
     const tips=[];
     const lrvs=colours.map(c=>c.lrv||50);
     const lrvSpread=Math.max(...lrvs)-Math.min(...lrvs);
-    const avgh=colours.reduce((a,c)=>a+c.hsl.h,0)/colours.length;
-    const avgs=colours.reduce((a,c)=>a+c.hsl.s,0)/colours.length;
+    const avgh=colours.reduce((a,c)=>a+(c.hsl?.h??0),0)/colours.length;
+    const avgs=colours.reduce((a,c)=>a+(c.hsl?.s??50),0)/colours.length;
 
     if(lrvSpread>45) tips.push(`High contrast palette (LRV spread ${Math.round(lrvSpread)}%)  strong ground/motif definition; dark will recede, light will advance`);
     else if(lrvSpread<15) tips.push(`Low contrast tones  consider outline colour to define motif from ground, or use texture over flat fill`);
@@ -3807,12 +3815,14 @@ const Prompter={
     const eraStr=this.era||'';
 
     // Repeat
-    const repeatStr=this.repeat||'seamless repeat pattern';
+    const isNoRepeat=this.repeat==='__none__';
+    const repeatStr=isNoRepeat?'':(this.repeat||'seamless repeat pattern');
 
     // Build core prompt  fabric/textile oriented
     const parts=[];
     if(subjStr&&subjStr!=='No specific subject') parts.push(subjStr);
-    parts.push(repeatStr);
+    if(isNoRepeat) parts.push('single composition illustration, not a repeat pattern');
+    else parts.push(repeatStr);
     if(medStr) parts.push(medStr);
     if(eraStr) parts.push(eraStr);
     parts.push(paletteNote);
@@ -5720,6 +5730,20 @@ const AutoPalette = {
     setTimeout(() => {
       const hexes = this.extract(Sampler.uploadImg, k);
       this._showResults(hexes, 'Auto-Palette');
+    }, 30);
+  },
+
+  fromCamera(k = 6) {
+    const video = document.getElementById('cam-video');
+    if (!video || !video.videoWidth) { App.toast('Camera not active'); return; }
+    const snap = document.createElement('canvas');
+    snap.width  = video.videoWidth;
+    snap.height = video.videoHeight;
+    snap.getContext('2d').drawImage(video, 0, 0);
+    App.toast('Analysing frame\u2026');
+    setTimeout(() => {
+      const hexes = this.extract(snap, k);
+      this._showResults(hexes, 'Camera Auto-Palette');
     }, 30);
   },
 
