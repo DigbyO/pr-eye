@@ -508,6 +508,32 @@ a{color:var(--accent);text-decoration:none}
 </style>
 </head>
 <body>
+<!-- CVD simulation filters (injected once; CVDSim applies via #app filter) -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+  <defs>
+    <filter id="cvd-deuteranopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.29900 0.58700 0.11400 0 0
+        0.29900 0.58700 0.11400 0 0
+        0.00000 0.10140 0.88580 0 0
+        0       0       0       1 0"/>
+    </filter>
+    <filter id="cvd-protanopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.10889 0.70940 0.18167 0 0
+        0.10889 0.70940 0.18167 0 0
+        0.00000 0.09710 0.90290 0 0
+        0       0       0       1 0"/>
+    </filter>
+    <filter id="cvd-tritanopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.95200 0.04800 0.00000 0 0
+        0.29140 0.70140 -0.00280 0 0
+        0.00000 0.52500 0.47500 0 0
+        0       0       0       1 0"/>
+    </filter>
+  </defs>
+</svg>
 <div id="app">
 
 <!-- TOP BAR -->
@@ -1447,56 +1473,56 @@ const FB=[
 ];
 
 const EB=[
-  {code:"EB-001",name:"Fossil",hex:"#D8D0C0",url:"https://earthbornpaints.co.uk/colour/fossil"},
-  {code:"EB-002",name:"White Rabbit",hex:"#EDEAE0",url:"https://earthbornpaints.co.uk/colour/white-rabbit"},
-  {code:"EB-003",name:"Flint",hex:"#C8C4B8",url:"https://earthbornpaints.co.uk/colour/flint"},
-  {code:"EB-004",name:"Earthborn White",hex:"#F0EDE5",url:"https://earthbornpaints.co.uk/colour/earthborn-white"},
-  {code:"EB-005",name:"Bone",hex:"#E0D8C8",url:"https://earthbornpaints.co.uk/colour/bone"},
-  {code:"EB-006",name:"Seagull",hex:"#DCDCD0",url:"https://earthbornpaints.co.uk/colour/seagull"},
-  {code:"EB-007",name:"Portland Stone",hex:"#C8C0A8",url:"https://earthbornpaints.co.uk/colour/portland-stone"},
-  {code:"EB-008",name:"Hay",hex:"#D8C898",url:"https://earthbornpaints.co.uk/colour/hay"},
-  {code:"EB-009",name:"Pebble Shore",hex:"#C0B898",url:"https://earthbornpaints.co.uk/colour/pebble-shore"},
-  {code:"EB-010",name:"Sandpiper",hex:"#C8B890",url:"https://earthbornpaints.co.uk/colour/sandpiper"},
-  {code:"EB-011",name:"Clay",hex:"#B0A080",url:"https://earthbornpaints.co.uk/colour/clay"},
-  {code:"EB-012",name:"Sand Castle",hex:"#D8C898",url:"https://earthbornpaints.co.uk/colour/sand-castle"},
-  {code:"EB-013",name:"Shoreline",hex:"#B8B098",url:"https://earthbornpaints.co.uk/colour/shoreline"},
-  {code:"EB-014",name:"Bluff",hex:"#A89878",url:"https://earthbornpaints.co.uk/colour/bluff"},
-  {code:"EB-015",name:"Mudlark",hex:"#907860",url:"https://earthbornpaints.co.uk/colour/mudlark"},
-  {code:"EB-016",name:"Warm Stone",hex:"#C4B090",url:"https://earthbornpaints.co.uk/colour/warm-stone"},
-  {code:"EB-017",name:"Terracotta",hex:"#C07850",url:"https://earthbornpaints.co.uk/colour/terracotta"},
-  {code:"EB-018",name:"Red Ochre",hex:"#A85840",url:"https://earthbornpaints.co.uk/colour/red-ochre"},
-  {code:"EB-019",name:"Burnt Earth",hex:"#8A4030",url:"https://earthbornpaints.co.uk/colour/burnt-earth"},
-  {code:"EB-020",name:"Deep Red",hex:"#702828",url:"https://earthbornpaints.co.uk/colour/deep-red"},
-  {code:"EB-021",name:"Blossom",hex:"#E8C0B8",url:"https://earthbornpaints.co.uk/colour/blossom"},
-  {code:"EB-022",name:"Rose Hip",hex:"#D8907A",url:"https://earthbornpaints.co.uk/colour/rose-hip"},
-  {code:"EB-023",name:"Wild Thyme",hex:"#80906A",url:"https://earthbornpaints.co.uk/colour/wild-thyme"},
-  {code:"EB-024",name:"Sage",hex:"#98A882",url:"https://earthbornpaints.co.uk/colour/sage"},
-  {code:"EB-025",name:"Grass",hex:"#688050",url:"https://earthbornpaints.co.uk/colour/grass"},
-  {code:"EB-026",name:"Leaf",hex:"#506840",url:"https://earthbornpaints.co.uk/colour/leaf"},
-  {code:"EB-027",name:"Fern",hex:"#607858",url:"https://earthbornpaints.co.uk/colour/fern"},
-  {code:"EB-028",name:"Forest",hex:"#3A5038",url:"https://earthbornpaints.co.uk/colour/forest"},
-  {code:"EB-029",name:"Lichen",hex:"#909878",url:"https://earthbornpaints.co.uk/colour/lichen"},
-  {code:"EB-030",name:"Mint",hex:"#A8C0A8",url:"https://earthbornpaints.co.uk/colour/mint"},
-  {code:"EB-031",name:"Duck Egg",hex:"#A8C0B8",url:"https://earthbornpaints.co.uk/colour/duck-egg"},
-  {code:"EB-032",name:"Sea Mist",hex:"#B0C8C8",url:"https://earthbornpaints.co.uk/colour/sea-mist"},
-  {code:"EB-033",name:"Teal",hex:"#508090",url:"https://earthbornpaints.co.uk/colour/teal"},
-  {code:"EB-034",name:"Blue Duck",hex:"#6898A8",url:"https://earthbornpaints.co.uk/colour/blue-duck"},
-  {code:"EB-035",name:"Skies",hex:"#88A8C0",url:"https://earthbornpaints.co.uk/colour/skies"},
-  {code:"EB-036",name:"Pale Wedgwood",hex:"#A0B8D0",url:"https://earthbornpaints.co.uk/colour/pale-wedgwood"},
-  {code:"EB-037",name:"Cornflower",hex:"#6880A8",url:"https://earthbornpaints.co.uk/colour/cornflower"},
-  {code:"EB-038",name:"Indigo",hex:"#405880",url:"https://earthbornpaints.co.uk/colour/indigo"},
-  {code:"EB-039",name:"Navy",hex:"#283850",url:"https://earthbornpaints.co.uk/colour/navy"},
-  {code:"EB-040",name:"Slate",hex:"#708090",url:"https://earthbornpaints.co.uk/colour/slate"},
-  {code:"EB-041",name:"Charcoal",hex:"#505058",url:"https://earthbornpaints.co.uk/colour/charcoal"},
-  {code:"EB-042",name:"Black",hex:"#282828",url:"https://earthbornpaints.co.uk/colour/black"},
-  {code:"EB-043",name:"Lavender",hex:"#B0A8C8",url:"https://earthbornpaints.co.uk/colour/lavender"},
-  {code:"EB-044",name:"Heather",hex:"#9880A0",url:"https://earthbornpaints.co.uk/colour/heather"},
-  {code:"EB-045",name:"Mauve",hex:"#C0A8B8",url:"https://earthbornpaints.co.uk/colour/mauve"},
-  {code:"EB-046",name:"Mulberry",hex:"#7A5070",url:"https://earthbornpaints.co.uk/colour/mulberry"},
-  {code:"EB-047",name:"Plum",hex:"#583050",url:"https://earthbornpaints.co.uk/colour/plum"},
-  {code:"EB-048",name:"Wisteria",hex:"#C8B8D8",url:"https://earthbornpaints.co.uk/colour/wisteria"},
-  {code:"EB-049",name:"Mist",hex:"#D0D0D8",url:"https://earthbornpaints.co.uk/colour/mist"},
-  {code:"EB-050",name:"Storm",hex:"#9898A8",url:"https://earthbornpaints.co.uk/colour/storm"},
+  {code:"EB-001",name:"Fossil",hex:"#D8D0C0",url:"https://earthbornpaints.co.uk/product/fossil"},
+  {code:"EB-002",name:"White Rabbit",hex:"#EDEAE0",url:"https://earthbornpaints.co.uk/product/white-rabbit"},
+  {code:"EB-003",name:"Flint",hex:"#C8C4B8",url:"https://earthbornpaints.co.uk/product/flint"},
+  {code:"EB-004",name:"Earthborn White",hex:"#F0EDE5",url:"https://earthbornpaints.co.uk/product/earthborn-white"},
+  {code:"EB-005",name:"Bone",hex:"#E0D8C8",url:"https://earthbornpaints.co.uk/product/bone"},
+  {code:"EB-006",name:"Seagull",hex:"#DCDCD0",url:"https://earthbornpaints.co.uk/product/seagull"},
+  {code:"EB-007",name:"Portland Stone",hex:"#C8C0A8",url:"https://earthbornpaints.co.uk/product/portland-stone"},
+  {code:"EB-008",name:"Hay",hex:"#D8C898",url:"https://earthbornpaints.co.uk/product/hay"},
+  {code:"EB-009",name:"Pebble Shore",hex:"#C0B898",url:"https://earthbornpaints.co.uk/product/pebble-shore"},
+  {code:"EB-010",name:"Sandpiper",hex:"#C8B890",url:"https://earthbornpaints.co.uk/product/sandpiper"},
+  {code:"EB-011",name:"Clay",hex:"#B0A080",url:"https://earthbornpaints.co.uk/product/clay"},
+  {code:"EB-012",name:"Sand Castle",hex:"#D8C898",url:"https://earthbornpaints.co.uk/product/sand-castle"},
+  {code:"EB-013",name:"Shoreline",hex:"#B8B098",url:"https://earthbornpaints.co.uk/product/shoreline"},
+  {code:"EB-014",name:"Bluff",hex:"#A89878",url:"https://earthbornpaints.co.uk/product/bluff"},
+  {code:"EB-015",name:"Mudlark",hex:"#907860",url:"https://earthbornpaints.co.uk/product/mudlark"},
+  {code:"EB-016",name:"Warm Stone",hex:"#C4B090",url:"https://earthbornpaints.co.uk/product/warm-stone"},
+  {code:"EB-017",name:"Terracotta",hex:"#C07850",url:"https://earthbornpaints.co.uk/product/terracotta"},
+  {code:"EB-018",name:"Red Ochre",hex:"#A85840",url:"https://earthbornpaints.co.uk/product/red-ochre"},
+  {code:"EB-019",name:"Burnt Earth",hex:"#8A4030",url:"https://earthbornpaints.co.uk/product/burnt-earth"},
+  {code:"EB-020",name:"Deep Red",hex:"#702828",url:"https://earthbornpaints.co.uk/product/deep-red"},
+  {code:"EB-021",name:"Blossom",hex:"#E8C0B8",url:"https://earthbornpaints.co.uk/product/blossom"},
+  {code:"EB-022",name:"Rose Hip",hex:"#D8907A",url:"https://earthbornpaints.co.uk/product/rose-hip"},
+  {code:"EB-023",name:"Wild Thyme",hex:"#80906A",url:"https://earthbornpaints.co.uk/product/wild-thyme"},
+  {code:"EB-024",name:"Sage",hex:"#98A882",url:"https://earthbornpaints.co.uk/product/sage"},
+  {code:"EB-025",name:"Grass",hex:"#688050",url:"https://earthbornpaints.co.uk/product/grass"},
+  {code:"EB-026",name:"Leaf",hex:"#506840",url:"https://earthbornpaints.co.uk/product/leaf"},
+  {code:"EB-027",name:"Fern",hex:"#607858",url:"https://earthbornpaints.co.uk/product/fern"},
+  {code:"EB-028",name:"Forest",hex:"#3A5038",url:"https://earthbornpaints.co.uk/product/forest"},
+  {code:"EB-029",name:"Lichen",hex:"#909878",url:"https://earthbornpaints.co.uk/product/lichen"},
+  {code:"EB-030",name:"Mint",hex:"#A8C0A8",url:"https://earthbornpaints.co.uk/product/mint"},
+  {code:"EB-031",name:"Duck Egg",hex:"#A8C0B8",url:"https://earthbornpaints.co.uk/product/duck-egg"},
+  {code:"EB-032",name:"Sea Mist",hex:"#B0C8C8",url:"https://earthbornpaints.co.uk/product/sea-mist"},
+  {code:"EB-033",name:"Teal",hex:"#508090",url:"https://earthbornpaints.co.uk/product/teal"},
+  {code:"EB-034",name:"Blue Duck",hex:"#6898A8",url:"https://earthbornpaints.co.uk/product/blue-duck"},
+  {code:"EB-035",name:"Skies",hex:"#88A8C0",url:"https://earthbornpaints.co.uk/product/skies"},
+  {code:"EB-036",name:"Pale Wedgwood",hex:"#A0B8D0",url:"https://earthbornpaints.co.uk/product/pale-wedgwood"},
+  {code:"EB-037",name:"Cornflower",hex:"#6880A8",url:"https://earthbornpaints.co.uk/product/cornflower"},
+  {code:"EB-038",name:"Indigo",hex:"#405880",url:"https://earthbornpaints.co.uk/product/indigo"},
+  {code:"EB-039",name:"Navy",hex:"#283850",url:"https://earthbornpaints.co.uk/product/navy"},
+  {code:"EB-040",name:"Slate",hex:"#708090",url:"https://earthbornpaints.co.uk/product/slate"},
+  {code:"EB-041",name:"Charcoal",hex:"#505058",url:"https://earthbornpaints.co.uk/product/charcoal"},
+  {code:"EB-042",name:"Black",hex:"#282828",url:"https://earthbornpaints.co.uk/product/black"},
+  {code:"EB-043",name:"Lavender",hex:"#B0A8C8",url:"https://earthbornpaints.co.uk/product/lavender"},
+  {code:"EB-044",name:"Heather",hex:"#9880A0",url:"https://earthbornpaints.co.uk/product/heather"},
+  {code:"EB-045",name:"Mauve",hex:"#C0A8B8",url:"https://earthbornpaints.co.uk/product/mauve"},
+  {code:"EB-046",name:"Mulberry",hex:"#7A5070",url:"https://earthbornpaints.co.uk/product/mulberry"},
+  {code:"EB-047",name:"Plum",hex:"#583050",url:"https://earthbornpaints.co.uk/product/plum"},
+  {code:"EB-048",name:"Wisteria",hex:"#C8B8D8",url:"https://earthbornpaints.co.uk/product/wisteria"},
+  {code:"EB-049",name:"Mist",hex:"#D0D0D8",url:"https://earthbornpaints.co.uk/product/mist"},
+  {code:"EB-050",name:"Storm",hex:"#9898A8",url:"https://earthbornpaints.co.uk/product/storm"},
 ];
 </script>
 
@@ -1730,6 +1756,7 @@ const DS={
     }
     a.unshift(e);
     this._safeSave(a);
+    if(navigator.vibrate) navigator.vibrate(18); // B: colour added to library
     return e;
   },
 
@@ -1912,6 +1939,7 @@ const App={
   },
 
   share(title, text, url){
+    if(navigator.vibrate) navigator.vibrate([12,8,22]); // C: share triggered
     const sheet = document.getElementById('share-sheet');
     const opts  = document.getElementById('share-options');
     const tEl   = document.getElementById('share-title');
@@ -2379,7 +2407,7 @@ const Sampler={
   capture(){
     const hex=this.currentHex;
     if(!hex||hex==='#888888')return;
-    if(navigator.vibrate)navigator.vibrate(30);
+    if(navigator.vibrate) navigator.vibrate(25); // A: colour picked
     this.addToQueue(hex);
   },
 
@@ -2816,7 +2844,7 @@ const Gallery={
       ${c.pantone?`<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>`:''}
       ${(()=>{const _lg=CS.nearestLG(c.lab)||c.littleGreene;return _lg?`<div class="det-match"><div class="det-ms" style="background:${_lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${_lg.name}</div><div class="det-mc">${_lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_lg.url}')">Order </button></div>`:''})()}
       ${(()=>{const _fb=CS.nearestFB(c.lab)||c.farrowBall;return _fb?`<div class="det-match"><div class="det-ms" style="background:${_fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${_fb.name}</div><div class="det-mc">${_fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_fb.url}')">Order </button></div>`:''})()}
-      ${(()=>{const _eb=CS.nearestEB(c.lab)||c.earthborn;return _eb?`<div class="det-match"><div class="det-ms" style="background:${_eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${_eb.name}</div><div class="det-mc">${_eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_eb.url}')">Order </button></div>`:''})()}
+      ${(()=>{const _eb=CS.nearestEB(c.lab)||c.earthborn;return _eb?`<div class="det-match"><div class="det-ms" style="background:${_eb.hex}"></div><div class="det-mi"><div class="det-mb">Earthborn</div><div class="det-mn">${_eb.name}</div><div class="det-mc">${_eb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink(_eb.url || ('https://earthbornpaints.co.uk/?s='+encodeURIComponent(_eb.name)))">Order ⇗</button></div>`:''})()}
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${c.id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${c.id}')">Explore</button>
@@ -2853,6 +2881,7 @@ const Gallery={
 
   exportOne(id,withData){
     const c=DS.get(id);if(!c)return;
+    if(navigator.vibrate) navigator.vibrate([10,6,35]); // D: export triggered
     const sc=3,W=200*sc,H=240*sc;
     const canvas=document.getElementById('export-canvas');
     canvas.width=W;canvas.height=H;
@@ -3577,9 +3606,18 @@ const Explorer={
     URL.revokeObjectURL(u); App.toast('.cube ready');
   },
   addSplit(){
-    const h=CS.harmonies(this.rootHex);
-    [h.splitTone.shadows,h.splitTone.highlights].forEach(hex=>this.addToLib(hex));
-    App.toast('Split tones added');
+    if (!this.rootHex) { App.toast('Select a colour to explore first'); return; }
+    let h;
+    try { h = CS.harmonies(this.rootHex); } catch(e) { App.toast('Could not compute split tones'); return; }
+    const st = h?.splitTone;
+    if (!st?.shadows || !st?.highlights) { App.toast('Split tone data unavailable'); return; }
+    // Batch add silently, one combined toast at the end
+    [st.shadows, st.highlights].forEach(hex => {
+      const e = DS.makeEntry(hex, 'explorer');
+      DS.add(e);
+    });
+    App.refresh();
+    App.toast('Split tone shadows + highlights saved ✓');
   }
 };
 </script>
@@ -3740,7 +3778,6 @@ const Prompter={
   },
 
   generate(){
-    if(navigator.vibrate) navigator.vibrate(20);
     const colours=DS.all().filter(c=>this.sel.has(c.id));
     if(!colours.length){App.toast('Select colours first');return}
     const out = this.buildPrompt(colours);
@@ -3904,6 +3941,7 @@ const Prompter={
     if(!t||t.startsWith('Select')){App.toast('Generate a prompt first');return}
     // Priority: native share with text as primary payload (works for Discord/MJ)
     if(navigator.share){
+      if(navigator.vibrate) navigator.vibrate([12,8,22]); // C: share triggered
       navigator.share({ title:'Midjourney Fabric & Wallpaper Prompt', text:t })
         .catch(err=>{
           // User cancelled or share failed  fall back to clipboard
@@ -3919,7 +3957,6 @@ const Prompter={
     const t=document.getElementById('prompt-out').textContent;
     if(!t||t.startsWith('Select')){App.toast('Generate a prompt first');return}
     if(t.length>4000){App.toast('⚠️ Prompt is '+t.length+'/4000 chars — trim before sending');return}
-    if(navigator.vibrate) navigator.vibrate([15,8,30]);
     const doCopy=()=>{
       if(navigator.clipboard?.writeText) return navigator.clipboard.writeText(t);
       const ta=document.createElement('textarea');
@@ -4237,6 +4274,8 @@ const SwatchExport = {
   // Hex values already in the library use their existing entry; others are created in-memory
   openFromHexes(hexes, layoutHint) {
     if (!hexes || !hexes.length) { App.toast('No colours to export'); return; }
+    // Always reset to polaroids unless the caller explicitly requests a layout
+    this.layout = layoutHint || 'polaroids';
     const lib = DS.all();
     this._ephemeral = [];
     this.selectedIds = new Set();
@@ -4664,6 +4703,7 @@ const SwatchExport = {
   download() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select at least one colour'); return; }
+    if(navigator.vibrate) navigator.vibrate([10,6,35]); // D: export triggered
     const {w,h} = this.getCanvasSize();
     const canvas = document.getElementById('export-canvas');
     canvas.width=w; canvas.height=h;
@@ -4818,7 +4858,6 @@ const ColourGenerator = {
   },
 
   render() {
-    if(navigator.vibrate) navigator.vibrate([18,8,18]);
     const aes = this.AESTHETICS[this.aesthetic];
     if (!aes) return;
 
@@ -4872,6 +4911,7 @@ const ColourGenerator = {
       <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-s btn-sm" onclick="ColourGenerator.render()"> Regenerate</button>
         <button class="btn btn-s btn-sm" onclick="ColourGenerator.saveAll()">+ Save All</button>
+        <button class="btn btn-s btn-sm" onclick="ColourGenerator.openSwatch()"> Swatch</button>
         <button class="btn btn-p btn-sm" onclick="ColourGenerator.exportCard()">Export Card</button>
       </div>`;
   },
@@ -4888,9 +4928,17 @@ const ColourGenerator = {
     App.toast(`${this.currentPalette.length} colours saved`);
   },
 
+  openSwatch() {
+    if (!this.currentPalette || !this.currentPalette.length) {
+      App.toast('Generate a palette first');
+      return;
+    }
+    SwatchExport.openFromHexes(this.currentPalette, 'polaroids');
+  },
+
   exportCard() {
     if (!this.currentPalette) return;
-    if(navigator.vibrate) navigator.vibrate(40);
+    if(navigator.vibrate) navigator.vibrate([10,6,35]); // D: export triggered
     const aes = this.AESTHETICS[this.aesthetic];
     const n   = this.currentPalette.length;
     const W   = 600, PAD = 20, SWATCH_H = 200, INFO_H = 72;
@@ -5380,36 +5428,36 @@ const CVDSim = {
 
   setMode(mode) {
     this.mode = mode;
+    // Sync button states everywhere (both in panel and in static HTML)
     document.querySelectorAll('[data-cvd]').forEach(btn => {
       btn.classList.toggle('on', btn.dataset.cvd === mode);
     });
     this._applyToUI();
-    App.toast(this.LABELS[mode] + ' view');
+    App.toast(this.LABELS[mode] + (mode === 'normal' ? ' — simulation off' : ' view active'));
   },
 
   /**
-   * Inject simulated colour overlay onto all swatch/chip elements
+   * Apply CVD simulation via CSS filter on #app — reliable across all
+   * dynamically-rendered swatches without DOM traversal.
    */
   _applyToUI() {
+    const app = document.getElementById('app');
+    if (!app) return;
+    const filterMap = {
+      normal:        'none',
+      deuteranopia:  'url(#cvd-deuteranopia)',
+      protanopia:    'url(#cvd-protanopia)',
+      tritanopia:    'url(#cvd-tritanopia)',
+      achromatopsia: 'grayscale(100%) contrast(1.05)',
+    };
+    app.style.filter = filterMap[this.mode] || 'none';
+    // Keep per-swatch data-orig-bg logic for JS-only consumers
     if (this.mode === 'normal') {
       document.querySelectorAll('[data-orig-bg]').forEach(el => {
         el.style.background = el.dataset.origBg;
         delete el.dataset.origBg;
       });
-      return;
     }
-    // Find all colour swatch elements
-    const swatches = document.querySelectorAll(
-      '.prom-sw,.pb-slot-colour,.colgen-swatch,.pol-block,.rule-block,[style*="background:#"],[style*="background: #"]'
-    );
-    swatches.forEach(el => {
-      const bg = el.style.background || el.style.backgroundColor;
-      const hexMatch = bg.match(/#([0-9a-fA-F]{6})/);
-      if (!hexMatch) return;
-      if (!el.dataset.origBg) el.dataset.origBg = bg;
-      const sim = this.simulate('#' + hexMatch[1], this.mode);
-      el.style.background = sim;
-    });
   },
 
   /**
@@ -5596,20 +5644,24 @@ const AutoPalette = {
   _showResults(hexes, title) {
     const existing = document.getElementById('_ap_panel');
     if (existing) existing.remove();
+    // Store on window so inline onclick attrs reach it without double-quote collision
+    window._apHexes = hexes;
     const d = document.createElement('div');
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">${title}</div>
       <div style="display:flex;gap:6px;margin-bottom:12px">
-        ${hexes.map((h,i) => `<div style="flex:1;height:60px;border-radius:6px;background:${h};border:1px solid var(--border);cursor:pointer;position:relative" title="${CS.autoName(h)} ${h.toUpperCase()}" onclick="AutoPalette._addOne('${h}',this)">
-          <div style="position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:${CS.lrv(CS.rgbToLab(CS.hexToRgb(h).r,CS.hexToRgb(h).g,CS.hexToRgb(h).b))<50?'rgba(255,255,255,.7)':'rgba(0,0,0,.6)'}">${h.toUpperCase()}</div>
-        </div>`).join('')}
+        ${hexes.map((h,i) => {
+          const lum = CS.lrv(CS.rgbToLab(CS.hexToRgb(h).r, CS.hexToRgb(h).g, CS.hexToRgb(h).b));
+          const tc = lum < 50 ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.65)';
+          return '<div data-ap-idx="' + i + '" style="flex:1;height:60px;border-radius:6px;background:' + h + ';border:1px solid var(--border);cursor:pointer;position:relative" onclick="AutoPalette._addOne(window._apHexes[' + i + '],this)" title="Tap to save ' + h.toUpperCase() + '">'
+            + '<div style="position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:' + tc + '">' + h.toUpperCase() + '</div>'
+            + '</div>';
+        }).join('')}
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button class="btn btn-p btn-sm" onclick="AutoPalette._saveAll(${JSON.stringify(hexes)})">+ Save All</button>
-        <button class="btn btn-s btn-sm" onclick="SharePalette.copyURL(${JSON.stringify(hexes)})">Share URL</button>
-        <button class="btn btn-s btn-sm" onclick="SharePalette.exportJSON(${JSON.stringify(hexes)})">JSON</button>
+        <button class="btn btn-p btn-sm" onclick="AutoPalette._saveAll(window._apHexes)">+ Save All</button>
         <button class="btn btn-s btn-sm" style="margin-left:auto" onclick="document.getElementById('_ap_panel').remove()">Close</button>
       </div>
     </div>`;
@@ -5617,15 +5669,20 @@ const AutoPalette = {
   },
 
   _addOne(hex, el) {
-    const e = DS.makeEntry(hex, 'autopick'); DS.add(e); App.refresh();
+    if (!hex || !hex.startsWith('#')) { App.toast('Invalid colour'); return; }
+    const e = DS.makeEntry(hex, 'autopick');
+    DS.add(e);
+    App.refresh();
     el.style.outline = '2px solid var(--ok)';
-    App.toast(CS.autoName(hex) + ' saved');
+    el.title = '✓ Saved';
+    App.toast(e.name + ' saved');
   },
 
   _saveAll(hexes) {
+    if (!Array.isArray(hexes) || !hexes.length) { App.toast('No colours to save'); return; }
     hexes.forEach(hex => { const e = DS.makeEntry(hex, 'autopick'); DS.add(e); });
     App.refresh();
-    App.toast(hexes.length + ' colours saved');
+    App.toast(hexes.length + ' colour' + (hexes.length > 1 ? 's' : '') + ' saved to library');
     document.getElementById('_ap_panel')?.remove();
   }
 };
