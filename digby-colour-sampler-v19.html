@@ -3094,7 +3094,7 @@ const Sampler={
           v.autoplay   = true;
           v.muted      = true;
           v.playsInline = true;  // camelCase JS property for iOS
-          v.setAttribute('playsinline', '');   // redundant but belt-and-braces
+          v.setAttribute('playsinline', 'true');  // spec: string 'true' for maximum compat
           v.setAttribute('autoplay',    '');
 
           v.srcObject = stream;
@@ -3112,10 +3112,16 @@ const Sampler={
               v.play()
                 .then(resolve)
                 .catch(err => {
-                  // NotAllowedError after load() is usually a browser
-                  // autoplay policy — non-fatal, video may still render
-                  console.warn('Camera play() blocked (non-fatal):', err.name, err.message);
-                  resolve(); // continue to startSampling regardless
+                  // NotAllowedError after load() is a browser autoplay policy block.
+                  // Add a one-time body click listener so the first user gesture
+                  // "wakes up" the video track — required on some iOS PWA installs.
+                  console.warn('Camera play() blocked — adding body click fallback:', err.name);
+                  const onBodyClick = () => {
+                    document.body.removeEventListener('click', onBodyClick);
+                    v.play().catch(e => console.warn('Body-click play() also failed:', e.name));
+                  };
+                  document.body.addEventListener('click', onBodyClick, { once: true });
+                  resolve(); // continue to startSampling — sampling will wait for readyState≥2
                 });
             };
             // Belt-and-braces: if metadata already available, fire immediately
@@ -5150,20 +5156,26 @@ const Prompter={
     const g=btn.dataset.g, v=btn.dataset.v;
     const isSingle=btn.classList.contains('prom-pill-single');
 
+    // Read live toggle element state (spec: check #prom-multi-toggle).
+    // Supports both checkbox (.checked) and div.sw (.on class) patterns.
+    const toggleEl=document.getElementById('prom-multi-toggle');
+    const multiOn=(toggleEl?.checked===true)||toggleEl?.classList.contains('on')||this.multiMode;
+
     if(isSingle){
-      // Era / repeat — always radio
+      // Era / repeat — always radio regardless of multi-mode
       document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
       if(g==='era')     this.era=v;
       if(g==='repeat')  this.repeat=v;
-    } else if(this.multiMode){
-      // Multi-select ON: toggle this pill independently, keep others
+    } else if(multiOn){
+      // Multi-select ON: toggle this pill independently — others keep their state
       btn.classList.toggle('on');
       const set=g==='subject'?this.subjects:this.mediums;
       if(btn.classList.contains('on')) set.add(v);
       else set.delete(v);
     } else {
-      // Multi-select OFF: radio behaviour — deselect all in group, select this
+      // Multi-select OFF: radio — deselect all in group, then select this one.
+      // If it was already the only active pill, tapping it deselects (toggle).
       const wasOn=btn.classList.contains('on');
       document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
       const set=g==='subject'?this.subjects:this.mediums;
