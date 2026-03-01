@@ -523,6 +523,23 @@ a{color:var(--accent);text-decoration:none}
 .pb-algo-chip-hex{font-family:var(--mono);font-size:8px;font-weight:600;pointer-events:none;white-space:nowrap;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.28)}
 .pb-algo-card{background:linear-gradient(135deg,rgba(162,89,255,.08),rgba(255,107,107,.08))!important;border-color:rgba(162,89,255,.25)!important}
 .pb-algo-card:active{border-color:var(--accent)!important}
+
+/* ── sRGB Gamut Warning ─────────────────────────────────────── */
+.gamut-warn{display:inline-flex;align-items:center;font-size:9px;line-height:1;cursor:default;position:relative;vertical-align:middle;margin-left:3px;opacity:.8}
+.gamut-warn:hover .gamut-tip{display:block}
+.gamut-tip{display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#2a1a00;color:#ffc947;font-size:9px;font-family:var(--mono);white-space:nowrap;padding:3px 7px;border-radius:4px;z-index:999;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+.gamut-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#2a1a00}
+
+/* ── CVD Palette Simulation Panel ──────────────────────────── */
+#pb-cvd-panel{display:none;flex-direction:column;gap:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-top:2px}
+.cvd-mode-row{display:flex;gap:5px;flex-wrap:wrap}
+.cvd-mode-btn{padding:4px 8px;font-size:9px;font-family:var(--mono);border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s;text-transform:uppercase;letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
+.cvd-mode-btn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700}
+.cvd-swatch-row{display:flex;gap:4px;align-items:center}
+.cvd-row-label{font-size:8px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:72px;flex-shrink:0}
+.cvd-cell{height:32px;flex:1;border-radius:4px;position:relative;transition:background .2s}
+.cvd-orig-row .cvd-cell{height:24px;opacity:.65}
+.cvd-delta{display:none}
 .pb-slot-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
 .pb-slot-empty:active{border-color:var(--accent);color:var(--accent)}
 #pb-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -1316,6 +1333,29 @@ a{color:var(--accent);text-decoration:none}
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()"> Swatch</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.copyAsTailwind()" title="Copy palette as Tailwind CSS theme extension">🎨 Tailwind</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleCVD()" title="Colour blindness simulation">👁 CVD</button>
+        </div>
+
+        <!-- ── CVD Palette Simulation Panel ──────────────────────────── -->
+        <div id="pb-cvd-panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700">Colour Blindness Preview</span>
+            <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 8px" onclick="PaletteBuilder.toggleCVD()">Close</button>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:8px">
+            Non-destructive simulation — original colours are never modified.
+          </div>
+          <div class="cvd-mode-row" id="pb-cvd-modes">
+            <button class="cvd-mode-btn on" data-pbcvd="normal"         onclick="PaletteBuilder.setCVDMode('normal')">Normal</button>
+            <button class="cvd-mode-btn"    data-pbcvd="deuteranopia"   onclick="PaletteBuilder.setCVDMode('deuteranopia')">Deuteranopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="protanopia"     onclick="PaletteBuilder.setCVDMode('protanopia')">Protanopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="tritanopia"     onclick="PaletteBuilder.setCVDMode('tritanopia')">Tritanopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="achromatopsia"  onclick="PaletteBuilder.setCVDMode('achromatopsia')">Achromatopsia</button>
+          </div>
+          <div id="pb-cvd-preview" style="margin-top:8px;display:flex;flex-direction:column;gap:5px"></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:6px;line-height:1.5">
+            Deuteranopia = green-blind · Protanopia = red-blind · Tritanopia = blue-blind · Achromatopsia = monochromatic
+          </div>
         </div>
 
         <!-- Generate palette from base colour — buttons now live inside the Suggest panel -->
@@ -2047,6 +2087,73 @@ const CS = {
     const l2 = this.relativeLuminance(r2,g2,b2);
     const lighter = Math.max(l1,l2), darker = Math.min(l1,l2);
     return (lighter + 0.05) / (darker + 0.05);
+  },
+
+  // ── sRGB Gamut Analysis ─────────────────────────────────────────────────
+  //
+  // Strategy: OKLCH binary search (CSS Color Level 4 standard approach).
+  // A hex color represents an sRGB value that may have originated as a wider-gamut
+  // (Display P3 / AdobeRGB) colour that was clamped when captured via canvas.
+  // A colour is "at the sRGB gamut surface" — and therefore a candidate P3 capture —
+  // if its OKLCH chroma C is within a tight tolerance of the maximum sRGB-representable
+  // chroma at the same perceptual lightness L and hue angle H.
+  //
+  // _oklchToLinearSRGB: OKLCH → Oklab → linear-light sRGB (may exceed [0,1]).
+  // _maxSRGBChromaAtLH: 20-step binary search → max C where linear RGB ∈ [0,1].
+  // isOutOfSRGBGamut:   Returns true if the colour is ≥97% of maxC AND C > 0.05.
+  //                     Low-chroma / near-neutral colours are always false.
+
+  _oklchToLinearSRGB(L, C, H) {
+    // OKLCH → Oklab
+    const hRad = H * Math.PI / 180;
+    const a = C * Math.cos(hRad);
+    const b = C * Math.sin(hRad);
+    // Oklab → LMS cube roots
+    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+    const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+    const l3 = l_ * l_ * l_;
+    const m3 = m_ * m_ * m_;
+    const s3 = s_ * s_ * s_;
+    // LMS³ → linear sRGB
+    return {
+      r:  4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
+      g: -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
+      b: -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3
+    };
+  },
+
+  _maxSRGBChromaAtLH(L, H) {
+    // Binary search: find maximum C where OKLCH(L,C,H)→sRGB ∈ [0,1]
+    let lo = 0, hi = 0.50, eps = 1e-4;
+    for (let i = 0; i < 22; i++) {
+      const mid = (lo + hi) / 2;
+      const {r, g, b} = this._oklchToLinearSRGB(L, mid, H);
+      // In-gamut = all channels within epsilon of [0,1]
+      if (r >= -eps && r <= 1 + eps && g >= -eps && g <= 1 + eps && b >= -eps && b <= 1 + eps) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
+  },
+
+  isOutOfSRGBGamut(hex) {
+    // Quick reject: near-neutral colours can never be out-of-gamut
+    const {r, g, b} = this.hexToRgb(hex);
+    const okl = this.rgbToOklch(r, g, b);  // {l:0-100, c:0-100, h:0-360}
+    const L = okl.l / 100;  // normalise to Oklab [0,1]
+    const C = okl.c / 100;  // normalise chroma
+    const H = okl.h;         // degrees
+
+    // Skip near-neutral and very dark/light colours
+    if (C < 0.05 || L < 0.08 || L > 0.96) return false;
+
+    const maxC = this._maxSRGBChromaAtLH(L, H);
+
+    // At-gamut-surface: current chroma ≥ 97% of maximum possible in sRGB
+    return C >= maxC * 0.97;
   }
 
 
@@ -3535,7 +3642,7 @@ const Gallery={
     return`<div class="polaroid" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Gallery.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Gallery.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
       <div class="pol-name">${c.name}</div>
-      <div class="pol-hex">${c.hex.toUpperCase()}</div>
+      <div class="pol-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
       <div class="pol-match">${c.pantone?.code||''}</div>
       <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
     </div>`;
@@ -3585,7 +3692,7 @@ const Gallery={
       <div class="insp-swatch" style="background:${c.hex};display:flex;align-items:flex-end;padding:10px">
         <div style="flex:1">
           <div class="insp-name" style="color:${fgClr}">${c.name}</div>
-          <div style="font-size:11px;font-family:var(--mono);color:${fgClr};opacity:.7">${c.hex.toUpperCase()} &nbsp;·&nbsp; LRV ${c.lrv}%</div>
+          <div style="font-size:11px;font-family:var(--mono);color:${fgClr};opacity:.7">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?' <span class="gamut-warn" style="font-size:11px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — this colour may clip on sRGB displays</span></span>':''} &nbsp;·&nbsp; LRV ${c.lrv}%</div>
         </div>
       </div>
 
@@ -5827,6 +5934,9 @@ const PaletteBuilder = {
     this.historyStack.push(snap);
     if (this.historyStack.length > 50) this.historyStack.shift(); // cap at 50
     this._syncUndoBtn();
+    // Refresh CVD preview if panel is open
+    const _cvdPanel = document.getElementById('pb-cvd-panel');
+    if (_cvdPanel && _cvdPanel.style.display === 'flex') this._renderCVDPreview();
   },
 
   undo() {
@@ -5962,6 +6072,84 @@ const PaletteBuilder = {
   closeLibPicker() { document.getElementById('pb-lib-picker').style.display = 'none'; },
 
   //  THEMED SUGGEST 
+  // ── Colour Blindness Simulation (Palette) ───────────────────────────────────
+  _pbCVDMode: 'normal',
+
+  toggleCVD() {
+    const panel = document.getElementById('pb-cvd-panel');
+    if (!panel) return;
+    const showing = panel.style.display === 'flex';
+    panel.style.display = showing ? 'none' : 'flex';
+    if (!showing) {
+      this._pbCVDMode = 'normal';
+      document.querySelectorAll('[data-pbcvd]').forEach(b => b.classList.toggle('on', b.dataset.pbcvd === 'normal'));
+      this._renderCVDPreview();
+    }
+  },
+
+  setCVDMode(mode) {
+    this._pbCVDMode = mode;
+    document.querySelectorAll('[data-pbcvd]').forEach(b => b.classList.toggle('on', b.dataset.pbcvd === mode));
+    this._renderCVDPreview();
+  },
+
+  _renderCVDPreview() {
+    const wrap = document.getElementById('pb-cvd-preview');
+    if (!wrap || !this.colours.length) {
+      if (wrap) wrap.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px">No colours in palette yet</div>';
+      return;
+    }
+    const mode = this._pbCVDMode;
+
+    // Row 1: original colours (always shown as reference)
+    const origCells = this.colours.map(c =>
+      `<div class="cvd-cell" style="background:${c.hex}" title="${c.name} · ${c.hex.toUpperCase()}"></div>`
+    ).join('');
+
+    let html = `<div class="cvd-swatch-row cvd-orig-row">
+      <div class="cvd-row-label">Original</div>
+      ${origCells}
+    </div>`;
+
+    if (mode === 'normal') {
+      // In normal mode, show all 4 simulations as comparison
+      const modes = [
+        { key: 'deuteranopia',  label: 'Deuteranopia' },
+        { key: 'protanopia',    label: 'Protanopia' },
+        { key: 'tritanopia',    label: 'Tritanopia' },
+        { key: 'achromatopsia', label: 'Achromato.' },
+      ];
+      modes.forEach(({ key, label }) => {
+        const cells = this.colours.map(c => {
+          const simHex = CVDSim.simulate(c.hex, key);
+          return `<div class="cvd-cell" style="background:${simHex}" title="${label}: ${simHex.toUpperCase()}"></div>`;
+        }).join('');
+        html += `<div class="cvd-swatch-row">
+          <div class="cvd-row-label">${label}</div>
+          ${cells}
+        </div>`;
+      });
+      html += `<div style="font-size:9px;color:var(--muted);text-align:center;padding-top:4px">Tap a mode above to focus on one simulation</div>`;
+    } else {
+      // Focused mode: show only the selected simulation with clear comparison
+      const cells = this.colours.map(c => {
+        const simHex = CVDSim.simulate(c.hex, mode);
+        const dE = CS.dE(CS.rgbToLab(CS.hexToRgb(c.hex).r, CS.hexToRgb(c.hex).g, CS.hexToRgb(c.hex).b),
+                         CS.rgbToLab(CS.hexToRgb(simHex).r, CS.hexToRgb(simHex).g, CS.hexToRgb(simHex).b));
+        const shifted = dE > 8 ? '!' : '';
+        return `<div class="cvd-cell" style="background:${simHex}" title="${CVDSim.LABELS[mode]}: ${simHex.toUpperCase()} (ΔE ${dE.toFixed(1)})${shifted?'  High shift':''}">${shifted?`<span style="position:absolute;top:2px;right:3px;font-size:8px;opacity:.7">!</span>`:''}</div>`;
+      }).join('');
+      html += `<div class="cvd-swatch-row">
+        <div class="cvd-row-label">${CVDSim.LABELS[mode]}</div>
+        ${cells}
+      </div>`;
+      html += `<div style="font-size:9px;color:var(--muted);padding-top:4px;line-height:1.5">
+        ΔE &gt; 8 flagged with ! — colours that shift significantly may be hard to distinguish.
+      </div>`;
+    }
+    wrap.innerHTML = html;
+  },
+
   // ── Non-destructive algo suggest tray ────────────────────────────────────
   suggestAlgo(label, hexes) {
     const tray  = document.getElementById('pb-algo-tray');
@@ -6449,7 +6637,7 @@ const PaletteBuilder = {
         </div>
         <div class="pb-slot-info">
           <div class="pb-slot-name">${c.name}</div>
-          <div class="pb-slot-hex">${c.hex.toUpperCase()}</div>
+          <div class="pb-slot-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
           <div class="pb-slot-pan">${c.pantone}</div>
         </div>
       </div>`;
