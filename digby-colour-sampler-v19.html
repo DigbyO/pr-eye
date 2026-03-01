@@ -356,8 +356,18 @@ a{color:var(--accent);text-decoration:none}
 .insp-wcag-pass .insp-wcag-badge{color:var(--ok);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 .insp-wcag-fail .insp-wcag-badge{color:var(--danger);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 /* det-match family removed: paint match feature stripped */
-.btn-buy{background:linear-gradient(135deg,#c8943a 0%,#b07828 100%);color:#fff;border:1px solid #d4a84a;font-weight:700;letter-spacing:.04em}
-.btn-buy:hover{background:linear-gradient(135deg,#d4a84a 0%,#c8943a 100%);border-color:#e0bc60}
+.insp-paint-section{margin:12px 14px 14px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.insp-paint-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:8px 12px 4px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.insp-paint-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)}
+.insp-paint-row:last-child{border-bottom:none}
+.insp-paint-swatch{width:36px;height:36px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.insp-paint-info{flex:1;min-width:0}
+.insp-paint-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:2px}
+.insp-paint-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insp-paint-code{font-size:9px;color:var(--muted);font-family:var(--mono);font-weight:400}
+.insp-paint-de{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.insp-paint-link{color:var(--accent);text-decoration:none}
+.insp-paint-link:active{opacity:.7}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -1189,64 +1199,64 @@ a{color:var(--accent);text-decoration:none}
       <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span></div>
       <div class="prom-pill-grid" id="subject-grid">
         <div class="prom-pill-group-label">Botanical</div>
-        <button class="prom-pill" data-g="subject" data-v="florals">Florals</button>
-        <button class="prom-pill" data-g="subject" data-v="foliage">Foliage</button>
-        <button class="prom-pill" data-g="subject" data-v="botanicals">Botanicals</button>
-        <button class="prom-pill" data-g="subject" data-v="ferns">Ferns</button>
-        <button class="prom-pill" data-g="subject" data-v="herbs and spices">Herbs</button>
-        <button class="prom-pill" data-g="subject" data-v="fruit and berries">Fruit</button>
-        <button class="prom-pill" data-g="subject" data-v="mushrooms and fungi">Fungi</button>
+        <button class="prom-pill" data-g="subject" data-v="florals" onclick="Prompter.togglePill(this)">Florals</button>
+        <button class="prom-pill" data-g="subject" data-v="foliage" onclick="Prompter.togglePill(this)">Foliage</button>
+        <button class="prom-pill" data-g="subject" data-v="botanicals" onclick="Prompter.togglePill(this)">Botanicals</button>
+        <button class="prom-pill" data-g="subject" data-v="ferns" onclick="Prompter.togglePill(this)">Ferns</button>
+        <button class="prom-pill" data-g="subject" data-v="herbs and spices" onclick="Prompter.togglePill(this)">Herbs</button>
+        <button class="prom-pill" data-g="subject" data-v="fruit and berries" onclick="Prompter.togglePill(this)">Fruit</button>
+        <button class="prom-pill" data-g="subject" data-v="mushrooms and fungi" onclick="Prompter.togglePill(this)">Fungi</button>
         <div class="prom-pill-group-label">Fauna</div>
-        <button class="prom-pill" data-g="subject" data-v="birds in flight and perched">Birds</button>
-        <button class="prom-pill" data-g="subject" data-v="butterflies and moths">Butterflies</button>
-        <button class="prom-pill" data-g="subject" data-v="insects and beetles">Insects</button>
-        <button class="prom-pill" data-g="subject" data-v="fish and marine life">Fish</button>
-        <button class="prom-pill" data-g="subject" data-v="shells and coral">Shells</button>
-        <button class="prom-pill" data-g="subject" data-v="deer and woodland animals">Animals</button>
-        <button class="prom-pill" data-g="subject" data-v="exotic birds and plumage">Exotic Birds</button>
+        <button class="prom-pill" data-g="subject" data-v="birds in flight and perched" onclick="Prompter.togglePill(this)">Birds</button>
+        <button class="prom-pill" data-g="subject" data-v="butterflies and moths" onclick="Prompter.togglePill(this)">Butterflies</button>
+        <button class="prom-pill" data-g="subject" data-v="insects and beetles" onclick="Prompter.togglePill(this)">Insects</button>
+        <button class="prom-pill" data-g="subject" data-v="fish and marine life" onclick="Prompter.togglePill(this)">Fish</button>
+        <button class="prom-pill" data-g="subject" data-v="shells and coral" onclick="Prompter.togglePill(this)">Shells</button>
+        <button class="prom-pill" data-g="subject" data-v="deer and woodland animals" onclick="Prompter.togglePill(this)">Animals</button>
+        <button class="prom-pill" data-g="subject" data-v="exotic birds and plumage" onclick="Prompter.togglePill(this)">Exotic Birds</button>
         <div class="prom-pill-group-label">Geometric</div>
-        <button class="prom-pill" data-g="subject" data-v="geometric tessellation">Tessellation</button>
-        <button class="prom-pill" data-g="subject" data-v="ogee and trellis forms">Trellis</button>
-        <button class="prom-pill" data-g="subject" data-v="chevron and herringbone">Chevron</button>
-        <button class="prom-pill" data-g="subject" data-v="diamond lattice">Lattice</button>
-        <button class="prom-pill" data-g="subject" data-v="stars and snowflakes">Stars</button>
-        <button class="prom-pill" data-g="subject" data-v="interlocking circles">Circles</button>
+        <button class="prom-pill" data-g="subject" data-v="geometric tessellation" onclick="Prompter.togglePill(this)">Tessellation</button>
+        <button class="prom-pill" data-g="subject" data-v="ogee and trellis forms" onclick="Prompter.togglePill(this)">Trellis</button>
+        <button class="prom-pill" data-g="subject" data-v="chevron and herringbone" onclick="Prompter.togglePill(this)">Chevron</button>
+        <button class="prom-pill" data-g="subject" data-v="diamond lattice" onclick="Prompter.togglePill(this)">Lattice</button>
+        <button class="prom-pill" data-g="subject" data-v="stars and snowflakes" onclick="Prompter.togglePill(this)">Stars</button>
+        <button class="prom-pill" data-g="subject" data-v="interlocking circles" onclick="Prompter.togglePill(this)">Circles</button>
         <div class="prom-pill-group-label">Decorative</div>
-        <button class="prom-pill" data-g="subject" data-v="classical damask motifs">Damask</button>
-        <button class="prom-pill" data-g="subject" data-v="toile de jouy pastoral scene">Toile</button>
-        <button class="prom-pill" data-g="subject" data-v="chinoiserie pagodas and blossom">Chinoiserie</button>
-        <button class="prom-pill" data-g="subject" data-v="heraldic crests and shields">Heraldic</button>
-        <button class="prom-pill" data-g="subject" data-v="celestial suns moons and stars">Celestial</button>
-        <button class="prom-pill" data-g="subject" data-v="abstract gestural marks">Abstract</button>
-        <button class="prom-pill" data-g="subject" data-v="paisley and ikat forms">Paisley</button>
-        <button class="prom-pill" data-g="subject" data-v="architectural columns and arches">Architectural</button>
+        <button class="prom-pill" data-g="subject" data-v="classical damask motifs" onclick="Prompter.togglePill(this)">Damask</button>
+        <button class="prom-pill" data-g="subject" data-v="toile de jouy pastoral scene" onclick="Prompter.togglePill(this)">Toile</button>
+        <button class="prom-pill" data-g="subject" data-v="chinoiserie pagodas and blossom" onclick="Prompter.togglePill(this)">Chinoiserie</button>
+        <button class="prom-pill" data-g="subject" data-v="heraldic crests and shields" onclick="Prompter.togglePill(this)">Heraldic</button>
+        <button class="prom-pill" data-g="subject" data-v="celestial suns moons and stars" onclick="Prompter.togglePill(this)">Celestial</button>
+        <button class="prom-pill" data-g="subject" data-v="abstract gestural marks" onclick="Prompter.togglePill(this)">Abstract</button>
+        <button class="prom-pill" data-g="subject" data-v="paisley and ikat forms" onclick="Prompter.togglePill(this)">Paisley</button>
+        <button class="prom-pill" data-g="subject" data-v="architectural columns and arches" onclick="Prompter.togglePill(this)">Architectural</button>
       </div>
 
       <!-- ART MEDIUM -->
       <div class="sec prom-sec-label">Art Medium <span class="prom-multi-hint">multi-select</span></div>
       <div class="prom-pill-grid" id="medium-grid">
         <div class="prom-pill-group-label">Print</div>
-        <button class="prom-pill" data-g="medium" data-v="etching">Etching</button>
-        <button class="prom-pill" data-g="medium" data-v="woodblock print">Woodblock</button>
-        <button class="prom-pill" data-g="medium" data-v="screen print">Screen Print</button>
-        <button class="prom-pill" data-g="medium" data-v="linocut print">Linocut</button>
-        <button class="prom-pill" data-g="medium" data-v="risograph print">Risograph</button>
-        <button class="prom-pill" data-g="medium" data-v="engraving">Engraving</button>
-        <button class="prom-pill" data-g="medium" data-v="stencil print">Stencil</button>
+        <button class="prom-pill" data-g="medium" data-v="etching" onclick="Prompter.togglePill(this)">Etching</button>
+        <button class="prom-pill" data-g="medium" data-v="woodblock print" onclick="Prompter.togglePill(this)">Woodblock</button>
+        <button class="prom-pill" data-g="medium" data-v="screen print" onclick="Prompter.togglePill(this)">Screen Print</button>
+        <button class="prom-pill" data-g="medium" data-v="linocut print" onclick="Prompter.togglePill(this)">Linocut</button>
+        <button class="prom-pill" data-g="medium" data-v="risograph print" onclick="Prompter.togglePill(this)">Risograph</button>
+        <button class="prom-pill" data-g="medium" data-v="engraving" onclick="Prompter.togglePill(this)">Engraving</button>
+        <button class="prom-pill" data-g="medium" data-v="stencil print" onclick="Prompter.togglePill(this)">Stencil</button>
         <div class="prom-pill-group-label">Painted</div>
-        <button class="prom-pill" data-g="medium" data-v="watercolour illustration">Watercolour</button>
-        <button class="prom-pill" data-g="medium" data-v="gouache painting">Gouache</button>
-        <button class="prom-pill" data-g="medium" data-v="oil painting">Oil Painting</button>
-        <button class="prom-pill" data-g="medium" data-v="pastel drawing">Pastel</button>
-        <button class="prom-pill" data-g="medium" data-v="acrylic painting">Acrylic</button>
+        <button class="prom-pill" data-g="medium" data-v="watercolour illustration" onclick="Prompter.togglePill(this)">Watercolour</button>
+        <button class="prom-pill" data-g="medium" data-v="gouache painting" onclick="Prompter.togglePill(this)">Gouache</button>
+        <button class="prom-pill" data-g="medium" data-v="oil painting" onclick="Prompter.togglePill(this)">Oil Painting</button>
+        <button class="prom-pill" data-g="medium" data-v="pastel drawing" onclick="Prompter.togglePill(this)">Pastel</button>
+        <button class="prom-pill" data-g="medium" data-v="acrylic painting" onclick="Prompter.togglePill(this)">Acrylic</button>
         <div class="prom-pill-group-label">Drawing</div>
-        <button class="prom-pill" data-g="medium" data-v="pen and ink illustration">Pen & Ink</button>
-        <button class="prom-pill" data-g="medium" data-v="pencil drawing">Pencil</button>
-        <button class="prom-pill" data-g="medium" data-v="charcoal drawing">Charcoal</button>
+        <button class="prom-pill" data-g="medium" data-v="pen and ink illustration" onclick="Prompter.togglePill(this)">Pen & Ink</button>
+        <button class="prom-pill" data-g="medium" data-v="pencil drawing" onclick="Prompter.togglePill(this)">Pencil</button>
+        <button class="prom-pill" data-g="medium" data-v="charcoal drawing" onclick="Prompter.togglePill(this)">Charcoal</button>
         <div class="prom-pill-group-label">Digital</div>
-        <button class="prom-pill" data-g="medium" data-v="flat vector illustration">Flat Vector</button>
-        <button class="prom-pill" data-g="medium" data-v="collage and mixed media">Collage</button>
-        <button class="prom-pill" data-g="medium" data-v="digital illustration">Digital</button>
+        <button class="prom-pill" data-g="medium" data-v="flat vector illustration" onclick="Prompter.togglePill(this)">Flat Vector</button>
+        <button class="prom-pill" data-g="medium" data-v="collage and mixed media" onclick="Prompter.togglePill(this)">Collage</button>
+        <button class="prom-pill" data-g="medium" data-v="digital illustration" onclick="Prompter.togglePill(this)">Digital</button>
       </div>
 
       <!-- PERIOD / ERA -->
@@ -1812,8 +1822,8 @@ const CS = {
     return Math.sqrt(Math.pow(dLp/SL,2)+Math.pow(dCp/SC,2)+Math.pow(dHp/SH,2)+RT*(dCp/SC)*(dHp/SH));
   },
   nearestPantone(lab){let b=null,bd=Infinity;for(const p of PANTONE){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
-  nearestLG(lab){let b=null,bd=Infinity;for(const p of LG){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
-  nearestFB(lab){let b=null,bd=Infinity;for(const p of FB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
+  nearestLG(lab){let b=null,bd=Infinity;for(const p of LG){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
+  nearestFB(lab){let b=null,bd=Infinity;for(const p of FB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   lrv(lab){return Math.round((lab.l/100)**2*100)},
 
   //  Trio helper methods 
@@ -2966,13 +2976,12 @@ const Sampler={
       return;
     }
 
-    // 4. Three-tier camera constraint chain.
-    //    Tier 1: ideal facing + resolution
-    //    Tier 2: exact facing only (keeps rear/front if device rejects resolution)
-    //    Tier 3: video:true (absolute last resort)
-    const facing = this.camFront ? 'user' : 'environment';
-    const tier1 = { video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
-    const tier2 = { video: { facingMode: { exact: facing } } };
+    // 4. Multi-tier camera constraint fallback chain.
+    //    Tier 1: exact rear camera  (most specific, may throw OverconstrainedError on desktop/webcam)
+    //    Tier 2: preferred rear camera (soft hint, works on most phones)
+    //    Tier 3: any camera (absolute last resort — also catches desktop single-cam setups)
+    const tier1 = { video: { facingMode: { exact: 'environment' } } };
+    const tier2 = { video: { facingMode: 'environment' } };
     const tier3 = { video: true };
 
     const isOverconstrained = function(e) {
@@ -2997,19 +3006,23 @@ const Sampler={
     tryCamera(tier1)
       .catch(err => {
         if (isOverconstrained(err)) {
-          console.warn('Camera tier 1 overconstrained — retrying facing-only');
+          console.warn('Camera tier 1 (exact environment) overconstrained — retrying soft hint');
           return tryCamera(tier2);
         }
         throw err;
       })
       .catch(err => {
         if (isOverconstrained(err)) {
-          console.warn('Camera tier 2 overconstrained — retrying video:true');
+          console.warn('Camera tier 2 (preferred environment) overconstrained — retrying video:true');
           return tryCamera(tier3);
         }
         throw err;
       })
-      .catch(err => this.handleCameraError(err));
+      .catch(err => {
+        // All three tiers failed — show toast and hex fallback
+        App.toast('Camera blocked or unavailable');
+        this.handleCameraError(err);
+      });
   },
 
   handleCameraError(err) {
@@ -3943,9 +3956,24 @@ const Gallery={
         <button class="btn btn-s btn-sm" onclick="Gallery.exportOne('${id}')">Export Polaroid</button>
         <button class="btn btn-d btn-sm" onclick="Gallery.del('${id}')">Delete</button>
       </div>
-      <div style="margin-top:8px">
-        <button class="btn btn-buy btn-sm" style="width:100%" onclick="window.open('https://digby.shop/products/custom-solid-colour-fabric?hex=${c.hex.replace('#','')}','_blank')">🛍️ Buy as Fabric</button>
-      </div>
+      ${(()=>{
+        const fb = c.farrowBall, lg = c.littleGreene;
+        if (!fb && !lg) return '';
+        const row = (brand, logo, paint) => paint
+          ? `<div class="insp-paint-row">
+              <div class="insp-paint-swatch" style="background:${paint.hex}"></div>
+              <div class="insp-paint-info">
+                <div class="insp-paint-brand">${brand}</div>
+                <div class="insp-paint-name">${paint.name} <span class="insp-paint-code">${paint.code}</span></div>
+                <div class="insp-paint-de">ΔE ${paint.de} · <a href="${paint.url}" target="_blank" rel="noopener" class="insp-paint-link">View paint ↗</a></div>
+              </div>
+            </div>` : '';
+        return `<div class="insp-paint-section">
+          <div class="insp-paint-label">Nearest Physical Paint</div>
+          ${row('Farrow & Ball','fb',fb)}
+          ${row('Little Greene','lg',lg)}
+        </div>`;
+      })()}
     </div>`);
   },
 
@@ -4926,6 +4954,8 @@ const Prompter={
 
   // Generic pill toggle  called by onclick on each pill
   togglePill(btn){
+    // Guard: hue-filter pills have data-hf not data-g — handled by setHueFilter, skip here
+    if(!btn.dataset.g) return;
     const g=btn.dataset.g, v=btn.dataset.v;
     const isSingle=btn.classList.contains('prom-pill-single');
 
