@@ -358,17 +358,15 @@ a{color:var(--accent);text-decoration:none}
 /* det-match family removed: paint match feature stripped */
 .insp-matches-section{margin:12px 14px 14px}
 .insp-matches-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 0 6px;font-family:var(--mono)}
-.insp-matches-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.insp-match-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;gap:9px;align-items:flex-start;min-width:0}
-.insp-match-cell:first-child:nth-last-child(3),.insp-match-cell:first-child:nth-last-child(3)~.insp-match-cell:last-child{grid-column:span 1}
-.insp-match-cell:only-child,.insp-match-cell:first-child:nth-last-child(3) ~ .insp-match-cell:nth-child(2){grid-column:span 1}
-.insp-matches-grid:has(.insp-match-cell:nth-child(3)){grid-template-columns:1fr 1fr;}.insp-matches-grid:has(.insp-match-cell:nth-child(3)) .insp-match-cell:last-child{grid-column:span 2}
-.insp-match-empty{color:var(--muted);font-size:12px;align-items:center;justify-content:center}
+.insp-matches-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.insp-matches-grid .insp-match-cell:last-child:nth-child(3){grid-column:1/-1}
+.insp-match-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;gap:9px;align-items:flex-start;min-width:0;overflow:hidden}
+.insp-match-empty{display:none}
 .insp-match-swatch{width:32px;height:32px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .insp-match-body{flex:1;min-width:0;overflow:hidden}
 .insp-match-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:1px}
-.insp-match-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.insp-match-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.insp-match-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.insp-match-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .insp-match-link{font-size:9px;color:var(--accent);text-decoration:none;margin-top:3px;display:inline-block}
 /* Sort buttons */
 .prom-lib-sort{display:flex;gap:4px;margin-left:auto}
@@ -3123,28 +3121,19 @@ const Sampler={
 
       v.srcObject = stream;
 
-      // v.load() forces Safari to reinitialise the media pipeline after
-      // srcObject assignment — without it play() may reject with
-      // NotAllowedError even on a fresh permission grant
-      v.load();
-
-      // Wait for video metadata (real dimensions) before starting RAF
-      await new Promise(res => {
-        if (v.readyState >= 1) res();
-        else v.addEventListener('loadedmetadata', res, { once: true });
-      });
-
-      // ── play() with async/await + body-click fallback ─────────────
+      // ── play() directly — no loadedmetadata wait ──────────────────
+      // On iOS Safari PWA, loadedmetadata can fail to fire for MediaStream
+      // sources, causing a permanent deadlock. We call play() immediately;
+      // the RAF sampling loop already guards with readyState < 2.
       try {
         await v.play();
       } catch (err) {
         if (err.name === 'NotAllowedError' || err.name === 'AbortError') {
-          // Autoplay blocked by browser policy (common on iOS PWA installs).
-          // Show a visible overlay — the tap satisfies the user-gesture requirement.
+          // Autoplay blocked — show tap overlay for user gesture
           console.warn('Camera play() blocked — showing tap overlay:', err.name);
           this._showTapOverlay(v);
         } else {
-          throw err; // re-throw genuine errors (NotFoundError, etc.)
+          throw err;
         }
       }
 
@@ -4192,8 +4181,7 @@ const Gallery={
               <div class="insp-match-sub">${paint.code} · ΔE ${paint.de}</div>
               <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
             </div>
-          </div>`:
-          `<div class="insp-match-cell insp-match-empty">—</div>`;
+          </div>`:``;
 
         const pantoneCell=pan?`
           <div class="insp-match-cell">
@@ -5237,34 +5225,39 @@ const Prompter={
 
   // Generic pill toggle  called by onclick on each pill
   togglePill(btn){
-    // Guard: hue-filter pills have data-hf not data-g — handled by setHueFilter, skip here
     if(!btn.dataset.g) return;
     const g=btn.dataset.g, v=btn.dataset.v;
     const isSingle=btn.classList.contains('prom-pill-single');
 
-    // Spec: read .checked directly from the toggle element.
-    // toggleMulti() keeps el.checked in sync so this always reflects current state.
-    const isMulti=document.getElementById('prom-multi-toggle').checked;
+    // Use this.multiMode directly — it is the authoritative source of truth.
+    // Relying on .checked on a <div> is fragile because it is not a native
+    // form property and can be undefined or stale.
+    const isMulti = this.multiMode;
 
     if(isSingle){
       // Era / repeat — always radio regardless of multi-mode
       document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
-      if(g==='era')     this.era=v;
-      if(g==='repeat')  this.repeat=v;
-    } else {
-      if(!isMulti){
-        // Single-select: clear all others in group first
-        document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
-        const set=g==='subject'?this.subjects:this.mediums;
-        set.clear();
-      }
-      // Toggle this pill (multi: accumulate; single: just activate)
-      const wasOn=!isMulti?false:btn.classList.contains('on');
-      btn.classList.toggle('on',!wasOn);
+      if(g==='era')    this.era=v;
+      if(g==='repeat') this.repeat=v;
+    } else if(isMulti){
+      // Multi-select ON: toggle this pill independently.
+      // The "remove others" block is SKIPPED — all selected pills stay on.
+      btn.classList.toggle('on');
       const set=g==='subject'?this.subjects:this.mediums;
       if(btn.classList.contains('on')) set.add(v);
       else set.delete(v);
+    } else {
+      // Single-select (default): clear all in group, then activate this one.
+      // Tapping an already-active pill deselects it (toggle).
+      const wasOn=btn.classList.contains('on');
+      document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
+      const set=g==='subject'?this.subjects:this.mediums;
+      set.clear();
+      if(!wasOn){
+        btn.classList.add('on');
+        set.add(v);
+      }
     }
     this._updateColourScience();
   },
