@@ -356,18 +356,24 @@ a{color:var(--accent);text-decoration:none}
 .insp-wcag-pass .insp-wcag-badge{color:var(--ok);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 .insp-wcag-fail .insp-wcag-badge{color:var(--danger);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 /* det-match family removed: paint match feature stripped */
-.insp-paint-section{margin:12px 14px 14px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.insp-paint-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:8px 12px 4px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.insp-paint-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border)}
-.insp-paint-row:last-child{border-bottom:none}
-.insp-paint-swatch{width:36px;height:36px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
-.insp-paint-info{flex:1;min-width:0}
-.insp-paint-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:2px}
-.insp-paint-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.insp-paint-code{font-size:9px;color:var(--muted);font-family:var(--mono);font-weight:400}
-.insp-paint-de{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px}
-.insp-paint-link{color:var(--accent);text-decoration:none}
-.insp-paint-link:active{opacity:.7}
+.insp-matches-section{margin:12px 14px 14px}
+.insp-matches-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 0 6px;font-family:var(--mono)}
+.insp-matches-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.insp-match-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;gap:9px;align-items:flex-start;min-width:0}
+.insp-match-cell:first-child:nth-last-child(3),.insp-match-cell:first-child:nth-last-child(3)~.insp-match-cell:last-child{grid-column:span 1}
+.insp-match-cell:only-child,.insp-match-cell:first-child:nth-last-child(3) ~ .insp-match-cell:nth-child(2){grid-column:span 1}
+.insp-matches-grid:has(.insp-match-cell:nth-child(3)){grid-template-columns:1fr 1fr;}.insp-matches-grid:has(.insp-match-cell:nth-child(3)) .insp-match-cell:last-child{grid-column:span 2}
+.insp-match-empty{color:var(--muted);font-size:12px;align-items:center;justify-content:center}
+.insp-match-swatch{width:32px;height:32px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.insp-match-body{flex:1;min-width:0}
+.insp-match-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:1px}
+.insp-match-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insp-match-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.insp-match-link{font-size:9px;color:var(--accent);text-decoration:none;margin-top:3px;display:inline-block}
+/* Sort buttons */
+.prom-lib-sort{display:flex;gap:4px;margin-left:auto}
+.plib-sort-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--muted);cursor:pointer;line-height:1.4;font-family:var(--sans);transition:all .15s}
+.plib-sort-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -397,7 +403,7 @@ a{color:var(--accent);text-decoration:none}
    MODULE 4  PROMPTER
  */
 /* Library strip pinned above Prompter scroll */
-#prom-lib-header{display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px 4px;flex-shrink:0}
+#prom-lib-header{display:flex;align-items:center;gap:6px;padding:10px 14px 4px;flex-shrink:0;flex-wrap:wrap}
 #prom-lib-header .prom-lib-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 #prom-lib-header .prom-lib-count{font-size:10px;color:var(--accent);font-weight:700}
 #prom-lib-strip{display:flex;gap:10px;padding:4px 14px 12px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--border)}
@@ -660,9 +666,9 @@ a{color:var(--accent);text-decoration:none}
 #inspector-body .insp-swatch{height:140px;border-radius:var(--r) var(--r) 0 0;margin-bottom:0;position:relative;overflow:hidden}
 .insp-name{font-family:var(--sharpie);font-size:clamp(1.375rem,5vw,1.625rem);margin-bottom:10px;color:var(--text)}
 .insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 14px 12px}
-.insp-row{background:var(--surface2);border-radius:var(--rs);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.insp-row{background:var(--surface2);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px}
 .insp-label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
-.insp-val{font-size:var(--fs-sm);color:var(--text);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right;line-height:1.3}
+.insp-val{font-size:var(--fs-base);color:var(--text);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right;line-height:1.5}
 .insp-copy{background:none;border:1px solid var(--border);border-radius:4px;padding:5px 9px;font-size:var(--fs-xxs);color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .15s;min-height:32px}
 .insp-copy:active{background:var(--accent);color:#000;border-color:var(--accent)}
 .insp-copy.copied{background:var(--ok);color:#000;border-color:var(--ok)}
@@ -1001,6 +1007,11 @@ a{color:var(--accent);text-decoration:none}
         <div id="mood-bars"></div>
       </div>
 
+      <div class="sec">Tints, Shades &amp; Tones</div>
+      <div class="card" id="var-card" style="padding:10px 0 4px">
+        <div id="var-container"></div>
+      </div>
+
       <div class="sec">Split Tone</div>
       <div class="card">
         <div class="split-grad" id="split-grad"></div>
@@ -1159,6 +1170,11 @@ a{color:var(--accent);text-decoration:none}
     <div id="prom-lib-header">
       <span class="prom-lib-title">Library</span>
       <span class="prom-lib-count" id="prom-lib-count"></span>
+      <div class="prom-lib-sort" id="prom-lib-sort">
+        <button class="plib-sort-btn on" data-sort="newest" onclick="Prompter.setSort(this)">Newest</button>
+        <button class="plib-sort-btn" data-sort="hue"    onclick="Prompter.setSort(this)">Hue</button>
+        <button class="plib-sort-btn" data-sort="light"  onclick="Prompter.setSort(this)">Lightness</button>
+      </div>
     </div>
     <div id="prom-lib-strip"></div>
     <div class="mod-scroll">
@@ -1301,6 +1317,15 @@ a{color:var(--accent);text-decoration:none}
         <button class="prom-pill prom-pill-single" data-g="repeat" data-v="ditsy print scattered motif">Ditsy</button>
         <button class="prom-pill prom-pill-single" data-g="repeat" data-v="large scale statement repeat">Large Scale</button>
         <button class="prom-pill prom-pill-single" data-g="repeat" data-v="dense allover pattern no ground visible">Allover</button>
+      </div>
+
+      <!-- MULTI-SELECT MODE -->
+      <div class="sec prom-sec-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Multi-Select
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:10px;color:var(--muted)">Pick multiple subjects &amp; mediums</div>
+          <div class="sw" id="prom-multi-toggle" onclick="Prompter.toggleMulti(this)"></div>
+        </div>
       </div>
 
       <!-- BATCH MODE -->
@@ -1867,6 +1892,23 @@ const CS = {
   kDesc(k){return k<2200?'Candlelight':k<3000?'Tungsten':k<3500?'Warm White':k<4500?'Neutral':k<6000?'Daylight':k<7000?'Overcast':'Deep Sky'},
   autoName(hex){const{r,g,b}=this.hexToRgb(hex);const{h,s,l}=this.rgbToHsl(r,g,b);if(s<10)return l>85?'Near White':l>65?'Light Grey':l>45?'Grey':l>25?'Dark Grey':'Near Black';const hns=['Red','Rose','Tangerine','Amber','Gold','Lime','Green','Teal','Sky Blue','Blue','Indigo','Violet'];const hn=hns[Math.round(h/30)%12];const px=l>72?'Pale':l<28?'Deep':s<22?'Muted':s>70?'Vivid':'Warm';return`${px} ${hn}`},
   harmonies(hex){const{r,g,b}=this.hexToRgb(hex);const lab=this.rgbToLab(r,g,b);const{l,c,h}=this.labToLch(lab);const mk=(dh,dl=0,dc=0)=>this.lchToHex(Math.max(8,Math.min(96,l+dl)),Math.max(5,c+dc),(h+dh+360)%360);return{complementary:[hex,mk(180)],analogous:[mk(-30),hex,mk(30)],triadic:[hex,mk(120),mk(240)],tetradic:[hex,mk(90),mk(180),mk(270)],splitComp:[hex,mk(150),mk(210)],mono:[mk(0,22,-12),mk(0,10,-6),hex,mk(0,-14,4),mk(0,-28,8)],splitTone:{shadows:mk(180,-(l*.4),c*.3),highlights:mk(0,+(95-l)*.3,c*.3)}}},
+
+  // Tints (lighten), Shades (darken), Tones (desaturate) — 5 steps each in LCH
+  variations(hex){
+    const lab=this.rgbToLab(...Object.values(this.hexToRgb(hex)));
+    const{l,c,h}=this.labToLch(lab);
+    const mk=(dl,dc)=>this.lchToHex(Math.max(4,Math.min(97,l+dl)),Math.max(0,c+dc),h);
+    // Tints: blend toward white (L→96, C→4)
+    const tintSteps=[.2,.4,.6,.8,1.0];
+    const tints=tintSteps.map(t=>mk((96-l)*t,(4-c)*t));
+    // Shades: blend toward black (L→4, C→0)
+    const shadeSteps=[.2,.4,.6,.8,1.0];
+    const shades=shadeSteps.map(t=>mk((4-l)*t,-c*t));
+    // Tones: desaturate toward grey (C→0, slight L nudge toward 55)
+    const toneSteps=[.2,.4,.6,.8,1.0];
+    const tones=toneSteps.map(t=>mk((55-l)*t*.35,-c*t));
+    return{tints,shades,tones};
+  },
   mood(hex){const{r,g,b}=this.hexToRgb(hex);const{h,s,l}=this.rgbToHsl(r,g,b);return{Warm:h<30||h>300?75+s*.25:Math.max(0,50-(h-180)*.3),Energy:s*.7+l*.3,Weight:100-l,Purity:s,Light:l}},
   applyStyle(lab,baseLab,style){
     let{l,a,b}={...lab};
@@ -4045,20 +4087,39 @@ const Gallery={
       </div>
       ${(()=>{
         const fb = c.farrowBall, lg = c.littleGreene;
-        if (!fb && !lg) return '';
-        const row = (brand, logo, paint) => paint
-          ? `<div class="insp-paint-row">
-              <div class="insp-paint-swatch" style="background:${paint.hex}"></div>
-              <div class="insp-paint-info">
-                <div class="insp-paint-brand">${brand}</div>
-                <div class="insp-paint-name">${paint.name} <span class="insp-paint-code">${paint.code}</span></div>
-                <div class="insp-paint-de">ΔE ${paint.de} · <a href="${paint.url}" target="_blank" rel="noopener" class="insp-paint-link">View paint ↗</a></div>
-              </div>
-            </div>` : '';
-        return `<div class="insp-paint-section">
-          <div class="insp-paint-label">Nearest Physical Paint</div>
-          ${row('Farrow & Ball','fb',fb)}
-          ${row('Little Greene','lg',lg)}
+        const pan = c.pantone;
+        const hasAny = fb || lg || pan;
+        if(!hasAny) return '';
+
+        const paintCell=(brand,paint)=>paint?`
+          <div class="insp-match-cell">
+            <div class="insp-match-swatch" style="background:${paint.hex}"></div>
+            <div class="insp-match-body">
+              <div class="insp-match-brand">${brand}</div>
+              <div class="insp-match-name">${paint.name}</div>
+              <div class="insp-match-sub">${paint.code} · ΔE ${paint.de}</div>
+              <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
+            </div>
+          </div>`:
+          `<div class="insp-match-cell insp-match-empty">—</div>`;
+
+        const pantoneCell=pan?`
+          <div class="insp-match-cell">
+            <div class="insp-match-swatch" style="background:${pan.hex||c.hex}"></div>
+            <div class="insp-match-body">
+              <div class="insp-match-brand">Pantone</div>
+              <div class="insp-match-name">${pan.name||pan.code}</div>
+              <div class="insp-match-sub">${pan.code}</div>
+            </div>
+          </div>`:``;
+
+        return `<div class="insp-matches-section">
+          <div class="insp-matches-label">Closest Colour Matches</div>
+          <div class="insp-matches-grid">
+            ${pantoneCell}
+            ${paintCell('Farrow &amp; Ball', fb)}
+            ${paintCell('Little Greene', lg)}
+          </div>
         </div>`;
       })()}
     </div>`);
@@ -4360,6 +4421,7 @@ const Explorer={
     const h = CS.harmonies(this.rootHex);
     this.renderHarmonies(h);
     this.renderMood();
+    this.renderVariations();
     document.getElementById('split-grad').style.background =
       `linear-gradient(to right,${h.splitTone.shadows},${h.splitTone.highlights})`;
     this.renderTrio();
@@ -4398,6 +4460,32 @@ const Explorer={
         <div class="mood-track"><div class="mood-fill" style="width:${v}%;background:${this.rootHex}"></div></div>
         <div class="mood-v">${Math.round(v)}%</div>
       </div>`).join('');
+  },
+
+  renderVariations(){
+    const vc=document.getElementById('var-container');
+    if(!vc)return;
+    const v=CS.variations(this.rootHex);
+    const swRow=(label,hexArr)=>`
+      <div style="padding:2px 12px 0;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between">
+        <span>${label}</span>
+        <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 7px"
+          onclick="SwatchExport.openFromHexes(${JSON.stringify(hexArr).replace(/"/g,"'")},'polaroids')"
+          title="Export ${label} as swatches">⬇</button>
+      </div>
+      <div class="harm-row">${hexArr.map(hex=>`
+        <div class="harm-sw" style="background:${hex}"
+             onclick="Explorer.setRoot('${hex}')"
+             title="Explore ${hex}">
+          <div class="harm-hex">${hex.toUpperCase()}</div>
+          <button class="harm-add-btn" onclick="event.stopPropagation();Explorer.addToLib('${hex}')"
+                  title="Save to library">+</button>
+        </div>`).join('')}</div>`;
+    vc.innerHTML=[
+      swRow('Tints', v.tints),
+      swRow('Shades',v.shades),
+      swRow('Tones', v.tones)
+    ].join('');
   },
 
   //  TRIO GENERATOR 
@@ -4873,6 +4961,8 @@ const Prompter={
   era:'',
   repeat:'seamless repeat pattern',
   batchMode:false,
+  multiMode:false,
+  sortMode:'newest',
   tile:true,
   raw:true,
   ar:'1:1',
@@ -4897,8 +4987,21 @@ const Prompter={
     this.render();
   },
 
+  setSort(btn){
+    this.sortMode=btn.dataset.sort;
+    document.querySelectorAll('.plib-sort-btn').forEach(b=>b.classList.toggle('on',b===btn));
+    this.render();
+  },
+
+  _sortAll(all){
+    if(this.sortMode==='hue')   return [...all].sort((a,b)=>(a.hsl?.h??0)-(b.hsl?.h??0));
+    if(this.sortMode==='light') return [...all].sort((a,b)=>(a.hsl?.l??50)-(b.hsl?.l??50));
+    return all; // newest = insertion order
+  },
+
   render(){
     const all=DS.all();
+    const sorted=this._sortAll(all);
 
     // ── Library strip (all colours, unfiltered, horizontal scroll) ──
     const stripEl=document.getElementById('prom-lib-strip');
@@ -4908,7 +5011,7 @@ const Prompter={
         stripEl.innerHTML='<span class="plib-empty">Sample some colours first</span>';
         if(libCountEl) libCountEl.textContent='';
       } else {
-        stripEl.innerHTML=all.map(c=>`<button class="plib-chip ${this.sel.has(c.id)?'on':''}"
+        stripEl.innerHTML=sorted.map(c=>`<button class="plib-chip ${this.sel.has(c.id)?'on':''}"
             type="button"
             data-cid="${c.id}"
             aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
@@ -4968,7 +5071,7 @@ const Prompter={
           aria-pressed="${this.sel.has(c.id)}">
           <div class="prom-sw" style="background:${c.hex}"></div>
           <div class="prom-label">${c.name}</div>
-          <div class="kelvin-badge"><b>~${_k.toLocaleString()}K</b></div>
+          <div class="kelvin-badge"><b>~${Math.round(_k-273).toLocaleString()}°C</b></div>
           <div class="psych-pill psych-${_pt.category}">${_pt.label}</div>
         </button>`;}).join('');;
   },
@@ -5048,17 +5151,46 @@ const Prompter={
     const isSingle=btn.classList.contains('prom-pill-single');
 
     if(isSingle){
-      // Deselect all in group, select this
+      // Era / repeat — always radio
       document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
       if(g==='era')     this.era=v;
       if(g==='repeat')  this.repeat=v;
-    } else {
-      // Multi-select toggle
+    } else if(this.multiMode){
+      // Multi-select ON: toggle this pill independently, keep others
       btn.classList.toggle('on');
       const set=g==='subject'?this.subjects:this.mediums;
       if(btn.classList.contains('on')) set.add(v);
       else set.delete(v);
+    } else {
+      // Multi-select OFF: radio behaviour — deselect all in group, select this
+      const wasOn=btn.classList.contains('on');
+      document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
+      const set=g==='subject'?this.subjects:this.mediums;
+      set.clear();
+      if(!wasOn){
+        btn.classList.add('on');
+        set.add(v);
+      }
+    }
+    this._updateColourScience();
+  },
+
+  toggleMulti(el){
+    this.multiMode=!this.multiMode;
+    el.classList.toggle('on',this.multiMode);
+    // When turning multi-mode OFF, collapse each group to at most 1 selection
+    if(!this.multiMode){
+      ['subject','medium'].forEach(g=>{
+        const pills=[...document.querySelectorAll(`.prom-pill[data-g="${g}"].on`)];
+        if(pills.length>1){
+          pills.slice(1).forEach(p=>{
+            p.classList.remove('on');
+            const set=g==='subject'?this.subjects:this.mediums;
+            set.delete(p.dataset.v);
+          });
+        }
+      });
     }
     this._updateColourScience();
   },
