@@ -400,7 +400,7 @@ a{color:var(--accent);text-decoration:none}
 .split-grad{height:56px;border-radius:var(--rs);margin:8px 12px}
 .c1-box{margin:12px;background:var(--surface2);border-radius:var(--r);padding:13px}
 .c1-box h4{font-size:11px;color:var(--accent);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
-.c1-box li{font-size:11px;color:var(--muted);margin-bottom:4px;line-height:1.5;margin-left:14px}
+.c1-box li{font-size:14px;color:var(--muted);margin-bottom:4px;line-height:1.6;margin-left:14px}
 .c1-box code{background:var(--surface3);padding:1px 4px;border-radius:3px;font-family:var(--mono);font-size:10px;color:var(--accent)}
 
 /* 
@@ -3297,29 +3297,30 @@ const Sampler={
   // screen overlay; when the user taps it, their gesture satisfies the
   // browser's autoplay policy and we call v.play() again.
   _showTapOverlay(v){
+    // FIXED: show overlay, store video ref, and pre-start RAF so frames
+    // render immediately once the user gesture unblocks play().
     const ov = document.getElementById('cam-tap-overlay');
     if (ov) {
       ov.style.display = 'flex';
-      // Also keep the body fallback in case the overlay tap misses
-      document.body.addEventListener('click', async () => {
-        try { await v.play(); }
-        catch (e) { console.warn('Body-click play() also failed:', e.name); }
-      }, { once: true });
-      // Store video ref for _tapToPlay()
       this._tapVideo = v;
+      // Pre-start sampling — RAF loop guards with readyState<2 so safe to run early
+      this.startSampling();
     }
   },
 
   async _tapToPlay(){
+    // FIXED: hide overlay, play video, then (re)start the RAF sampling loop
     const ov = document.getElementById('cam-tap-overlay');
     const v = this._tapVideo || document.getElementById('cam-video');
     if (ov) ov.style.display = 'none';
     try {
       await v.play();
-      console.log('Camera play() succeeded after user tap');
+      console.log('[CAM] _tapToPlay: play() OK after user gesture');
+      // FIXED: ensure sampling loop is running now that video is live
+      this.startSampling();
     } catch (e) {
-      console.warn('_tapToPlay play() failed:', e.name);
-      App.toast('Camera could not start — try re-opening the app');
+      console.warn('[CAM] _tapToPlay: play() still failed:', e.name);
+      App.toast('Camera could not start — try closing and reopening the app');
     }
   },
 
@@ -4351,70 +4352,115 @@ const Gallery={
   },
 
   _renderSharePolaroid(c){
+    // FIXED: use ctx.scale(SCALE, SCALE) for HiDPI output.
+    // All draw calls use logical (1x) coordinates — ctx.scale handles the 2x multiply.
+    // SAFE_ZONE padding prevents any element from touching the canvas edge.
     const canvas = document.getElementById('export-canvas');
-    const W=400, H=520;
-    canvas.width=W; canvas.height=H;
-    const ctx=canvas.getContext('2d');
-    const rgb=CS.hexToRgb(c.hex);
-    const lrv=c.lrv||CS.lrv(c.lab||CS.rgbToLab(rgb.r,rgb.g,rgb.b));
-    const onDark=lrv<50;
-    const PAD=22, CW=W-PAD*2, SWATCH_H=280, CARD_H=H-PAD*2;
-    const INFO_Y=PAD+SWATCH_H+16;
-    const rr=(ctx,x,y,w,h,r)=>{
+    const SCALE     = 2;          // FIXED: 2× for crisp retina output
+    const SAFE_ZONE = 40;         // FIXED: minimum margin from canvas edge to any content
+    const BASE_W    = 400;        // logical width  (canvas pixel width = 800)
+    const BASE_H    = 520;        // logical height (canvas pixel height = 1040)
+    canvas.width  = BASE_W * SCALE;
+    canvas.height = BASE_H * SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);      // FIXED: single scale call — all coords below are logical
+
+    const rgb    = CS.hexToRgb(c.hex);
+    const lrv    = c.lrv || CS.lrv(c.lab || CS.rgbToLab(rgb.r, rgb.g, rgb.b));
+    const onDark = lrv < 50;
+
+    // ── Layout (all logical px) ─────────────────────────────────
+    const PAD      = SAFE_ZONE;                 // card starts at SAFE_ZONE from edge
+    const CW       = BASE_W - PAD * 2;          // card width  = 320
+    const SWATCH_H = 265;                       // colour swatch block height
+    const CARD_H   = BASE_H - PAD * 2;         // card height = 440
+    const INFO_Y   = PAD + SWATCH_H + 14;      // top of text info strip
+
+    const rr = (x,y,w,h,r) => {                // FIXED: roundRect helper without ctx arg
       ctx.beginPath();
-      ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
-      ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-      ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
-      ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+      ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+      ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+      ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+      ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
     };
-    // Grey canvas so white card is visible
-    ctx.fillStyle='#ebebeb';
-    ctx.fillRect(0,0,W,H);
-    // White card + shadow
+
+    // ── Canvas background ────────────────────────────────────────
+    ctx.fillStyle = '#ebebeb';
+    ctx.fillRect(0, 0, BASE_W, BASE_H);
+
+    // ── White card + drop shadow ─────────────────────────────────
     ctx.save();
-    ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=28;ctx.shadowOffsetY=8;
-    ctx.fillStyle='#fff';
-    rr(ctx,PAD,PAD,CW,CARD_H,14);ctx.fill();
+    ctx.shadowColor    = 'rgba(0,0,0,.22)';
+    ctx.shadowBlur     = 24;
+    ctx.shadowOffsetY  = 7;
+    ctx.fillStyle      = '#ffffff';
+    rr(PAD, PAD, CW, CARD_H, 12); ctx.fill();
     ctx.restore();
-    // Colour swatch — clipped to rounded top of card
+
+    // ── Colour swatch clipped to rounded top corners ─────────────
     ctx.save();
-    rr(ctx,PAD,PAD,CW,SWATCH_H,14);ctx.clip();
-    ctx.fillStyle=c.hex;ctx.fillRect(PAD,PAD,CW,SWATCH_H);
+    rr(PAD, PAD, CW, SWATCH_H, 12); ctx.clip();
+    ctx.fillStyle = c.hex;
+    ctx.fillRect(PAD, PAD, CW, SWATCH_H);
     ctx.restore();
-    // Hex badge
-    const bW=94,bH=24,bX=W-PAD-bW-6,bY=PAD+SWATCH_H-bH-8;
-    ctx.fillStyle=onDark?'rgba(0,0,0,.45)':'rgba(255,255,255,.65)';
-    rr(ctx,bX,bY,bW,bH,5);ctx.fill();
-    ctx.fillStyle=onDark?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)';
-    ctx.font='bold 11px "Space Mono",monospace';
-    ctx.textAlign='center';
-    ctx.fillText(c.hex.toUpperCase(),bX+bW/2,bY+16);
-    // Name
-    ctx.fillStyle='#1a1a1a';
-    ctx.font='bold 23px "Permanent Marker",cursive';
-    ctx.textAlign='left';
-    const nx=PAD+14;
-    ctx.fillText(c.name,nx,INFO_Y+28);
-    // Paint matches — only if name exists, truncated to fit card
-    [['LG',c.littleGreene?.name||'',c.littleGreene?.hex],
-     ['F&B',c.farrowBall?.name||'',c.farrowBall?.hex]]
-    .filter(([,n])=>n)
-    .forEach(([brand,name,hex],i)=>{
-      const y=INFO_Y+58+i*25;
-      if(hex){ctx.fillStyle=hex;ctx.beginPath();ctx.arc(nx+5,y-5,6,0,Math.PI*2);ctx.fill();}
-      ctx.fillStyle='#999';ctx.font='9px "Space Mono",monospace';ctx.textAlign='left';
-      ctx.fillText(brand,nx+17,y);
-      const maxPx=CW-70;
-      ctx.fillStyle='#333';ctx.font='11px -apple-system,sans-serif';
-      ctx.save();ctx.rect(nx+44,y-14,maxPx,18);ctx.clip();
-      ctx.fillText(name,nx+46,y);
+
+    // ── Hex badge (bottom-right of swatch) ──────────────────────
+    const bW=94, bH=22, bX=PAD+CW-bW-6, bY=PAD+SWATCH_H-bH-7;
+    ctx.fillStyle = onDark ? 'rgba(0,0,0,.42)' : 'rgba(255,255,255,.62)';
+    rr(bX, bY, bW, bH, 4); ctx.fill();
+    ctx.fillStyle  = onDark ? 'rgba(255,255,255,.92)' : 'rgba(0,0,0,.82)';
+    ctx.font       = 'bold 10px "Space Mono",monospace';
+    ctx.textAlign  = 'center';
+    ctx.textBaseline = 'middle';   // FIXED: vertical centering prevents descender clip
+    ctx.fillText(c.hex.toUpperCase(), bX + bW/2, bY + bH/2);
+
+    // ── Colour name ──────────────────────────────────────────────
+    ctx.fillStyle    = '#1a1a1a';
+    ctx.font         = 'bold 22px "Permanent Marker",cursive';
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'top';      // FIXED: anchored to top — descenders can't clip bottom
+    const nx = PAD + 12;
+    ctx.fillText(c.name, nx, INFO_Y + 8);
+
+    // ── Paint match rows ─────────────────────────────────────────
+    const matches = [
+      ['LG',  c.littleGreene?.name||'', c.littleGreene?.hex],
+      ['F&B', c.farrowBall?.name||'',   c.farrowBall?.hex  ],
+    ].filter(([,n]) => n);
+
+    matches.forEach(([brand, name, hex], i) => {
+      const rowY   = INFO_Y + 46 + i * 26;
+      const dotCX  = nx + 6;
+      const dotCY  = rowY + 6;
+      if (hex) {
+        ctx.fillStyle = hex;
+        ctx.beginPath(); ctx.arc(dotCX, dotCY, 6, 0, Math.PI*2); ctx.fill();
+      }
+      // Brand tag
+      ctx.fillStyle    = '#999';
+      ctx.font         = '8px "Space Mono",monospace';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(brand, nx + 17, dotCY);
+      // Paint name — clip rect ensures it never overflows the card
+      const nameX  = nx + 44;
+      const maxW   = CW - 60;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(nameX, rowY, maxW, 20); ctx.clip();
+      ctx.fillStyle    = '#333';
+      ctx.font         = '11px -apple-system,sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(name, nameX, dotCY);
       ctx.restore();
     });
-    // Footer — digby.shop only, no "Sampler" text
-    ctx.fillStyle='#c8a96e';
-    ctx.font='bold 10px "Space Mono",monospace';
-    ctx.textAlign='right';
-    ctx.fillText('digby.shop',PAD+CW-14,PAD+CARD_H-16);
+
+    // ── Footer — digby.shop, right-aligned, safely above card bottom ─
+    ctx.fillStyle    = '#c8a96e';
+    ctx.font         = 'bold 9px "Space Mono",monospace';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'bottom';   // FIXED: anchors to bottom baseline — no descender clip
+    ctx.fillText('digby.shop', PAD + CW - 12, PAD + CARD_H - 10);
+
     return canvas.toDataURL('image/png');
   },
 
@@ -5065,6 +5111,13 @@ const Prompter={
     };
     delegate('prom-chips',     'data-cid');
     delegate('prom-lib-strip', 'data-cid');
+    // FIXED: sync .checked property on the toggle div so togglePill can read it
+    // reliably from first load — without this, el.checked is undefined on first tap.
+    const tog = document.getElementById('prom-multi-toggle');
+    if (tog) {
+      tog.checked = this.multiMode; // true by default
+      tog.classList.toggle('on', this.multiMode);
+    }
     this.render();
   },
 
@@ -5406,12 +5459,13 @@ const Prompter={
     return raw.length > 3800 ? raw.slice(0, 3797) + '...' : raw;
   },
 
-  // Wrap an array in {} if batch mode AND >1 items, else join naturally
+  // FIXED: join multiple selections with commas (e.g. "Oil Painting, Charcoal")
+  // Batch mode wraps in {} for Midjourney permutation syntax.
   _batchWrap(arr, fallback=''){
     if(!arr.length) return fallback;
     if(arr.length===1) return arr[0];
     if(this.batchMode) return `{${arr.join(', ')}}`;
-    return arr.join(' and ');
+    return arr.join(', ');  // FIXED: was arr.join(' and ') — commas read better in prompts
   },
 
   _buildParams(){
