@@ -120,17 +120,13 @@ a{color:var(--accent);text-decoration:none}
 #sampler-cam-wrap{
   position:relative;flex:1;background:#000;
   display:flex;align-items:center;justify-content:center;
-  /* clip-path instead of overflow:hidden — overflow:hidden breaks iOS Safari video compositing */
-  clip-path:inset(0);
+  /* No overflow or clip — any compositing barrier breaks iOS Safari video rendering */
 }
 #cam-video{
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:cover;display:block;
-  /* iOS Safari: force GPU compositing layer — prevents black screen */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  /* iOS Safari: will-change promotes to own layer without stacking issues */
+  will-change:transform;
 }
 #cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 
@@ -1237,7 +1233,7 @@ a{color:var(--accent);text-decoration:none}
       <div class="prom-chips" id="prom-chips"></div>
 
       <!-- SUBJECT -->
-      <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span></div>
+      <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span> <span id="subj-badge" style="display:none;font-size:10px;background:var(--accent);color:#1a1208;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--mono)"></span></div>
       <div class="prom-pill-grid" id="subject-grid">
         <div class="prom-pill-group-label">Botanical</div>
         <button class="prom-pill" data-g="subject" data-v="florals" onclick="Prompter.togglePill(this)">Florals</button>
@@ -1274,7 +1270,7 @@ a{color:var(--accent);text-decoration:none}
       </div>
 
       <!-- ART MEDIUM -->
-      <div class="sec prom-sec-label">Art Medium <span class="prom-multi-hint">multi-select</span></div>
+      <div class="sec prom-sec-label">Art Medium <span class="prom-multi-hint">multi-select</span> <span id="med-badge" style="display:none;font-size:10px;background:var(--accent);color:#1a1208;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--mono)"></span></div>
       <div class="prom-pill-grid" id="medium-grid">
         <div class="prom-pill-group-label">Print</div>
         <button class="prom-pill" data-g="medium" data-v="etching" onclick="Prompter.togglePill(this)">Etching</button>
@@ -4356,82 +4352,69 @@ const Gallery={
 
   _renderSharePolaroid(c){
     const canvas = document.getElementById('export-canvas');
-    const W=400, H=480;
+    const W=400, H=520;
     canvas.width=W; canvas.height=H;
     const ctx=canvas.getContext('2d');
     const rgb=CS.hexToRgb(c.hex);
     const lrv=c.lrv||CS.lrv(c.lab||CS.rgbToLab(rgb.r,rgb.g,rgb.b));
     const onDark=lrv<50;
-    const textCol=onDark?'rgba(255,255,255,.92)':'rgba(0,0,0,.82)';
-    const mutedCol=onDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.4)';
-
-    // White polaroid card
-    ctx.fillStyle='#ffffff';
-    ctx.shadowColor='rgba(0,0,0,.18)';
-    ctx.shadowBlur=24;
-    ctx.shadowOffsetY=6;
-    roundRect(ctx,20,20,W-40,H-40,12);
-    ctx.fill();
-    ctx.shadowColor='transparent';
-
-    // Colour block
-    ctx.fillStyle=c.hex;
-    roundRect(ctx,36,36,W-72,H-180,8);
-    ctx.fill();
-
-    // Hex overlay bottom-right of swatch
-    ctx.fillStyle=onDark?'rgba(0,0,0,.4)':'rgba(255,255,255,.5)';
-    ctx.fillRect(W-36-90,H-180-28,90,22);
-    ctx.fillStyle=onDark?'rgba(255,255,255,.85)':'rgba(0,0,0,.75)';
-    ctx.font='bold 11px "Space Mono",monospace';
-    ctx.textAlign='right';
-    ctx.fillText(c.hex.toUpperCase(),W-36-6,H-180-10);
-
-    // Name
-    ctx.fillStyle='#1a1a1a';
-    ctx.font='bold 22px "Permanent Marker",cursive';
-    ctx.textAlign='left';
-    ctx.fillText(c.name,36,H-120);
-
-    // Paint matches
-    const lg=c.littleGreene?.name||'';
-    const fb=c.farrowBall?.name||'';
-    ctx.font='11px "Space Mono",monospace';
-    ctx.fillStyle='#555';
-    const matches=[
-      ['LG',lg,c.littleGreene?.hex],
-      ['F&B',fb,c.farrowBall?.hex],
-    ];
-    matches.forEach(([brand,name,hex],i)=>{
-      const y=H-96+i*22;
-      // Brand swatch dot
-      if(hex){ctx.fillStyle=hex;ctx.beginPath();ctx.arc(44,y-3,6,0,Math.PI*2);ctx.fill();}
-      ctx.fillStyle='#888';
-      ctx.font='9px "Space Mono",monospace';
-      ctx.textAlign='left';
-      ctx.fillText(brand,54,y);
-      ctx.fillStyle='#333';
-      ctx.font='11px -apple-system,sans-serif';
-      ctx.fillText(name.length>22?name.slice(0,21)+'':name,80,y);
-    });
-
-    // Footer
-    ctx.fillStyle='#c8a96e';
-    ctx.font='bold 10px "Space Mono",monospace';
-    ctx.textAlign='right';
-    ctx.fillText('digby.shop',W-36,H-28);
-    ctx.fillStyle='#aaa';
-    ctx.font='9px "Space Mono",monospace';
-    ctx.fillText('Spectrum 1.0 · Digby Colour Sampler',36,H-28);
-
-    function roundRect(ctx,x,y,w,h,r){
+    const PAD=22, CW=W-PAD*2, SWATCH_H=280, CARD_H=H-PAD*2;
+    const INFO_Y=PAD+SWATCH_H+16;
+    const rr=(ctx,x,y,w,h,r)=>{
       ctx.beginPath();
       ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
       ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
       ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
       ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
-    }
-
+    };
+    // Grey canvas so white card is visible
+    ctx.fillStyle='#ebebeb';
+    ctx.fillRect(0,0,W,H);
+    // White card + shadow
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=28;ctx.shadowOffsetY=8;
+    ctx.fillStyle='#fff';
+    rr(ctx,PAD,PAD,CW,CARD_H,14);ctx.fill();
+    ctx.restore();
+    // Colour swatch — clipped to rounded top of card
+    ctx.save();
+    rr(ctx,PAD,PAD,CW,SWATCH_H,14);ctx.clip();
+    ctx.fillStyle=c.hex;ctx.fillRect(PAD,PAD,CW,SWATCH_H);
+    ctx.restore();
+    // Hex badge
+    const bW=94,bH=24,bX=W-PAD-bW-6,bY=PAD+SWATCH_H-bH-8;
+    ctx.fillStyle=onDark?'rgba(0,0,0,.45)':'rgba(255,255,255,.65)';
+    rr(ctx,bX,bY,bW,bH,5);ctx.fill();
+    ctx.fillStyle=onDark?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)';
+    ctx.font='bold 11px "Space Mono",monospace';
+    ctx.textAlign='center';
+    ctx.fillText(c.hex.toUpperCase(),bX+bW/2,bY+16);
+    // Name
+    ctx.fillStyle='#1a1a1a';
+    ctx.font='bold 23px "Permanent Marker",cursive';
+    ctx.textAlign='left';
+    const nx=PAD+14;
+    ctx.fillText(c.name,nx,INFO_Y+28);
+    // Paint matches — only if name exists, truncated to fit card
+    [['LG',c.littleGreene?.name||'',c.littleGreene?.hex],
+     ['F&B',c.farrowBall?.name||'',c.farrowBall?.hex]]
+    .filter(([,n])=>n)
+    .forEach(([brand,name,hex],i)=>{
+      const y=INFO_Y+58+i*25;
+      if(hex){ctx.fillStyle=hex;ctx.beginPath();ctx.arc(nx+5,y-5,6,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle='#999';ctx.font='9px "Space Mono",monospace';ctx.textAlign='left';
+      ctx.fillText(brand,nx+17,y);
+      const maxPx=CW-70;
+      ctx.fillStyle='#333';ctx.font='11px -apple-system,sans-serif';
+      ctx.save();ctx.rect(nx+44,y-14,maxPx,18);ctx.clip();
+      ctx.fillText(name,nx+46,y);
+      ctx.restore();
+    });
+    // Footer — digby.shop only, no "Sampler" text
+    ctx.fillStyle='#c8a96e';
+    ctx.font='bold 10px "Space Mono",monospace';
+    ctx.textAlign='right';
+    ctx.fillText('digby.shop',PAD+CW-14,PAD+CARD_H-16);
     return canvas.toDataURL('image/png');
   },
 
@@ -5243,41 +5226,42 @@ const Prompter={
 
   // Generic pill toggle  called by onclick on each pill
   togglePill(btn){
-    if(!btn.dataset.g) return;
-    const g=btn.dataset.g, v=btn.dataset.v;
-    const isSingle=btn.classList.contains('prom-pill-single');
-
-    // Use this.multiMode directly — it is the authoritative source of truth.
-    // Relying on .checked on a <div> is fragile because it is not a native
-    // form property and can be undefined or stale.
-    const isMulti = this.multiMode;
-
-    if(isSingle){
-      // Era / repeat — always radio regardless of multi-mode
-      document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
-      btn.classList.add('on');
-      if(g==='era')    this.era=v;
-      if(g==='repeat') this.repeat=v;
-    } else if(isMulti){
-      // Multi-select ON: toggle this pill independently.
-      // The "remove others" block is SKIPPED — all selected pills stay on.
-      btn.classList.toggle('on');
-      const set=g==='subject'?this.subjects:this.mediums;
-      if(btn.classList.contains('on')) set.add(v);
-      else set.delete(v);
-    } else {
-      // Single-select (default): clear all in group, then activate this one.
-      // Tapping an already-active pill deselects it (toggle).
-      const wasOn=btn.classList.contains('on');
-      document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
-      const set=g==='subject'?this.subjects:this.mediums;
-      set.clear();
-      if(!wasOn){
+    try {
+      if(!btn||!btn.dataset) return;
+      const g   = btn.dataset.g;
+      const val = btn.dataset.v;
+      if(!g) return;
+      const isSingle = btn.classList.contains('prom-pill-single');
+      const isMulti  = !!this.multiMode;
+      if(isSingle){
+        document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
         btn.classList.add('on');
-        set.add(v);
+        if(g==='era')    this.era    = val;
+        if(g==='repeat') this.repeat = val;
+      } else if(isMulti){
+        const wasOn = btn.classList.contains('on');
+        btn.classList.toggle('on', !wasOn);
+        const set = g==='subject' ? this.subjects : this.mediums;
+        if(!wasOn) set.add(val); else set.delete(val);
+      } else {
+        const wasOn = btn.classList.contains('on');
+        document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
+        const set = g==='subject' ? this.subjects : this.mediums;
+        set.clear();
+        if(!wasOn){ btn.classList.add('on'); set.add(val); }
       }
-    }
-    this._updateColourScience();
+      this._updatePillBadge(g);
+      this._updateColourScience();
+    } catch(e){ console.error('[togglePill]',e); }
+  },
+
+  _updatePillBadge(g){
+    try {
+      const count = g==='subject' ? this.subjects.size : this.mediums.size;
+      const id = g==='subject' ? 'subj-badge' : 'med-badge';
+      const el = document.getElementById(id);
+      if(el){ el.textContent = count ? count+' selected' : ''; el.style.display = count ? 'inline' : 'none'; }
+    } catch(e){}
   },
 
   toggleMulti(el){
