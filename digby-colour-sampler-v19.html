@@ -358,14 +358,14 @@ a{color:var(--accent);text-decoration:none}
 /* det-match family removed: paint match feature stripped */
 .insp-matches-section{margin:12px 14px 14px}
 .insp-matches-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 0 6px;font-family:var(--mono)}
-.insp-matches-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.insp-matches-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .insp-match-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;gap:9px;align-items:flex-start;min-width:0}
 .insp-match-cell:first-child:nth-last-child(3),.insp-match-cell:first-child:nth-last-child(3)~.insp-match-cell:last-child{grid-column:span 1}
 .insp-match-cell:only-child,.insp-match-cell:first-child:nth-last-child(3) ~ .insp-match-cell:nth-child(2){grid-column:span 1}
 .insp-matches-grid:has(.insp-match-cell:nth-child(3)){grid-template-columns:1fr 1fr;}.insp-matches-grid:has(.insp-match-cell:nth-child(3)) .insp-match-cell:last-child{grid-column:span 2}
 .insp-match-empty{color:var(--muted);font-size:12px;align-items:center;justify-content:center}
 .insp-match-swatch{width:32px;height:32px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
-.insp-match-body{flex:1;min-width:0}
+.insp-match-body{flex:1;min-width:0;overflow:hidden}
 .insp-match-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:1px}
 .insp-match-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .insp-match-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px}
@@ -374,6 +374,9 @@ a{color:var(--accent);text-decoration:none}
 .prom-lib-sort{display:flex;gap:4px;margin-left:auto}
 .plib-sort-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--muted);cursor:pointer;line-height:1.4;font-family:var(--sans);transition:all .15s}
 .plib-sort-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+/* White Balance button */
+.wb-btn{font-size:9px;letter-spacing:.02em;transition:background var(--tr),color var(--tr)}
+.wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -782,6 +785,9 @@ a{color:var(--accent);text-decoration:none}
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
         <button class="cap-side-btn" onclick="AutoPalette.fromCamera()" title="Extract palette from camera view">🎨</button>
+        <button class="cap-side-btn wb-btn" id="wb-btn"
+                onclick="Sampler.toggleWhiteBalance()"
+                title="Set white balance">⬜ WB</button>
         <button id="cap-btn" onclick="Sampler.capture()">
           <div id="cap-inner"></div>
           <div id="cap-queue-badge" style="display:none">0</div>
@@ -2955,6 +2961,7 @@ const Sampler={
   uploadImg:null,
   upCtx:null,
   pickQueue:[], // multi-pick queue
+  wb:{r:1,g:1,b:1}, // white balance multipliers — set via setWhiteBalance()
 
   init(){
     this.detectBrowser();
@@ -3074,62 +3081,68 @@ const Sampler={
       return e.name === 'OverconstrainedError' || e.name === 'ConstraintNotSatisfiedError';
     };
 
-    const tryCamera = (constraints) =>
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-          this.stream = stream;
+    // ── Async camera setup — wraps getUserMedia + play() in async/await ──
+    // This is cleaner than nested .then chains and makes the play() fallback
+    // logic far easier to reason about on Safari/iOS PWA.
+    const tryCamera = async (constraints) => {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.stream = stream;
 
-          // ── iOS Safari / PWA black-screen fix ─────────────────────────
-          // Safari pauses the track and never renders if srcObject is
-          // assigned while the video element (or any ancestor) is hidden.
-          // Force camera wrap visible BEFORE attaching the stream.
-          const wrap = document.getElementById('sampler-cam-wrap');
-          if (wrap) wrap.style.display = 'flex';
+      // ── iOS Safari / PWA black-screen fix ─────────────────────────
+      // Safari pauses the track and never renders if srcObject is
+      // assigned while the video element (or any ancestor) is hidden.
+      // Force camera wrap visible BEFORE attaching the stream.
+      const wrap = document.getElementById('sampler-cam-wrap');
+      if (wrap) wrap.style.display = 'flex';
 
-          // Tear down any stale source first (required on iOS reuse)
-          v.srcObject = null;
+      // Tear down any stale source first (required on iOS reuse)
+      v.srcObject = null;
 
-          // Hard-set all three iOS-required attributes as properties
-          // (not just HTML attributes) so Safari respects them at runtime
-          v.autoplay   = true;
-          v.muted      = true;
-          v.playsInline = true;  // camelCase JS property for iOS
-          v.setAttribute('playsinline', 'true');  // spec: string 'true' for maximum compat
-          v.setAttribute('autoplay',    '');
+      // Hard-set all three iOS-required attributes as JS properties
+      // AND HTML attributes — Safari checks both independently
+      v.autoplay    = true;
+      v.muted       = true;
+      v.playsInline = true;                        // camelCase JS property
+      v.setAttribute('playsinline', 'true');       // string 'true' for max compat
+      v.setAttribute('autoplay',    '');
+      v.setAttribute('muted',       '');
 
-          v.srcObject = stream;
+      v.srcObject = stream;
 
-          // Safari needs v.load() after srcObject assignment to fully
-          // reinitialise the media pipeline, otherwise play() may reject
-          // with NotAllowedError even on a fresh permission grant
-          v.load();
+      // v.load() forces Safari to reinitialise the media pipeline after
+      // srcObject assignment — without it play() may reject with
+      // NotAllowedError even on a fresh permission grant
+      v.load();
 
-          // Wait for enough metadata so the video has real dimensions
-          // before starting the RAF sampling loop (avoids 0×0 canvas draws)
-          return new Promise((resolve, reject) => {
-            const onMeta = () => {
-              v.removeEventListener('loadedmetadata', onMeta);
-              v.play()
-                .then(resolve)
-                .catch(err => {
-                  // NotAllowedError after load() is a browser autoplay policy block.
-                  // Add a one-time body click listener so the first user gesture
-                  // "wakes up" the video track — required on some iOS PWA installs.
-                  console.warn('Camera play() blocked — adding body click fallback:', err.name);
-                  const onBodyClick = () => {
-                    document.body.removeEventListener('click', onBodyClick);
-                    v.play().catch(e => console.warn('Body-click play() also failed:', e.name));
-                  };
-                  document.body.addEventListener('click', onBodyClick, { once: true });
-                  resolve(); // continue to startSampling — sampling will wait for readyState≥2
-                });
-            };
-            // Belt-and-braces: if metadata already available, fire immediately
-            if (v.readyState >= 1) { onMeta(); }
-            else { v.addEventListener('loadedmetadata', onMeta, { once: true }); }
-          });
-        })
-        .then(() => this.startSampling());
+      // Wait for video metadata (real dimensions) before starting RAF
+      await new Promise(res => {
+        if (v.readyState >= 1) res();
+        else v.addEventListener('loadedmetadata', res, { once: true });
+      });
+
+      // ── play() with async/await + body-click fallback ─────────────
+      try {
+        await v.play();
+      } catch (err) {
+        if (err.name === 'NotAllowedError' || err.name === 'AbortError') {
+          // Autoplay blocked by browser policy (common on iOS PWA installs).
+          // Register a one-time body click so the next user tap "wakes up"
+          // the video track — this tap has a user-gesture in the call stack,
+          // which satisfies the autoplay policy requirement.
+          console.warn('Camera play() blocked — tap anywhere to activate video:', err.name);
+          document.body.addEventListener('click', async () => {
+            try { await v.play(); }
+            catch (e) { console.warn('Body-click play() also failed:', e.name); }
+          }, { once: true });
+          // Do NOT throw — continue to startSampling.
+          // The RAF loop guards with v.readyState<2 so it safe to proceed.
+        } else {
+          throw err; // re-throw genuine errors (NotFoundError, etc.)
+        }
+      }
+
+      this.startSampling();
+    };
 
     tryCamera(tier1)
       .catch(err => {
@@ -3275,6 +3288,37 @@ const Sampler={
     this.rafId = requestAnimationFrame(ts => this.sample(ts));
   },
 
+  // ── White Balance ───────────────────────────────────────────────
+  // Sets wb multipliers so the currently sampled colour becomes pure white.
+  // Formula: multiplier = 255 / channel  (clamped to reasonable range).
+  setWhiteBalance(){
+    const hex=this.currentHex;
+    if(!hex||hex==='#888888'){ App.toast('Point at a white surface first'); return; }
+    const {r,g,b}=CS.hexToRgb(hex);
+    if(r<10&&g<10&&b<10){ App.toast('Too dark — point at something white'); return; }
+    this.wb={
+      r: r>0 ? Math.min(8, 255/r) : 1,
+      g: g>0 ? Math.min(8, 255/g) : 1,
+      b: b>0 ? Math.min(8, 255/b) : 1
+    };
+    const btn=document.getElementById('wb-btn');
+    if(btn){ btn.classList.add('on'); btn.title='WB active — tap to reset'; }
+    App.toast('White balance set');
+  },
+
+  resetWhiteBalance(){
+    this.wb={r:1,g:1,b:1};
+    const btn=document.getElementById('wb-btn');
+    if(btn){ btn.classList.remove('on'); btn.title='Set white balance'; }
+    App.toast('White balance reset');
+  },
+
+  toggleWhiteBalance(){
+    const isActive=this.wb.r!==1||this.wb.g!==1||this.wb.b!==1;
+    if(isActive) this.resetWhiteBalance();
+    else this.setWhiteBalance();
+  },
+
   sample(timestamp){
     // Re-queue next frame first  loop continues even if we return early
     if(!this.frozen && this.mode==='camera'){
@@ -3299,6 +3343,10 @@ const Sampler={
     for(let i=0;i<data.length;i+=4){R+=data[i];G+=data[i+1];B+=data[i+2];n++}
     if(!n)return;
     R=Math.round(R/n);G=Math.round(G/n);B=Math.round(B/n);
+    // Apply white balance multipliers (clamped to 0–255)
+    R=Math.round(Math.min(255,Math.max(0,R*this.wb.r)));
+    G=Math.round(Math.min(255,Math.max(0,G*this.wb.g)));
+    B=Math.round(Math.min(255,Math.max(0,B*this.wb.b)));
     const hex=CS.rgbToHex(R,G,B);
     this.currentHex=hex;
     if(this.lutOn&&App.activeLut)this.drawLutOverlay(v.videoWidth,v.videoHeight);
@@ -5156,10 +5204,9 @@ const Prompter={
     const g=btn.dataset.g, v=btn.dataset.v;
     const isSingle=btn.classList.contains('prom-pill-single');
 
-    // Read live toggle element state (spec: check #prom-multi-toggle).
-    // Supports both checkbox (.checked) and div.sw (.on class) patterns.
-    const toggleEl=document.getElementById('prom-multi-toggle');
-    const multiOn=(toggleEl?.checked===true)||toggleEl?.classList.contains('on')||this.multiMode;
+    // Spec: read .checked directly from the toggle element.
+    // toggleMulti() keeps el.checked in sync so this always reflects current state.
+    const isMulti=document.getElementById('prom-multi-toggle').checked;
 
     if(isSingle){
       // Era / repeat — always radio regardless of multi-mode
@@ -5167,23 +5214,19 @@ const Prompter={
       btn.classList.add('on');
       if(g==='era')     this.era=v;
       if(g==='repeat')  this.repeat=v;
-    } else if(multiOn){
-      // Multi-select ON: toggle this pill independently — others keep their state
-      btn.classList.toggle('on');
+    } else {
+      if(!isMulti){
+        // Single-select: clear all others in group first
+        document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
+        const set=g==='subject'?this.subjects:this.mediums;
+        set.clear();
+      }
+      // Toggle this pill (multi: accumulate; single: just activate)
+      const wasOn=!isMulti?false:btn.classList.contains('on');
+      btn.classList.toggle('on',!wasOn);
       const set=g==='subject'?this.subjects:this.mediums;
       if(btn.classList.contains('on')) set.add(v);
       else set.delete(v);
-    } else {
-      // Multi-select OFF: radio — deselect all in group, then select this one.
-      // If it was already the only active pill, tapping it deselects (toggle).
-      const wasOn=btn.classList.contains('on');
-      document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
-      const set=g==='subject'?this.subjects:this.mediums;
-      set.clear();
-      if(!wasOn){
-        btn.classList.add('on');
-        set.add(v);
-      }
     }
     this._updateColourScience();
   },
@@ -5191,6 +5234,9 @@ const Prompter={
   toggleMulti(el){
     this.multiMode=!this.multiMode;
     el.classList.toggle('on',this.multiMode);
+    // Keep a real .checked property on the element so togglePill can read
+    // `document.getElementById('prom-multi-toggle').checked` directly
+    el.checked=this.multiMode;
     // When turning multi-mode OFF, collapse each group to at most 1 selection
     if(!this.multiMode){
       ['subject','medium'].forEach(g=>{
