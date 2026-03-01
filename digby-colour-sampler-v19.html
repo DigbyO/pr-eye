@@ -803,6 +803,20 @@ a{color:var(--accent);text-decoration:none}
         <button class="btn btn-s btn-sm" style="flex-shrink:0;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.6)" onclick="Sampler.clearQueue()"></button>
       </div>
 
+      <!-- iOS autoplay-blocked overlay — shown when play() is deferred to user gesture -->
+      <div id="cam-tap-overlay" style="display:none;position:absolute;inset:0;z-index:50;
+           background:rgba(0,0,0,.72);display:none;flex-direction:column;align-items:center;
+           justify-content:center;gap:10px;cursor:pointer;text-align:center;padding:20px"
+           onclick="Sampler._tapToPlay()">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="rgba(255,255,255,.9)" stroke="none"/>
+        </svg>
+        <div style="font-size:15px;font-weight:700;color:#fff;line-height:1.3">Tap to Start Camera</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);max-width:220px;line-height:1.5">
+          iOS requires a tap to activate the live preview
+        </div>
+      </div>
+
       <!-- Live colour bar -->
       <div id="live-bar">
         <div id="live-swatch"></div>
@@ -3126,16 +3140,9 @@ const Sampler={
       } catch (err) {
         if (err.name === 'NotAllowedError' || err.name === 'AbortError') {
           // Autoplay blocked by browser policy (common on iOS PWA installs).
-          // Register a one-time body click so the next user tap "wakes up"
-          // the video track — this tap has a user-gesture in the call stack,
-          // which satisfies the autoplay policy requirement.
-          console.warn('Camera play() blocked — tap anywhere to activate video:', err.name);
-          document.body.addEventListener('click', async () => {
-            try { await v.play(); }
-            catch (e) { console.warn('Body-click play() also failed:', e.name); }
-          }, { once: true });
-          // Do NOT throw — continue to startSampling.
-          // The RAF loop guards with v.readyState<2 so it safe to proceed.
+          // Show a visible overlay — the tap satisfies the user-gesture requirement.
+          console.warn('Camera play() blocked — showing tap overlay:', err.name);
+          this._showTapOverlay(v);
         } else {
           throw err; // re-throw genuine errors (NotFoundError, etc.)
         }
@@ -3280,6 +3287,37 @@ const Sampler={
     const cy=Math.max(35,Math.min(h-35,y));
     ch.style.left=cx+'px';
     ch.style.top=cy+'px';
+  },
+
+  // ── Tap-to-play overlay (iOS autoplay policy) ──────────────────
+  // Called when v.play() rejects with NotAllowedError. Shows a full-
+  // screen overlay; when the user taps it, their gesture satisfies the
+  // browser's autoplay policy and we call v.play() again.
+  _showTapOverlay(v){
+    const ov = document.getElementById('cam-tap-overlay');
+    if (ov) {
+      ov.style.display = 'flex';
+      // Also keep the body fallback in case the overlay tap misses
+      document.body.addEventListener('click', async () => {
+        try { await v.play(); }
+        catch (e) { console.warn('Body-click play() also failed:', e.name); }
+      }, { once: true });
+      // Store video ref for _tapToPlay()
+      this._tapVideo = v;
+    }
+  },
+
+  async _tapToPlay(){
+    const ov = document.getElementById('cam-tap-overlay');
+    const v = this._tapVideo || document.getElementById('cam-video');
+    if (ov) ov.style.display = 'none';
+    try {
+      await v.play();
+      console.log('Camera play() succeeded after user tap');
+    } catch (e) {
+      console.warn('_tapToPlay play() failed:', e.name);
+      App.toast('Camera could not start — try re-opening the app');
+    }
   },
 
   startSampling(){
