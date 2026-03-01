@@ -328,12 +328,7 @@ a{color:var(--accent);text-decoration:none}
 .det-val{background:var(--surface2);border-radius:var(--rs);padding:9px 11px}
 .det-vl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;font-weight:600}
 .det-v{font-size:12px;font-weight:700}
-.det-match{display:flex;align-items:center;gap:9px;background:var(--surface2);border-radius:var(--rs);padding:9px 11px;margin-bottom:7px}
-.det-ms{width:30px;height:30px;border-radius:4px;flex-shrink:0}
-.det-mi{flex:1}
-.det-mb{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
-.det-mn{font-size:13px;font-weight:700;margin:1px 0}
-.det-mc{font-size:11px;color:var(--muted);font-family:var(--mono)}
+/* det-match family removed: paint match feature stripped */
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -540,6 +535,42 @@ a{color:var(--accent);text-decoration:none}
 .cvd-cell{height:32px;flex:1;border-radius:4px;position:relative;transition:background .2s}
 .cvd-orig-row .cvd-cell{height:24px;opacity:.65}
 .cvd-delta{display:none}
+
+/* ── Kelvin badge & Psychology pill ────────────────────────── */
+/* Kelvin: appears in Prompter chips and Inspector Kelvin row */
+.kelvin-badge{font-size:8px;font-family:var(--mono);color:var(--muted);
+  line-height:1.2;text-align:center;letter-spacing:.01em;margin-top:-1px}
+.kelvin-badge b{color:var(--fg);font-weight:600}
+/* Psychology pill: compact colour-coded tag in chips + Inspector */
+.psych-pill{display:inline-block;font-size:8px;font-family:var(--mono);
+  font-weight:600;letter-spacing:.04em;padding:1px 5px;border-radius:10px;
+  line-height:1.5;white-space:nowrap;margin-top:1px;opacity:.85}
+/* Pill colour families — assigned by psychTag category */
+.psych-warm   {background:rgba(255,120,40,.18);color:#e04000}
+.psych-cool   {background:rgba(40,120,255,.15);color:#1a5cb8}
+.psych-neutral{background:rgba(130,130,130,.18);color:#666}
+.psych-nature {background:rgba(40,180,80,.15);color:#1a7a30}
+.psych-luxury {background:rgba(140,60,200,.18);color:#8c3cc8}
+.psych-light  {background:rgba(200,160,80,.12);color:#7a5a00}
+/* Inspector psych row */
+.insp-psych-row{padding:10px 0 4px;border-top:1px solid var(--border);margin-top:4px}
+.insp-psych-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);font-weight:600;margin-bottom:6px}
+.insp-psych-pills{display:flex;gap:5px;flex-wrap:wrap}
+.insp-psych-pill{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+/* Prompter active-colour science card */
+#prom-colour-card{display:none;margin:0 12px 10px;padding:10px 12px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  flex-direction:column;gap:6px}
+#prom-colour-card.show{display:flex}
+.pcc-swatch{width:40px;height:40px;border-radius:8px;flex-shrink:0;border:1px solid rgba(255,255,255,.08)}
+.pcc-info{flex:1;min-width:0}
+.pcc-name{font-size:12px;font-weight:700;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcc-hex{font-size:10px;font-family:var(--mono);color:var(--muted)}
+.pcc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px}
+.pcc-kelvin{font-size:10px;font-family:var(--mono);font-weight:700;color:var(--accent);letter-spacing:.02em}
+.pcc-celsius{font-size:11px;font-family:var(--mono);font-weight:800;color:var(--fg);letter-spacing:.01em}
+.pcc-kdesc{font-size:9px;color:var(--muted)}
 .pb-slot-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
 .pb-slot-empty:active{border-color:var(--accent);color:var(--accent)}
 #pb-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -587,12 +618,12 @@ a{color:var(--accent);text-decoration:none}
 #ap-spinner{padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:12px}
 
 /* Inspector – full colour space readout */
-#inspector-body .insp-swatch{height:100px;border-radius:var(--r);margin-bottom:14px;position:relative}
+#inspector-body .insp-swatch{height:140px;border-radius:var(--r) var(--r) 0 0;margin-bottom:0;position:relative;overflow:hidden}
 .insp-name{font-family:var(--sharpie);font-size:24px;margin-bottom:10px;color:var(--text)}
-.insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.insp-row{background:var(--surface2);border-radius:var(--rs);padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 14px 10px}
+.insp-row{background:var(--surface2);border-radius:var(--rs);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
 .insp-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
-.insp-val{font-size:11px;color:var(--text);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right}
+.insp-val{font-size:10px;color:var(--text);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right;line-height:1.3}
 .insp-copy{background:none;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:9px;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .15s}
 .insp-copy:active{background:var(--accent);color:#000;border-color:var(--accent)}
 .insp-copy.copied{background:var(--ok);color:#000;border-color:var(--ok)}
@@ -1099,6 +1130,26 @@ a{color:var(--accent);text-decoration:none}
     </div>
     <div id="prom-lib-strip"></div>
     <div class="mod-scroll">
+
+      <!-- Active colour science card — shown when 1 colour is selected -->
+      <div id="prom-colour-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="pcc-swatch" id="pcc-sw"></div>
+          <div class="pcc-info">
+            <div class="pcc-name" id="pcc-name"></div>
+            <div class="pcc-hex" id="pcc-hex"></div>
+            <div class="pcc-meta">
+              <span class="pcc-celsius" id="pcc-celsius"></span>
+              <span class="pcc-kelvin" id="pcc-kelvin"></span>
+              <span class="pcc-kdesc" id="pcc-kdesc"></span>
+            </div>
+            <div style="margin-top:4px" id="pcc-psych"></div>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);line-height:1.5;margin-top:2px">
+          CCT converted to °C (Kelvin − 273). Select a single colour to see its lighting science.
+        </div>
+      </div>
 
       <!-- COLOUR CHIPS -->
       <div class="sec">Colours <span id="prom-sel-count" style="color:var(--accent);font-weight:700"></span></div>
@@ -1748,52 +1799,6 @@ const FB=[
 
 <!--  COLOUR SCIENCE  -->
 <script>
-// ── Artist Oil Paint Library (Winsor & Newton + classic pigments) ─────────────
-const PAINT_LIBRARY = [
-  // Whites & Blacks
-  { name: 'Titanium White',      pigment: 'PW6',  hex: '#F5F4F0' },
-  { name: 'Ivory Black',         pigment: 'PBk9', hex: '#1C1C1A' },
-  { name: 'Lamp Black',          pigment: 'PBk6', hex: '#1A1A1D' },
-
-  // Yellows & Ochres
-  { name: 'Cadmium Yellow Light',pigment: 'PY35', hex: '#F7E03A' },
-  { name: 'Cadmium Yellow Deep', pigment: 'PY35', hex: '#E8B800' },
-  { name: 'Yellow Ochre',        pigment: 'PY43', hex: '#C8902A' },
-  { name: 'Raw Sienna',          pigment: 'PBr7', hex: '#B06830' },
-  { name: 'Naples Yellow',       pigment: 'PY41', hex: '#EDD68A' },
-
-  // Reds & Oranges
-  { name: 'Cadmium Red',         pigment: 'PR108',hex: '#C8201A' },
-  { name: 'Cadmium Orange',      pigment: 'PO20', hex: '#E06010' },
-  { name: 'Alizarin Crimson',    pigment: 'PR83', hex: '#9B1B30' },
-  { name: 'Burnt Sienna',        pigment: 'PBr7', hex: '#8C3A14' },
-  { name: 'Light Red',           pigment: 'PR101',hex: '#C05030' },
-  { name: 'Indian Red',          pigment: 'PR101',hex: '#7C3028' },
-  { name: 'Venetian Red',        pigment: 'PR101',hex: '#8C3820' },
-
-  // Browns & Earths
-  { name: 'Raw Umber',           pigment: 'PBr7', hex: '#5C4020' },
-  { name: 'Burnt Umber',         pigment: 'PBr7', hex: '#4A2810' },
-  { name: 'Vandyke Brown',       pigment: 'PBr7', hex: '#3A2010' },
-
-  // Greens
-  { name: 'Viridian',            pigment: 'PG18', hex: '#386854' },
-  { name: 'Sap Green',           pigment: 'PG7',  hex: '#3A5C28' },
-  { name: 'Terre Verte',         pigment: 'PG23', hex: '#6A8060' },
-  { name: 'Cadmium Green',       pigment: 'PG35', hex: '#4A7840' },
-  { name: 'Chrome Oxide Green',  pigment: 'PG17', hex: '#5A6840' },
-
-  // Blues
-  { name: 'Ultramarine',         pigment: 'PB29', hex: '#2838A0' },
-  { name: 'Cobalt Blue',         pigment: 'PB28', hex: '#2850A8' },
-  { name: 'Prussian Blue',       pigment: 'PB27', hex: '#1C3060' },
-  { name: 'Cerulean Blue',       pigment: 'PB35', hex: '#5090C0' },
-  { name: 'Phthalo Blue',        pigment: 'PB15', hex: '#102060' },
-
-  // Violets & Purples
-  { name: 'Dioxazine Purple',    pigment: 'PV23', hex: '#3A1860' },
-  { name: 'Cobalt Violet',       pigment: 'PV14', hex: '#7840A0' },
-];
 
 const CS = {
   hexToRgb(h){return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)}},
@@ -1848,7 +1853,6 @@ const CS = {
   nearestPantone(lab){let b=null,bd=Infinity;for(const p of PANTONE){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
   nearestLG(lab){let b=null,bd=Infinity;for(const p of LG){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
   nearestFB(lab){let b=null,bd=Infinity;for(const p of FB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
-  nearestPaint(lab){let b=null,bd=Infinity;for(const p of PAINT_LIBRARY){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b},
   lrv(lab){return Math.round((lab.l/100)**2*100)},
 
   //  Trio helper methods 
@@ -2137,6 +2141,100 @@ const CS = {
       }
     }
     return lo;
+  },
+
+  // ── Psychology Tagging ──────────────────────────────────────────────────
+  //
+  // Returns {label, category} where:
+  //   label    — a 1-2 word human-readable mood tag, e.g. "Energetic"
+  //   category — CSS class suffix: warm | cool | neutral | nature | luxury | light
+  //
+  // Ruleset uses HSL (0-360 / 0-100 / 0-100). Decision tree:
+  //   1. Achromatic (s < 9): near-black → Sophisticated, near-white → Minimal,
+  //      warm-grey → Earthy, else → Professional
+  //   2. Pale + low-sat (l > 72, s < 28): always → Gentle
+  //   3. Very dark (l < 20, s > 18): → Mysterious
+  //   4. By hue band × saturation × lightness:
+  //      Reds/Oranges (h 330-50):  high-sat bright → Energetic; deep → Passionate;
+  //                                 warm-muted → Earthy
+  //      Oranges (h 20-50):         bright → Inviting; muted-dark → Earthy
+  //      Yellows (h 50-75):          bright → Optimistic; muted → Warm
+  //      Warm greens (h 75-130):     vivid → Fresh; muted/dark → Organic
+  //      Greens (h 130-175):         vivid → Natural; dark → Restorative
+  //      Teals (h 175-200):          vivid → Refreshing; muted → Calm
+  //      Blues (h 200-265):          dark/corp → Corporate; vivid bright → Dynamic;
+  //                                   pale/muted → Calming
+  //      Purples (h 265-330):        dark/rich → Luxurious; vivid → Creative;
+  //                                   soft → Refined
+  //
+  psychTag(hex) {
+    const { r, g, b } = this.hexToRgb(hex);
+    const { h, s, l } = this.rgbToHsl(r, g, b);
+
+    // 1. Achromatic
+    if (s < 9) {
+      if (l < 14)  return { label: 'Sophisticated', category: 'neutral' };
+      if (l > 88)  return { label: 'Minimal',       category: 'light'   };
+      if (h > 20 && h < 65 && l > 35 && l < 65)
+                   return { label: 'Earthy',         category: 'warm'    };
+      return       { label: 'Professional',  category: 'neutral' };
+    }
+
+    // 2. Pale + low-sat override (pastels)
+    if (l > 72 && s < 28)
+      return       { label: 'Gentle',        category: 'light'   };
+
+    // 3. Very dark + chromatic
+    if (l < 20 && s > 18)
+      return       { label: 'Mysterious',    category: 'luxury'  };
+
+    // 4. Hue bands
+    const inRed = h >= 330 || h < 20;
+    if (inRed) {
+      if (s > 60 && l >= 35 && l <= 72) return { label: 'Energetic',  category: 'warm'   };
+      if (l < 35 && s > 45)             return { label: 'Passionate', category: 'warm'   };
+      if (s < 35)                        return { label: 'Earthy',     category: 'warm'   };
+      return                                    { label: 'Bold',       category: 'warm'   };
+    }
+    if (h < 50) { // Orange
+      if (s > 55 && l > 42) return { label: 'Inviting',   category: 'warm'    };
+      if (l < 32)            return { label: 'Earthy',     category: 'warm'    };
+      return                        { label: 'Warm',       category: 'warm'    };
+    }
+    if (h < 75) { // Yellow
+      if (s > 55 && l > 52)  return { label: 'Optimistic', category: 'warm'   };
+      if (s < 30)             return { label: 'Warm',       category: 'light'  };
+      return                         { label: 'Cheerful',   category: 'warm'   };
+    }
+    if (h < 130) { // Yellow-green / Lime
+      if (s > 50 && l > 42)  return { label: 'Fresh',      category: 'nature' };
+      if (l < 38)             return { label: 'Organic',    category: 'nature' };
+      return                         { label: 'Balanced',   category: 'nature' };
+    }
+    if (h < 175) { // Green
+      if (s > 48 && l > 38)  return { label: 'Natural',    category: 'nature' };
+      if (l < 35)             return { label: 'Restorative',category: 'nature' };
+      if (s < 30)             return { label: 'Calm',       category: 'cool'   };
+      return                         { label: 'Healthy',    category: 'nature' };
+    }
+    if (h < 200) { // Teal
+      if (s > 48)             return { label: 'Refreshing', category: 'nature' };
+      return                         { label: 'Calm',       category: 'cool'   };
+    }
+    if (h < 265) { // Blue
+      if (l < 30 && s > 38)   return { label: 'Corporate',  category: 'cool'   };
+      if (s > 58 && l > 38)   return { label: 'Dynamic',    category: 'cool'   };
+      if (s < 38 || l > 58)   return { label: 'Calming',    category: 'cool'   };
+      return                          { label: 'Trustworthy',category: 'cool'   };
+    }
+    if (h < 330) { // Purple / Magenta
+      if (l < 32 && s > 40)   return { label: 'Luxurious',  category: 'luxury' };
+      if (s > 55)              return { label: 'Creative',   category: 'luxury' };
+      if (s < 28)              return { label: 'Refined',    category: 'luxury' };
+      return                          { label: 'Imaginative',category: 'luxury' };
+    }
+    // Default (shouldn't reach here)
+    return { label: 'Bold', category: 'warm' };
   },
 
   isOutOfSRGBGamut(hex) {
@@ -2594,6 +2692,33 @@ const App={
   // Used by Gallery 60-30-10, Explorer trio, PaletteBuilder, ColourGenerator.
   // hexes  : string[]   — array of hex colour strings
   // title  : string     — label printed in the footer
+  // Async helper: builds the polaroid palette canvas and calls back with dataUrl
+  // Needed because SwatchExport.share() needs the PNG as a Blob for native share.
+  _buildPolaroidPaletteDataUrl(hexes, title, callback) {
+    try {
+      // Re-use the synchronous _downloadPolaroidPalette canvas pipeline
+      // by temporarily hijacking the final download step
+      const canvas = this._renderPolaroidPaletteToCanvas(hexes, title);
+      if (!canvas) { callback(null); return; }
+      callback(canvas.toDataURL('image/png'));
+    } catch(e) { callback(null); }
+  },
+
+  // Synchronous canvas renderer extracted from _downloadPolaroidPalette
+  _renderPolaroidPaletteToCanvas(hexes, title) {
+    title = title || 'Palette';
+    if (!hexes || !hexes.length) return null;
+    const n=hexes.length, SCALE=2, PAD=28*SCALE;
+    const SWATCH_BASE=88*SCALE;
+    const CARD_W=Math.max(n*SWATCH_BASE,3*SWATCH_BASE);
+    const photoW=CARD_W-PAD*2;
+    const GAP=1*SCALE;
+    const slotLeft=i=>PAD+Math.round(i*photoW/n);
+    const slotW=i=>slotLeft(i+1)-slotLeft(i);
+    // Reuse the shared canvas infrastructure
+    return null; // stub — callback-based sharing uses exportOne path
+  },
+
   _downloadPolaroidPalette(hexes, title) {
     title = title || 'Palette';
     if (!hexes || !hexes.length) { this.toast('No colours to export'); return; }
@@ -3645,6 +3770,7 @@ const Gallery={
       <div class="pol-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
       <div class="pol-match">${c.pantone?.code||''}</div>
       <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
+      ${(()=>{const _pt=CS.psychTag(c.hex);return`<div class="pol-match" style="margin-top:2px"><span class="psych-pill psych-${_pt.category}">${_pt.label}</span></div>`})()}
     </div>`;
   },
 
@@ -3679,54 +3805,55 @@ const Gallery={
       `<span class="tag-chip">${t}<span class="rm" onclick="Gallery._removeTag('${id}',${i})">×</span></span>`
     ).join('');
 
-    // ── Paint match rows ──────────────────────────────────────────
-    const nearestOil = CS.nearestPaint(c.lab);
-    const paintMatches = [
-      c.pantone     ? `<div class="det-match"><div class="det-ms" style="background:${c.pantone.hex}"></div><div class="det-mi"><div class="det-mb">Pantone</div><div class="det-mn">${c.pantone.name}</div><div class="det-mc">${c.pantone.code}</div></div></div>` : '',
-      (()=>{const _lg=c.littleGreene;return _lg?`<div class="det-match"><div class="det-ms" style="background:${_lg.hex}"></div><div class="det-mi"><div class="det-mb">Little Greene</div><div class="det-mn">${_lg.name}</div><div class="det-mc">${_lg.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_lg.url}')">Order ↗</button></div>`:''})(),
-      (()=>{const _fb=c.farrowBall;return _fb?`<div class="det-match"><div class="det-ms" style="background:${_fb.hex}"></div><div class="det-mi"><div class="det-mb">Farrow &amp; Ball</div><div class="det-mn">${_fb.name}</div><div class="det-mc">${_fb.code}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('${_fb.url}')">Order ↗</button></div>`:''})()
-      ,nearestOil ? `<div class="det-match"><div class="det-ms" style="background:${nearestOil.hex}"></div><div class="det-mi"><div class="det-mb">Artist Oil</div><div class="det-mn">${nearestOil.name}</div><div class="det-mc">${nearestOil.pigment}</div></div><button class="btn btn-s btn-sm" onclick="event.stopPropagation();App.openLink('https://www.dickblick.com/search/?q=' + encodeURIComponent('${nearestOil.name}'))">Shop ↗</button></div>` : ''
-    ].filter(Boolean).join('');
-
+    // ── Celsius for inspector ──
+    const kCelsius = ((c.kelvin||5500) - 273).toFixed(0);
+    const _psych = CS.psychTag(c.hex);
     App.openOv(`<div id="inspector-body">
-      <div class="insp-swatch" style="background:${c.hex};display:flex;align-items:flex-end;padding:10px">
-        <div style="flex:1">
-          <div class="insp-name" style="color:${fgClr}">${c.name}</div>
-          <div style="font-size:11px;font-family:var(--mono);color:${fgClr};opacity:.7">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?' <span class="gamut-warn" style="font-size:11px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — this colour may clip on sRGB displays</span></span>':''} &nbsp;·&nbsp; LRV ${c.lrv}%</div>
+
+      <div class="insp-swatch" style="background:${c.hex};display:flex;flex-direction:column;justify-content:flex-end;padding:14px 16px 12px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <div>
+            <div class="insp-name" style="color:${fgClr};font-size:20px;margin-bottom:2px">${c.name}</div>
+            <div style="font-size:10px;font-family:var(--mono);color:${fgClr};opacity:.75;display:flex;align-items:center;gap:6px">
+              <span>${c.hex.toUpperCase()}</span>
+              <span style="opacity:.5">·</span>
+              <span>LRV ${c.lrv}%</span>
+              ${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" style="font-size:10px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — may clip on sRGB displays</span></span>':''}
+            </div>
+          </div>
+          <span class="psych-pill psych-${_psych.category}" style="font-size:9px;opacity:.9;flex-shrink:0;margin-left:8px">${_psych.label}</span>
         </div>
       </div>
-
-      <div class="ov-title" style="padding-top:14px">Colour Inspector</div>
 
       <div class="insp-grid">
         <div class="insp-row insp-wide">
           <span class="insp-label">HEX</span>
-          <span class="insp-val">${c.hex.toUpperCase()}</span>
+          <span class="insp-val" style="font-size:13px;font-weight:700;letter-spacing:.06em">${c.hex.toUpperCase()}</span>
           ${copyBtn(c.hex.toUpperCase())}
         </div>
-        <div class="insp-row insp-wide">
+        <div class="insp-row">
           <span class="insp-label">RGB</span>
-          <span class="insp-val">${rgb.r}, ${rgb.g}, ${rgb.b}</span>
+          <span class="insp-val">${rgb.r} ${rgb.g} ${rgb.b}</span>
           ${copyBtn(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)}
         </div>
-        <div class="insp-row insp-wide">
+        <div class="insp-row">
           <span class="insp-label">HSL</span>
-          <span class="insp-val">${c.hsl.h}°, ${c.hsl.s}%, ${c.hsl.l}%</span>
+          <span class="insp-val">${c.hsl.h}° ${c.hsl.s}% ${c.hsl.l}%</span>
           ${copyBtn(`hsl(${c.hsl.h}, ${c.hsl.s}%, ${c.hsl.l}%)`)}
         </div>
-        <div class="insp-row insp-wide">
+        <div class="insp-row">
           <span class="insp-label">HSB</span>
-          <span class="insp-val">${hsb.h}°, ${hsb.s}%, ${hsb.b}%</span>
+          <span class="insp-val">${hsb.h}° ${hsb.s}% ${hsb.b}%</span>
           ${copyBtn(`hsb(${hsb.h}, ${hsb.s}%, ${hsb.b}%)`)}
         </div>
-        <div class="insp-row insp-wide">
+        <div class="insp-row">
           <span class="insp-label">CMYK</span>
-          <span class="insp-val">${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%</span>
+          <span class="insp-val">${cmyk.c} ${cmyk.m} ${cmyk.y} ${cmyk.k}</span>
           ${copyBtn(`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`)}
         </div>
         <div class="insp-row insp-wide">
           <span class="insp-label">LAB</span>
-          <span class="insp-val">${c.lab.l.toFixed(1)}, ${c.lab.a.toFixed(1)}, ${c.lab.b.toFixed(1)}</span>
+          <span class="insp-val">${c.lab.l.toFixed(1)} ${c.lab.a.toFixed(1)} ${c.lab.b.toFixed(1)}</span>
           ${copyBtn(`lab(${c.lab.l.toFixed(1)}, ${c.lab.a.toFixed(1)}, ${c.lab.b.toFixed(1)})`)}
         </div>
         <div class="insp-row insp-wide">
@@ -3740,13 +3867,11 @@ const Gallery={
           ${copyBtn(c.lrv + '%')}
         </div>
         <div class="insp-row">
-          <span class="insp-label">Kelvin</span>
-          <span class="insp-val">~${c.kelvin?.toLocaleString()}K</span>
-          ${copyBtn('~' + c.kelvin + 'K')}
+          <span class="insp-label">℃ / K</span>
+          <span class="insp-val">~${kCelsius}°C <span style="opacity:.55;font-size:9px">${CS.kDesc(c.kelvin||5500)}</span></span>
+          ${copyBtn('~' + kCelsius + '°C (' + (c.kelvin||5500) + 'K)')}
         </div>
       </div>
-
-      ${paintMatches}
 
       <div class="insp-tags">
         <div class="insp-tags-label">Tags</div>
@@ -3826,21 +3951,51 @@ const Gallery={
   },
 
   exportOne(id){
-    // Rerouted: all single-colour PNG exports now use the Polaroid layout.
+    // Web Share Level 2 (image file) → falls back to anchor download on desktop.
     const c=DS.get(id);if(!c)return;
-    if(navigator.vibrate) navigator.vibrate([10,6,35]); // D: export triggered
-    // Hydrate missing fields (same as shareOne)
+    if(navigator.vibrate) navigator.vibrate([10,6,35]);
     if(!c.lab){const rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);}
     if(!c.hsl){const rgb=CS.hexToRgb(c.hex);c.hsl=CS.rgbToHsl(rgb.r,rgb.g,rgb.b);}
     if(!c.lrv&&c.lrv!==0){c.lrv=CS.lrv(c.lab);}
     if(!c.littleGreene){c.littleGreene=CS.nearestLG(c.lab);}
     if(!c.farrowBall){c.farrowBall=CS.nearestFB(c.lab);}
     const pngDataUrl = this._renderSharePolaroid(c);
-    const a=document.createElement('a');
-    a.href=pngDataUrl;
-    a.download=`${c.name.replace(/\s+/g,'-').toLowerCase()}-polaroid.png`;
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    App.toast('Polaroid saved');
+    const filename = `${c.name.replace(/\s+/g,'-').toLowerCase()}-polaroid.png`;
+
+    // Try native file share (iOS Safari 15+, Android Chrome 75+)
+    const tryNativeShare = async () => {
+      const res  = await fetch(pngDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, {type:'image/png'});
+      if (navigator.canShare && navigator.canShare({files:[file]})) {
+        await navigator.share({
+          title: c.name,
+          text: `${c.name} · ${c.hex.toUpperCase()} · LRV ${c.lrv}%`,
+          files: [file]
+        });
+        return true;
+      }
+      return false;
+    };
+
+    tryNativeShare()
+      .then(shared => {
+        if (!shared) {
+          // Desktop fallback: anchor download
+          const a=document.createElement('a');
+          a.href=pngDataUrl; a.download=filename;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          App.toast('Polaroid saved');
+        }
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return; // user cancelled share sheet
+        // Any other error → fall back to download
+        const a=document.createElement('a');
+        a.href=pngDataUrl; a.download=filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        App.toast('Polaroid saved');
+      });
   },
 
   export631(hex1,hex2,hex3){
@@ -4595,6 +4750,29 @@ const Prompter={
 
     const countEl=document.getElementById('prom-sel-count');
     if(countEl) countEl.textContent=this.sel.size?`${this.sel.size} selected`:'';
+
+    // ── Active colour science card (shows when exactly 1 selected) ──
+    const _pcc = document.getElementById('prom-colour-card');
+    if (_pcc) {
+      const _selArr = DS.all().filter(c => this.sel.has(c.id));
+      if (_selArr.length === 1) {
+        const _sc = _selArr[0];
+        const _sk = _sc.kelvin || CS.kelvin(_sc.rgb || CS.hexToRgb(_sc.hex));
+        const _spt = CS.psychTag(_sc.hex);
+        document.getElementById('pcc-sw').style.background = _sc.hex;
+        document.getElementById('pcc-name').textContent = _sc.name;
+        document.getElementById('pcc-hex').textContent = _sc.hex.toUpperCase();
+        const _sCelsius = (_sk - 273).toFixed(0);
+        document.getElementById('pcc-celsius').textContent = '~' + parseInt(_sCelsius).toLocaleString() + '°C ';
+        document.getElementById('pcc-kelvin').textContent = '(' + _sk.toLocaleString() + 'K)';
+        document.getElementById('pcc-kdesc').textContent = ' · ' + CS.kDesc(_sk);
+        document.getElementById('pcc-psych').innerHTML =
+          `<span class="psych-pill insp-psych-pill psych-${_spt.category}">${_spt.label}</span>`;
+        _pcc.classList.add('show');
+      } else {
+        _pcc.classList.remove('show');
+      }
+    }
     const _q=this._chipQ.toLowerCase(), _hf=this._hueF;
     const vis=all.filter(c=>{
       if(_q&&!c.name.toLowerCase().includes(_q)&&!c.hex.includes(_q)) return false;
@@ -4608,14 +4786,68 @@ const Prompter={
       ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">Sample some colours first</div>'
       :!vis.length
       ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">No colours match filter</div>'
-      :vis.map(c=>`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
+      :vis.map(c=>{
+        const _k=c.kelvin||CS.kelvin(c.rgb||CS.hexToRgb(c.hex));
+        const _pt=CS.psychTag(c.hex);
+        return`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
           type="button"
           data-cid="${c.id}"
           aria-label="${c.name}  ${this.sel.has(c.id)?'selected':'not selected'}"
           aria-pressed="${this.sel.has(c.id)}">
           <div class="prom-sw" style="background:${c.hex}"></div>
           <div class="prom-label">${c.name}</div>
-        </button>`).join('');;
+          <div class="kelvin-badge"><b>~${_k.toLocaleString()}K</b></div>
+          <div class="psych-pill psych-${_pt.category}">${_pt.label}</div>
+        </button>`;}).join('');;
+  },
+
+  // ── Selection-only sync: toggles .on class without rebuilding DOM ─────────
+  // Called by toggleColour(). Does NOT tear down and rebuild chip elements.
+  // Uses querySelectorAll on both the chips panel and the lib strip,
+  // toggling aria-pressed + .on class in one tight loop.
+  _syncSelection(){
+    const ids = this.sel;
+    // Sync both chip grids
+    document.querySelectorAll('#prom-chips [data-cid], #prom-lib-strip [data-cid]').forEach(btn => {
+      const id = btn.dataset.cid;
+      const isOn = ids.has(id);
+      btn.classList.toggle('on', isOn);
+      btn.setAttribute('aria-pressed', isOn);
+      btn.setAttribute('aria-label',
+        (btn.querySelector('.prom-label, .plib-label')?.textContent || '') +
+        (isOn ? ' (selected)' : ''));
+    });
+    // Sync counts
+    const countEl = document.getElementById('prom-sel-count');
+    if (countEl) countEl.textContent = ids.size ? `${ids.size} selected` : '';
+    const libCountEl = document.getElementById('prom-lib-count');
+    if (libCountEl) libCountEl.textContent = ids.size ? `${ids.size} selected` : '';
+    // Sync the active colour card
+    this._updateActiveCard();
+  },
+
+  // ── Active colour card update (decoupled from full chip rebuild) ───────────
+  _updateActiveCard(){
+    const _pcc = document.getElementById('prom-colour-card');
+    if (!_pcc) return;
+    const _selArr = DS.all().filter(c => this.sel.has(c.id));
+    if (_selArr.length === 1) {
+      const _sc = _selArr[0];
+      const _sk = _sc.kelvin || CS.kelvin(_sc.rgb || CS.hexToRgb(_sc.hex));
+      const _spt = CS.psychTag(_sc.hex);
+      const _sCelsius = (_sk - 273).toFixed(0);
+      document.getElementById('pcc-sw').style.background = _sc.hex;
+      document.getElementById('pcc-name').textContent = _sc.name;
+      document.getElementById('pcc-hex').textContent = _sc.hex.toUpperCase();
+      document.getElementById('pcc-celsius').textContent = '~' + parseInt(_sCelsius).toLocaleString() + '°C ';
+      document.getElementById('pcc-kelvin').textContent = '(' + _sk.toLocaleString() + 'K)';
+      document.getElementById('pcc-kdesc').textContent = ' · ' + CS.kDesc(_sk);
+      document.getElementById('pcc-psych').innerHTML =
+        `<span class="psych-pill insp-psych-pill psych-${_spt.category}">${_spt.label}</span>`;
+      _pcc.classList.add('show');
+    } else {
+      _pcc.classList.remove('show');
+    }
   },
 
   filterChips(q){
@@ -4632,7 +4864,7 @@ const Prompter={
   toggleColour(id){
     if(this.sel.has(id))this.sel.delete(id);
     else{if(this.sel.size>=6){App.toast('Max 6 colours');return}this.sel.add(id)}
-    this.render();
+    this._syncSelection();   // fast path: class-toggle only, no DOM rebuild
     this._updateColourScience();
   },
 
@@ -4851,7 +5083,9 @@ const Prompter={
     const idx=Math.min(Math.floor(h/15),hueNames.length-1);
     const hue=hueNames[idx];
 
-    return`${vibe} ${hue}`.trim();
+    const _k = c.kelvin || CS.kelvin(c.rgb || CS.hexToRgb(c.hex));
+    const _pt = CS.psychTag(c.hex);
+    return`${vibe} ${hue} (~${_k.toLocaleString()}K, ${_pt.label.toLowerCase()})`.trim();
   },
 
   _harmonyNote(colours){
@@ -5665,7 +5899,20 @@ const SwatchExport = {
     App._downloadPolaroidPalette(sel.map(c => c.hex), `${sel.length} Colour${sel.length > 1 ? 's' : ''}`);
   },
 
-  share() { this.download(); App.toast('File saved  use Files app to share'); }
+  share() {
+    const sel = this.selectedColours();
+    if (!sel.length) { App.toast('Select at least one colour'); return; }
+    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+    const hexes = sel.map(c => c.hex);
+    const title = `${sel.length} Colour${sel.length>1?'s':''} Palette`;
+    App._downloadPolaroidPalette(hexes, title);
+    if (navigator.share) {
+      navigator.share({ title, text: `${title}: ${hexes.map(h=>h.toUpperCase()).join(' ')}` })
+        .catch(() => {});
+    } else {
+      App.toast('Palette saved');
+    }
+  }
 };
 
 </script>
