@@ -55,8 +55,7 @@
   --tap:44px;          /* iOS/Android minimum touch target */
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,html{font-size:16px;box-sizing:border-box}
-*,*::before,*::after{box-sizing:inherit}
+html{height:100%;overflow:hidden;font-size:16px}
 body{height:100%;overflow:hidden;font-family:var(--mono);font-size:1rem;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;touch-action:none}
 button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 a{color:var(--accent);text-decoration:none}
@@ -338,7 +337,17 @@ a{color:var(--accent);text-decoration:none}
 .det-val{background:var(--surface2);border-radius:var(--rs);padding:9px 11px}
 .det-vl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;font-weight:600}
 .det-v{font-size:12px;font-weight:700}
-/* ── Inline Inspector WCAG contrast cells ── */
+/* ── Manual Hex Input Fallback (shown when camera is unavailable) ── */
+#hex-fallback{display:none;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:290px;padding-top:12px;border-top:1px solid var(--border);margin-top:4px}
+#hex-fallback.show{display:flex}
+.hex-fb-label{font-size:var(--fs-xs);color:var(--muted);text-align:center;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
+.hex-fb-row{display:flex;gap:8px;width:100%;align-items:center}
+#hex-fb-input{flex:1;background:var(--surface2);border:2px solid var(--border);border-radius:var(--rs);padding:10px 12px;color:var(--text);font-family:var(--mono);font-size:var(--fs-sm);text-transform:uppercase;text-align:center;letter-spacing:.1em;transition:border-color .2s;min-height:var(--tap)}
+#hex-fb-input:focus{outline:none;border-color:var(--accent)}
+#hex-fb-input.invalid{border-color:var(--danger)}
+#hex-fb-preview{width:44px;height:44px;border-radius:var(--rs);border:2px solid var(--border);flex-shrink:0;transition:background .2s}
+.hex-fb-hint{font-size:var(--fs-xxs);color:var(--muted);font-family:var(--mono);text-align:center}
+/* ── end Hex Fallback ── */
 .insp-wcag-cell{border-radius:var(--rs);padding:9px 10px 8px;border:2px solid transparent;min-height:var(--tap);display:flex;flex-direction:column;justify-content:center;gap:2px}
 .insp-wcag-pass{border-color:var(--ok);background:rgba(46,204,113,.07)}
 .insp-wcag-fail{border-color:var(--danger);background:rgba(192,57,43,.07)}
@@ -347,6 +356,8 @@ a{color:var(--accent);text-decoration:none}
 .insp-wcag-pass .insp-wcag-badge{color:var(--ok);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 .insp-wcag-fail .insp-wcag-badge{color:var(--danger);font-size:var(--fs-xxs);font-weight:700;letter-spacing:.05em;font-family:var(--mono)}
 /* det-match family removed: paint match feature stripped */
+.btn-buy{background:linear-gradient(135deg,#c8943a 0%,#b07828 100%);color:#fff;border:1px solid #d4a84a;font-weight:700;letter-spacing:.04em}
+.btn-buy:hover{background:linear-gradient(135deg,#d4a84a 0%,#c8943a 100%);border-color:#e0bc60}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -792,6 +803,24 @@ a{color:var(--accent);text-decoration:none}
         </div>
         <!-- Diagnostic panel  helps identify exact failure -->
         <div id="cam-diag" style="margin-top:10px;background:rgba(255,255,255,.07);border-radius:8px;padding:10px 14px;font-size:9px;font-family:monospace;color:rgba(255,255,255,.45);line-height:1.8;text-align:left;max-width:290px;word-break:break-all"></div>
+
+        <!-- Manual Hex Input Fallback — shown for NotFound / NotAllowed errors -->
+        <div id="hex-fallback">
+          <div class="hex-fb-label">— or type / paste a hex code —</div>
+          <div class="hex-fb-row">
+            <div id="hex-fb-preview" style="background:#888888"></div>
+            <input id="hex-fb-input"
+                   type="text"
+                   maxlength="7"
+                   placeholder="#RRGGBB"
+                   autocomplete="off"
+                   spellcheck="false"
+                   oninput="Sampler.onHexFbInput(this.value)"
+                   onkeydown="if(event.key==='Enter') Sampler.submitHexFallback()">
+          </div>
+          <button class="btn btn-p btn-sm" style="width:100%" onclick="Sampler.submitHexFallback()">🎨 Sample This Colour →</button>
+          <div class="hex-fb-hint">Accepts #RGB or #RRGGBB · Press Enter to sample</div>
+        </div>
       </div>
     </div>
 
@@ -1466,7 +1495,7 @@ a{color:var(--accent);text-decoration:none}
   </div>
 
 
-  <!--  WCAG ACCESSIBILITY  -->
+  <!--  end mod-palette  -->
   </div>
 
 <!-- TABS -->
@@ -2417,7 +2446,6 @@ const App={
     Prompter.init();
     PaletteBuilder.init();   // registers Ctrl/Cmd+Z undo
     ColourGenerator.init();
-    WCAG.render();
     this.updateDot();
   },
 
@@ -2889,6 +2917,7 @@ const Sampler={
     const noCam = document.getElementById('no-cam');
     noCam.classList.remove('show');
     v.srcObject = null;
+    this.hideHexFallback();
 
     // 1. In-app browser check FIRST  these are never secure contexts,
     //    so must be caught before isSecureContext to show the right message.
@@ -2992,10 +3021,11 @@ const Sampler={
       case 'PermissionDeniedError':
         this.showCamError(
           'Permission Denied',
-          '<strong>Android/Chrome:</strong> Tap the  in the address bar  ' +
-          'Site Settings  Camera  Allow, then tap Retry.<br><br>' +
-          '<strong>iPhone/Safari:</strong> Settings  Safari  Camera  Allow.'
+          '<strong>Android/Chrome:</strong> Tap the  in the address bar → ' +
+          'Site Settings → Camera → Allow, then tap Retry.<br><br>' +
+          '<strong>iPhone/Safari:</strong> Settings → Safari → Camera → Allow.'
         );
+        this.showHexFallback();
         break;
       case 'SecurityError':
         this.showCamError(
@@ -3009,9 +3039,10 @@ const Sampler={
       case 'DevicesNotFoundError':
         this.showCamError(
           'No Camera Found',
-          'No camera was detected. Use  Picker or  Upload instead.'
+          'No camera was detected. Use 🎨 Picker or 📂 Upload instead.'
         );
-        break;
+        this.showHexFallback();
+        break;    break;
       case 'NotReadableError':
       case 'TrackStartError':
         this.showCamError(
@@ -3528,6 +3559,81 @@ const Sampler={
       ctx.drawImage(img,ox,oy,dw,dh);
     }
   },
+
+  // ── Manual Hex Input Fallback ──────────────────────────────────────────────
+  // Called when camera is unavailable (NotFound / NotAllowed).
+  // Shows an inline hex input so the user can still sample colours manually.
+
+  showHexFallback() {
+    const el = document.getElementById('hex-fallback');
+    if (el) el.classList.add('show');
+    // Reset input state
+    const inp = document.getElementById('hex-fb-input');
+    if (inp) { inp.value = ''; inp.classList.remove('invalid'); }
+    const prev = document.getElementById('hex-fb-preview');
+    if (prev) prev.style.background = '#888888';
+  },
+
+  hideHexFallback() {
+    const el = document.getElementById('hex-fallback');
+    if (el) el.classList.remove('show');
+  },
+
+  // Fired on every keystroke in the hex input — live-updates the preview swatch
+  onHexFbInput(raw) {
+    const inp  = document.getElementById('hex-fb-input');
+    const prev = document.getElementById('hex-fb-preview');
+    if (!inp || !prev) return;
+
+    // Normalise: ensure leading #, uppercase
+    let val = raw.trim().toUpperCase();
+    if (val && !val.startsWith('#')) val = '#' + val;
+
+    // Live colour preview and validity indication
+    const isShort = /^#[0-9A-F]{3}$/.test(val);
+    const isFull  = /^#[0-9A-F]{6}$/.test(val);
+    const isValid = isShort || isFull;
+
+    inp.classList.toggle('invalid', val.length > 1 && !isValid);
+
+    if (isShort) {
+      // Expand #RGB → #RRGGBB for preview
+      const r = val[1]+val[1], g = val[2]+val[2], b = val[3]+val[3];
+      prev.style.background = `#${r}${g}${b}`;
+    } else if (isFull) {
+      prev.style.background = val;
+    } else {
+      prev.style.background = '#888888';
+    }
+  },
+
+  // Submit: validate → expand shorthand → pass through normal capture pipeline
+  submitHexFallback() {
+    const inp = document.getElementById('hex-fb-input');
+    if (!inp) return;
+
+    let val = inp.value.trim().toUpperCase();
+    if (val && !val.startsWith('#')) val = '#' + val;
+
+    // Expand #RGB → #RRGGBB
+    if (/^#[0-9A-F]{3}$/.test(val)) {
+      val = '#' + val[1]+val[1] + val[2]+val[2] + val[3]+val[3];
+    }
+
+    if (!/^#[0-9A-F]{6}$/.test(val)) {
+      inp.classList.add('invalid');
+      if (inp.animate) inp.animate([{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'none'}],{duration:200});
+      App.toast('Enter a valid hex code — e.g. #3A7FBD');
+      return;
+    }
+
+    // Feed into the queue just like a camera capture
+    this.addToQueue(val);
+    inp.value = '';
+    inp.classList.remove('invalid');
+    document.getElementById('hex-fb-preview').style.background = '#888888';
+    App.toast(`${val} added to queue`);
+  },
 };
 </script>
 
@@ -3836,6 +3942,9 @@ const Gallery={
         <button class="btn btn-s btn-sm" onclick="Gallery.shareOne('${id}')">Share ↗</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.exportOne('${id}')">Export Polaroid</button>
         <button class="btn btn-d btn-sm" onclick="Gallery.del('${id}')">Delete</button>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-buy btn-sm" style="width:100%" onclick="window.open('https://digby.shop/products/custom-solid-colour-fabric?hex=${c.hex.replace('#','')}','_blank')">🛍️ Buy as Fabric</button>
       </div>
     </div>`);
   },
@@ -6906,6 +7015,51 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Mark "None" era and default repeat as selected
   const noneEra=document.querySelector('.prom-pill[data-g="era"][data-v=""]');
   if(noneEra) noneEra.classList.add('on');
+
+  // ── Offline Service Worker (Blob URL — single-file PWA, no separate sw.js needed) ─────
+  // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
+  // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
+  if ('serviceWorker' in navigator && 'caches' in window) {
+    const SW_CACHE = 'spectrum-v1';
+    const swSrc = `
+const CACHE='spectrum-v1';
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
+  self.skipWaiting();
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET') return;
+  const u=new URL(e.request.url);
+  if(u.origin!==self.location.origin) return;
+  e.respondWith(
+    caches.match(e.request).then(cached=>{
+      const net=fetch(e.request).then(res=>{
+        if(res&&res.status===200&&res.type!=='opaque'){
+          const cl=res.clone();
+          caches.open(CACHE).then(c=>c.put(e.request,cl));
+        }
+        return res;
+      }).catch(()=>cached);
+      return cached||net;
+    })
+  );
+});
+`;
+    try {
+      const blob=new Blob([swSrc],{type:'application/javascript'});
+      const swUrl=URL.createObjectURL(blob);
+      const scope=location.pathname.replace(/\/[^\/]*$/,'/')||'/';
+      navigator.serviceWorker.register(swUrl,{scope})
+        .then(r=>{console.log('[Spectrum SW] registered, scope:',r.scope);URL.revokeObjectURL(swUrl);})
+        .catch(e=>{console.warn('[Spectrum SW] Blob SW failed (OK on file://):', e.message);URL.revokeObjectURL(swUrl);});
+    } catch(e){console.warn('[Spectrum SW]',e.message);}
+  }
 });
 </script>
 <!-- ═══════════════════════════════════════════════════════════════
