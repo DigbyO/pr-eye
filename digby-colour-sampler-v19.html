@@ -2205,8 +2205,20 @@ const CS = {
     const { r, g, b } = this.hexToRgb(hex);
     const { h, s, l } = this.rgbToHsl(r, g, b);
 
-    // 1. Achromatic
-    if (s < 9) {
+    // MASTER-FIX 6: use OKLCH chroma for achromatic detection.
+    // Threshold c<1.0 (=0.01 in standard OKLCH) ensures subtle architectural
+    // greys are correctly labelled Neutral rather than Earthy/Calming.
+    // (Previous HSL s<9 threshold was too loose — ~0.04 OKLCH equivalent.)
+    const _okl = CS.rgbToOklch(r, g, b);
+    const _c   = _okl.c;  // OKLCH chroma scaled ×100 (so 0.01 std = 1.0 here)
+    // 1. Achromatic (OKLCH chroma < 1.0 == 0.01 standard)
+    if (_c < 1.0) {
+      if (l < 14)  return { label: 'Sophisticated', category: 'neutral' };
+      if (l > 88)  return { label: 'Minimal',       category: 'light'   };
+      return       { label: 'Neutral',      category: 'neutral' };
+    }
+    // Near-achromatic (between 0.01 and ~0.04 std) — subtle colour present
+    if (_c < 4.0) {
       if (l < 14)  return { label: 'Sophisticated', category: 'neutral' };
       if (l > 88)  return { label: 'Minimal',       category: 'light'   };
       if (h > 20 && h < 65 && l > 35 && l < 65)
@@ -2277,6 +2289,9 @@ const CS = {
   autoTags(hex) {
     const { r, g, b } = this.hexToRgb(hex);
     const { h, s, l } = this.rgbToHsl(r, g, b);
+    // MASTER-FIX 6b: compute OKLCH chroma for accurate neutral tagging
+    const _okl = this.rgbToOklch(r, g, b);
+    const _c   = _okl.c; // scaled ×100; threshold 1.0 = 0.01 standard OKLCH
     const tags = [];
 
     // ── Energy / Mood ───────────────────────────────────────────────
@@ -2288,7 +2303,8 @@ const CS = {
       else                                               tags.push('Creative');
     }
 
-    if (s < 18 && l > 22 && l < 78)  tags.push('Minimal');
+    // MASTER-FIX 6b: 'Minimal' requires OKLCH chroma < 1.0 (true neutral/near-neutral)
+    if (_c < 1.0 && l > 22 && l < 78)   tags.push('Minimal');
     if (l < 20 && s > 18)            tags.push('Moody');
     if (l < 20 && s < 12)            tags.push('Dramatic');
 
@@ -2527,8 +2543,10 @@ const DS = {
       hsl:         CS.rgbToHsl(rgb.r, rgb.g, rgb.b),
       lab,
       lch:         CS.labToLch(lab),
-      name:        CS.autoName(hex),
-      nameSource:  'auto',
+      // MASTER-FIX 3: prefer closest Pantone name as the canonical name;
+      // autoName() is the generative fallback when Pantone data is absent.
+      name:        CS.nearestPantone(lab)?.name || CS.autoName(hex),
+      nameSource:  CS.nearestPantone(lab) ? 'pantone' : 'auto',
       pantone:     CS.nearestPantone(lab),
       littleGreene:CS.nearestLG(lab),
       farrowBall:  CS.nearestFB(lab),
@@ -3372,9 +3390,27 @@ const Sampler={
 
     if(this.frozen||this.mode!=='camera') return;
     const v=document.getElementById('cam-video');
-    if(!v.videoWidth||v.readyState<2)return;
+    if(!v.videoWidth) return;
+    // MASTER-FIX 1a: replace readyState<2 (too strict on iOS PWA) with paused/ended check
+    if(v.paused||v.ended) return;
+
+    // MASTER-FIX 1b: ensure cam-canvas dimensions match video and draw the frame to it.
+    // The <video> element handles display on most platforms, but on iOS PWA the GPU
+    // compositing layer can silently go black; drawing to the overlay canvas guarantees
+    // the feed is always visible.
+    const cvs = document.getElementById('cam-canvas');
+    if(cvs){
+      if(cvs.width!==v.videoWidth)  cvs.width  = v.videoWidth;
+      if(cvs.height!==v.videoHeight) cvs.height = v.videoHeight;
+      if(!this.lutOn || !App.activeLut){
+        const dctx = cvs.getContext('2d');
+        dctx.drawImage(v, 0, 0, cvs.width, cvs.height);
+      }
+    }
+
+    // Pixel-sample from a separate offscreen canvas (avoids polluting the display canvas)
     const tmp=document.createElement('canvas');
-    tmp.width=v.videoWidth;tmp.height=v.videoHeight;
+    tmp.width=v.videoWidth; tmp.height=v.videoHeight;
     const ctx=tmp.getContext('2d');
     ctx.drawImage(v,0,0);
     const px=Math.round(this.sampleX*v.videoWidth);
@@ -3384,14 +3420,14 @@ const Sampler={
     let R=0,G=0,B=0,n=0;
     for(let i=0;i<data.length;i+=4){R+=data[i];G+=data[i+1];B+=data[i+2];n++}
     if(!n)return;
-    R=Math.round(R/n);G=Math.round(G/n);B=Math.round(B/n);
-    // Apply white balance multipliers (clamped to 0–255)
+    R=Math.round(R/n); G=Math.round(G/n); B=Math.round(B/n);
+    // MASTER-FIX 4: clamp WB-multiplied channels strictly to 0–255 before hex conversion
     R=Math.round(Math.min(255,Math.max(0,R*this.wb.r)));
     G=Math.round(Math.min(255,Math.max(0,G*this.wb.g)));
     B=Math.round(Math.min(255,Math.max(0,B*this.wb.b)));
     const hex=CS.rgbToHex(R,G,B);
     this.currentHex=hex;
-    if(this.lutOn&&App.activeLut)this.drawLutOverlay(v.videoWidth,v.videoHeight);
+    if(this.lutOn&&App.activeLut) this.drawLutOverlay(v.videoWidth,v.videoHeight);
     this.updateLiveBar(hex,R,G,B);
   },
 
@@ -3428,7 +3464,10 @@ const Sampler={
   updateLiveBar(hex,r,g,b){
     document.getElementById('live-swatch').style.background=hex;
     document.getElementById('live-hex').textContent=hex.toUpperCase();
-    document.getElementById('live-name').textContent=CS.autoName(hex);
+    // MASTER-FIX 3: primary display name = closest Pantone match;
+    // autoName() is the fallback if no Pantone data yet.
+    const _pan=CS.nearestPantone(CS.rgbToLab(r,g,b));
+    document.getElementById('live-name').textContent=_pan?.name||CS.autoName(hex);
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
     document.getElementById('live-k').textContent=`~${_kC.toLocaleString()}°C ${CS.kDesc(k)}`;
@@ -3492,7 +3531,24 @@ const Sampler={
     const hex=this.pendingHex;if(!hex)return;
     const name=document.getElementById('save-name').value.trim()||CS.autoName(hex);
     const entry=DS.makeEntry(hex,this.mode);
-    entry.name=name;DS.add(entry);
+    entry.name=name;
+    // MASTER-FIX 5a: capture the current video frame so the Polaroid export
+    // can render an actual photo crop rather than a flat colour block.
+    // The frame is stored as a compact dataURL (max 400px wide) to keep
+    // IndexedDB entries small.
+    try {
+      const v = document.getElementById('cam-video');
+      if(v && v.videoWidth && !v.paused) {
+        const MAX = 400;
+        const scale = Math.min(1, MAX / v.videoWidth);
+        const fc = document.createElement('canvas');
+        fc.width  = Math.round(v.videoWidth  * scale);
+        fc.height = Math.round(v.videoHeight * scale);
+        fc.getContext('2d').drawImage(v, 0, 0, fc.width, fc.height);
+        entry.frame = fc.toDataURL('image/jpeg', 0.82);
+      }
+    } catch(e){ /* frame capture is best-effort */ }
+    DS.add(entry);
     this.dismissSave();App.refresh();
     App.toast(`"${name}" saved`);
   },
@@ -4352,31 +4408,32 @@ const Gallery={
   },
 
   _renderSharePolaroid(c){
-    // FIXED: use ctx.scale(SCALE, SCALE) for HiDPI output.
-    // All draw calls use logical (1x) coordinates — ctx.scale handles the 2x multiply.
-    // SAFE_ZONE padding prevents any element from touching the canvas edge.
+    // MASTER-FIX 5b: HiDPI canvas with ctx.scale(2,2) — all draw coords are logical px.
+    // SAFE_ZONE=40 ensures nothing touches the canvas edge.
+    // Object-fit:cover logic draws the captured video frame (c.frame) into the swatch
+    // area without distortion; falls back to solid hex fill when no frame is stored.
     const canvas = document.getElementById('export-canvas');
-    const SCALE     = 2;          // FIXED: 2× for crisp retina output
-    const SAFE_ZONE = 40;         // FIXED: minimum margin from canvas edge to any content
-    const BASE_W    = 400;        // logical width  (canvas pixel width = 800)
-    const BASE_H    = 520;        // logical height (canvas pixel height = 1040)
+    const SCALE     = 2;           // MASTER-FIX 5: 2× for crisp retina output
+    const SAFE_ZONE = 40;          // MASTER-FIX 5: guaranteed margin from canvas edge
+    const BASE_W    = 400;
+    const BASE_H    = 520;
     canvas.width  = BASE_W * SCALE;
     canvas.height = BASE_H * SCALE;
     const ctx = canvas.getContext('2d');
-    ctx.scale(SCALE, SCALE);      // FIXED: single scale call — all coords below are logical
+    ctx.scale(SCALE, SCALE);
 
     const rgb    = CS.hexToRgb(c.hex);
     const lrv    = c.lrv || CS.lrv(c.lab || CS.rgbToLab(rgb.r, rgb.g, rgb.b));
     const onDark = lrv < 50;
 
-    // ── Layout (all logical px) ─────────────────────────────────
-    const PAD      = SAFE_ZONE;                 // card starts at SAFE_ZONE from edge
-    const CW       = BASE_W - PAD * 2;          // card width  = 320
-    const SWATCH_H = 265;                       // colour swatch block height
-    const CARD_H   = BASE_H - PAD * 2;         // card height = 440
-    const INFO_Y   = PAD + SWATCH_H + 14;      // top of text info strip
+    // Layout (logical px)
+    const PAD      = SAFE_ZONE;
+    const CW       = BASE_W - PAD * 2;   // 320
+    const SWATCH_H = 265;
+    const CARD_H   = BASE_H - PAD * 2;   // 440
+    const INFO_Y   = PAD + SWATCH_H + 14;
 
-    const rr = (x,y,w,h,r) => {                // FIXED: roundRect helper without ctx arg
+    const rr = (x,y,w,h,r) => {
       ctx.beginPath();
       ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
       ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
@@ -4384,82 +4441,104 @@ const Gallery={
       ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
     };
 
-    // ── Canvas background ────────────────────────────────────────
+    // Canvas background
     ctx.fillStyle = '#ebebeb';
     ctx.fillRect(0, 0, BASE_W, BASE_H);
 
-    // ── White card + drop shadow ─────────────────────────────────
+    // White card + shadow
     ctx.save();
-    ctx.shadowColor    = 'rgba(0,0,0,.22)';
-    ctx.shadowBlur     = 24;
-    ctx.shadowOffsetY  = 7;
-    ctx.fillStyle      = '#ffffff';
+    ctx.shadowColor   = 'rgba(0,0,0,.22)';
+    ctx.shadowBlur    = 24;
+    ctx.shadowOffsetY = 7;
+    ctx.fillStyle     = '#ffffff';
     rr(PAD, PAD, CW, CARD_H, 12); ctx.fill();
     ctx.restore();
 
-    // ── Colour swatch clipped to rounded top corners ─────────────
+    // ── Swatch area — object-fit:cover from stored frame, or solid hex fill ──
     ctx.save();
     rr(PAD, PAD, CW, SWATCH_H, 12); ctx.clip();
-    ctx.fillStyle = c.hex;
-    ctx.fillRect(PAD, PAD, CW, SWATCH_H);
+    if(c.frame){
+      // MASTER-FIX 5b: cover-crop the captured video frame into the swatch rect.
+      // Calculates source crop so the centre fills the destination without stretching.
+      const img = new Image();
+      img.src = c.frame;
+      // Draw synchronously — the dataURL image is already decoded at this point.
+      const iw = img.naturalWidth  || img.width;
+      const ih = img.naturalHeight || img.height;
+      if(iw && ih){
+        const destAR = CW / SWATCH_H;       // target aspect ratio
+        const srcAR  = iw / ih;             // source aspect ratio
+        let sx=0, sy=0, sw=iw, sh=ih;
+        if(srcAR > destAR){
+          // Source is wider than dest — crop sides
+          sw = Math.round(ih * destAR);
+          sx = Math.round((iw - sw) / 2);
+        } else {
+          // Source is taller than dest — crop top/bottom
+          sh = Math.round(iw / destAR);
+          sy = Math.round((ih - sh) / 2);
+        }
+        ctx.drawImage(img, sx, sy, sw, sh, PAD, PAD, CW, SWATCH_H);
+        // Tint overlay so hex badge and text remain legible
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(PAD, PAD, CW, SWATCH_H);
+      } else {
+        ctx.fillStyle = c.hex; ctx.fillRect(PAD, PAD, CW, SWATCH_H);
+      }
+    } else {
+      // No frame stored — flat colour swatch
+      ctx.fillStyle = c.hex;
+      ctx.fillRect(PAD, PAD, CW, SWATCH_H);
+    }
     ctx.restore();
 
-    // ── Hex badge (bottom-right of swatch) ──────────────────────
+    // Hex badge (bottom-right of swatch)
     const bW=94, bH=22, bX=PAD+CW-bW-6, bY=PAD+SWATCH_H-bH-7;
-    ctx.fillStyle = onDark ? 'rgba(0,0,0,.42)' : 'rgba(255,255,255,.62)';
+    ctx.fillStyle = onDark ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.65)';
     rr(bX, bY, bW, bH, 4); ctx.fill();
-    ctx.fillStyle  = onDark ? 'rgba(255,255,255,.92)' : 'rgba(0,0,0,.82)';
-    ctx.font       = 'bold 10px "Space Mono",monospace';
-    ctx.textAlign  = 'center';
-    ctx.textBaseline = 'middle';   // FIXED: vertical centering prevents descender clip
+    ctx.fillStyle    = onDark ? 'rgba(255,255,255,.92)' : 'rgba(0,0,0,.82)';
+    ctx.font         = 'bold 10px "Space Mono",monospace';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText(c.hex.toUpperCase(), bX + bW/2, bY + bH/2);
 
-    // ── Colour name ──────────────────────────────────────────────
+    // Colour name
     ctx.fillStyle    = '#1a1a1a';
     ctx.font         = 'bold 22px "Permanent Marker",cursive';
     ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';      // FIXED: anchored to top — descenders can't clip bottom
+    ctx.textBaseline = 'top';
     const nx = PAD + 12;
     ctx.fillText(c.name, nx, INFO_Y + 8);
 
-    // ── Paint match rows ─────────────────────────────────────────
+    // Paint match rows
     const matches = [
       ['LG',  c.littleGreene?.name||'', c.littleGreene?.hex],
-      ['F&B', c.farrowBall?.name||'',   c.farrowBall?.hex  ],
+      ['F&B', c.farrowBall?.name||''  , c.farrowBall?.hex  ],
     ].filter(([,n]) => n);
 
-    matches.forEach(([brand, name, hex], i) => {
-      const rowY   = INFO_Y + 46 + i * 26;
-      const dotCX  = nx + 6;
-      const dotCY  = rowY + 6;
-      if (hex) {
-        ctx.fillStyle = hex;
-        ctx.beginPath(); ctx.arc(dotCX, dotCY, 6, 0, Math.PI*2); ctx.fill();
-      }
-      // Brand tag
+    matches.forEach(([brand, name, hex], idx) => {
+      const rowY  = INFO_Y + 46 + idx * 26;
+      const dotCX = nx + 6, dotCY = rowY + 6;
+      if(hex){ ctx.fillStyle=hex; ctx.beginPath(); ctx.arc(dotCX,dotCY,6,0,Math.PI*2); ctx.fill(); }
       ctx.fillStyle    = '#999';
       ctx.font         = '8px "Space Mono",monospace';
       ctx.textAlign    = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(brand, nx + 17, dotCY);
-      // Paint name — clip rect ensures it never overflows the card
-      const nameX  = nx + 44;
-      const maxW   = CW - 60;
+      ctx.fillText(brand, nx+17, dotCY);
       ctx.save();
-      ctx.beginPath(); ctx.rect(nameX, rowY, maxW, 20); ctx.clip();
+      ctx.beginPath(); ctx.rect(nx+44, rowY, CW-60, 20); ctx.clip();
       ctx.fillStyle    = '#333';
       ctx.font         = '11px -apple-system,sans-serif';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(name, nameX, dotCY);
+      ctx.fillText(name, nx+46, dotCY);
       ctx.restore();
     });
 
-    // ── Footer — digby.shop, right-aligned, safely above card bottom ─
+    // Footer
     ctx.fillStyle    = '#c8a96e';
     ctx.font         = 'bold 9px "Space Mono",monospace';
     ctx.textAlign    = 'right';
-    ctx.textBaseline = 'bottom';   // FIXED: anchors to bottom baseline — no descender clip
-    ctx.fillText('digby.shop', PAD + CW - 12, PAD + CARD_H - 10);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('digby.shop', PAD+CW-12, PAD+CARD_H-10);
 
     return canvas.toDataURL('image/png');
   },
@@ -5285,18 +5364,25 @@ const Prompter={
       const val = btn.dataset.v;
       if(!g) return;
       const isSingle = btn.classList.contains('prom-pill-single');
-      const isMulti  = !!(document.getElementById('prom-multi-toggle')?.checked ?? this.multiMode);
+      // MASTER-FIX 2: check the .on CSS class on the toggle div — this is set by
+      // toggleMulti() and is always reliable; .checked is a non-standard property
+      // that can be undefined on first load before Prompter.init() runs.
+      const tog     = document.getElementById('prom-multi-toggle');
+      const isMulti = tog ? tog.classList.contains('on') : this.multiMode;
       if(isSingle){
+        // Era / Repeat are always single-select regardless of multi-mode
         document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
         btn.classList.add('on');
         if(g==='era')    this.era    = val;
         if(g==='repeat') this.repeat = val;
       } else if(isMulti){
+        // Multi-select: toggle this pill independently, leave siblings untouched
         const wasOn = btn.classList.contains('on');
         btn.classList.toggle('on', !wasOn);
         const set = g==='subject' ? this.subjects : this.mediums;
         if(!wasOn) set.add(val); else set.delete(val);
       } else {
+        // Single-select: clear group, then activate this pill (toggle off if re-tapped)
         const wasOn = btn.classList.contains('on');
         document.querySelectorAll(`.prom-pill[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
         const set = g==='subject' ? this.subjects : this.mediums;
