@@ -124,7 +124,7 @@ a{color:var(--accent);text-decoration:none}
   width:100%;aspect-ratio:1/1;
   max-height:calc(100dvh - var(--top-h) - var(--tab-h) - 110px);
   overflow:hidden;border-radius:16px;
-  /* v79: 1:1 + overflow:hidden + border-radius:16px clips to rounded corners */
+  /* v79: 1:1 + overflow:hidden + border-radius clips video to rounded corners */
 }
 #cam-video{
   position:absolute;top:0;left:0;width:100%;height:100%;
@@ -235,6 +235,12 @@ a{color:var(--accent);text-decoration:none}
   display:none;cursor:pointer;
 }
 #lut-badge.show{display:block}
+/* v79: LUT locked placeholder — shown in Simple Mode */
+#lut-locked{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8;background:rgba(12,12,12,.92);border:1px solid var(--accent);border-radius:12px;padding:14px 22px;text-align:center;backdrop-filter:blur(6px);pointer-events:auto;cursor:pointer}
+#lut-locked .lut-lock-icon{font-size:20px;margin-bottom:4px}
+#lut-locked .lut-lock-text{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+body.simple-mode #lut-locked{display:block}
+body.pro-mode #lut-locked{display:none}
 
 /* Mode switcher */
 #mode-bar{
@@ -897,6 +903,9 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div id="lut-badge" onclick="Sampler.toggleLut()">Grade ON </div>
       <!-- MASTER-FIX-V52: LUT None button — restores natural camera feed -->
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
+
+      <!-- v79: LUT locked placeholder -->
+      <div id="lut-locked" onclick="App.toast('Turn on Pro Mode in Settings')"><div class="lut-lock-icon">ð</div><div class="lut-lock-text">Unlock in Pro Mode</div></div>
 
       <!-- Capture row -->
       <div id="capture-row">
@@ -3842,7 +3851,6 @@ const Sampler={
   },
 
   toggleLut(){
-    // v79: LUT lockdown - bail if Pro Mode is OFF
     if (!State.proMode) { App.toast('Enable Pro Mode for LUT grading'); return; }
     this.lutOn=false;App.activeLut=null;
     document.getElementById('lut-badge').classList.remove('show');
@@ -9179,7 +9187,9 @@ self.onmessage = function(e) {
    *   [96px white bottom footer — brand byline]
    *   [28px white border bottom]
    */
-  exportPolaroid(hexes) {
+  async exportPolaroid(hexes) {
+    // v79: preload Sharpie font
+    try { await document.fonts.load('bold 12px "Permanent Marker"'); } catch(e) {}
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
     // FIX 5: Camera logic — use full video frame (contain/letterbox), not square crop (cover)
@@ -9221,11 +9231,11 @@ self.onmessage = function(e) {
     // Canvas is physical pixels (2× scale factor)
     const canvas = document.createElement('canvas');
     const _dpr = Math.min(window.devicePixelRatio || 2, 3);
-    canvas.width  = LOGICAL_W * _dpr;
-    canvas.height = LOGICAL_H * _dpr;
+    canvas.width  = Math.floor(LOGICAL_W * _dpr);
+    canvas.height = Math.floor(LOGICAL_H * _dpr);
     const ctx = canvas.getContext('2d');
 
-    // v79: HiDPI — scale by devicePixelRatio for crisp output on 3× displays
+    // v79: HiDPI — devicePixelRatio for crisp output on 3x displays — all draw calls use logical coords.
     ctx.scale(_dpr, _dpr);
 
     // ── Polaroid white card ───────────────────────────────────────
@@ -9257,20 +9267,21 @@ self.onmessage = function(e) {
 
     // ── Colour swatch strip ────────────────────────────────────────
     const n      = hexes.length;
-    const swW    = Math.floor(photoW / n);
     const swY    = BORDER + photoH + Math.round((FOOT_H - SW_H) * 0.25);
-    const labelY = swY + SW_H + 6;
 
     hexes.forEach((hex, i) => {
-      const x = BORDER + i * swW;
+      // v79: pixel-exact positions — Math.floor eliminates sub-pixel white gaps
+      const x  = BORDER + Math.floor(i * photoW / n);
+      const x2 = BORDER + Math.floor((i + 1) * photoW / n);
+      const sw = x2 - x;
 
       // Swatch block with rounded top corners
       const r = 5;
       ctx.beginPath();
       ctx.moveTo(x + r, swY);
-      ctx.lineTo(x + swW - r, swY);
-      ctx.quadraticCurveTo(x + swW, swY, x + swW, swY + r);
-      ctx.lineTo(x + swW, swY + SW_H);
+      ctx.lineTo(x + sw - r, swY);
+      ctx.quadraticCurveTo(x + sw, swY, x + sw, swY + r);
+      ctx.lineTo(x + sw, swY + SW_H);
       ctx.lineTo(x, swY + SW_H);
       ctx.lineTo(x, swY + r);
       ctx.quadraticCurveTo(x, swY, x + r, swY);
@@ -9278,15 +9289,13 @@ self.onmessage = function(e) {
       ctx.fillStyle = hex;
       ctx.fill();
 
-      // v77: Strip labels — HEX code beneath each swatch EXCEPT index 0
-      // (index 0 is the "hero" colour already shown in the footer as Name + HEX)
-      if (i > 0) {
-        ctx.fillStyle = '#888888';
-        ctx.font = '6px system-ui,-apple-system,sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText(hex.toUpperCase(), x + swW / 2, swY + SW_H + 4);
-      }
+      // v79: skip index 0 labels — hero colour already in footer
+      if (i === 0) return;
+      ctx.fillStyle = '#888888';
+      ctx.font = '6px system-ui,-apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(hex.toUpperCase(), x + sw / 2, swY + SW_H + 4);
     });
 
     // ── Footer: Colour Name (L1), HEX (L2), digby.shop brand below ───────
