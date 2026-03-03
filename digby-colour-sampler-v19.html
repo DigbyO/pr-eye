@@ -255,6 +255,22 @@ a{color:var(--accent);text-decoration:none}
 #upload-wrap{flex:1;overflow:hidden;position:relative;background:#000;display:none}
 #upload-wrap.show{display:block}
 #upload-canvas{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
+/* ── Loupe magnifier ───────────────────────────────────────────────── */
+#loupe-overlay{position:fixed;width:88px;height:88px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 4px 18px rgba(0,0,0,.55),0 0 0 1.5px rgba(0,0,0,.3);pointer-events:none;z-index:9999;display:none;overflow:hidden;background:#111;transform:translate(-50%,-110%)}
+#loupe-canvas{width:88px;height:88px;display:block}
+#loupe-cross{position:absolute;inset:0;pointer-events:none}
+#loupe-cross::before,#loupe-cross::after{content:'';position:absolute;background:rgba(255,255,255,.7)}
+#loupe-cross::before{left:50%;top:20%;width:1px;height:60%;transform:translateX(-50%)}
+#loupe-cross::after{top:50%;left:20%;height:1px;width:60%;transform:translateY(-50%)}
+/* ── Folder system ──────────────────────────────────────────────────── */
+#gal-folder-bar{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.folder-tab{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;min-height:30px}
+.folder-tab.on{background:var(--accent);color:#1a1208;border-color:var(--accent)}
+#gal-add-folder-btn{padding:4px 10px;border-radius:20px;font-size:11px;border:1px dashed var(--border);background:none;color:var(--muted);cursor:pointer;white-space:nowrap;min-height:30px}
+/* ── Individual Colour Page fixes ───────────────────────────────────── */
+.insp-val{word-break:break-word;overflow-wrap:break-word;white-space:normal!important}
+.insp-match-name{word-break:break-word;overflow-wrap:break-word;white-space:normal!important}
+.insp-desc-text{word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;font-size:12px;line-height:1.7;color:var(--muted);padding:0 14px 14px}
 #upload-crosshair{
   position:absolute;pointer-events:none;transform:translate(-50%,-50%);
   width:50px;height:50px;display:none;z-index:5;
@@ -666,19 +682,39 @@ a{color:var(--accent);text-decoration:none}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
 #ap-spinner{padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:12px}
 
-/* Inspector – full colour space readout */
-#inspector-body .insp-swatch{height:140px;border-radius:var(--r) var(--r) 0 0;margin-bottom:0;position:relative;overflow:hidden}
-.insp-name{font-family:var(--sharpie);font-size:clamp(1.375rem,5vw,1.625rem);margin-bottom:10px;color:var(--text)}
-.insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 14px 12px;overflow:hidden}
-.insp-row{background:var(--surface2);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px}
+/* Inspector – full colour space readout — LUXURY REDESIGN */
+#inspector-body .insp-swatch{min-height:clamp(200px,44dvh,360px);border-radius:var(--r) var(--r) 0 0;margin-bottom:0;position:relative;overflow:hidden;flex-shrink:0}
+.insp-name{font-family:var(--sharpie);font-size:clamp(1.75rem,7vw,2.25rem);margin-bottom:6px;color:var(--text);overflow-wrap:anywhere;word-break:break-word;line-height:1.15}
+.insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 30px 12px;overflow:hidden}
+.insp-row{background:var(--surface2);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px;overflow-wrap:anywhere;word-break:break-word}
 .insp-label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
-.insp-val{font-size:var(--fs-base);color:var(--text);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right;line-height:1.5}
+.insp-val{font-size:var(--fs-base);color:var(--text);font-family:var(--mono);word-break:break-word;overflow-wrap:anywhere;white-space:normal;flex:1;text-align:right;line-height:1.5}
 .insp-copy{background:none;border:1px solid var(--border);border-radius:4px;padding:5px 9px;font-size:var(--fs-xxs);color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .15s;min-height:32px}
 .insp-copy:active{background:var(--accent);color:#000;border-color:var(--accent)}
 .insp-copy.copied{background:var(--ok);color:#000;border-color:var(--ok)}
 .insp-wide{grid-column:1/-1}
-.insp-tags{margin-bottom:14px}
+.insp-tags{margin-bottom:14px;padding:0 30px}
 .insp-tags-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;font-family:var(--mono)}
+/* Certification-style paint match block */
+.insp-cert-section{margin:0;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--accent) 4%,var(--surface))}
+.insp-cert-header{display:flex;align-items:center;gap:8px;padding:12px 30px 8px}
+.insp-cert-badge{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-family:var(--mono);font-weight:700;background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px;padding:2px 7px;flex-shrink:0}
+.insp-cert-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono)}
+.insp-cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 30px 14px;width:100%;box-sizing:border-box}
+.insp-cert-grid .insp-match-cell:last-child:nth-child(3){grid-column:1/-1}
+.insp-match-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;gap:9px;align-items:flex-start;min-width:0;overflow:hidden;box-sizing:border-box}
+.insp-match-empty{display:none}
+.insp-match-swatch{width:32px;height:32px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.insp-match-body{flex:1;min-width:0;overflow:hidden}
+.insp-match-brand{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-family:var(--mono);margin-bottom:1px}
+.insp-match-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;overflow-wrap:anywhere;word-break:break-word;display:block;max-width:100%}
+.insp-match-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;max-width:100%}
+.insp-match-link{font-size:9px;color:var(--accent);text-decoration:none;margin-top:3px;display:inline-block}
+/* Hero name bar */
+.insp-hero-info{padding:20px 30px 18px;border-bottom:1px solid var(--border)}
+.insp-hero-name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.insp-hero-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.det-actions{display:flex;gap:7px;flex-wrap:wrap;padding:14px 30px 18px}
 .tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .tag-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--text);display:flex;align-items:center;gap:4px;cursor:pointer}
 .tag-chip-auto{background:color-mix(in srgb,var(--accent) 12%,var(--surface2));border-color:color-mix(in srgb,var(--accent) 35%,var(--border));color:var(--accent);font-weight:600;cursor:default}
@@ -865,18 +901,23 @@ a{color:var(--accent);text-decoration:none}
 
     <!-- Upload canvas (hidden by default) -->
     <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
-      <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0">
+      <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;flex-wrap:wrap">
         <button class="btn btn-s btn-sm" onclick="document.getElementById('up-input').click()">Change</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette.fromUpload(6)" title="Extract dominant colours via k-means">🎨 Auto-Palette</button>
-        <button class="btn btn-s btn-sm" onclick="Sampler._exportUploadPolaroid()" title="Export this image as a Polaroid card">📷 Polaroid</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()" title="Export picked colours as polaroid with photo">📷 Export Polaroid</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
-        <div id="up-pick-queue" style="display:flex;gap:5px;flex:1;overflow-x:auto"></div>
-        <div id="up-live-swatch" style="width:28px;height:28px;border-radius:4px;background:#888;border:2px solid var(--border);flex-shrink:0"></div>
-        <div id="up-live-hex" style="font-size:10px;flex-shrink:0;min-width:60px"></div>
       </div>
-      <!-- Queued count and save row -->
+      <!-- Picked colours strip — shown after any tap -->
       <div id="up-queue-bar" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 12px;flex-shrink:0;align-items:center;gap:8px;flex-wrap:wrap">
-        <span id="up-queue-info" style="font-size:11px;color:var(--muted);flex:1"></span>
+        <div style="display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;min-height:42px">
+          <div id="up-pick-queue" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          <div style="display:flex;align-items:center;gap:6px;padding-left:4px">
+            <div id="up-live-swatch" style="width:32px;height:32px;border-radius:6px;background:#888;border:2.5px solid var(--accent);flex-shrink:0"></div>
+            <div id="up-live-hex" style="font-size:11px;flex-shrink:0;font-family:var(--mono);min-width:64px;color:var(--accent)"></div>
+          </div>
+        </div>
+        <span id="up-queue-info" style="font-size:10px;color:var(--muted);flex-shrink:0"></span>
         <button class="btn btn-p btn-sm" onclick="Sampler.saveQueue()">Save All</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
       </div>
@@ -946,6 +987,7 @@ a{color:var(--accent);text-decoration:none}
           <div id="wheel-queue-swatches" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px"></div>
           <div style="display:flex;gap:7px">
             <button class="btn btn-p btn-sm" style="flex:1" onclick="Sampler.saveQueue()">Save All</button>
+            <button class="btn btn-s btn-sm" onclick="Sampler._exportWheelPolaroid()">📷 Polaroid</button>
             <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
           </div>
         </div>
@@ -977,6 +1019,8 @@ a{color:var(--accent);text-decoration:none}
         <button class="tog-btn" onclick="Gallery.setView('631')" id="gv631" title="60-30-10 rule">60/30/10</button>
       </div>
     </div>
+    <!-- Folder tabs -->
+    <div id="gal-folder-bar"></div>
     <!-- Sort bar -->
     <div id="gal-sort-bar">
       <span class="sort-label">Sort</span>
@@ -1021,7 +1065,15 @@ a{color:var(--accent);text-decoration:none}
         </div>
       </div>
 
-      <div class="sec">Colour Harmonies</div>
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Colour Harmonies
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Save all harmony colours to library" onclick="Explorer.saveHarmAll()">+ Save All</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Swatch export" onclick="Explorer.exportHarmSwatches()">🎨 Swatch</button>
+          <button class="btn btn-p btn-sm" style="font-size:10px;padding:3px 8px" title="Export as PNG" onclick="Explorer.exportHarmPng()">📷 PNG</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Share" onclick="Explorer.shareHarm()">Share</button>
+        </div>
+      </div>
       <div class="card" id="harm-card" style="padding:10px 0 4px">
         <div id="harm-container"></div>
       </div>
@@ -1031,7 +1083,15 @@ a{color:var(--accent);text-decoration:none}
         <div id="mood-bars"></div>
       </div>
 
-      <div class="sec">Tints, Shades &amp; Tones</div>
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Tints, Shades &amp; Tones
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Save all tints/shades/tones to library" onclick="Explorer.saveVarAll()">+ Save All</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Swatch export" onclick="Explorer.exportVarSwatches()">🎨 Swatch</button>
+          <button class="btn btn-p btn-sm" style="font-size:10px;padding:3px 8px" title="Export as PNG" onclick="Explorer.exportVarPng()">📷 PNG</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Share" onclick="Explorer.shareVar()">Share</button>
+        </div>
+      </div>
       <div class="card" id="var-card" style="padding:10px 0 4px">
         <div id="var-container"></div>
       </div>
@@ -1071,7 +1131,15 @@ a{color:var(--accent);text-decoration:none}
         <div id="trio-display"></div>
       </div>
 
-      <div class="sec">Aesthetic Colour Generator</div>
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Aesthetic Colour Generator
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Save all colours to library" onclick="ColourGenerator.saveAll()">+ Save All</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Swatch export" onclick="ColourGenerator.openSwatch()">🎨 Swatch</button>
+          <button class="btn btn-p btn-sm" style="font-size:10px;padding:3px 8px" title="Export as PNG card" onclick="ColourGenerator.exportCard()">📷 PNG</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Share this palette" onclick="ColourGenerator.shareCard()">Share</button>
+        </div>
+      </div>
       <div id="colgen-section" style="padding:0 0 4px">
         <div id="colgen-mode-row" style="display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px 4px">
           <button class="trio-mode-btn on"  data-a="japandi"      onclick="ColourGenerator.setAesthetic(this)">Japandi</button>
@@ -1086,13 +1154,24 @@ a{color:var(--accent);text-decoration:none}
           <button class="trio-mode-btn"     data-a="brutalist"    onclick="ColourGenerator.setAesthetic(this)">Brutalist</button>
           <button class="trio-mode-btn"     data-a="wabisabi"     onclick="ColourGenerator.setAesthetic(this)">Wabi-Sabi</button>
           <button class="trio-mode-btn"     data-a="parisian"     onclick="ColourGenerator.setAesthetic(this)">Parisian</button>
+          <button class="trio-mode-btn"     data-a="brightColours" onclick="ColourGenerator.setAesthetic(this)">Bright</button>
+          <button class="trio-mode-btn"     data-a="neon"         onclick="ColourGenerator.setAesthetic(this)">Neon</button>
+          <button class="trio-mode-btn"     data-a="popArt"       onclick="ColourGenerator.setAesthetic(this)">Pop Art</button>
           <button class="trio-mode-btn" onclick="ColourGenerator.randomAesthetic()" style="background:linear-gradient(135deg,#7B6EF6 0%,#E85D8A 100%);color:#fff;border:none;font-weight:600">⚄ Random</button>
         </div>
         <div id="colgen-desc" style="padding:4px 12px 10px;font-size:12px;color:var(--muted);line-height:1.6"></div>
         <div id="colgen-palette" style="padding:0 12px 12px"></div>
       </div>
 
-      <div class="sec">Sample-Based LUT Generator</div>
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Sample-Based LUT Generator
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Save LUT zone colours to library" onclick="Explorer.saveSlutAll()">+ Save All</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Swatch export" onclick="Explorer.exportSlutSwatches()">🎨 Swatch</button>
+          <button class="btn btn-p btn-sm" style="font-size:10px;padding:3px 8px" title="Export as PNG" onclick="Explorer.exportSlutPng()">📷 PNG</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Share" onclick="Explorer.shareSlut()">Share</button>
+        </div>
+      </div>
       <div class="card" id="sample-lut-card" style="padding:12px">
         <div style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px">
           Assign sampled colours to tonal zones. The app builds a real .cube LUT that pushes your image toward those colours  shadows, midtones and highlights independently.
@@ -1300,56 +1379,79 @@ a{color:var(--accent);text-decoration:none}
         <button class="prom-pill" data-g="medium" data-v="digital illustration" onclick="Prompter.togglePill(this)">Digital</button>
       </div>
 
-      <!-- PERIOD / ERA -->
-      <div class="sec prom-sec-label">Period &amp; Era <span class="prom-single-hint">single</span></div>
+      <!-- STYLES & AESTHETICS -->
+      <div class="sec prom-sec-label">Styles &amp; Aesthetics <span class="prom-single-hint">single</span></div>
       <div class="prom-pill-grid" id="era-grid">
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="">None</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="medieval illuminated manuscript style">Medieval</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Gothic cathedral style">Gothic</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Renaissance period style">Renaissance</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Georgian period style">Georgian</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Regency period style">Regency</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Victorian era style">Victorian</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Edwardian era style">Edwardian</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Nouveau style">Art Nouveau</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Deco style">Art Deco</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Bauhaus design style">Bauhaus</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="mid-century modern style">Mid-Century</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="1960s psychedelic style">1960s</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Pop Art style">Pop Art</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="1970s retro style">1970s</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="1980s design style">1980s</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Brutalist design style">Brutalist</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="contemporary design style">Contemporary</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="Japanese Meiji period style">Meiji Japan</button>
-        <button class="prom-pill prom-pill-single" data-g="era" data-v="William Morris Arts and Crafts style">Arts & Crafts</button>
+        <button class="prom-pill prom-pill-single on" data-g="era" data-v="" onclick="Prompter.togglePill(this)">None</button>
+        <div class="prom-pill-group-label">Historical</div>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="medieval illuminated manuscript style" onclick="Prompter.togglePill(this)">Medieval</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Gothic cathedral style" onclick="Prompter.togglePill(this)">Gothic</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Renaissance period style" onclick="Prompter.togglePill(this)">Renaissance</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Georgian period style" onclick="Prompter.togglePill(this)">Georgian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Regency period style" onclick="Prompter.togglePill(this)">Regency</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Victorian era style" onclick="Prompter.togglePill(this)">Victorian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Edwardian era style" onclick="Prompter.togglePill(this)">Edwardian</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Japanese Meiji period style" onclick="Prompter.togglePill(this)">Meiji Japan</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="William Morris Arts and Crafts style" onclick="Prompter.togglePill(this)">Arts &amp; Crafts</button>
+        <div class="prom-pill-group-label">Modern Movements</div>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Nouveau style" onclick="Prompter.togglePill(this)">Art Nouveau</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Art Deco style" onclick="Prompter.togglePill(this)">Art Deco</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Bauhaus design style" onclick="Prompter.togglePill(this)">Bauhaus</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="mid-century modern style" onclick="Prompter.togglePill(this)">Mid-Century</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1960s psychedelic style" onclick="Prompter.togglePill(this)">1960s Psychedelic</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Pop Art style" onclick="Prompter.togglePill(this)">Pop Art</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1970s retro style" onclick="Prompter.togglePill(this)">1970s Retro</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="1980s design style" onclick="Prompter.togglePill(this)">1980s</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Brutalist design style" onclick="Prompter.togglePill(this)">Brutalist</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="contemporary design style" onclick="Prompter.togglePill(this)">Contemporary</button>
+        <div class="prom-pill-group-label">Aesthetic Styles</div>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Japandi minimal aesthetic" onclick="Prompter.togglePill(this)">Japandi</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="cottagecore pastoral aesthetic" onclick="Prompter.togglePill(this)">Cottagecore</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="dark academia aesthetic" onclick="Prompter.togglePill(this)">Dark Academia</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="coastal Hampton aesthetic" onclick="Prompter.togglePill(this)">Coastal</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="maximalist eclectic aesthetic" onclick="Prompter.togglePill(this)">Maximalist</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="wabi-sabi imperfect aesthetic" onclick="Prompter.togglePill(this)">Wabi-Sabi</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="Memphis group design aesthetic" onclick="Prompter.togglePill(this)">Memphis</button>
+        <button class="prom-pill prom-pill-single" data-g="era" data-v="cyberpunk neon dystopian aesthetic" onclick="Prompter.togglePill(this)">Cyberpunk</button>
       </div>
 
       <!-- PATTERN REPEAT -->
       <div class="sec prom-sec-label">Pattern Repeat <span class="prom-single-hint">single</span></div>
       <div class="prom-pill-grid" id="repeat-grid">
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="__none__" style="border-color:var(--muted);color:var(--muted)">No Pattern</button>
-        <button class="prom-pill prom-pill-single on" data-g="repeat" data-v="seamless repeat pattern">Seamless</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless half-drop repeat pattern">Half-Drop</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless brick repeat pattern">Brick</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless stripe pattern">Stripe</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless check pattern">Check</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless trellis pattern">Trellis</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless damask repeat">Damask</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless toile de jouy repeat">Toile</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless ogee repeat pattern">Ogee</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="ditsy print scattered motif">Ditsy</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="large scale statement repeat">Large Scale</button>
-        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="dense allover pattern no ground visible">Allover</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="__none__" style="border-color:var(--muted);color:var(--muted)" onclick="Prompter.togglePill(this)">No Pattern</button>
+        <button class="prom-pill prom-pill-single on" data-g="repeat" data-v="seamless repeat pattern" onclick="Prompter.togglePill(this)">Seamless</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless half-drop repeat pattern" onclick="Prompter.togglePill(this)">Half-Drop</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless brick repeat pattern" onclick="Prompter.togglePill(this)">Brick</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless stripe pattern" onclick="Prompter.togglePill(this)">Stripe</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless check pattern" onclick="Prompter.togglePill(this)">Check</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless trellis pattern" onclick="Prompter.togglePill(this)">Trellis</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless damask repeat" onclick="Prompter.togglePill(this)">Damask</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless toile de jouy repeat" onclick="Prompter.togglePill(this)">Toile</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="seamless ogee repeat pattern" onclick="Prompter.togglePill(this)">Ogee</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="ditsy print scattered motif" onclick="Prompter.togglePill(this)">Ditsy</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="large scale statement repeat" onclick="Prompter.togglePill(this)">Large Scale</button>
+        <button class="prom-pill prom-pill-single" data-g="repeat" data-v="dense allover pattern no ground visible" onclick="Prompter.togglePill(this)">Allover</button>
       </div>
 
       <!-- MULTI-SELECT MODE -->
       <div class="sec prom-sec-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
         Multi-Select
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:10px;color:var(--muted)">Multi-select ON — tap multiple pills to combine</div>
+          <div style="font-size:10px;color:var(--muted)" id="multi-toggle-hint">Multi-select ON — tap multiple pills to combine</div>
           <div class="sw on" id="prom-multi-toggle" onclick="Prompter.toggleMulti(this)"></div>
         </div>
+      </div>
+
+      <!-- OUTPUT FORMAT -->
+      <div class="sec prom-sec-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Output Format
+        <div class="tog-group" id="output-format-tog" style="margin:0">
+          <button class="tog-btn on" data-fmt="normal" onclick="Prompter.setOutputFormat(this)">Full Prompt</button>
+          <button class="tog-btn" data-fmt="colours" onclick="Prompter.setOutputFormat(this)">Just Colours</button>
+        </div>
+      </div>
+      <div id="just-colours-hint" style="display:none;padding:0 12px 8px;font-size:10px;color:var(--muted);line-height:1.6">
+        Outputs only the selected hex codes — all text modifiers are ignored. Paste directly into Midjourney's <span style="color:var(--accent);font-family:var(--mono)">--cref</span> or colour fields.
       </div>
 
       <!-- BATCH MODE -->
@@ -1441,6 +1543,8 @@ a{color:var(--accent);text-decoration:none}
         <button class="btn btn-p btn-sm" onclick="Prompter.copy()" title="Copy prompt to clipboard">📋 Copy Prompt</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.share()">Share</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.openMJ()" title="Copy prompt and open Midjourney">Open MJ ↗</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.resetModifiers()" title="Clear all text choices, keep colours">Reset Modifiers</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.clearColours()" title="Remove selected colours, keep text choices">Clear Colours</button>
       </div>
 
       <div class="shop-banner">
@@ -1604,6 +1708,11 @@ a{color:var(--accent);text-decoration:none}
 
 <div id="toast"></div>
 <canvas id="export-canvas"></canvas>
+<!-- Loupe magnifier overlay — Safe: pointer-events:none, never blocks canvas clicks -->
+<div id="loupe-overlay" style="pointer-events:none!important">
+  <canvas id="loupe-canvas" width="88" height="88" style="pointer-events:none"></canvas>
+  <div id="loupe-cross"></div>
+</div>
 <canvas id="sw-preview-canvas" style="display:none"></canvas>
 
 <!--  DATASETS  -->
@@ -2398,19 +2507,42 @@ const DS = {
   },
 
   // ── Migration: run once on first load ───────────────────────────────────
+  // Robust: handles flat array, object-wrapped, or corrupted LS data without crashing.
   async _migrateFromLocalStorage() {
+    let entries = [];
     try {
       const raw = localStorage.getItem(this.KEY);
       if (!raw) return;
-      const entries = JSON.parse(raw);
-      if (!Array.isArray(entries) || !entries.length) return;
-      // Check if IDB already has data (don't overwrite)
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch(e) {
+        // Corrupted JSON — nuke it and bail out
+        console.warn('Spectrum: corrupted localStorage data removed');
+        localStorage.removeItem(this.KEY); return;
+      }
+      // Case 1: plain flat array (old format)
+      if (Array.isArray(parsed)) {
+        entries = parsed.filter(e => e && e.hex);
+      }
+      // Case 2: folder-object format e.g. {"Default":[...], "ProjectA":[...]}
+      else if (parsed && typeof parsed === 'object') {
+        for (const folder of Object.keys(parsed)) {
+          const arr = parsed[folder];
+          if (Array.isArray(arr)) {
+            arr.filter(e => e && e.hex).forEach(e => {
+              if (!e.folder) e.folder = folder;
+              entries.push(e);
+            });
+          }
+        }
+      }
+      if (!entries.length) { localStorage.removeItem(this.KEY); return; }
+      // Don't overwrite existing IDB data
       const existing = await this._idbReadAll();
       if (existing.length) { localStorage.removeItem(this.KEY); return; }
       await this._idbWriteAll(entries);
       localStorage.removeItem(this.KEY);
       console.info(`Spectrum: migrated ${entries.length} colours from localStorage to IndexedDB`);
-    } catch (e) { console.warn('Migration failed:', e); }
+    } catch (e) { console.warn('Spectrum migration error:', e); }
   },
 
   // ── IDB helpers ─────────────────────────────────────────────────────────
@@ -2475,6 +2607,12 @@ const DS = {
   add(e) {
     if (this._cache.length >= this.MAX_COLOURS) {
       App.toast(`Library limit (${this.MAX_COLOURS}). Delete some first.`); return null;
+    }
+    // Tag with active folder (FolderManager initialised after DS, safe to check)
+    if (typeof FolderManager !== 'undefined' && !e.folder) {
+      e.folder = FolderManager.active;
+    } else if (!e.folder) {
+      e.folder = 'Default';
     }
     this._cache.unshift(e);
     this._idbPut(e);
@@ -2617,6 +2755,7 @@ const App={
     await DS.init();   // IndexedDB open + localStorage migration
     // MASTER-FIX-V52: load persisted State before modules initialise
     State.load();
+    FolderManager.init(); // Init folders + migrate old entries after DS is ready
     // Apply persisted white balance to Sampler
     Sampler.wb = { ...State.wb };
     if (Sampler.wb.r !== 1 || Sampler.wb.g !== 1 || Sampler.wb.b !== 1) {
@@ -2892,7 +3031,7 @@ const App={
 
     // ── Info strip height scales gently with available swatch width ──────────
     const INFO_H = Math.round(Math.max(56 * SCALE, Math.min(72 * SCALE, avgVis * 0.38)));
-    const FOOT_H = 48 * SCALE;
+    const FOOT_H = 88 * SCALE;  // +40px logical vs previous 48px — footer text breathing room
     const CARD_H = PAD + SW_H + INFO_H + FOOT_H + PAD;
 
     const canvas = document.createElement('canvas');
@@ -3160,11 +3299,14 @@ const Sampler={
     }
 
     // 4. Multi-tier camera constraint fallback chain.
-    //    Tier 1: exact rear camera  (most specific, may throw OverconstrainedError on desktop/webcam)
-    //    Tier 2: preferred rear camera (soft hint, works on most phones)
+    //    Default is REAR (environment) camera; flips to front (user) when this.camFront=true.
+    //    STAGE1-FIX: tiers now respect this.camFront so flipCamera() actually switches.
+    //    Tier 1: exact facing mode  (most specific, may throw OverconstrainedError on desktop/webcam)
+    //    Tier 2: soft facing hint (works on most phones)
     //    Tier 3: any camera (absolute last resort — also catches desktop single-cam setups)
-    const tier1 = { video: { facingMode: { exact: 'environment' }, width: { min: 640, ideal: 1280, max: 1920 }, height: { min: 480, ideal: 720, max: 1080 } } };
-    const tier2 = { video: { facingMode: 'environment',              width: { min: 640, ideal: 1280, max: 1920 }, height: { min: 480, ideal: 720, max: 1080 } } };
+    const _facing = this.camFront ? 'user' : 'environment';
+    const tier1 = { video: { facingMode: { exact: _facing }, width: { min: 640, ideal: 1280, max: 1920 }, height: { min: 480, ideal: 720, max: 1080 } } };
+    const tier2 = { video: { facingMode: _facing,            width: { min: 640, ideal: 1280, max: 1920 }, height: { min: 480, ideal: 720, max: 1080 } } };
     const tier3 = { video: true };
 
     const isOverconstrained = function(e) {
@@ -3635,9 +3777,10 @@ const Sampler={
 
   //  Queue system for multi-pick 
   addToQueue(hex){
-    const max = this.camCount === 1 ? 1 : this.camCount;
+    // Upload mode: unlimited (up to 20). Camera/wheel mode: capped at camCount.
+    const max = this.mode === 'upload' ? 20 : (this.camCount === 1 ? 1 : this.camCount);
     if (this.pickQueue.length >= max) {
-      App.toast(`Queue full (${max})  save or clear first`);
+      App.toast(`Queue full (${max}) — save or clear first`);
       return;
     }
     this.pickQueue.push(hex);
@@ -3662,10 +3805,15 @@ const Sampler={
     if(cqb){
       cqb.style.display=isEmpty?'none':'flex';
       if(cqs) cqs.innerHTML=q.map((h,i)=>
-        `<div onclick="Sampler.removeFromQueue(${i})" title="${h}"
-          style="width:32px;height:32px;border-radius:6px;background:${h};
-          border:2px solid rgba(255,255,255,.25);flex-shrink:0;cursor:pointer;
-          box-shadow:0 2px 4px rgba(0,0,0,.4)"></div>`
+        `<div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:2px">
+          <div title="Tap to remove ${h}"
+            style="width:32px;height:32px;border-radius:6px;background:${h};
+            border:2px solid rgba(255,255,255,.25);flex-shrink:0;cursor:pointer;
+            box-shadow:0 2px 4px rgba(0,0,0,.4);position:relative"
+            onclick="Sampler.removeFromQueue(${i})">
+            <span style="position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1">×</span>
+          </div>
+        </div>`
       ).join('');
       if(cqc) cqc.textContent=`${q.length}/${this.camCount}`;
     }
@@ -3676,11 +3824,14 @@ const Sampler={
     if(uqb&&uqq){
       uqb.style.display=isEmpty?'none':'flex';
       const info=document.getElementById('up-queue-info');
-      if(info) info.textContent=`${q.length} colour${q.length>1?'s':''} queued`;
+      if(info) info.textContent=`${q.length} colour${q.length>1?'s':''} picked`;
       uqq.innerHTML=q.map((h,i)=>
-        `<div style="width:24px;height:24px;border-radius:4px;background:${h};
-          border:2px solid var(--border);cursor:pointer" title="${h}"
-          onclick="Sampler.removeFromQueue(${i})"></div>`
+        `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer" title="Remove ${h}" onclick="Sampler.removeFromQueue(${i})">
+          <div style="width:34px;height:34px;border-radius:6px;background:${h};border:2.5px solid rgba(255,255,255,.7);box-shadow:0 2px 6px rgba(0,0,0,.5);position:relative">
+            <span style="position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#e84040;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none;border:1.5px solid rgba(255,255,255,.5)">×</span>
+          </div>
+          <div style="font-size:7.5px;color:var(--accent);font-family:var(--mono);font-weight:700">${h.toUpperCase()}</div>
+        </div>`
       ).join('');
     }
 
@@ -3690,10 +3841,10 @@ const Sampler={
     if(wqb&&wqs){
       wqb.style.display=isEmpty?'none':'block';
       wqs.innerHTML=q.map((h,i)=>
-        `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-          <div onclick="Sampler.removeFromQueue(${i})"
-            style="width:34px;height:34px;border-radius:var(--rs);background:${h};
-            border:2px solid var(--border);cursor:pointer"></div>
+        `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer" title="Remove ${h}" onclick="Sampler.removeFromQueue(${i})">
+          <div style="position:relative;width:34px;height:34px;border-radius:var(--rs);background:${h};border:2px solid var(--border)">
+            <span style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none">×</span>
+          </div>
           <div style="font-size:8px;color:var(--muted)">${h.toUpperCase()}</div>
         </div>`
       ).join('');
@@ -3703,6 +3854,96 @@ const Sampler={
   removeFromQueue(i){
     this.pickQueue.splice(i,1);
     this.renderQueue();
+  },
+
+  // Export a polaroid from the wheel queue
+  _exportWheelPolaroid() {
+    const hexes = this.pickQueue.slice();
+    if (!hexes.length) { App.toast('Queue some colours first'); return; }
+    AutoPalette.exportPolaroid(hexes);
+  },
+
+  // ── Manual swatch export — exports picked colours as a clean swatch strip
+  // Calls SwatchExport.openFromHexes() for a clean, consistent panel with no photo.
+  exportManualSwatches() {
+    const hexes = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
+    if (!hexes.length) {
+      App.toast('Tap colours on the image first to pick some');
+      return;
+    }
+    SwatchExport.openFromHexes(hexes, 'polaroids');
+  },
+
+  // Alias kept for any legacy call sites
+  exportManualPolaroid() {
+    if (!this.uploadImg) { App.toast('No image loaded'); return; }
+    const hexes = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
+    if (!hexes.length) { App.toast('Tap colours on the image first'); return; }
+    AutoPalette.exportPolaroid(hexes);
+  },
+
+  // ── Safe mobile loupe — completely separate from pick logic ──────────────
+  // Uses a floating canvas overlay that draws a 2× zoomed crop of the upload
+  // canvas at the user's finger. pointer-events:none means it NEVER intercepts
+  // the touchend/click events that fire the colour-pick.
+  _loupe: { active: false, canvas: null, ctx: null, overlay: null },
+
+  _initLoupe(uploadCanvas) {
+    const overlay = document.getElementById('loupe-overlay');
+    const lc      = document.getElementById('loupe-canvas');
+    if (!overlay || !lc) return;
+    this._loupe.overlay = overlay;
+    this._loupe.canvas  = lc;
+    this._loupe.ctx     = lc.getContext('2d');
+
+    const showLoupe = (cx, cy) => {
+      // cx/cy: client coordinates of pointer
+      const srcRect = uploadCanvas.getBoundingClientRect();
+      // Compute canvas pixel from client coords
+      const scaleX = uploadCanvas.width / srcRect.width;
+      const scaleY = uploadCanvas.height / srcRect.height;
+      const px = (cx - srcRect.left) * scaleX;
+      const py = (cy - srcRect.top)  * scaleY;
+
+      // Draw 2× zoomed crop into loupe canvas (44×44 src → 88×88 dst)
+      const crop = 44;
+      const lCtx = this._loupe.ctx;
+      lCtx.clearRect(0, 0, 88, 88);
+      lCtx.save();
+      lCtx.beginPath();
+      lCtx.arc(44, 44, 44, 0, Math.PI * 2);
+      lCtx.clip();
+      lCtx.drawImage(
+        uploadCanvas,
+        px - crop / 2, py - crop / 2, crop, crop,
+        0, 0, 88, 88
+      );
+      lCtx.restore();
+
+      // Position overlay above the finger — offset 60px up + centred horizontally
+      overlay.style.left = cx + 'px';
+      overlay.style.top  = (cy - 60) + 'px';
+      overlay.style.display = 'block';
+    };
+
+    const hideLoupe = () => { overlay.style.display = 'none'; };
+
+    // Touch move shows loupe; touchend/click still fire normally on canvas for picking
+    uploadCanvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const t = e.touches[0];
+        showLoupe(t.clientX, t.clientY);
+      }
+    }, { passive: true });
+
+    uploadCanvas.addEventListener('touchend',   hideLoupe, { passive: true });
+    uploadCanvas.addEventListener('touchcancel',hideLoupe, { passive: true });
+
+    // Desktop pointer support (doesn't interfere with mobile)
+    uploadCanvas.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'mouse') showLoupe(e.clientX, e.clientY);
+    }, { passive: true });
+    uploadCanvas.addEventListener('pointerleave', hideLoupe, { passive: true });
   },
 
   saveQueue(){
@@ -3737,7 +3978,12 @@ const Sampler={
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
     this.pickQueue=[];
     this.renderQueue();
-    if(m==='upload'&&!this.uploadImg)document.getElementById('up-input').click();
+    if(m==='upload'){
+      // Show upload wrap, trigger file picker if no image loaded yet
+      if(!this.uploadImg){
+        try{ document.getElementById('up-input').click(); } catch(e){}
+      }
+    }
     if(m==='wheel')setTimeout(()=>ColourWheel.init(),50);
   },
 
@@ -3855,13 +4101,19 @@ const Sampler={
           ctx.beginPath();ctx.arc(dispX,dispY,3,0,Math.PI*2);
           ctx.fillStyle='white';ctx.fill();
 
+          if (!Array.isArray(this.pickQueue)) this.pickQueue = [];
           this.addToQueue(hex);
         };
 
-        // touchend only for pick (not touchstart)  prevents double-fire
-        newCanvas.addEventListener('touchend',pick,{passive:false});
-        newCanvas.addEventListener('touchmove',(e)=>e.preventDefault(),{passive:false});
-        newCanvas.addEventListener('click',pick);
+        // Pick events: touchend + click + pointerup (belt-and-braces for all platforms)
+        newCanvas.addEventListener('touchend', pick, {passive:false});
+        newCanvas.addEventListener('touchmove', (e)=>e.preventDefault(), {passive:false});
+        newCanvas.addEventListener('click', pick);
+        // pointerup catches cases where click doesn't fire after touchend
+        newCanvas.addEventListener('pointerup', (ev) => { if (ev.pointerType !== 'touch') pick(ev); });
+
+        // Attach safe loupe magnifier (pointer-events:none overlay — never blocks picks)
+        this._initLoupe(newCanvas);
 
         // Show the upload wrap if hidden
         document.getElementById('upload-wrap').style.display='flex';
@@ -3889,8 +4141,8 @@ const Sampler={
   // Export the currently uploaded image as a Polaroid card (no swatches needed)
   _exportUploadPolaroid() {
     if (!this.uploadImg) { App.toast('Load an image first'); return; }
-    // Use any queued colours as swatches; fall back to auto-palette if none
-    const hexes = (this.pickQueue || []).map(c => c.hex);
+    // pickQueue contains hex strings directly
+    const hexes = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
     if (hexes.length) {
       AutoPalette.exportPolaroid(hexes);
     } else {
@@ -4000,6 +4252,89 @@ const Sampler={
 };
 </script>
 
+<!--  FOLDER MANAGER  -->
+<script>
+const FolderManager = {
+  FK: 'digby_folders_v1',
+  _folders: ['Default'],
+  _active:  'Default',
+
+  init() {
+    try {
+      const raw = localStorage.getItem(this.FK);
+      if (raw) {
+        let saved;
+        try { saved = JSON.parse(raw); } catch(e) { saved = null; }
+        if (saved && saved.folders && Array.isArray(saved.folders) && saved.folders.length) {
+          this._folders = saved.folders;
+          if (saved.active && this._folders.includes(saved.active)) this._active = saved.active;
+        }
+      }
+    } catch(e) { /* use defaults */ }
+    // Ensure 'Default' always exists
+    if (!this._folders.includes('Default')) this._folders.unshift('Default');
+    if (!this._folders.includes(this._active)) this._active = 'Default';
+    // Migration: tag existing entries without a folder → 'Default'
+    DS.all().filter(c => !c.folder).forEach(c => DS.update(c.id, { folder: 'Default' }));
+    this._save();
+    this.renderUI();
+  },
+
+  _save() {
+    try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
+  },
+
+  get active() { return this._active; },
+  get folders() { return this._folders; },
+
+  setActive(name) {
+    if (!this._folders.includes(name)) return;
+    this._active = name;
+    this._save();
+    this.renderUI();
+    Gallery.render();
+  },
+
+  createFolder(name) {
+    const clean = (name || '').trim();
+    if (!clean) return;
+    if (this._folders.includes(clean)) { App.toast('Folder already exists'); return; }
+    this._folders.push(clean);
+    this._save();
+    this.setActive(clean);
+  },
+
+  deleteFolder(name) {
+    if (name === 'Default') { App.toast('Cannot delete Default folder'); return; }
+    if (!confirm(`Delete folder "${name}"? Colours in it will move to Default.`)) return;
+    DS.all().filter(c => c.folder === name).forEach(c => DS.update(c.id, { folder: 'Default' }));
+    this._folders = this._folders.filter(f => f !== name);
+    if (this._active === name) this._active = 'Default';
+    this._save();
+    this.renderUI();
+    Gallery.render();
+  },
+
+  tagEntry(e) { e.folder = this._active; return e; },
+
+  renderUI() {
+    const bar = document.getElementById('gal-folder-bar');
+    if (!bar) return;
+    bar.innerHTML = this._folders.map(f => {
+      const safe = f.replace(/'/g,"\\'");
+      return `<button class="folder-tab${f === this._active ? ' on' : ''}" onclick="FolderManager.setActive('${safe}')">${f}${f !== 'Default' ? ` <span onclick="event.stopPropagation();FolderManager.deleteFolder('${safe}');" style="opacity:.5;margin-left:4px;font-size:10px;cursor:pointer">×</span>` : ''}</button>`;
+    }).join('') + `<button id="gal-add-folder-btn" onclick="FolderManager._promptNew()">+ New Folder</button>`;
+  },
+
+  _promptNew() {
+    const raw = prompt('Enter folder name:');
+    const n = (raw || '').trim();
+    if (n) this.createFolder(n);
+    else if (raw !== null) App.toast('Folder name cannot be empty');
+  }
+};
+</script>
+
 <!--  GALLERY  -->
 <script>
 const Gallery={
@@ -4070,11 +4405,12 @@ const Gallery={
   activeTagFilter: null,
 
   render(){
-    const all=DS.all();
+    const allRaw=DS.all();
+    // Filter by active folder (FolderManager may not exist yet on first load)
+    const activeFolder = (typeof FolderManager !== 'undefined') ? FolderManager.active : 'Default';
+    const all = allRaw.filter(c => !c.folder || c.folder === activeFolder);
     document.getElementById('gal-count').textContent=`${all.length} colour${all.length!==1?'s':''}`;
     document.getElementById('gallery-actions').style.display=all.length?'flex':'none';
-
-    this._updateTagBar();
 
     const grid=document.getElementById('gallery-grid');
     const view631=document.getElementById('gal-631-view');
@@ -4214,20 +4550,64 @@ const Gallery={
     const _psych = CS.psychTag(c.hex);
     App.openOv(`<div id="inspector-body">
 
-      <div class="insp-swatch" style="background:${c.hex};display:flex;flex-direction:column;justify-content:flex-end;padding:14px 16px 12px">
-        <div style="display:flex;align-items:flex-end;justify-content:space-between">
-          <div>
-            <div class="insp-name" style="color:${fgClr};font-size:20px;margin-bottom:2px">${c.name}</div>
-            <div style="font-size:10px;font-family:var(--mono);color:${fgClr};opacity:.75;display:flex;align-items:center;gap:6px">
-              <span>${c.hex.toUpperCase()}</span>
-              <span style="opacity:.5">·</span>
-              <span>LRV ${c.lrv}%</span>
-              ${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" style="font-size:10px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — may clip on sRGB displays</span></span>':''}
+      <!-- LUXURY HERO: dominant colour block fills top of panel -->
+      <div class="insp-swatch" style="background:${c.hex};display:flex;flex-direction:column;justify-content:flex-end;padding:0">
+        <div style="background:linear-gradient(to top,rgba(0,0,0,.48) 0%,transparent 65%);padding:22px 30px 20px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+            <div style="min-width:0;flex:1">
+              <div class="insp-name" style="color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55);margin-bottom:5px;overflow-wrap:anywhere;word-break:break-word">${c.name}</div>
+              <div style="font-size:11px;font-family:var(--mono);color:rgba(255,255,255,.82);display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere">
+                <span style="font-weight:700;letter-spacing:.07em">${c.hex.toUpperCase()}</span>
+                <span style="opacity:.45">·</span>
+                <span>LRV ${c.lrv}%</span>
+                ${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" style="font-size:10px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — may clip on sRGB displays</span></span>':''}
+              </div>
             </div>
+            <span class="psych-pill psych-${_psych.category}" style="font-size:9px;opacity:.92;flex-shrink:0;backdrop-filter:blur(4px)">${_psych.label}</span>
           </div>
-          <span class="psych-pill psych-${_psych.category}" style="font-size:9px;opacity:.9;flex-shrink:0;margin-left:8px">${_psych.label}</span>
         </div>
       </div>
+
+      <!-- CERTIFICATION BLOCK: Closest Paint Match — editorial, top of info -->
+      ${(()=>{
+        const fb = c.farrowBall, lg = c.littleGreene;
+        const pan = c.pantone;
+        const hasAny = fb || lg || pan;
+        if(!hasAny) return '';
+
+        const paintCell=(brand,paint)=>paint?`
+          <div class="insp-match-cell">
+            <div class="insp-match-swatch" style="background:${paint.hex}"></div>
+            <div class="insp-match-body">
+              <div class="insp-match-brand">${brand}</div>
+              <div class="insp-match-name">${paint.name}</div>
+              <div class="insp-match-sub">${paint.code} · ΔE ${paint.de}</div>
+              <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
+            </div>
+          </div>`:``
+
+        const pantoneCell=pan?`
+          <div class="insp-match-cell">
+            <div class="insp-match-swatch" style="background:${pan.hex||c.hex}"></div>
+            <div class="insp-match-body">
+              <div class="insp-match-brand">Pantone</div>
+              <div class="insp-match-name">${pan.name||pan.code}</div>
+              <div class="insp-match-sub">${pan.code}</div>
+            </div>
+          </div>`:``
+
+        return `<div class="insp-cert-section">
+          <div class="insp-cert-header">
+            <span class="insp-cert-badge">✓ Matched</span>
+            <span class="insp-cert-label">Closest Paint &amp; Colour References</span>
+          </div>
+          <div class="insp-cert-grid">
+            ${pantoneCell}
+            ${paintCell('Farrow &amp; Ball', fb)}
+            ${paintCell('Little Greene', lg)}
+          </div>
+        </div>`;
+      })()}
 
       <div class="insp-grid">
         <div class="insp-row insp-wide">
@@ -4308,46 +4688,10 @@ const Gallery={
       <div class="det-actions">
         <button class="btn btn-s btn-sm" onclick="Gallery.rename('${id}')">Rename</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.toExplorer('${id}')">Explore</button>
-        <button class="btn btn-s btn-sm" onclick="Gallery.shareOne('${id}')">Share ↗</button>
+        <button class="btn btn-s btn-sm" onclick="Gallery.shareOneNative('${id}')">Share ↗</button>
         <button class="btn btn-s btn-sm" onclick="Gallery.exportOne('${id}')">Export Polaroid</button>
         <button class="btn btn-d btn-sm" onclick="Gallery.del('${id}')">Delete</button>
       </div>
-      ${(()=>{
-        const fb = c.farrowBall, lg = c.littleGreene;
-        const pan = c.pantone;
-        const hasAny = fb || lg || pan;
-        if(!hasAny) return '';
-
-        const paintCell=(brand,paint)=>paint?`
-          <div class="insp-match-cell">
-            <div class="insp-match-swatch" style="background:${paint.hex}"></div>
-            <div class="insp-match-body">
-              <div class="insp-match-brand">${brand}</div>
-              <div class="insp-match-name">${paint.name}</div>
-              <div class="insp-match-sub">${paint.code} · ΔE ${paint.de}</div>
-              <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
-            </div>
-          </div>`:``;
-
-        const pantoneCell=pan?`
-          <div class="insp-match-cell">
-            <div class="insp-match-swatch" style="background:${pan.hex||c.hex}"></div>
-            <div class="insp-match-body">
-              <div class="insp-match-brand">Pantone</div>
-              <div class="insp-match-name">${pan.name||pan.code}</div>
-              <div class="insp-match-sub">${pan.code}</div>
-            </div>
-          </div>`:``;
-
-        return `<div class="insp-matches-section">
-          <div class="insp-matches-label">Closest Colour Matches</div>
-          <div class="insp-matches-grid">
-            ${pantoneCell}
-            ${paintCell('Farrow &amp; Ball', fb)}
-            ${paintCell('Little Greene', lg)}
-          </div>
-        </div>`;
-      })()}
     </div>`);
   },
 
@@ -4468,7 +4812,12 @@ const Gallery={
   },
 
   shareOne(id){
-    // Hydrate before sharing too
+    // Legacy path — kept for compatibility. Delegates to native share.
+    this.shareOneNative(id);
+  },
+
+  // Native Web Share API — text + optional image
+  shareOneNative(id){
     let c=DS.get(id);if(!c)return;
     if(!c.lab){const rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);}
     if(!c.hsl){const rgb=CS.hexToRgb(c.hex);c.hsl=CS.rgbToHsl(rgb.r,rgb.g,rgb.b);}
@@ -4478,14 +4827,49 @@ const Gallery={
 
     const lg=c.littleGreene?.name||'N/A';
     const fb=c.farrowBall?.name||'N/A';
-    // Text without digby.shop link
-    const text=` ${c.name}${c.hex.toUpperCase()} · LRV ${c.lrv}%Little Greene: ${lg}Farrow & Ball: ${fb}`;
+    const text=`${c.name}\n${c.hex.toUpperCase()} · LRV ${c.lrv}%\nLittle Greene: ${lg}\nFarrow & Ball: ${fb}\n\nSampled with Spectrum — digby.shop`;
 
-    // Render polaroid on the hidden export canvas
-    const pngDataUrl = this._renderSharePolaroid(c);
-
-    App.forceCloseOv();
-    setTimeout(()=>App.shareWithImage(c.name, text, pngDataUrl), 150);
+    // Try native share first (mobile); fall back to clipboard
+    if(navigator.share){
+      App.forceCloseOv();
+      // Try to share with image; fall back to text only
+      const pngDataUrl = this._renderSharePolaroid(c);
+      if(pngDataUrl && navigator.canShare){
+        try {
+          // Convert dataURL to File for sharing
+          const arr = pngDataUrl.split(',');
+          const mime = arr[0].match(/:(.*?);/)[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8 = new Uint8Array(n);
+          while(n--) u8[n] = bstr.charCodeAt(n);
+          const file = new File([u8], `${c.name.replace(/\s+/g,'-')}-spectrum.png`, { type: mime });
+          if(navigator.canShare({ files: [file] })){
+            navigator.share({ title: c.name, text, files: [file] })
+              .catch(err => { if(err.name!=='AbortError') App.copyToClipboard(text,'Share unavailable — details copied'); });
+            return;
+          }
+        } catch(e) {}
+      }
+      navigator.share({ title: c.name, text })
+        .catch(err => { if(err.name!=='AbortError') App.copyToClipboard(text,'Share unavailable — details copied'); });
+    } else {
+      // Clipboard fallback
+      const execFallback=()=>{
+        const ta=document.createElement('textarea');
+        ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;width:1px;height:1px';
+        document.body.appendChild(ta);ta.focus();ta.select();
+        try{document.execCommand('copy');}catch(e){}
+        document.body.removeChild(ta);
+        App.toast('Colour details copied to clipboard');
+      };
+      App.forceCloseOv();
+      setTimeout(()=>{
+        navigator.clipboard?.writeText(text)
+          .then(()=>App.toast('Colour details copied to clipboard'))
+          .catch(execFallback);
+      },150);
+    }
   },
 
   _renderSharePolaroid(c){
@@ -5038,6 +5422,92 @@ const Explorer={
     const e = DS.makeEntry(hex,'explorer'); DS.add(e); App.refresh();
     App.toast(`${e.name} saved`);
   },
+  // ── STAGE1: Tints/Shades/Tones export helpers ────────────────────────────
+  _allVarHexes(){
+    if (!this.rootHex) return [];
+    const v = CS.variations(this.rootHex);
+    return [...(v.tints||[]), ...(v.shades||[]), ...(v.tones||[])];
+  },
+  // Returns all unique hexes across all 6 harmony types for the current root colour.
+  _allHarmHexes() {
+    if (!this.rootHex) return [];
+    const h = CS.harmonies(this.rootHex);
+    const seen = new Set();
+    const out  = [];
+    ['complementary','analogous','triadic','tetradic','splitComp','mono'].forEach(k => {
+      (h[k] || []).forEach(hex => { if (!seen.has(hex)) { seen.add(hex); out.push(hex); } });
+    });
+    return out;
+  },
+  saveHarmAll() {
+    const hexes = this._allHarmHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    hexes.forEach(hex => { const e = DS.makeEntry(hex, 'explorer'); DS.add(e); });
+    App.refresh(); App.toast(hexes.length + ' harmony colours saved');
+  },
+  exportHarmSwatches() {
+    const hexes = this._allHarmHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    SwatchExport.openFromHexes(hexes, 'polaroids');
+  },
+  exportHarmPng() {
+    const hexes = this._allHarmHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    App._downloadPolaroidPalette(hexes, CS.autoName(this.rootHex) + ' Harmonies');
+  },
+  shareHarm() {
+    const hexes = this._allHarmHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    const label = CS.autoName(this.rootHex) + ' Harmonies';
+    const lines = hexes.map(h => ' ' + CS.autoName(h) + ' ' + h.toUpperCase()).join('');
+    App.share(label, label + lines + ' digby.shop', 'https://digby.shop');
+  },
+  saveVarAll(){
+    const hexes = this._allVarHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    hexes.forEach(hex => { const e = DS.makeEntry(hex,'explorer'); DS.add(e); });
+    App.refresh(); App.toast(hexes.length + ' tints/shades/tones saved');
+  },
+  exportVarSwatches(){
+    const hexes = this._allVarHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    SwatchExport.openFromHexes(hexes, 'polaroids');
+  },
+  exportVarPng(){
+    const hexes = this._allVarHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    App._downloadPolaroidPalette(hexes, CS.autoName(this.rootHex) + ' Tints & Shades');
+  },
+  shareVar(){
+    const hexes = this._allVarHexes();
+    if (!hexes.length) { App.toast('Select a root colour first'); return; }
+    const label = CS.autoName(this.rootHex) + ' Tints & Shades';
+    const lines = hexes.map(h => ' ' + CS.autoName(h) + ' ' + h.toUpperCase()).join('');
+    App.share(label, label + lines + 'digby.shop', 'https://digby.shop');
+  },
+
+  // ── STAGE1: Sample-Based LUT export helpers ──────────────────────────────
+  _slutHexes(){
+    const s = this._slutState;
+    return [s.shadow, s.mid, s.high].filter(Boolean);
+  },
+  saveSlutAll(){
+    const hexes = this._slutHexes();
+    hexes.forEach(hex => { const e = DS.makeEntry(hex,'explorer'); DS.add(e); });
+    App.refresh(); App.toast('LUT zone colours saved to library');
+  },
+  exportSlutSwatches(){
+    SwatchExport.openFromHexes(this._slutHexes(), 'polaroids');
+  },
+  exportSlutPng(){
+    App._downloadPolaroidPalette(this._slutHexes(), 'LUT Zone Palette');
+  },
+  shareSlut(){
+    const hexes = this._slutHexes();
+    const lines = hexes.map(h => ' ' + CS.autoName(h) + ' ' + h.toUpperCase()).join('');
+    App.share('LUT Zone Palette', 'LUT Zone Palette' + lines + 'digby.shop', 'https://digby.shop');
+  },
+
   _saveTrioAll(hexes){
     hexes.forEach(hex=>{ const e=DS.makeEntry(hex,'explorer'); DS.add(e); });
     App.refresh(); App.toast(`${hexes.length} colours saved to library`);
@@ -5297,6 +5767,7 @@ const Prompter={
   repeat:'seamless repeat pattern',
   batchMode:false,
   multiMode:true,  // default ON — multi-select works immediately without needing to find the toggle
+  outputFormat:'normal', // 'normal' | 'colours'
   sortMode:'newest',
   tile:true,
   raw:true,
@@ -5360,10 +5831,11 @@ const Prompter={
         stripEl.innerHTML='<span class="plib-empty">Sample some colours first</span>';
         if(libCountEl) libCountEl.textContent='';
       } else {
-      // MASTER-FIX-V52: cap strip to 12 most recent sampled colours to keep UI clean
+      // Belt-and-braces: both event delegation AND inline onclick
       stripEl.innerHTML=sorted.slice(0, 12).map(c=>`<button class="plib-chip ${this.sel.has(c.id)?'on':''}"
             type="button"
             data-cid="${c.id}"
+            onclick="Prompter.toggleColour('${c.id}')"
             aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
             aria-pressed="${this.sel.has(c.id)}">
             <div class="plib-sw" style="background:${c.hex}"></div>
@@ -5417,6 +5889,7 @@ const Prompter={
         return`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
           type="button"
           data-cid="${c.id}"
+          onclick="Prompter.toggleColour('${c.id}')"
           aria-label="${c.name}  ${this.sel.has(c.id)?'selected':'not selected'}"
           aria-pressed="${this.sel.has(c.id)}">
           <div class="prom-sw" style="background:${c.hex}"></div>
@@ -5522,8 +5995,9 @@ const Prompter={
         if(g==='era')    this.era    = val;
         if(g==='repeat') this.repeat = val;
       } else if(isMulti){
-        // MASTER-FIX-V53: multi — toggle pill, add/remove from array
+        // MASTER-FIX-V53: multi — toggle pill, add/remove from array (max 3 per category)
         const wasOn = btn.classList.contains('on');
+        if(!wasOn && arr.length >= 3){ App.toast('Max 3 per category'); return; }
         btn.classList.toggle('on', !wasOn);
         if(!wasOn) _arrAdd(arr, val); else _arrDel(arr, val);
       } else {
@@ -5561,6 +6035,10 @@ const Prompter={
     // MASTER-FIX-V53: set BOTH 'on' (visual styling) AND 'active' (truth source for togglePill)
     el.classList.toggle('on',     this.multiMode);
     el.classList.toggle('active', this.multiMode); // MASTER-FIX-V53: togglePill reads this
+    const hintEl = document.getElementById('multi-toggle-hint');
+    if(hintEl) hintEl.textContent = this.multiMode
+      ? 'Multi-select ON — tap multiple pills to combine (max 3)'
+      : 'Single-select ON — one choice per category';
     State.multiMode = this.multiMode; State.save();
     // Collapse to at most 1 selection per group when switching to single-select
     if(!this.multiMode){
@@ -5587,6 +6065,46 @@ const Prompter={
     el.classList.toggle('on',this.batchMode);
     const hint=document.getElementById('batch-hint');
     if(hint) hint.style.display=this.batchMode?'block':'none';
+  },
+
+  setOutputFormat(btn){
+    this.outputFormat = btn.dataset.fmt || 'normal';
+    document.querySelectorAll('#output-format-tog .tog-btn').forEach(b=>b.classList.toggle('on',b===btn));
+    const hint = document.getElementById('just-colours-hint');
+    if(hint) hint.style.display = this.outputFormat === 'colours' ? 'block' : 'none';
+  },
+
+  // Reset all text modifiers (subjects, mediums, era, repeat) but leave colours alone
+  resetModifiers(){
+    this.subjects.splice(0, this.subjects.length);
+    this.mediums.splice(0, this.mediums.length);
+    this.era = '';
+    this.repeat = 'seamless repeat pattern';
+    // Clear pill highlights for text categories
+    document.querySelectorAll('.prom-pill[data-g="subject"]').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.prom-pill[data-g="medium"]').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.prom-pill[data-g="era"]').forEach(b=>{
+      b.classList.toggle('on', b.dataset.v === '');
+    });
+    document.querySelectorAll('.prom-pill[data-g="repeat"]').forEach(b=>{
+      b.classList.toggle('on', b.dataset.v === 'seamless repeat pattern');
+    });
+    this._updatePillBadge('subject');
+    this._updatePillBadge('medium');
+    State.subjects=[]; State.mediums=[]; State.save();
+    document.getElementById('prompt-out').textContent = 'Select colours and tap Generate...';
+    this._updateCharCount('');
+    App.toast('Modifiers reset ✓');
+  },
+
+  // Remove selected colours but leave all text modifiers alone
+  clearColours(){
+    this.sel.clear();
+    this._syncSelection();
+    this._updateColourScience();
+    document.getElementById('prompt-out').textContent = 'Select colours and tap Generate...';
+    this._updateCharCount('');
+    App.toast('Colours cleared ✓');
   },
 
   toggleParam(el,p){
@@ -5655,16 +6173,25 @@ const Prompter={
 
   generate(){
     const colours=DS.all().filter(c=>this.sel.has(c.id));
-    if(!colours.length){App.toast('Select colours first');return}
-    const out = this.buildPrompt(colours);
+    // Allow generation even with zero colours — just produces a text-only prompt
+    let out;
+    if(this.outputFormat === 'colours'){
+      out = colours.length
+        ? colours.map(c => c.hex.toUpperCase()).join(', ')
+        : '(no colours selected — add colours to the prompt via the picker above)';
+    } else {
+      out = this.buildPrompt(colours);
+    }
     document.getElementById('prompt-out').textContent = out;
     this._updateCharCount(out);
   },
 
   buildPrompt(colours){
-    // Colour palette string
-    const colourStr=colours.map(c=>this._descColour(c)).join(', ');
-    const paletteNote=`colour palette of ${colourStr}`;
+    // Colour palette string (optional — omit if no colours selected)
+    const colourStr = colours.length
+      ? colours.map(c=>this._descColour(c)).join(', ')
+      : '';
+    const paletteNote = colourStr ? `colour palette of ${colourStr}` : '';
 
     // Subject  single or batch
     // MASTER-FIX-V53: subjects is already an Array  pass directly
@@ -5688,7 +6215,7 @@ const Prompter={
     else parts.push(repeatStr);
     if(medStr) parts.push(medStr);
     if(eraStr) parts.push(eraStr);
-    parts.push(paletteNote);
+    if(paletteNote) parts.push(paletteNote);
     parts.push('highly detailed, fine craftsmanship, flat on white ground, textile design');
 
     // Harmony flavour note
@@ -5708,8 +6235,9 @@ const Prompter={
   _batchWrap(arr, fallback=''){
     if(!arr || !arr.length) return fallback;
     if(arr.length === 1) return arr[0];
-    // MASTER-FIX-V54: always wrap multiple items in {} (Midjourney permutation syntax)
-    return '{' + arr.join(', ') + '}';
+    // Multi-select: comma-join by default; wrap in {} only when Batch Mode is active
+    if(this.batchMode) return '{' + arr.join(', ') + '}';
+    return arr.join(', ');
   },
 
   _buildParams(){
@@ -6726,6 +7254,33 @@ const ColourGenerator = {
         ['#C0B0A0','#1E2E50','#CC4030','#EEE6DB','#706050'],
       ]
     },
+    brightColours: {
+      name: 'Bright Colours',
+      desc: 'Maximum saturation, no apologies. These are colours that refuse to be ignored — the palette equivalent of turning the TV brightness up to 100.',
+      palettes: [
+        ['#FF2D55','#FF9500','#34C759','#007AFF','#AF52DE'],
+        ['#FF3B30','#FF9F0A','#30D158','#0A84FF','#BF5AF2'],
+        ['#FF453A','#FFD60A','#32D74B','#0A84FF','#FF375F'],
+      ]
+    },
+    neon: {
+      name: 'Neon',
+      desc: 'The light from a sign you\'d follow down a wet alley at 2am. Electric hues with maximum luminosity — cyberpunk, rave, and retro-future.',
+      palettes: [
+        ['#FF00CC','#00FFCC','#FFCC00','#CC00FF','#00CCFF'],
+        ['#FF0099','#00FF99','#FF9900','#9900FF','#00AAFF'],
+        ['#FF33DD','#33FFDD','#FFDD33','#DD33FF','#33DDFF'],
+      ]
+    },
+    popArt: {
+      name: 'Pop Art',
+      desc: "Warhol's soup cans, Lichtenstein's dots, Hockney's pools. Primary extremes in high contrast — bold outlines implied even when absent.",
+      palettes: [
+        ['#FF0000','#FFFF00','#0000FF','#FFFFFF','#000000'],
+        ['#E8003D','#FFE600','#0037FF','#F5F5F5','#1A1A1A'],
+        ['#CC0000','#FFCC00','#003399','#EEEEEE','#222222'],
+      ]
+    },
   },
 
   currentPalette: null,
@@ -6832,6 +7387,16 @@ const ColourGenerator = {
     // Rerouted to shared Polaroid palette layout for visual consistency.
     const aes = this.AESTHETICS[this.aesthetic];
     App._downloadPolaroidPalette(this.currentPalette, aes.name + ' Palette');
+  },
+
+  shareCard(){
+    if (!this.currentPalette || !this.currentPalette.length) {
+      App.toast('Generate a palette first'); return;
+    }
+    const aes = this.AESTHETICS[this.aesthetic];
+    const label = (aes ? aes.name : 'Aesthetic') + ' Palette';
+    const lines = this.currentPalette.map(h => ' ' + CS.autoName(h) + ' ' + h.toUpperCase()).join('');
+    App.share(label, label + lines + 'digby.shop', 'https://digby.shop');
   },
 
   init() { this.render(); }
@@ -8321,9 +8886,9 @@ self.onmessage = function(e) {
     // ctx.scale(2,2) at the very top doubles them to physical (2×) pixels for HiDPI.
     const LOGICAL_W  = 380;
     const BORDER     = 28;
-    const FOOT_H     = 96;  // white footer height (logical px)
+    const FOOT_H     = 130; // increased for footer text breathing room
     const SW_H       = 56;  // swatch block height inside footer (logical px)
-    const SAFE_ZONE  = 70;  // MASTER-FIX-V54: 70px left gutter — text always starts here
+    const SAFE_ZONE  = 30;  // 30px horizontal padding — prevents edge clipping
 
     // ── Source dimensions ────────────────────────────────────────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
@@ -8399,47 +8964,54 @@ self.onmessage = function(e) {
       ctx.fillStyle = hex;
       ctx.fill();
 
-      // MASTER-FIX-V54: hex label left-anchored at SAFE_ZONE to prevent right-edge clipping.
+      // Hex label sits under its own swatch block (x+2), not stacked at a fixed gutter.
       ctx.fillStyle    = '#1a1a1a';
       ctx.font         = '7.5px monospace';
       ctx.textAlign    = 'left';
       ctx.textBaseline = 'top';
-      ctx.fillText(hex.toUpperCase(), SAFE_ZONE, labelY);
+      ctx.fillText(hex.toUpperCase(), x + 2, labelY);
     });
 
     // ── Footer: Pantone Name, Brand, Hex — all anchored at SAFE_ZONE ─────────
-    // MASTER-FIX-V54: look up Pantone name for first hex as the polaroid label.
-    const firstRgb = CS.hexToRgb(hexes[0]);
-    const firstLab = CS.rgbToLab(
-      Math.min(255, Math.max(0, firstRgb.r)),  // MASTER-FIX-V54: clamp RGB
-      Math.min(255, Math.max(0, firstRgb.g)),
-      Math.min(255, Math.max(0, firstRgb.b))
-    );
-    const pantone     = CS.nearestPantone(firstLab);
-    const pantoneName = pantone?.name || CS.autoName(hexes[0]); // MASTER-FIX-V54: Pantone first
+    // STAGE1-FIX: use a safe firstHex variable so an unexpectedly-empty
+    // hexes array never causes a crash on hexes[0].toUpperCase().
+    const firstHex    = (hexes && hexes.length) ? hexes[0] : null;
     const footY       = BORDER + photoH + FOOT_H - 28;
 
-    // Brand line
+    if (firstHex) {
+      const firstRgb  = CS.hexToRgb(firstHex);
+      const firstLab  = CS.rgbToLab(
+        Math.min(255, Math.max(0, firstRgb.r)),
+        Math.min(255, Math.max(0, firstRgb.g)),
+        Math.min(255, Math.max(0, firstRgb.b))
+      );
+      const pantone     = CS.nearestPantone(firstLab);
+      const pantoneName = pantone?.name || CS.autoName(firstHex);
+
+      // Pantone name — prominent
+      ctx.fillStyle    = '#1a1a1a';
+      ctx.font         = 'bold 9px monospace';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(pantoneName, SAFE_ZONE, footY);
+
+      // Hex value
+      ctx.fillStyle = '#888888';
+      ctx.font      = '7px monospace';
+      ctx.fillText(firstHex.toUpperCase(), SAFE_ZONE, footY + 9);
+    }
+
+    // Brand line (always shown)
     ctx.fillStyle    = '#aaaaaa';
     ctx.font         = '7px monospace';
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText('digby.shop', SAFE_ZONE, footY + 14);
 
-    // Pantone name — prominent
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font      = 'bold 9px monospace';
-    ctx.fillText(pantoneName, SAFE_ZONE, footY);
-
-    // Hex value
-    ctx.fillStyle = '#888888';
-    ctx.font      = '7px monospace';
-    ctx.fillText(hexes[0].toUpperCase(), SAFE_ZONE, footY + 9);
-
     // ── Download ──────────────────────────────────────────────────
     const a = document.createElement('a');
     a.href     = canvas.toDataURL('image/png');
-    a.download = 'spectrum-palette-polaroid.png';
+    a.download = `spectrum-${Date.now()}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
