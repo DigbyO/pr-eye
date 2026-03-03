@@ -124,10 +124,10 @@ a{color:var(--accent);text-decoration:none}
   width:100%;aspect-ratio:1/1;
   max-height:calc(100dvh - var(--top-h) - var(--tab-h) - 110px);
   overflow:hidden;border-radius:16px;
-  /* v79: 1:1 + overflow:hidden + border-radius clips video to rounded corners */
+  /* v79: 1:1 + overflow:hidden + border-radius:16px clips video to rounded corners */
 }
 #cam-video{
-  position:absolute;top:0;left:0;width:100%;height:100%;
+  position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;
   object-fit:cover;display:block;
   /* v78: absolute fill with cover — no black bars */
   will-change:transform;
@@ -235,7 +235,6 @@ a{color:var(--accent);text-decoration:none}
   display:none;cursor:pointer;
 }
 #lut-badge.show{display:block}
-/* v79: LUT locked placeholder — shown in Simple Mode */
 #lut-locked{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8;background:rgba(12,12,12,.92);border:1px solid var(--accent);border-radius:12px;padding:14px 22px;text-align:center;backdrop-filter:blur(6px);pointer-events:auto;cursor:pointer}
 #lut-locked .lut-lock-icon{font-size:20px;margin-bottom:4px}
 #lut-locked .lut-lock-text{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
@@ -905,7 +904,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
 
       <!-- v79: LUT locked placeholder -->
-      <div id="lut-locked" onclick="App.toast('Turn on Pro Mode in Settings')"><div class="lut-lock-icon">ð</div><div class="lut-lock-text">Unlock in Pro Mode</div></div>
+      <div id="lut-locked" onclick="App.toast('Turn on Pro Mode in Settings')"><div class="lut-lock-icon">🔒</div><div class="lut-lock-text">Unlock in Pro Mode</div></div>
 
       <!-- Capture row -->
       <div id="capture-row">
@@ -3242,27 +3241,13 @@ const App={
     ctx.fillStyle = '#E8E4DE';
     ctx.fillRect(PAD, footY, photoW, 1 * SCALE);
 
+    // v79: Footer — digby.shop byline only (hero labels deleted)
     var footTextY = footY + Math.round(FOOT_H * 0.38);
-    // v76 CLEAN FOOTER — Line 1 (Title), Line 2 (HEX), digby.shop drawn EXACTLY ONCE
-    // Line 1: palette title — bold 10px black, system-ui sans-serif
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold ' + Math.round(12 * SCALE) + 'px Permanent Marker,cursive';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(title, PAD, footTextY);
-    // Line 2: first hex — 8px grey #888888
-    ctx.fillStyle = '#888888';
-    ctx.font = Math.round(8 * SCALE) + 'px system-ui,-apple-system,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    var _dlFirstHex = (hexes && hexes[0]) ? hexes[0].toUpperCase() : '';
-    ctx.fillText(_dlFirstHex, PAD, footTextY + Math.round(14 * SCALE));
-    // Brand byline — right-aligned at (CARD_W - PAD), 28px below Line 1
     ctx.fillStyle = '#AAAAAA';
     ctx.font = Math.round(6.5 * SCALE) + 'px system-ui,-apple-system,sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillText('digby.shop', CARD_W - PAD, footTextY + Math.round(28 * SCALE));
+    ctx.fillText('digby.shop', CARD_W - PAD, footTextY + Math.round(14 * SCALE));
 
     var a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
@@ -5302,32 +5287,12 @@ const Library={
     ctx.textBaseline = 'middle';
     ctx.fillText(c.hex.toUpperCase(), bX + bW/2, bY + bH/2);
 
-    // ── v76 CLEAN FOOTER: Line 1 (Name), Line 2 (HEX), digby.shop — drawn EXACTLY ONCE ──
-    const TX = PAD;  // all text anchored at x=SAFE_ZONE
-    // Line 1: Colour Name — Bold 10px Black, system-ui sans-serif
-    ctx.fillStyle    = '#1a1a1a';
-    ctx.font         = 'bold 12px Permanent Marker,cursive';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';
-    let _nameText = c.name;
-    while (_nameText.length > 3 && ctx.measureText(_nameText).width > CW - 20) {
-      _nameText = _nameText.slice(0, -1);
-    }
-    ctx.fillText(_nameText, TX, INFO_Y + 8);
-
-    // Line 2: HEX code — 8px Grey #888888, system-ui sans-serif
-    ctx.fillStyle    = '#888888';
-    ctx.font         = '8px system-ui,-apple-system,sans-serif';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(c.hex.toUpperCase(), TX, INFO_Y + 22);
-
-    // Brand byline — right-aligned, 28px below Line 1
+    // ── v79: Footer — digby.shop byline only (hero Name+HEX labels deleted) ──
     ctx.fillStyle    = '#aaaaaa';
     ctx.font         = '7px system-ui,-apple-system,sans-serif';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillText('digby.shop', BASE_W - SAFE_ZONE, INFO_Y + 8 + 28);
+    ctx.fillText('digby.shop', BASE_W - SAFE_ZONE, INFO_Y + 14);
 
     return canvas.toDataURL('image/png');
   },
@@ -9188,7 +9153,6 @@ self.onmessage = function(e) {
    *   [28px white border bottom]
    */
   async exportPolaroid(hexes) {
-    // v79: preload Sharpie font
     try { await document.fonts.load('bold 12px "Permanent Marker"'); } catch(e) {}
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
@@ -9235,7 +9199,7 @@ self.onmessage = function(e) {
     canvas.height = Math.floor(LOGICAL_H * _dpr);
     const ctx = canvas.getContext('2d');
 
-    // v79: HiDPI — devicePixelRatio for crisp output on 3x displays — all draw calls use logical coords.
+    // MASTER-FIX-V54: scale(2,2) at absolute top — all draw calls use logical coords.
     ctx.scale(_dpr, _dpr);
 
     // ── Polaroid white card ───────────────────────────────────────
@@ -9266,71 +9230,44 @@ self.onmessage = function(e) {
     ctx.fillRect(BORDER, BORDER, photoW, photoH);
 
     // ── Colour swatch strip ────────────────────────────────────────
-    const n      = hexes.length;
-    const swY    = BORDER + photoH + Math.round((FOOT_H - SW_H) * 0.25);
+    // v79: pixel-exact swatch positions — Math.floor eliminates sub-pixel gaps
+    const n    = hexes.length;
+    const swY  = BORDER + photoH + Math.round((FOOT_H - SW_H) * 0.25);
 
     hexes.forEach((hex, i) => {
-      // v79: pixel-exact positions — Math.floor eliminates sub-pixel white gaps
-      const x  = BORDER + Math.floor(i * photoW / n);
-      const x2 = BORDER + Math.floor((i + 1) * photoW / n);
+      const x  = Math.floor(BORDER + i * photoW / n);
+      const x2 = Math.floor(BORDER + (i + 1) * photoW / n);
       const sw = x2 - x;
 
-      // Swatch block with rounded top corners
+      // Swatch block — rounded top corners, edge-to-edge fill
       const r = 5;
       ctx.beginPath();
       ctx.moveTo(x + r, swY);
       ctx.lineTo(x + sw - r, swY);
       ctx.quadraticCurveTo(x + sw, swY, x + sw, swY + r);
-      ctx.lineTo(x + sw, swY + SW_H);
-      ctx.lineTo(x, swY + SW_H);
+      ctx.lineTo(x + sw, Math.floor(swY + SW_H));
+      ctx.lineTo(x, Math.floor(swY + SW_H));
       ctx.lineTo(x, swY + r);
       ctx.quadraticCurveTo(x, swY, x + r, swY);
       ctx.closePath();
       ctx.fillStyle = hex;
       ctx.fill();
 
-      // v79: skip index 0 labels — hero colour already in footer
-      if (i === 0) return;
+      // HEX label centred beneath each swatch
       ctx.fillStyle = '#888888';
       ctx.font = '6px system-ui,-apple-system,sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText(hex.toUpperCase(), x + sw / 2, swY + SW_H + 4);
+      ctx.fillText(hex.toUpperCase(), x + sw / 2, Math.floor(swY + SW_H) + 4);
     });
 
-    // ── Footer: Colour Name (L1), HEX (L2), digby.shop brand below ───────
-    // STAGE1-FIX: use a safe firstHex variable so an unexpectedly-empty
-    // hexes array never causes a crash on hexes[0].toUpperCase().
-    const firstHex    = (hexes && hexes.length) ? hexes[0] : null;
-    const footY       = BORDER + photoH + FOOT_H - 48;
-
-    if (firstHex) {
-      // v76 CLEAN FOOTER — Line 1 (Name), Line 2 (HEX), digby.shop drawn EXACTLY ONCE
-      // Line 1: Colour Name — Bold 10px Black, system-ui sans-serif
-      ctx.fillStyle    = '#1a1a1a';
-      ctx.font         = 'bold 12px Permanent Marker,cursive';
-      ctx.textAlign    = 'left';
-      ctx.textBaseline = 'top';
-      let _apName = CS.autoName(firstHex);
-      while (_apName.length > 3 && ctx.measureText(_apName).width > (LOGICAL_W - SAFE_ZONE * 2 - 20)) {
-        _apName = _apName.slice(0, -1);
-      }
-      ctx.fillText(_apName, SAFE_ZONE, footY);
-
-      // Line 2: HEX code — 8px Grey #888888, system-ui sans-serif
-      ctx.fillStyle    = '#888888';
-      ctx.font         = '8px system-ui,-apple-system,sans-serif';
-      ctx.textAlign    = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(firstHex.toUpperCase(), SAFE_ZONE, footY + 14);
-    }
-
-    // Brand byline — right-aligned at (LOGICAL_W - SAFE_ZONE), 28px below Line 1
+    // ── v79: Footer — digby.shop byline only (hero Name+HEX labels deleted) ──
+    const footY = BORDER + photoH + FOOT_H - 48;
     ctx.fillStyle    = '#aaaaaa';
     ctx.font         = '7px system-ui,-apple-system,sans-serif';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillText('digby.shop', LOGICAL_W - SAFE_ZONE, footY + 28);
+    ctx.fillText('digby.shop', LOGICAL_W - SAFE_ZONE, footY + 14);
 
     // ── Download ──────────────────────────────────────────────────
     const a = document.createElement('a');
