@@ -2927,14 +2927,11 @@ const App={
     // v92: Page Visibility API — pause camera RAF when screen locks or app goes to background
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        // Screen off / app backgrounded: kill the RAF loop and pause video
+        // v95: cancel RAF only — never pause the video.
+        // Pausing getUserMedia on iOS sets videoWidth=0, breaking Polaroid capture.
         if (Sampler.rafId) { cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
-        const v = document.getElementById('cam-video');
-        if (v && !v.paused) { try { v.pause(); } catch(e) {} }
       } else {
-        // Screen back on: resume video and restart sampling if we were on the sampler
-        const v = document.getElementById('cam-video');
-        if (v && v.paused && Sampler.stream) { try { v.play(); } catch(e) {} }
+        // Screen back on: restart sampling loop
         if (App.tab === 'sampler' && Sampler.mode === 'camera' && !Sampler.frozen) {
           Sampler.startSampling();
         }
@@ -9275,6 +9272,7 @@ self.onmessage = function(e) {
     snap.width  = video.videoWidth;
     snap.height = video.videoHeight;
     snap.getContext('2d').drawImage(video, 0, 0);
+    this._camSnap = snap; // v95: persist for exportPolaroid
     this._showSpinner('Analysing frame…');
     // FIX 4: Check if manual picks exist — if so, lock first pick into slot 0
     const manualPick = (Sampler.pickQueue && Sampler.pickQueue.length > 0) ? Sampler.pickQueue[0] : null;
@@ -9384,15 +9382,21 @@ self.onmessage = function(e) {
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
     // ── Source image ─────────────────────────────────────────────────────────
+    // v95: prefer the frame captured at analysis time (_camSnap) for camera.
+    // Re-capturing risks a black frame if the browser throttled the stream.
     let img = Sampler.uploadImg;
     if (Sampler.mode === 'camera' || !img) {
-      const video = document.getElementById('cam-video');
-      if (video && video.videoWidth) {
-        const snap = document.createElement('canvas');
-        snap.width  = video.videoWidth;
-        snap.height = video.videoHeight;
-        snap.getContext('2d').drawImage(video, 0, 0);
-        img = snap;
+      if (AutoPalette._camSnap && Sampler.mode === 'camera') {
+        img = AutoPalette._camSnap;
+      } else {
+        const video = document.getElementById('cam-video');
+        if (video && video.videoWidth) {
+          const snap = document.createElement('canvas');
+          snap.width  = video.videoWidth;
+          snap.height = video.videoHeight;
+          snap.getContext('2d').drawImage(video, 0, 0);
+          img = snap;
+        }
       }
     }
     if (!img) { App.toast('No image — use camera or upload a photo'); return; }
@@ -9572,16 +9576,30 @@ self.onmessage = function(e) {
     const a = document.createElement('a');
     a.href     = canvas.toDataURL('image/png');
     a.download = `spectrum-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    App.toast('Polaroid exported \u2713');
+    // ── Download — Web Share on mobile, anchor fallback on desktop ─────────────
+    const pngDataUrl = canvas.toDataURL('image/png');
+    const filename   = `spectrum-${Date.now()}.png`;
+    const _doAnchor  = () => {
+      const a = document.createElement('a');
+      a.href = pngDataUrl; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      App.toast('Polaroid exported ✓');
+    };
+    try {
+      const res  = await fetch(pngDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Spectrum Palette' });
+        App.toast('Polaroid exported ✓');
+      } else {
+        _doAnchor();
+      }
+    } catch(e) {
+      if (e.name !== 'AbortError') _doAnchor();
+    }
   }
 };
-
-// ─── AI COLOUR NAMES (color-name.com API when online) ────────────
-const AIColourName = {
-  _cache: {},
 
   async fetchName(hex) {
     const h = hex.replace('#', '').toUpperCase();
