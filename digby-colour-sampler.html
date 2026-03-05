@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.7</title>
+<title>Spectrum 4.0.9</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '407';
+  const APP_VERSION = '409';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -169,10 +169,10 @@ a{color:var(--accent);text-decoration:none}
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v406: live-bar sits immediately below #top header */
+/* v408: live-bar sits flush below #top header */
 #live-bar {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 6px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 4px);
   left: 50%;
   transform: translateX(-50%);
   width: 92%;
@@ -189,8 +189,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   align-items:center;gap:10px;pointer-events:auto;
 }
 @supports not (backdrop-filter: blur(10px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
-/* v402: sampler container padding clears fixed live-bar below #top */
-#sampler-container { padding-top: calc(var(--top-h) + 108px); }
+/* v408: sampler-cam-col padding-top set dynamically in setMode() */
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
@@ -983,7 +982,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
     </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="display:flex;flex-direction:column;gap:16px;flex:1;overflow:hidden;min-height:0">
+    <div id="sampler-cam-col" style="display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;min-height:0;padding-top:94px">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -2041,7 +2040,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.9</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3538,7 +3537,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.9</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4650,7 +4649,10 @@ const Sampler={
     // v132: hide mode-bar in camera mode → full-screen camera like v115
     const mb=document.getElementById('mode-bar');
     if(mb) mb.style.display=m==='camera'?'none':'flex';
-    document.getElementById('sampler-cam-col').style.display=m==='camera'?'flex':'none';
+    const col=document.getElementById('sampler-cam-col');
+    col.style.display=m==='camera'?'flex':'none';
+    // v408: padding-top only in camera mode to clear floating live-bar overlay
+    col.style.paddingTop=m==='camera'?'94px':'0';
     document.getElementById('upload-wrap').style.display=m==='upload'?'flex':'none';
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
     this.pickQueue=[];
