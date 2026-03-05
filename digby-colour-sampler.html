@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum v133</title>
+<title>Spectrum v138</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -856,9 +856,9 @@ body.simple-mode .colour-blind-tool{display:none!important}
 body.simple-mode .pb-pro-btn{display:none!important}
 /* v84: Pro-only gating for LUT Generator + Capture One sections */
 body.simple-mode .pro-only{display:none!important}
-/* v132: physical pro-mode-on gate — ensures pro-only hides/shows by body class */
-body:not(.pro-mode-on) .pro-only{display:none!important}
-body.pro-mode-on .pro-only{display:revert!important}
+/* v137: design-pro-on gates Design Pro features — decoupled from simple/pro tab mode */
+body:not(.design-pro-on) .pro-only{display:none!important}
+body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
 body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .colour-blind-tool,body.pro-mode .pb-pro-btn,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only{display:revert!important}
 
@@ -1330,33 +1330,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 
 
       <!-- v122: SURFACE TESTER ────────────────────────────────── -->
-      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
-        Library Colour Selector
-        <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">For Wall &amp; Trim</span>
-      </div>
-      <div class="card" style="padding:12px">
-        <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px">
-          Select a saved colour to use with Surface Tester
-        </div>
-        <select id="library-dropdown"
-          onchange="updateLibraryDropdown.onSelect(this.value)"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
-                 color:var(--fg);font-size:12px;padding:8px 10px;font-family:var(--mono);outline:none;cursor:pointer">
-          <option value="">— Choose from Library —</option>
-        </select>
-        <div id="lib-dropdown-preview" style="display:none;margin-top:10px;display:flex;align-items:center;gap:8px;padding:8px;background:var(--surface2);border-radius:8px">
-          <div id="lib-dropdown-dot" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0"></div>
-          <div>
-            <div id="lib-dropdown-name" style="font-size:12px;color:var(--fg)"></div>
-            <div id="lib-dropdown-hex" style="font-size:10px;color:var(--muted);font-family:var(--mono)"></div>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:6px">
-            <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.applyWall()">→ Wall</button>
-            <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.applyTrim()">→ Trim</button>
-          </div>
-        </div>
-      </div>
-
       <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
         Surface Tester
         <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">Wall &amp; Trim preview</span>
@@ -2021,14 +1994,14 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <div style="flex:1"><div class="set-l">Design Pro Mode</div><div class="set-sub">Unlock Wall &amp; Trim export, technical exports, and advanced tools</div></div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
             <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Off</span>
-            <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;cursor:pointer">
+            <div style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
               <input type="checkbox" id="settings-pro-checkbox-static"
                 style="opacity:0;width:0;height:0;position:absolute"
                 onchange="toggleProMode(this)">
               <div class="sw" id="settings-pro-sw"
-                onclick="document.getElementById('settings-pro-checkbox-static').click()"
+                onclick="var cb=document.getElementById('settings-pro-checkbox-static');cb.checked=!cb.checked;toggleProMode(cb);"
                 style="width:40px;height:22px;cursor:pointer;pointer-events:auto"></div>
-            </label>
+            </div>
             <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Pro</span>
           </div>
         </div>
@@ -2053,7 +2026,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v133</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v138</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3199,11 +3172,9 @@ const State = {
     if (this.proMode) {
       document.body.classList.remove('simple-mode');
       document.body.classList.add('pro-mode');
-      document.body.classList.add('pro-mode-on');    // v131 spec alias
     } else {
       document.body.classList.add('simple-mode');
       document.body.classList.remove('pro-mode');
-      document.body.classList.remove('pro-mode-on'); // v131 spec alias
     }
     // Sync header Pro toggle
     const hdrSw = document.getElementById('hdr-pro-sw');
@@ -3488,13 +3459,14 @@ const App={
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="dpm-lbl">Off</span>
-          <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer">
+          <div style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
             <input type="checkbox" id="pro-mode-toggle"
               style="opacity:0;width:0;height:0;position:absolute"
               onchange="toggleProMode(this)">
             <div class="sw" id="settings-pro-sw-ov"
-              style="width:44px;height:24px;border-radius:12px;cursor:pointer"></div>
-          </label>
+              onclick="var cb=document.getElementById('pro-mode-toggle');cb.checked=!cb.checked;toggleProMode(cb);"
+              style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
+          </div>
         </div>
       </div>
       <div class="shop-banner" style="margin:0 0 12px">
@@ -3536,7 +3508,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v133</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v138</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -6084,6 +6056,8 @@ const Explorer={
       `linear-gradient(to right,${h.splitTone.shadows},${h.splitTone.highlights})`;
     this.renderTrio();
     this.renderDesignerRecs();
+    // v134: sync Surface Tester defaults to Architectural Trim colours
+    if (typeof SurfaceTester !== 'undefined') SurfaceTester.syncFromExplorer();
   },
 
   //  Harmony swatches: tap swatch  new root, + button  add to lib 
@@ -6167,30 +6141,32 @@ const Explorer={
     const trimHex = CS.hslToHex(hsl.h/360, hsl.s/100, trimL/100);
 
     // CYCLE ENGINE: Read _designerMode (default 'analogous')
+    // v135: use CS.harmonies() (LCH-based) for perceptually correct colour distances
     const designerMode = this._designerMode || 'analogous';
-    let secH, accentH; // 30% and 10% hues
+    const harms = CS.harmonies(hex);
+    let analogousHex, compHex;
 
     if(designerMode === 'analogous'){
-      secH = ((hsl.h + 30) + 360) % 360;
-      accentH = ((hsl.h + 180) + 360) % 360;
+      // 30% = analogous neighbour (+30° LCH), 10% = complement (180°)
+      analogousHex = harms.analogous[2]; // +30° side
+      compHex      = harms.complementary[1];
     } else if(designerMode === 'triadic'){
-      secH = ((hsl.h + 120) + 360) % 360;
-      accentH = ((hsl.h + 240) + 360) % 360;
+      // 30% = triadic[1] (+120°), 10% = triadic[2] (+240°)
+      analogousHex = harms.triadic[1];
+      compHex      = harms.triadic[2];
     } else if(designerMode === 'split'){
-      secH = ((hsl.h + 150) + 360) % 360;
-      accentH = ((hsl.h + 210) + 360) % 360;
+      // 30% = split-comp[1] (+150°), 10% = split-comp[2] (+210°)
+      analogousHex = harms.splitComp[1];
+      compHex      = harms.splitComp[2];
     }
 
-    const analogousHex = CS.hslToHex(secH/360, hsl.s/100, hsl.l/100);
-    let compHex = CS.hslToHex(accentH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
-
-    // 60-30-10 DEDUP: If secondary and accent are too similar, shift accent by +30 more degrees
-    if(analogousHex === compHex){
-      const hueDelta = Math.abs(secH - accentH);
-      if(hueDelta < 10 || hueDelta > 350){
-        accentH = ((accentH + 30) + 360) % 360;
-        compHex = CS.hslToHex(accentH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
-      }
+    // Dedup: if 30% and 10% are perceptually too close (dE < 12), boost 10% chroma/lightness contrast
+    const dE_check = CS.dE(
+      CS.rgbToLab(...Object.values(CS.hexToRgb(analogousHex))),
+      CS.rgbToLab(...Object.values(CS.hexToRgb(compHex)))
+    );
+    if(dE_check < 12){
+      compHex = CS._boostChroma(CS._shiftLightness(compHex, hsl.l > 50 ? -18 : 18), 1.4);
     }
 
     const yiq = (rgb.r*299+rgb.g*587+rgb.b*114)/1000;
@@ -9577,7 +9553,7 @@ function toggleProMode(cb) {
   const val = (cb && typeof cb === 'object' && 'checked' in cb) ? cb.checked : Boolean(cb);
   state.isProMode = val;
   try { localStorage.setItem('spectrum-design-pro-mode', val ? '1' : '0'); } catch(e) {}
-  document.body.classList.toggle('pro-mode-on', val);
+  document.body.classList.toggle('design-pro-on', val);
   // Sync overlay checkbox + slider + label
   const cb2 = document.getElementById('pro-mode-toggle');
   if (cb2) cb2.checked = val;
@@ -9833,12 +9809,31 @@ const updateLibraryDropdown = {
 };
 
 const SurfaceTester = {
-  wallHex: '#888888',
-  trimHex: '#888888',
+  wallHex: '#c8b89a',
+  trimHex: '#a89278',
+  _manualWall: false,  // true once user has manually picked a wall colour
+  _manualTrim: false,  // true once user has manually picked a trim colour
+
+  // v134: sync Wall & Trim to Architectural Trim colours derived from Explorer root
+  syncFromExplorer() {
+    const hex = (typeof Explorer !== 'undefined' && Explorer.rootHex) ? Explorer.rootHex : null;
+    if (!hex) return;
+    const wallHex = hex;
+    // Compute trim: same hue/sat, ±15% lightness (matching renderDesignerRecs logic)
+    const rgb = CS.hexToRgb(wallHex);
+    const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
+    const trimLightMode = (typeof Explorer !== 'undefined') ? (Explorer._trimLight || false) : false;
+    const trimL = trimLightMode ? Math.min(100, hsl.l + 15) : Math.max(0, hsl.l - 15);
+    const trimHex = CS.hslToHex(hsl.h / 360, hsl.s / 100, trimL / 100);
+    if (!this._manualWall) { this.wallHex = wallHex; }
+    if (!this._manualTrim) { this.trimHex = trimHex; }
+    this._update();
+  },
 
   // v126: set directly from native color picker
   setWall(hex) {
     if (!hex) return;
+    this._manualWall = true;
     this.wallHex = hex;
     App.selectedHex = hex;
     // Sync the input element value
@@ -9849,6 +9844,7 @@ const SurfaceTester = {
 
   setTrim(hex) {
     if (!hex) return;
+    this._manualTrim = true;
     this.trimHex = hex;
     App.selectedHex = hex;
     const inp = document.getElementById('trim-color-input');
