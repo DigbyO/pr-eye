@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v98</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v99</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -20,7 +20,7 @@
 <script>
 /* v97 auto-update cache-buster */
 (function(){
-  const APP_VERSION="98";
+  const APP_VERSION="99";
   try{
     if(localStorage.getItem("stored_version")!==APP_VERSION){
       localStorage.setItem("stored_version",APP_VERSION);
@@ -577,20 +577,20 @@ a{color:var(--accent);text-decoration:none}
 .trio-mode-btn{font-size:11px;letter-spacing:.01em;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .trio-mode-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
 #trio-display{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
-/* v97: Unified floating bar for upload mode — hero image with floating pick queue */
+/* v99: Upload floating bars — positioned at bottom, canvas padded */
+body.upload-hero #upload-wrap{display:flex!important;flex-direction:column}
 body.upload-hero #upload-wrap > div:first-child{
-  position:absolute;top:auto;bottom:0;left:0;right:0;z-index:10;
-  background:rgba(12,12,12,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:none;border-top:1px solid rgba(255,255,255,.1);border-radius:14px 14px 0 0;
+  order:3;flex-shrink:0;
+  background:rgba(12,12,12,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,.1);border-bottom:none;
   padding:8px 12px;flex-wrap:wrap;gap:6px
 }
 body.upload-hero #up-queue-bar{
-  position:absolute;bottom:48px;left:0;right:0;z-index:11;
-  background:rgba(12,12,12,.80);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:none;border-radius:14px 14px 0 0;padding:8px 12px
+  order:2;flex-shrink:0;
+  background:rgba(12,12,12,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:none;border-top:1px solid rgba(255,255,255,.06);padding:8px 12px
 }
-body.upload-hero #upload-wrap{position:relative}
-body.upload-hero #upload-wrap > div:last-child{flex:1}
+body.upload-hero #upload-wrap > div:last-child{order:1;flex:1}
 .designer-rec{margin-bottom:14px}
 .designer-rec-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px;font-weight:600}
 .designer-rec-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px}
@@ -1059,6 +1059,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div id="cam-queue-swatches" style="display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
       <div id="cam-queue-count" style="font-size:10px;color:var(--muted);flex-shrink:0;white-space:nowrap"></div>
       <button class="btn btn-p btn-sm" style="flex-shrink:0" onclick="Sampler.saveQueue()">Save All</button>
+      <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="Sampler.exportManualPolaroid()">📷</button>
       <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="Sampler.clearQueue()">Clear</button>
     </div>
     </div><!-- /sampler-cam-col -->
@@ -1083,6 +1084,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
         <span id="up-queue-info" style="font-size:10px;color:var(--muted);flex-shrink:0"></span>
         <button class="btn btn-p btn-sm" onclick="Sampler.saveQueue()">Save All</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()">📷</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
       </div>
       <div style="position:relative;flex:1;overflow:hidden">
@@ -3123,7 +3125,7 @@ const App={
           const res = await fetch(pngDataUrl);
           const blob = await res.blob();
           const file = new File([blob], `${title}.png`, {type:'image/png'});
-          await navigator.share({title, text, files:[file]});
+          await navigator.share({ files:[file] });
           App.closeShare();
         }catch(e){ if(e.name!=='AbortError'){ App.toast('Sharing interrupted. Attempting direct download…'); App._downloadPolaroid(pngDataUrl,title); App.closeShare(); } }
       };
@@ -3220,7 +3222,7 @@ const App={
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v98</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v99</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
 
@@ -5432,7 +5434,7 @@ const Library={
           while(n--) u8[n] = bstr.charCodeAt(n);
           const file = new File([u8], `${c.name.replace(/\s+/g,'-')}-spectrum.png`, { type: mime });
           if(navigator.canShare({ files: [file] })){
-            navigator.share({ title: c.name, text, files: [file] })
+            navigator.share({ files: [file] })
               .catch(err => { if(err.name!=='AbortError') App.copyToClipboard(text,'Share unavailable — details copied'); });
             return;
           }
@@ -5461,7 +5463,7 @@ const Library={
 
   async _renderSharePolaroid(c){
     // v87: redesigned — large colour swatch (~70%), compact footer with paint match rows
-    try { await document.fonts.load('bold 18px "Permanent Marker"'); } catch(e) {}
+    try { await document.fonts.load('12px "Permanent Marker"'); await document.fonts.load('12px "Space Mono"'); } catch(e) {}
 
     const canvas    = document.getElementById('export-canvas');
     const SCALE     = Math.min(window.devicePixelRatio || 2, 3);
@@ -5934,7 +5936,7 @@ const Explorer={
     return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));
   },
 
-  // v98: Designer Spec Sheet Export
+  // v99: Designer Spec Sheet Export — tall narrow canvas (800×1800)
   async exportSpecSheet(){
     const d = this._designerData;
     if(!d){ App.toast('Generate a recommendation first'); return; }
@@ -5943,31 +5945,37 @@ const Explorer={
       await document.fonts.load('12px "Space Mono"');
     } catch(e){}
 
-    const W = 420, PAD = 32, BLOCK_H = 130, GAP = 16;
-    const HEADER = 80, FOOTER = 60;
-    const H = HEADER + (BLOCK_H + GAP) * 3 + FOOTER + PAD * 2;
-    const _dpr = Math.min(window.devicePixelRatio || 2, 3);
+    const W = 800, PAD = 48, GAP = 24;
+    const HEADER = 200, BLOCK_H = 420, FOOTER = 80;
+    const H = HEADER + (BLOCK_H + GAP) * 3 + FOOTER;
     const canvas = document.createElement('canvas');
-    canvas.width = Math.floor(W * _dpr);
-    canvas.height = Math.floor(H * _dpr);
+    canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-    ctx.scale(_dpr, _dpr);
 
-    // White card background
+    // White background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
+    // Thin accent line at top
+    ctx.fillStyle = '#c8a96e';
+    ctx.fillRect(PAD, 36, W - PAD*2, 2);
+
     // Header
     ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 18px "Permanent Marker",cursive';
+    ctx.font = 'bold 42px "Permanent Marker",cursive';
     ctx.textBaseline = 'top';
-    ctx.fillText('Interior Design Spec Sheet', PAD, PAD);
-    ctx.fillStyle = '#999';
-    ctx.font = '9px "Space Mono",monospace';
-    ctx.fillText('Generated by Spectrum · digby.shop', PAD, PAD + 26);
-    ctx.fillText(new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}), PAD, PAD + 40);
+    ctx.textAlign = 'left';
+    ctx.fillText('Interior Design Spec Sheet', PAD, 56);
+    ctx.fillStyle = '#888';
+    ctx.font = '16px "Space Mono",monospace';
+    ctx.fillText('Generated by Spectrum · digby.shop', PAD, 110);
+    ctx.fillText(new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}), PAD, 134);
 
-    // Colour blocks
+    // Thin line below header
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(PAD, HEADER - 16, W - PAD*2, 1);
+
+    // Colour blocks — stacked vertically
     const blocks = [
       { label: 'WALLS (60%)', hex: d.primaryHex, match: d.primaryMatch, desc: 'Dominant colour — walls, ceiling, large surfaces' },
       { label: 'WOODWORK & TRIM (30%)', hex: d.trimHex, match: d.trimMatch, desc: d.trimDesc },
@@ -5975,14 +5983,12 @@ const Explorer={
     ];
     const txtOn = (hx) => { const c=CS.hexToRgb(hx); return (c.r*0.299+c.g*0.587+c.b*0.114)<128?'#fff':'#000'; };
 
-    let y = HEADER + PAD;
+    let y = HEADER;
     blocks.forEach(blk => {
-      // Colour swatch rectangle
-      const swW = 80, swH = BLOCK_H - 20;
+      // Large colour swatch
+      const swW = W - PAD*2, swH = 240, rr = 16;
       ctx.fillStyle = blk.hex;
       ctx.beginPath();
-      // Compatible rounded rect
-      const rr=8;
       ctx.moveTo(PAD+rr, y); ctx.lineTo(PAD+swW-rr, y); ctx.arcTo(PAD+swW,y,PAD+swW,y+rr,rr);
       ctx.lineTo(PAD+swW, y+swH-rr); ctx.arcTo(PAD+swW,y+swH,PAD+swW-rr,y+swH,rr);
       ctx.lineTo(PAD+rr, y+swH); ctx.arcTo(PAD,y+swH,PAD,y+swH-rr,rr);
@@ -5990,50 +5996,53 @@ const Explorer={
       ctx.closePath();
       ctx.fill();
 
-      // HEX on swatch
+      // HEX centred on swatch
       ctx.fillStyle = txtOn(blk.hex);
-      ctx.font = 'bold 10px "Space Mono",monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(blk.hex.toUpperCase(), PAD + swW/2, y + swH/2);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
+      ctx.font = 'bold 22px "Space Mono",monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(blk.hex.toUpperCase(), W/2, y + swH/2);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
-      // Text block
-      const tx = PAD + swW + 16;
+      // Text below swatch
+      const ty = y + swH + 16;
       ctx.fillStyle = '#c8a96e';
-      ctx.font = 'bold 9px "Space Mono",monospace';
-      ctx.fillText(blk.label, tx, y + 4);
+      ctx.font = 'bold 16px "Space Mono",monospace';
+      ctx.fillText(blk.label, PAD, ty);
 
       ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold 14px "Permanent Marker",cursive';
-      ctx.fillText(CS.autoName(blk.hex), tx, y + 20);
+      ctx.font = 'bold 28px "Permanent Marker",cursive';
+      ctx.fillText(CS.autoName(blk.hex), PAD, ty + 26);
 
       ctx.fillStyle = '#555';
-      ctx.font = '10px "Space Mono",monospace';
-      ctx.fillText(blk.hex.toUpperCase(), tx, y + 40);
+      ctx.font = '18px "Space Mono",monospace';
+      ctx.fillText(blk.hex.toUpperCase(), PAD, ty + 62);
 
       if (blk.match) {
         ctx.fillStyle = '#8a7048';
-        ctx.font = '9px system-ui,sans-serif';
-        ctx.fillText('Closest: ' + blk.match, tx, y + 56);
+        ctx.font = '15px system-ui,sans-serif';
+        ctx.fillText('Closest Match: ' + blk.match, PAD, ty + 88);
       }
 
       ctx.fillStyle = '#999';
-      ctx.font = 'italic 9px system-ui,sans-serif';
-      const maxW = W - tx - PAD;
-      ctx.fillText(blk.desc, tx, y + 74, maxW);
+      ctx.font = 'italic 14px system-ui,sans-serif';
+      ctx.fillText(blk.desc, PAD, ty + 114, W - PAD*2);
+
+      // Separator
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(PAD, y + BLOCK_H - 4, W - PAD*2, 1);
 
       y += BLOCK_H + GAP;
     });
 
     // Footer
-    ctx.fillStyle = '#ccc';
-    ctx.font = '7px system-ui,sans-serif';
+    ctx.fillStyle = '#c8a96e';
+    ctx.fillRect(PAD, H - FOOTER + 10, W - PAD*2, 2);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '13px system-ui,sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('digby.shop', W - PAD, H - PAD);
+    ctx.fillText('digby.shop', W - PAD, H - 30);
 
-    // Export — same Web Share / fallback anchor pattern as Polaroid
+    // Export — v99: files only for iOS compat
     const pngDataUrl = canvas.toDataURL('image/png');
     const filename = `spectrum-spec-${Date.now()}.png`;
     const _doAnchor = () => {
@@ -6047,7 +6056,7 @@ const Explorer={
       const blob = await res.blob();
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Spectrum Spec Sheet' });
+        await navigator.share({ files: [file] });
         App.toast('Spec Sheet exported ✓');
       } else { _doAnchor(); }
     } catch(e) {
@@ -6571,7 +6580,7 @@ const Explorer={
 
   async slutSwatch(){
     // v85: preload Permanent Marker before canvas draw
-    try { await document.fonts.load('bold 13px "Permanent Marker"'); } catch(e) {}
+    try { await document.fonts.load('12px "Permanent Marker"'); await document.fonts.load('12px "Space Mono"'); } catch(e) {}
     const s = this._slutState;
     if(!s.lut){ App.toast('Generate LUT first'); return; }
     const ramp = ['#111','#333','#555','#777','#999','#bbb','#ddd','#fff'];
@@ -9794,9 +9803,10 @@ self.onmessage = function(e) {
     const LOGICAL_W   = 380;
     const BORDER      = 24;          // card outer margin
     const CW          = LOGICAL_W - BORDER * 2;  // 332px inner width
-    const SWATCH_H    = 80;          // v97: shorter swatch panels — labels move below
-    const LABEL_H     = 40;          // v97: white margin area for labels
+    const SWATCH_H    = 60;          // v99: height of swatch square area
+    const LABEL_H     = 32;          // v99: white margin area for labels below squares
     const BYLINE_PAD  = 24;          // space below labels for byline
+    const SWATCH_TOP_PAD = 12;       // breathing room below photo
 
     // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
@@ -9804,7 +9814,7 @@ self.onmessage = function(e) {
     const MAX_PHOTO_H = LOGICAL_W * 2;
     const naturalH    = Math.round(CW / (srcW / srcH));
     const photoH      = Math.min(naturalH, MAX_PHOTO_H);
-    const LOGICAL_H   = BORDER + photoH + SWATCH_H + LABEL_H + BYLINE_PAD + BORDER;
+    const LOGICAL_H   = BORDER + photoH + SWATCH_TOP_PAD + SWATCH_H + LABEL_H + BYLINE_PAD + BORDER;
 
     // ── Canvas setup ──────────────────────────────────────────────────────────
     const canvas = document.createElement('canvas');
@@ -9860,54 +9870,47 @@ self.onmessage = function(e) {
     ctx.fillRect(BORDER, BORDER, CW, photoH);
     ctx.restore();
 
-    // ── Full-width swatch panels ───────────────────────────────────────────────
-    const n    = hexes.length;
-    const swY  = BORDER + photoH;                  // flush against photo
-    const swW  = Math.floor(CW / n);               // equal width panels
-    // Last panel absorbs any rounding remainder
-    const lastExtraW = CW - swW * n;
-    const CARD_R = 14;                              // card corner radius
+    // ── v99: Individual swatch squares with white gaps ───────────────────────
+    const n       = hexes.length;
+    const GAP     = 8;                                // white gap between squares
+    const TOTAL_GAPS = (n - 1) * GAP;
+    const maxSwSz = Math.min(60, Math.floor((CW - TOTAL_GAPS) / n));  // square size
+    const ROW_W   = n * maxSwSz + TOTAL_GAPS;
+    const rowX    = BORDER + Math.floor((CW - ROW_W) / 2);  // centre the row
+    const swY     = BORDER + photoH + 12;             // 12px breathing room below photo
 
     hexes.forEach((hex, i) => {
-      const x   = BORDER + i * swW;
-      const w   = (i === n - 1) ? swW + lastExtraW : swW;
-      const isFirst = i === 0;
-      const isLast  = i === n - 1;
-      const isOnly  = n === 1;
-      const atBottom = true;
+      const x = rowX + i * (maxSwSz + GAP);
 
-      // Clip to rounded-bottom shape for first/last panels
+      // Draw colour square with rounded corners
       ctx.save();
-      if (isOnly) {
-        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, CARD_R);
-      } else if (isFirst) {
-        rr(x, swY, w, SWATCH_H, 0, 0, 0, CARD_R);
-      } else if (isLast) {
-        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, 0);
-      } else {
-        ctx.rect(x, swY, w, SWATCH_H);
-      }
-      ctx.clip();
+      const sr = 6;
+      ctx.beginPath();
+      ctx.moveTo(x+sr, swY); ctx.lineTo(x+maxSwSz-sr, swY); ctx.arcTo(x+maxSwSz,swY,x+maxSwSz,swY+sr,sr);
+      ctx.lineTo(x+maxSwSz, swY+maxSwSz-sr); ctx.arcTo(x+maxSwSz,swY+maxSwSz,x+maxSwSz-sr,swY+maxSwSz,sr);
+      ctx.lineTo(x+sr, swY+maxSwSz); ctx.arcTo(x,swY+maxSwSz,x,swY+maxSwSz-sr,sr);
+      ctx.lineTo(x, swY+sr); ctx.arcTo(x,swY,x+sr,swY,sr);
+      ctx.closePath();
       ctx.fillStyle = hex;
-      ctx.fillRect(x, swY, w, SWATCH_H);
+      ctx.fill();
       ctx.restore();
 
-      // ── v97: Labels drawn BELOW swatch in white margin, solid black ──────
-      const cx    = x + w / 2;
-      const maxTW = w - 6;
+      // ── Labels BELOW each square in white margin, solid black ──────
+      const cx    = x + maxSwSz / 2;
+      const maxTW = maxSwSz + GAP - 2;
       const slMode   = State.swatchLabel || 'both';
       const showName = slMode === 'both' || slMode === 'name';
       const showHex  = slMode === 'both' || slMode === 'hex';
-      const lblBase  = swY + SWATCH_H;  // top of white label strip
+      const lblTop   = swY + maxSwSz + 4;
 
       if (showName) {
         const rawName = CS.autoName(hex) || hex.toUpperCase();
-        let fSize = Math.min(11, Math.max(7, Math.floor(w / 6)));
+        let fSize = Math.min(9, Math.max(6, Math.floor(maxSwSz / 7)));
         ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'top';
         let displayName = rawName;
-        while (ctx.measureText(displayName).width > maxTW && fSize > 7) {
+        while (ctx.measureText(displayName).width > maxTW && fSize > 6) {
           fSize -= 0.5;
           ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
         }
@@ -9918,41 +9921,34 @@ self.onmessage = function(e) {
           displayName += '…';
         }
         ctx.fillStyle = '#000000';
-        ctx.fillText(displayName, cx, lblBase + 5, maxTW);
+        ctx.fillText(displayName, cx, lblTop, maxTW);
 
         if (showHex) {
-          ctx.fillStyle    = '#000000';
-          ctx.font         = `bold ${Math.max(6, Math.floor(fSize * 0.65))}px "Space Mono",monospace`;
-          ctx.textAlign    = 'center';
-          ctx.textBaseline = 'top';
-          ctx.fillText(hex.toUpperCase(), cx, lblBase + 5 + fSize + 3, maxTW);
+          ctx.fillStyle    = '#555555';
+          ctx.font         = `bold ${Math.max(5, Math.floor(fSize * 0.7))}px "Space Mono",monospace`;
+          ctx.fillText(hex.toUpperCase(), cx, lblTop + fSize + 2, maxTW);
         }
       } else if (showHex) {
-        const hexFSize = Math.min(10, Math.max(7, Math.floor(w / 6)));
+        const hexFSize = Math.min(8, Math.max(6, Math.floor(maxSwSz / 7)));
         ctx.fillStyle    = '#000000';
         ctx.font         = `bold ${hexFSize}px "Space Mono",monospace`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(hex.toUpperCase(), cx, lblBase + 8, maxTW);
+        ctx.fillText(hex.toUpperCase(), cx, lblTop + 2, maxTW);
       }
-      // slMode === 'none': no text drawn
     });
 
 
     // v97: swatch dividers removed for breathable design
     // ── digby.shop byline ────────────────────────────────────────────────────
-    const bylineY = BORDER + photoH + SWATCH_H + LABEL_H + Math.round(BYLINE_PAD / 2);
+    const bylineY = BORDER + photoH + SWATCH_TOP_PAD + SWATCH_H + LABEL_H + Math.round(BYLINE_PAD / 2);
     ctx.fillStyle    = '#999999';
     ctx.font         = '7px system-ui,-apple-system,sans-serif';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'middle';
     ctx.fillText('digby.shop', BORDER + CW - 8, bylineY);
 
-    // ── Download — Web Share on mobile (works on iOS PWA), anchor fallback desktop ──
-    const pngDataUrl = canvas.toDataURL('image/png');
-    const filename   = `spectrum-${Date.now()}.png`;
-    // v97: swatch dividers removed for breathable design
-    // ── Download — v97: sharing error toast + fallback ──────────────────────
+    // ── Download — v99: iOS share fix (files only, no title/text) + error toast ──
     const pngDataUrl = canvas.toDataURL('image/png');
     const filename   = `spectrum-${Date.now()}.png`;
     const _doAnchor  = () => {
@@ -9966,7 +9962,7 @@ self.onmessage = function(e) {
       const blob = await res.blob();
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Spectrum Palette' });
+        await navigator.share({ files: [file] });
         App.toast('Polaroid exported ✓');
       } else {
         _doAnchor();
