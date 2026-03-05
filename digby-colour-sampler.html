@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.31</title>
+<title>Spectrum 4.0.32</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '431';
+  const APP_VERSION = '432';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -215,7 +215,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   pointer-events: none;
 }
 @supports not (backdrop-filter: blur(16px)) { #live-bar { background: rgba(15, 15, 15, 0.88); } }
-/* v408: sampler-cam-col padding-top set dynamically in setMode() */
+/* v432: sampler-cam-col is full-bleed absolute — no padding-top */
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
 /* v429: square live-bar — top row: swatch + hex; below: name; below: kelvin */
@@ -1019,7 +1019,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
     </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: relative; gap: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 140px); background: #000;">
+    <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; overflow: hidden; z-index: 1;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -4874,9 +4874,7 @@ const Sampler={
     if(mb) mb.style.display=m==='camera'?'none':'flex';
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
-    // v427: dynamic clearance — camera gets safe-area + 140px, other modes get none
-    const camCol=document.getElementById('sampler-cam-col');
-    if(camCol){camCol.style.paddingTop=(m==='camera')?'calc(env(safe-area-inset-top, 0px) + 140px)':'0px';}
+    // v432: padding-top removed — cam-col is full-bleed absolute; live-bar floats above
     // v430: hide live-bar in upload and picker modes — only visible during camera
     const lb=document.getElementById('live-bar');
     if(lb){lb.style.setProperty('display', m==='camera'?'flex':'none', 'important');}
