@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.5</title>
+<title>Spectrum 4.0.7</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '405';
+  const APP_VERSION = '407';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -169,10 +169,10 @@ a{color:var(--accent);text-decoration:none}
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v402: live-bar top clears #top header (48px) + safe-area + 8px gap */
+/* v406: live-bar sits immediately below #top header */
 #live-bar {
   position: fixed;
-  top: calc(var(--top-h) + env(safe-area-inset-top, 0px) + 8px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 6px);
   left: 50%;
   transform: translateX(-50%);
   width: 92%;
@@ -279,8 +279,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* Mode switcher */
 #mode-bar{
   background:var(--surface);border-bottom:1px solid var(--border);
-  /* v402: pad top so Camera/Picker/Upload buttons clear live-bar (top-h + safe-area + bar height + gap) */
-  padding:8px 12px;padding-top:calc(var(--top-h) + env(safe-area-inset-top,0px) + 108px);
+  /* v406: mode-bar hidden in camera mode; normal padding for picker/upload */
+  padding:8px 12px;
   display:flex;gap:8px;flex-shrink:0;
 }
 
@@ -1220,7 +1220,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <div id="live-k"></div>
         </div>
         <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
-        <button id="live-export-btn" onclick="if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
+        <button id="live-export-btn" onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}})()" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
     </div>
     <!-- Save card -->
     <div id="save-wrap">
@@ -4355,7 +4355,22 @@ const Sampler={
   capture(){
     const hex=this.currentHex;
     if(!hex||hex==='#888888')return;
-    if(navigator.vibrate) navigator.vibrate(25); // A: colour picked
+    if(navigator.vibrate) navigator.vibrate(25);
+    // v406: direct-save to library immediately (restores v117 behaviour)
+    const e=DS.makeEntry(hex,this.mode);
+    try {
+      const v=document.getElementById('cam-video');
+      if(v&&v.videoWidth&&!v.paused){
+        const MAX=400,scale=Math.min(1,MAX/v.videoWidth);
+        const fc=document.createElement('canvas');
+        fc.width=Math.round(v.videoWidth*scale);fc.height=Math.round(v.videoHeight*scale);
+        fc.getContext('2d').drawImage(v,0,0,fc.width,fc.height);
+        e.frame=fc.toDataURL('image/jpeg',0.82);
+      }
+    }catch(err){}
+    DS.add(e);App.refresh();
+    App.toast(`\u2713 ${e.name}`);
+    // Also push to pickQueue for polaroid export
     this.addToQueue(hex);
   },
 
@@ -4493,10 +4508,18 @@ const Sampler={
     this.renderQueue();
   },
 
-  // Export a polaroid from the wheel queue
+  // Export a polaroid from the wheel/camera queue — snaps frame first if in camera mode
   _exportWheelPolaroid() {
     const hexes = this.pickQueue.slice();
     if (!hexes.length) { App.toast('Queue some colours first'); return; }
+    // v406: if camera is live, capture a frame for the polaroid background
+    const video = document.getElementById('cam-video');
+    if (video && video.videoWidth && this.mode === 'camera') {
+      const snap = document.createElement('canvas');
+      snap.width = video.videoWidth; snap.height = video.videoHeight;
+      snap.getContext('2d').drawImage(video, 0, 0);
+      AutoPalette._camSnap = snap;
+    }
     AutoPalette.exportPolaroid(hexes);
   },
 
