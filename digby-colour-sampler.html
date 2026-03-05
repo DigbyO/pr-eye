@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v107</title>
+<title>Spectrum v133</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '115';
+  const APP_VERSION = '132';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -166,23 +166,33 @@ a{color:var(--accent);text-decoration:none}
 }
 #picker-crosshair svg{width:70px;height:70px}
 
-/* Live colour bar - v108: glass pill floating at top of module, below status bar */
-#live-bar{
-  position:absolute;
-  top:env(safe-area-inset-top,0px);
-  left:12px;right:12px;width:auto;
-  z-index:20;
-  background:rgba(15,15,15,0.88);
-  -webkit-backdrop-filter:blur(12px);
-  backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:16px;
-  padding:10px 14px;
-  display:flex;align-items:center;gap:10px;
-  pointer-events:auto;
-  box-shadow:0 4px 24px rgba(0,0,0,.45);
-  flex-shrink:0;
+/* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
+#live-bar { display: none !important; }
+body.active-tab-sampler #live-bar { display: flex !important; }
+/* v125 EXACT NORTH STAR CSS — position:fixed, centered pill above camera */
+#live-bar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-height: 90px;
+  overflow: hidden;
+  z-index: 2000;
+  background: rgba(15,15,15,0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 16px;
+  align-items:center;gap:10px;pointer-events:auto;
 }
+@supports not (backdrop-filter: blur(10px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
+/* v125: sampler container padding clears fixed live-bar */
+#sampler-container { padding-top: 110px; }
+/* v125: focused polaroid gets 3px white outline */
+.polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
 /* live-bar children inherit pointer-events:auto from parent */
 #live-info{flex:1;min-width:0}
@@ -269,7 +279,9 @@ a{color:var(--accent);text-decoration:none}
 /* Mode switcher */
 #mode-bar{
   background:var(--surface);border-bottom:1px solid var(--border);
-  padding:8px 12px;display:flex;gap:8px;flex-shrink:0;
+  /* v123: pad top so Camera/Picker/Upload buttons clear the absolute live-bar */
+  padding:8px 12px;padding-top:calc(env(safe-area-inset-top,0px) + 130px); /* v132: live-bar bottom ≈ safe+100px; +30px gap for all devices */
+  display:flex;gap:8px;flex-shrink:0;
 }
 
 /* Save card - shown below camera */
@@ -826,7 +838,8 @@ body.simple-mode #tab-prompter{display:none!important}
 body.simple-mode .insp-advanced{display:none!important}
 body.simple-mode #manual-picker-section{display:none!important}
 /* Sampler: hide Manual Picker + Upload buttons */
-body.simple-mode #btn-mode-wheel{display:none!important}
+/* v132: Picker button always visible — reverted to v115 behaviour */
+/* body.simple-mode #btn-mode-wheel was hiding it; removed */
 body.simple-mode #btn-mode-up{display:none!important}
 /* Sampler: hide White Balance button */
 body.simple-mode #wb-btn{display:none!important}
@@ -843,6 +856,9 @@ body.simple-mode .colour-blind-tool{display:none!important}
 body.simple-mode .pb-pro-btn{display:none!important}
 /* v84: Pro-only gating for LUT Generator + Capture One sections */
 body.simple-mode .pro-only{display:none!important}
+/* v132: physical pro-mode-on gate — ensures pro-only hides/shows by body class */
+body:not(.pro-mode-on) .pro-only{display:none!important}
+body.pro-mode-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
 body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .colour-blind-tool,body.pro-mode .pb-pro-btn,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only{display:revert!important}
 
@@ -853,6 +869,36 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 #hdr-pro-sw.on{background:var(--accent);border-color:var(--accent)}
 #hdr-pro-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 #hdr-pro-sw.on::after{left:16px}
+
+/* ── v119 COLOUR TRAY ───────────────────────────────────────────── */
+#colour-tray-handle{
+  position:fixed;bottom:var(--tab-h);left:0;right:0;z-index:8500;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(20,20,20,.95);border-top:1px solid rgba(255,255,255,.12);
+  padding:6px 12px;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#tray-handle-chips{display:flex;gap:5px;align-items:center;overflow:hidden;flex:1;max-height:24px}
+.tray-chip-mini{width:20px;height:20px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,.2)}
+#tray-handle-label{font-size:10px;color:rgba(255,255,255,.5);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+#tray-handle-arrow{font-size:12px;color:rgba(255,255,255,.4);transition:transform .25s;flex-shrink:0}
+#colour-tray{
+  position:fixed;bottom:var(--tab-h);left:0;right:0;z-index:8400;
+  background:#111;border-top:2px solid rgba(255,255,255,.12);
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  max-height:55vh;display:flex;flex-direction:column;
+  touch-action:auto;
+}
+#colour-tray.open{transform:translateY(0)}
+#tray-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px;flex-shrink:0}
+#tray-title{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;font-family:var(--mono)}
+#tray-close-btn{background:#222;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:13px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#tray-swatches{display:flex;flex-wrap:wrap;gap:8px;padding:8px 14px 16px;overflow-y:auto;flex:1}
+.tray-swatch{width:52px;height:52px;border-radius:10px;cursor:pointer;position:relative;border:2px solid transparent;transition:border-color .15s,transform .1s;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tray-swatch.selected{border-color:#fff!important;transform:scale(1.08)}
+.tray-swatch-hex{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:rgba(255,255,255,.7);pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
+#tray-empty{font-size:12px;color:rgba(255,255,255,.3);font-family:var(--mono);text-align:center;padding:20px;width:100%}
+
 /* ── Colour-blind-tool: Pro-only ──────────────────────────────────── */
 .tab-inactive {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -860,12 +906,25 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  /* Narrow the glass pill a bit in landscape */
-  #live-bar{ left:20%;right:20%;top:8px; }
+  /* v120: fixed pill — just narrow it a bit in landscape */
+  #live-bar{ width:72%; }
 }
 /* live-bar uses backdrop-filter:blur(12px) in v108 — glass pill at top */
 .colour-blind-tool{transition:opacity .2s}
 
+
+/* v129: Surface Tester library picker */
+#st-lib-panel{display:none;max-height:200px;overflow-y:auto;background:var(--surface2);border-radius:10px;margin-top:8px;border:1px solid var(--border);-webkit-overflow-scrolling:touch}
+#st-lib-panel.open{display:block}
+#st-lib-panel::-webkit-scrollbar{display:none}
+.st-lib-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.st-lib-row:last-child{border-bottom:none}
+.st-lib-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.15)}
+.st-lib-name{flex:1;font-size:11px;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-lib-hex{font-size:8px;font-family:var(--mono);color:var(--muted)}
+.st-wall-btn,.st-trim-btn{font-size:9px;padding:3px 7px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--fg);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.st-wall-btn.active{background:#7c9885;border-color:#7c9885;color:#fff;font-weight:700}
+.st-trim-btn.active{background:#8a7a6e;border-color:#8a7a6e;color:#fff;font-weight:700}
 </style>
 </head>
 <body>
@@ -965,7 +1024,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <!-- Capture row -->
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
-        <button class="cap-side-btn" onclick="AutoPalette.fromCamera()" title="Extract palette from camera view">🎨</button>
+        <button class="cap-side-btn" onclick="Sampler.setMode('wheel')" title="Open colour picker">🎨</button>
         <button class="cap-side-btn wb-btn" id="wb-btn"
                 onclick="Sampler.toggleWhiteBalance()"
                 title="Set white balance">⬜ WB</button>
@@ -1080,6 +1139,17 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
     <!-- Colour Wheel Picker -->
     <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;background:var(--bg)">
 
+      <!-- v132: v115-style quick native colour picker -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border)">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer">
+          <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Quick pick</span>
+          <input type="color" id="wheel-native-input" value="#888888"
+            style="width:44px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;padding:2px"
+            oninput="ColourWheel.fromNative(this.value)"
+            onchange="ColourWheel.fromNative(this.value)">
+        </label>
+        <button class="btn btn-p btn-sm" style="font-size:11px" onclick="Sampler.captureFromWheel()">&#10003; Save</button>
+      </div>
       <!--  RESULT BAR  always visible at the top, no scroll needed -->
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:4">
         <div id="wheel-preview" style="width:52px;height:52px;border-radius:var(--r);border:2px solid var(--border);flex-shrink:0"></div>
@@ -1258,7 +1328,89 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <div id="var-container"></div>
       </div>
 
-      <div class="sec">Split Tone</div>
+
+      <!-- v122: SURFACE TESTER ────────────────────────────────── -->
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Library Colour Selector
+        <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">For Wall &amp; Trim</span>
+      </div>
+      <div class="card" style="padding:12px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px">
+          Select a saved colour to use with Surface Tester
+        </div>
+        <select id="library-dropdown"
+          onchange="updateLibraryDropdown.onSelect(this.value)"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+                 color:var(--fg);font-size:12px;padding:8px 10px;font-family:var(--mono);outline:none;cursor:pointer">
+          <option value="">— Choose from Library —</option>
+        </select>
+        <div id="lib-dropdown-preview" style="display:none;margin-top:10px;display:flex;align-items:center;gap:8px;padding:8px;background:var(--surface2);border-radius:8px">
+          <div id="lib-dropdown-dot" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0"></div>
+          <div>
+            <div id="lib-dropdown-name" style="font-size:12px;color:var(--fg)"></div>
+            <div id="lib-dropdown-hex" style="font-size:10px;color:var(--muted);font-family:var(--mono)"></div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.applyWall()">→ Wall</button>
+            <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.applyTrim()">→ Trim</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Surface Tester
+        <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">Wall &amp; Trim preview</span>
+      </div>
+      <div class="card" id="surface-tester-card" style="padding:12px">
+        <!-- Preview -->
+        <div id="surface-preview" style="border-radius:10px;overflow:hidden;width:100%;height:140px;background:#888888;position:relative;margin-bottom:12px;border:1px solid var(--border)">
+          <!-- Wall: full-bleed background -->
+          <div id="surface-wall-bg" style="position:absolute;inset:0;background:#888888;transition:background .3s"></div>
+          <!-- Trim: 40% width centered "door" element -->
+          <div id="surface-trim-el" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;height:75%;border-radius:4px 4px 0 0;background:#888888;transition:background .3s;box-shadow:0 4px 16px rgba(0,0,0,.45);border:2px solid rgba(0,0,0,.15)"></div>
+          <div id="surface-contrast-badge" style="position:absolute;bottom:5px;right:8px;font-size:9px;font-family:monospace;color:rgba(255,255,255,.9);background:rgba(0,0,0,.6);padding:2px 7px;border-radius:6px;font-weight:600"></div>
+        </div>
+        <!-- Controls: tap chip to pick colour directly via native color picker -->
+        <div id="surface-assignment-row" style="display:flex;gap:8px">
+          <!-- Wall slot -->
+          <label for="wall-color-input" style="flex:1;display:flex;align-items:center;gap:6px;background:var(--surface2);border-radius:6px;padding:6px 8px;cursor:pointer;position:relative" title="Tap to pick wall colour">
+            <div id="surface-wall-chip" style="width:22px;height:22px;border-radius:4px;background:#888888;border:2px solid rgba(255,255,255,.35);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>
+            <div style="font-size:9px;color:var(--muted);font-family:var(--mono);overflow:hidden">
+              <div style="color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em">Wall ✏️</div>
+              <div id="surface-wall-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff">—</div>
+            </div>
+            <input id="wall-color-input" type="color" value="#888888"
+              style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:none;padding:0"
+              oninput="SurfaceTester.setWall(this.value)"
+              onchange="SurfaceTester.setWall(this.value)">
+          </label>
+          <!-- Trim slot -->
+          <label for="trim-color-input" style="flex:1;display:flex;align-items:center;gap:6px;background:var(--surface2);border-radius:6px;padding:6px 8px;cursor:pointer;position:relative" title="Tap to pick trim colour">
+            <div id="surface-trim-chip" style="width:22px;height:22px;border-radius:4px;background:#888888;border:2px solid rgba(255,255,255,.35);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>
+            <div style="font-size:9px;color:var(--muted);font-family:var(--mono);overflow:hidden">
+              <div style="color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em">Trim ✏️</div>
+              <div id="surface-trim-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff">—</div>
+            </div>
+            <input id="trim-color-input" type="color" value="#888888"
+              style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:none;padding:0"
+              oninput="SurfaceTester.setTrim(this.value)"
+              onchange="SurfaceTester.setTrim(this.value)">
+          </label>
+        </div>
+        <div style="font-size:9px;color:rgba(255,255,255,.25);margin-top:8px;line-height:1.5;font-family:var(--mono)">Tap Wall or Trim to open colour picker</div>
+        <!-- v129: library picker for Surface Tester -->
+        <div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.toggleLibPanel()">📚 From Library ▾</button>
+          <button class="btn btn-s btn-sm" style="font-size:9px" onclick="SurfaceTester.autoSuggest()">✨ Auto-suggest</button>
+          <button class="btn btn-p btn-sm pro-only" style="font-size:9px" onclick="exportSurfacePreview()">📸 Export Preview</button>
+          <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="st-lib-hint"></span>
+        </div>
+        <div id="st-lib-panel"></div>
+      </div>
+
+
+
+            <div class="sec">Split Tone</div>
       <div class="card">
         <div class="split-grad" id="split-grad"></div>
         <div style="padding:0 12px 11px;display:flex;gap:7px;flex-wrap:wrap">
@@ -1709,6 +1861,31 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <button class="btn btn-s btn-sm" onclick="Prompter.clearColours()" title="Remove selected colours, keep text choices">Clear Colours</button>
       </div>
 
+      <!-- v132: Material Tags moved from Explorer into Prompter -->
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Material Tags
+        <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">Wall &amp; Trim · Midjourney</span>
+      </div>
+      <div class="card" id="semantic-prompter-card" style="padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-family:var(--mono)">Interior design prompt builder — Set Wall &amp; Trim colours first</div>
+        <textarea id="semantic-prompt-out" rows="3" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:10px;font-family:var(--mono);padding:8px;resize:vertical;line-height:1.5;outline:none" placeholder="Set Wall and Trim colours in Explorer, then tap a material tag…" readonly></textarea>
+        <div style="margin-top:10px;font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:6px">Material Tags</div>
+        <div id="material-tags" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="btn btn-s btn-sm" data-material="Limewash" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Limewash</button>
+          <button class="btn btn-s btn-sm" data-material="Matte Plaster" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Matte Plaster</button>
+          <button class="btn btn-s btn-sm" data-material="Brass" data-accent="Brass" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Brass</button>
+          <button class="btn btn-s btn-sm" data-material="Oak" data-accent="Oak" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Oak</button>
+          <button class="btn btn-s btn-sm" data-material="Marble" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Marble</button>
+          <button class="btn btn-s btn-sm" data-material="Linen" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Linen</button>
+          <button class="btn btn-s btn-sm" data-material="Concrete" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Concrete</button>
+          <button class="btn btn-s btn-sm" data-material="Velvet" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Velvet</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn btn-s btn-sm" style="flex:1" onclick="SemanticPrompter.copy()" ontouchstart="">Copy</button>
+          <button class="btn btn-p btn-sm" style="flex:1" onclick="SemanticPrompter.openMJ()" ontouchstart="">Open MJ ↗</button>
+        </div>
+      </div>
+
       <div class="shop-banner">
         <a href="https://digby.shop" target="_blank">digby.shop</a>
         <p>Print your palette creations as art products</p>
@@ -1821,6 +1998,75 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   <!--  end mod-palette  -->
   </div>
 
+
+  <!--  SETTINGS  -->
+  <div class="module" id="mod-settings">
+    <div class="mod-scroll" style="padding:12px">
+      <div class="sec">Library</div>
+      <div class="card" style="padding:0 12px">
+        <div class="set-row" id="set-lib-count"></div>
+        <div class="set-row"><div><div class="set-l">Backup Library</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
+        <div class="set-row"><div><div class="set-l">Restore Library</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input-st').click()">Restore JSON</button></div>
+        <input type="file" id="imp-input-st" accept=".json" style="display:none" onchange="App.importLib(this)">
+        <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub">Cannot be undone</div></div><button class="btn btn-d btn-sm" onclick="App.clearLib()">Clear</button></div>
+        <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
+      </div>
+      <div class="sec">Display</div>
+      <div class="card" style="padding:0 12px">
+        <div class="set-row" style="align-items:center;gap:6px">
+          <div style="flex:1"><div class="set-l">Theme</div><div class="set-sub">Light or Dark appearance</div></div>
+          <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">☀ Light</button>
+        </div>
+        <div class="set-row" style="align-items:center;gap:6px">
+          <div style="flex:1"><div class="set-l">Design Pro Mode</div><div class="set-sub">Unlock Wall &amp; Trim export, technical exports, and advanced tools</div></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Off</span>
+            <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;cursor:pointer">
+              <input type="checkbox" id="settings-pro-checkbox-static"
+                style="opacity:0;width:0;height:0;position:absolute"
+                onchange="toggleProMode(this)">
+              <div class="sw" id="settings-pro-sw"
+                onclick="document.getElementById('settings-pro-checkbox-static').click()"
+                style="width:40px;height:22px;cursor:pointer;pointer-events:auto"></div>
+            </label>
+            <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Pro</span>
+          </div>
+        </div>
+        <div class="set-row">
+          <div style="flex:1"><div class="set-l">Export Labels</div><div class="set-sub">Text shown on swatches</div></div>
+          <div class="seg-ctrl" style="margin-left:8px">
+            <div class="seg-btn on" id="sl-both" data-mode="both" onclick="App.setSwatchLabel('both')">Both</div>
+            <div class="seg-btn" id="sl-name" data-mode="name" onclick="App.setSwatchLabel('name')">Name</div>
+            <div class="seg-btn" id="sl-hex"  data-mode="hex"  onclick="App.setSwatchLabel('hex')">HEX</div>
+            <div class="seg-btn" id="sl-none" data-mode="none" onclick="App.setSwatchLabel('none')">None</div>
+          </div>
+        </div>
+        <div class="set-row set-row-cvd"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
+          <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
+      </div>
+
+      <div class="sec pro-only">Technical Exports</div>
+      <div class="card pro-only" style="padding:0 12px">
+        <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy all library colours as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
+        <div class="set-row"><div><div class="set-l">Swift UIColor</div><div class="set-sub">Copy as Swift UIColor extensions</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsSwift()">Copy</button></div>
+        <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as :root CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
+      </div>
+      <div class="sec">About</div>
+      <div class="card" style="padding:0 12px">
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v133</span></div>
+        <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
+      </div>
+      <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
+        <button class="btn btn-p" style="width:100%;font-size:14px;padding:13px" onclick="App.openLink('https://digby.shop')"> Visit digby.shop</button>
+      </div>
+    </div>
+  </div>
+
+
+<!-- v121: Colour Tray removed — Library is a dedicated tab again -->
+
 <!-- TABS -->
 <div id="tabs">
   <button class="tab on" id="tab-sampler" onclick="App.setTab('sampler')">
@@ -1836,11 +2082,11 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
     Explorer
   </button>
   <button class="tab" id="tab-prompter" onclick="App.setTab('prompter')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
     Prompter
   </button>
   <button class="tab" id="tab-palette" onclick="App.setTab('palette')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="11" r="1.5" fill="currentColor"/><circle cx="16" cy="15" r="1.5" fill="currentColor"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/><circle cx="8" cy="15" r="1.5" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6" fill="none"/><circle cx="12" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.2" cy="9" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.2" cy="15" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18" r="1.5" fill="currentColor" stroke="none"/><circle cx="6.8" cy="15" r="1.5" fill="currentColor" stroke="none"/><circle cx="6.8" cy="9" r="1.5" fill="currentColor" stroke="none"/></svg>
     Palette
   </button>
 </div>
@@ -2200,6 +2446,18 @@ const CS = {
     const prefix=this.huePrefix(hex);
     const auto=this.autoName(hex);
     return prefix+' / '+auto;
+  },
+
+  // v130: Pantone name as primary — falls back to prefixedName if no Pantone data
+  pantoneFirst(hex){
+    try {
+      const rgb = this.hexToRgb(hex);
+      const lab = this.rgbToLab(rgb.r, rgb.g, rgb.b);
+      const pan = this.nearestPantone(lab);
+      if (pan && pan.name) return pan.name;
+      if (pan && pan.code) return pan.code;
+    } catch(e) {}
+    return this.prefixedName(hex);
   },
   autoName(hex){
     if(!this._nameCache){try{this._nameCache=JSON.parse(localStorage.getItem('spectrum-name-cache')||'{}');}catch(e){this._nameCache={};}}
@@ -2868,7 +3126,7 @@ const DS = {
       lch:         CS.labToLch(lab),
       // MASTER-FIX 3: prefer closest Pantone name as the canonical name;
       // autoName() is the generative fallback when Pantone data is absent.
-      name:        CS.prefixedName(hex),
+      name:        CS.pantoneFirst(hex),  // v130: Pantone name as default
       nameSource:  'hue-prefix',
       pantone:     CS.nearestPantone(lab),
       littleGreene:CS.nearestLG(lab),
@@ -2897,6 +3155,9 @@ const State = {
   swatchLabel:   'both',  // v89: export swatch label mode — 'both' | 'name' | 'hex' | 'none'
   subjects:      [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
   mediums:       [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
+  focusedColor:  null, // v121: ID of focused/selected library colour
+  wallColor:     '#888888', // v122: Surface Tester wall slot
+  trimColor:     '#888888', // v122: Surface Tester trim slot
 
   save() {
     try {
@@ -2938,9 +3199,11 @@ const State = {
     if (this.proMode) {
       document.body.classList.remove('simple-mode');
       document.body.classList.add('pro-mode');
+      document.body.classList.add('pro-mode-on');    // v131 spec alias
     } else {
       document.body.classList.add('simple-mode');
       document.body.classList.remove('pro-mode');
+      document.body.classList.remove('pro-mode-on'); // v131 spec alias
     }
     // Sync header Pro toggle
     const hdrSw = document.getElementById('hdr-pro-sw');
@@ -2948,6 +3211,9 @@ const State = {
     // Sync settings overlay toggle (if open)
     const setSw = document.getElementById('settings-pro-sw');
     if (setSw) setSw.classList.toggle('on', this.proMode);
+    const setCb = document.getElementById('settings-pro-checkbox');
+    if (setCb) setCb.checked = this.proMode; // v131: keep real checkbox in sync
+    // Note: pro-mode-toggle is Design Pro Mode (independent) — do NOT sync here
     // v77: Remove/restore Prompter tab from DOM (not just display:none)
     const prompterTab = document.getElementById('tab-prompter');
     if (!this.proMode) {
@@ -2968,6 +3234,7 @@ const App={
   activeLut:null,
   activeLutName:'',
   online:false,
+  selectedHex:null,  // v119: currently selected colour from Palette Tray
 
   async init(){
     this.checkOnline();
@@ -2999,6 +3266,7 @@ const App={
       }
     });
 
+    document.body.classList.add('active-tab-sampler'); // v121: seed initial tab class
     Sampler.init();
     Library.render();
     Explorer.init();
@@ -3009,29 +3277,56 @@ const App={
   },
 
   setTab(t){
-    // v85: cleanup global event listeners when leaving sampler tab
+    // v121 Fraggle: body class gating — live-bar only visible on sampler
+    document.body.classList.forEach(c => { if(c.startsWith('active-tab-')) document.body.classList.remove(c); });
+    document.body.classList.add('active-tab-' + t);
+
     if (this.tab === 'sampler' && t !== 'sampler') {
       Sampler._cleanupGlobalListeners();
-      // v96: cancel RAF when leaving sampler — no need to sample while hidden
-      // IMPORTANT: do NOT call video.pause() — breaks iOS Safari getUserMedia stream
       if(Sampler.rafId){ cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
     }
-    // v96: restart RAF when returning to sampler (camera mode only)
     if(t === 'sampler' && this.tab !== 'sampler'){
       if(Sampler.mode === 'camera' && !Sampler.frozen) Sampler.startSampling();
     }
+    // v121: 4-tab nav — sampler/library/explorer/settings
+    const validMods = ['sampler','library','explorer','prompter','palette','settings'];
     document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-    document.getElementById('mod-'+t).classList.add('active');
-    document.getElementById('tab-'+t).classList.add('on');
+    const modEl = document.getElementById('mod-'+t);
+    const tabEl = document.getElementById('tab-'+t);
+    if(modEl) modEl.classList.add('active');
+    if(tabEl) tabEl.classList.add('on');
     this.tab=t;
-    if(t==='library')Library.render();
-    if(t==='explorer')Explorer.onOpen();
-    if(t==='prompter')Prompter.render();
-    if(t==='palette')PaletteBuilder.render();
-    // Re-apply CVD to newly rendered swatches
+    if(t==='library') Library.render();
+    if(t==='explorer') Explorer.onOpen();
+    if(t==='prompter') Prompter.render();
+    if(t==='palette'){ try{ PaletteBuilder.render(); }catch(e){} }
+    if(t==='explorer'){
+      try{ updateLibraryDropdown.refresh(); }catch(e){}       // v131/v132: refresh dropdown
+    }
+    if(t==='settings') this._refreshSettingsTab();
     if(typeof CVDSim!=='undefined'&&CVDSim.mode!=='normal')
       requestAnimationFrame(()=>CVDSim._applyToUI());
+  },
+
+  _refreshSettingsTab(){
+    const all=DS.all();
+    const el=document.getElementById('set-lib-count');
+    if(el) el.innerHTML=`<div class="set-l">${all.length} / ${DS.MAX_COLOURS} colours</div><div class="set-sub">${DS._db?'✓ Stored in IndexedDB':'Stored in localStorage'}</div>`;
+    // Sync pro-mode toggle (static settings tab)
+    const proVal = state.isProMode || false;
+    const sw=document.getElementById('settings-pro-sw');
+    if(sw){ sw.className=proVal?'sw on':'sw'; }
+    const cbStatic=document.getElementById('settings-pro-checkbox-static');
+    if(cbStatic) cbStatic.checked = proVal;
+    // Sync theme button
+    const tb=document.getElementById('settings-theme-btn');
+    if(tb) tb.textContent = document.body.classList.contains('light-mode') ? '🌙 Dark' : '☀ Light';
+    // Sync swatch label seg-ctrl
+    ['both','name','hex','none'].forEach(m=>{
+      const btn=document.getElementById('sl-'+m);
+      if(btn) btn.classList.toggle('on', State.swatchLabel===m);
+    });
   },
 
   refresh(){
@@ -3040,7 +3335,8 @@ const App={
     if(this.tab==='explorer')Explorer.render();
     if(this.tab==='prompter')Prompter.render();
     Sampler.updateCamCollection();
-    // Re-apply CVD to swatches created by this render pass
+    // v119: refresh tray handle chips on every DS change
+    if(typeof ColourTray!=='undefined') ColourTray.refresh();
     if(typeof CVDSim!=='undefined'&&CVDSim.mode!=='normal')
       requestAnimationFrame(()=>CVDSim._applyToUI());
   },
@@ -3184,6 +3480,23 @@ const App={
     const all=DS.all();
     this.openOv(`<div id="set-body">
       <div class="ov-title">Settings</div>
+      <div class="set-sec">Design</div>
+      <div class="set-row" style="align-items:center;gap:6px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="flex:1">
+          <div class="set-l">Design Pro Mode</div>
+          <div class="set-sub">Wall &amp; Trim export, Tailwind, Swift, CSS Variables</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="dpm-lbl">Off</span>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer">
+            <input type="checkbox" id="pro-mode-toggle"
+              style="opacity:0;width:0;height:0;position:absolute"
+              onchange="toggleProMode(this)">
+            <div class="sw" id="settings-pro-sw-ov"
+              style="width:44px;height:24px;border-radius:12px;cursor:pointer"></div>
+          </label>
+        </div>
+      </div>
       <div class="shop-banner" style="margin:0 0 12px">
         <a href="https://digby.shop" target="_blank">digby.shop</a>
         <p>Print your palette creations as products</p>
@@ -3204,15 +3517,7 @@ const App={
           <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">☀ Light</button>
         </div>
       </div>
-      <div class="set-row" style="align-items:center;gap:6px">
-        <div style="flex:1;min-width:0"><div class="set-l">Pro Mode</div><div class="set-sub">Unlock advanced tools &amp; Prompter tab</div></div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Simple</span>
-          <div class="${State.proMode?'sw on':'sw'}" id="settings-pro-sw" onclick="App.toggleProMode()"
-               style="width:40px;height:22px;flex-shrink:0"></div>
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Pro</span>
-        </div>
-      </div>
+
       <div class="set-row">
         <div style="flex:1;min-width:0"><div class="set-l">Export Labels</div><div class="set-sub">Text shown on colour swatches in exports</div></div>
         <div class="seg-ctrl" style="margin-left:8px">
@@ -3224,8 +3529,14 @@ const App={
       </div>
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
+      <div class="set-sec" style="display:${State.proMode?'block':'none'}" id="tech-exports-sec">Technical Exports</div>
+      <div id="tech-exports-card" style="display:${State.proMode?'block':'none'}">
+        <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy library as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
+        <div class="set-row"><div><div class="set-l">Swift UIColor</div><div class="set-sub">Copy as Swift UIColor extensions</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsSwift()">Copy</button></div>
+        <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
+      </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v80</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v133</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3237,6 +3548,7 @@ const App={
         </button>
       </div>
     </div>`);
+    setTimeout(initDesignProToggle, 0); // v132: sync Design Pro toggle state after overlay injects HTML
   },
 
   // ── Shared Polaroid palette export (no photo; colour swatches only) ──────────
@@ -3343,7 +3655,7 @@ const App={
       ctx.font = 'bold ' + nameSize + 'px system-ui,-apple-system,sans-serif';
       ctx.textAlign = 'center';
       // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
-      var name = CS.prefixedName(hex);
+      var name = CS.pantoneFirst(hex);  // v130: Pantone name on polaroid
       // Truncate to fit within swatch width with a small margin
       var maxW = sw - 8;
       while (name.length > 3 && ctx.measureText(name).width > maxW) {
@@ -3405,7 +3717,7 @@ const App={
 
   // v74: Shared Pro Mode toggle — called by BOTH header and settings toggles
   toggleProMode(val) {
-    State.proMode = (val !== undefined) ? !!val : !State.proMode;
+    State.proMode = (val !== undefined) ? !!val : !State.proMode; // v131: accepts bool from checkbox onchange
     State.save();
     State.applyProMode();
     App.toast(State.proMode ? 'Pro Mode ON' : 'Simple Mode ON');
@@ -3988,7 +4300,7 @@ const Sampler={
     document.getElementById('live-hex').style.color=_barTxt;
     // MASTER-FIX 3: primary display name = closest Pantone match;
     // autoName() is the fallback if no Pantone data yet.
-    document.getElementById('live-name').textContent=CS.prefixedName(hex);
+    document.getElementById('live-name').textContent=CS.pantoneFirst(hex);  // v130: show Pantone name live
     document.getElementById('live-name').style.color=_yiq<128?'rgba(255,255,255,.6)':'rgba(0,0,0,.5)';
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
@@ -4054,7 +4366,7 @@ const Sampler={
     const fb=CS.nearestFB(lab);
     const k=CS.kelvin(rgb);
     const lrv=CS.lrv(lab);
-    let name=CS.prefixedName(hex);
+    let name=CS.pantoneFirst(hex);  // v130: Pantone name default
     document.getElementById('save-swatch').style.background=hex;
     document.getElementById('save-name').value=name;
     document.getElementById('save-meta').textContent=
@@ -4069,7 +4381,7 @@ const Sampler={
 
   saveColour(){
     const hex=this.pendingHex;if(!hex)return;
-    const name=document.getElementById('save-name').value.trim()||CS.autoName(hex);
+    const name=document.getElementById('save-name').value.trim()||CS.pantoneFirst(hex);  // v130
     const entry=DS.makeEntry(hex,this.mode);
     entry.name=name;
     // MASTER-FIX 5a: capture the current video frame so the Polaroid export
@@ -4310,6 +4622,9 @@ const Sampler={
     document.getElementById('btn-mode-cam').classList.toggle('on',m==='camera');
     document.getElementById('btn-mode-up').classList.toggle('on',m==='upload');
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
+    // v132: hide mode-bar in camera mode → full-screen camera like v115
+    const mb=document.getElementById('mode-bar');
+    if(mb) mb.style.display=m==='camera'?'none':'flex';
     document.getElementById('sampler-cam-col').style.display=m==='camera'?'flex':'none';
     document.getElementById('upload-wrap').style.display=m==='upload'?'flex':'none';
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
@@ -4327,7 +4642,7 @@ const Sampler={
   captureFromWheel(){
     const hex=ColourWheel.getCurrentHex();
     this.addToQueue(hex);
-    App.toast(`${CS.autoName(hex)} added  ${this.pickQueue.length}/${this.camCount}`);
+    App.toast(`${CS.pantoneFirst(hex)} added  ${this.pickQueue.length}/${this.camCount}`);
   },
 
   setCamCount(n){
@@ -4783,12 +5098,20 @@ const Library={
 
   _autoLoad631toPrompter(){
     const all=DS.all(); if(all.length<2) return;
-    const sorted=[...all].sort((a,b)=>(b.lrv??50)-(a.lrv??50));
+    // v127: hydrate LRV so sort is meaningful
+    const hydrated=all.map(c=>{
+      if(Number.isFinite(c.lrv)) return c;  // v132: was !==undefined&&!==null, NaN passed through
+      try{const rgb=c.rgb||CS.hexToRgb(c.hex);const lab=c.lab||CS.rgbToLab(rgb.r,rgb.g,rgb.b);const lrv=CS.lrv(lab);DS.update(c.id,{lab,lrv});return{...c,lab,lrv};}
+      catch(e){return{...c,lrv:50};}
+    });
+    const _lrv2=c=>Number.isFinite(c.lrv)?c.lrv:50;
+    const sorted=[...hydrated].sort((a,b)=>_lrv2(b)-_lrv2(a));
     const dom=sorted[0], acc=sorted[sorted.length-1];
-    const midLrv=((dom.lrv??50)+(acc.lrv??50))/2;
-    const sec=sorted.slice(1,-1).reduce((best,c)=>
-      Math.abs((c.lrv??50)-midLrv)<Math.abs((best.lrv??50)-midLrv)?c:best, sorted[1]);
-    Prompter.use631(dom.id,sec.id,acc.id);
+    const middle=sorted.slice(1,-1);
+    let sec;
+    if(middle.length===0){sec=acc;}
+    else{const midLrv=(_lrv2(dom)+_lrv2(acc))/2;sec=middle.reduce((best,c)=>Math.abs(_lrv2(c)-midLrv)<Math.abs(_lrv2(best)-midLrv)?c:best,middle[0]);}
+    Prompter.use631(dom.id||'',sec.id||'',acc.id||'');
   },
 
   activeTagFilter: null,
@@ -4896,28 +5219,71 @@ const Library={
     bar.style.display = 'flex';
   },
 
+  // v132: HTML-escape helper — prevents colour names with & < > " breaking innerHTML
+  _esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  },
+
   render631(all, el) {
     if (!all.length) { el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add some colours to use 60-30-10 view</div>'; return; }
     if (all.length < 2) { el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add at least 2 colours to use 60-30-10 view</div>'; return; }
-    // Sort by LRV descending  stable sort so ties keep insertion order
-    const sorted = [...all].sort((a, b) => {
-      const diff = (b.lrv ?? 50) - (a.lrv ?? 50);
-      return diff !== 0 ? diff : all.indexOf(a) - all.indexOf(b); // stable tie-break
+
+    // v129 FIX: bulletproof LRV hydration.
+    // Previously ?? 50 was used but ?? does NOT catch NaN — only null/undefined.
+    // CS.lrv can return NaN if lab.l is NaN, making sort comparisons silently broken.
+    // Fix: use Number.isFinite() throughout, recompute any colour whose lrv is not finite.
+    const _safeLrv = v => (Number.isFinite(v) ? v : null);
+    const hydrated = all.map(c => {
+      if (_safeLrv(c.lrv) !== null) return c; // already a valid finite number
+      try {
+        const rgb = c.rgb || CS.hexToRgb(c.hex);
+        const lab = c.lab || CS.rgbToLab(rgb.r, rgb.g, rgb.b);
+        const lrv = CS.lrv(lab);
+        // Only store if finite — don't cache NaN
+        if (Number.isFinite(lrv)) { DS.update(c.id, { lab, lrv }); return { ...c, lab, lrv }; }
+        // If CS.lrv still returned NaN, fall back to luminance from hex directly
+        const hexLrv = Math.round(((c.hex ? (parseInt(c.hex.slice(1,3),16)*0.2126 + parseInt(c.hex.slice(3,5),16)*0.7152 + parseInt(c.hex.slice(5,7),16)*0.0722) / 255 : 0.5) ** 2.2) * 100);
+        return { ...c, lab, lrv: hexLrv };
+      } catch(e) { return { ...c, lrv: 50 }; }
+    });
+
+    // Sort by LRV descending — lightest = dominant (60%), darkest = accent (10%)
+    const _lrv = c => Number.isFinite(c.lrv) ? c.lrv : 50;
+    const sorted = [...hydrated].sort((a, b) => {
+      const diff = _lrv(b) - _lrv(a);
+      return diff !== 0 ? diff : hydrated.indexOf(a) - hydrated.indexOf(b);
     });
     const dom = sorted[0];
     const acc = sorted[sorted.length - 1];
-    // Secondary: pick the colour closest to the midpoint LRV between dom and acc
-    const midLrv = ((dom.lrv ?? 50) + (acc.lrv ?? 50)) / 2;
-    const sec = sorted.slice(1, -1).reduce((best, c) =>
-      Math.abs((c.lrv ?? 50) - midLrv) < Math.abs((best.lrv ?? 50) - midLrv) ? c : best,
-      sorted[1]
-    );
+
+    // 2-colour edge case — synthesise a blend for the 30% secondary slot
+    let sec;
+    const middle = sorted.slice(1, -1);
+    if (middle.length === 0) {
+      try {
+        const rgbD = CS.hexToRgb(dom.hex), rgbA = CS.hexToRgb(acc.hex);
+        const toH = n => n.toString(16).padStart(2,'0');
+        const bHex = '#'+toH(Math.round((rgbD.r+rgbA.r)/2))+toH(Math.round((rgbD.g+rgbA.g)/2))+toH(Math.round((rgbD.b+rgbA.b)/2));
+        sec = { hex: bHex, name: 'Blend', id: '__blend__', lrv: (_lrv(dom)+_lrv(acc))/2 };
+      } catch(e) { sec = acc; }
+    } else {
+      const midLrv = (_lrv(dom) + _lrv(acc)) / 2;
+      sec = middle.reduce((best, c) =>
+        Math.abs(_lrv(c) - midLrv) < Math.abs(_lrv(best) - midLrv) ? c : best,
+        middle[0]
+      );
+    }
     el.innerHTML=`
       <div style="padding:12px 12px 4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">The 603010 Rule</div>
       <div style="padding:0 12px;font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">A classic interior design & composition principle. Your lightest colour becomes the dominant (60%), mid-tone secondary (30%), deepest accent (10%).</div>
-      <div class="rule-block" style="background:${dom.hex};height:160px"><div class="rule-label">60%  ${dom.name}</div></div>
-      <div class="rule-block" style="background:${sec.hex};height:80px"><div class="rule-label" style="font-size:14px">30%  ${sec.name}</div></div>
-      <div class="rule-block" style="background:${acc.hex};height:40px"><div class="rule-label" style="font-size:11px">10%  ${acc.name}</div></div>
+      <div class="rule-block" style="background:${dom.hex};height:160px"><div class="rule-label">60%  ${this._esc(dom.name)}<span style="font-size:10px;opacity:.55;margin-left:8px">LRV ${_lrv(dom)}</span></div></div>
+      <div class="rule-block" style="background:${sec.hex};height:80px"><div class="rule-label" style="font-size:14px">30%  ${this._esc(sec.name)}<span style="font-size:9px;opacity:.55;margin-left:8px">LRV ${Math.round(_lrv(sec))}</span></div></div>
+      <div class="rule-block" style="background:${acc.hex};height:40px"><div class="rule-label" style="font-size:11px">10%  ${this._esc(acc.name)}<span style="font-size:9px;opacity:.55;margin-left:6px">LRV ${Math.round(_lrv(acc))}</span></div></div>
       <div style="padding:10px 12px;display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-s btn-sm" onclick="Library.export631('${dom.hex}','${sec.hex}','${acc.hex}')">Export PNG</button>
         <button class="btn btn-p btn-sm" onclick="SwatchExport.open6310('${dom.id}','${sec.id}','${acc.id}')">Swatch Export</button>
@@ -4932,7 +5298,7 @@ const Library={
   polaroidHTML(c){
     const angle=(parseInt(c.id.slice(-3),36)%9-4)*0.7;
     const vtName='pol-'+c.id;
-    return`<div class="polaroid" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.openDetail('${c.id}')}">
+    return`<div class="polaroid" data-id="${c.id}" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Library.setFocus('${c.id}');Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.setFocus('${c.id}');Library.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
       <div class="pol-name">${c.name}</div>
       <div class="pol-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
@@ -4941,6 +5307,16 @@ const Library={
       ${(()=>{const _pt=CS.psychTag(c.hex);return`<div class="pol-match" style="margin-top:2px"><span class="psych-pill psych-${_pt.category}">${_pt.label}</span></div>`})()}
       <button class="pol-folder-btn" onclick="event.stopPropagation();Library._addToFolder('${c.id}')" title="Move to folder">📁</button>
     </div>`;
+  },
+
+  setFocus(id) {
+    State.focusedColor = id;
+    document.querySelectorAll('.polaroid.focused').forEach(el => el.classList.remove('focused'));
+    const pol = document.querySelector(`.polaroid[data-id="${id}"]`);
+    if (pol) pol.classList.add('focused');
+    // Also expose hex for Surface Mapper
+    const entry = DS.get(id);
+    if (entry) App.selectedHex = entry.hex;
   },
 
   openDetail(id){
@@ -5194,7 +5570,7 @@ const Library={
     const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
     const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
     const tempId = 'tmp_' + Date.now();
-    const tempC = { id:tempId, hex:h, name:CS.autoName(h), rgb, lab, hsl,
+    const tempC = { id:tempId, hex:h, name:CS.pantoneFirst(h), rgb, lab, hsl,  // v130
       lrv:CS.lrv(lab), kelvin:CS.kelvin(rgb),
       farrowBall:CS.nearestFB(lab), littleGreene:CS.nearestLG(lab),
       autoTags:CS.autoTags(h), tags:[] };
@@ -5421,8 +5797,8 @@ const Library={
     await Promise.all([
       document.fonts.load('bold 12px "Permanent Marker"'),
       document.fonts.load('bold 10px "Space Mono"')
-    ]).catch(() => console.log("Font load failed, using system fallback"));
-    await document.fonts.ready;
+    ]).catch(() => {});
+    await document.fonts.ready.catch(() => {});
 
     const canvas    = document.getElementById('export-canvas');
     const SCALE     = Math.min(window.devicePixelRatio || 2, 3);
@@ -6529,6 +6905,9 @@ const Prompter={
         if(libCountEl) libCountEl.textContent=this.sel.size?`${this.sel.size} selected`:'';
       }
     }
+    // v128: keep selected bar and lib panel in sync
+    this._renderSelectedBar();
+    this._renderLibPanel();
 
     const countEl=document.getElementById('prom-sel-count');
     if(countEl) countEl.textContent=this.sel.size?`${this.sel.size} selected`:'';
@@ -6571,12 +6950,13 @@ const Prompter={
       :vis.map(c=>{
         const _k=c.kelvin||CS.kelvin(c.rgb||CS.hexToRgb(c.hex));
         const _pt=CS.psychTag(c.hex);
-        return`<button class="prom-chip"
+        return`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
           type="button"
           data-cid="${c.id}"
-          onclick="Library.openDetail('${c.id}')"
-          title="${c.name} — tap to view detail"
-          aria-label="${c.name} — tap to view colour detail">
+          onclick="Prompter.toggleColour('${c.id}')"
+          title="${c.name} — tap to select"
+          aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
+          aria-pressed="${this.sel.has(c.id)}">
           <div class="prom-sw" style="background:${c.hex}"></div>
           <div class="prom-label">${c.name}</div>
           <div class="kelvin-badge"><b>~${Math.round(_k-273).toLocaleString()}°C</b></div>
@@ -6603,8 +6983,8 @@ const Prompter={
     // Sync counts
     const countEl = document.getElementById('prom-sel-count');
     if (countEl) countEl.textContent = ids.size ? `${ids.size} selected` : '';
-    const libCountEl = document.getElementById('prom-lib-count');
-    if (libCountEl) libCountEl.textContent = ids.size ? `${ids.size} selected` : '';
+    // v128: selected bar + lib count handled by _renderSelectedBar
+    this._renderSelectedBar();
     // Sync the active colour card
     this._updateActiveCard();
   },
@@ -6644,7 +7024,80 @@ const Prompter={
     this.render();
   },
 
-  toggleColour(id){
+  // v128: render selected colours swatches bar
+  _renderSelectedBar(){
+    const bar = document.getElementById('prom-selected-bar');
+    const empty = document.getElementById('prom-sel-empty');
+    const countEl = document.getElementById('prom-lib-count');
+    if (!bar) return;
+    const selArr = DS.all().filter(c => this.sel.has(c.id));
+    if (countEl) countEl.textContent = selArr.length ? selArr.length + ' selected' : '';
+    if (!selArr.length) {
+      // Remove all psel-items but keep the empty span
+      bar.querySelectorAll('.psel-item').forEach(el => el.remove());
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    // Rebuild swatch items
+    bar.querySelectorAll('.psel-item').forEach(el => el.remove());
+    selArr.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'psel-item';
+      item.innerHTML = `<div class="psel-dot" style="background:${c.hex}"></div>
+        <div>
+          <div class="psel-name">${c.name}</div>
+          <div class="psel-hex">${c.hex.toUpperCase()}</div>
+        </div>
+        <button class="psel-x" onclick="Prompter.toggleColour('${c.id}')" aria-label="Remove ${c.name}">×</button>`;
+      bar.appendChild(item);
+    });
+  },
+
+  // v128: clear all selected colours
+  clearSel(){
+    this.sel.clear();
+    this._syncSelection();
+    this._renderSelectedBar();
+    this._renderLibPanel();
+    App.toast('Selection cleared');
+  },
+
+  // v128: toggle library dropdown panel open/closed
+  toggleLibPanel(){
+    const panel = document.getElementById('prom-lib-panel');
+    const btn = document.getElementById('prom-lib-toggle-btn');
+    if (!panel) return;
+    const isOpen = panel.classList.toggle('open');
+    if (btn) btn.classList.toggle('open', isOpen);
+    const lbl = document.getElementById('prom-lib-toggle-label');
+    if (lbl) lbl.textContent = isOpen ? 'Hide library ▴' : 'Choose colours ▾';
+    if (isOpen) this._renderLibPanel();
+  },
+
+  // v128: render rows in the library dropdown panel
+  _renderLibPanel(){
+    const panel = document.getElementById('prom-lib-panel');
+    if (!panel || !panel.classList.contains('open')) return;
+    const all = this._sortAll(DS.all());
+    if (!all.length) {
+      panel.innerHTML = '<div style="padding:14px 12px;font-size:11px;color:var(--muted)">No colours in library yet</div>';
+      return;
+    }
+    panel.innerHTML = all.map(c => {
+      const on = this.sel.has(c.id);
+      return `<div class="plib-row${on?' on':''}" onclick="Prompter.toggleColour('${c.id}');Prompter._renderLibPanel()" data-cid="${c.id}">
+        <div class="plib-row-dot" style="background:${c.hex}"></div>
+        <div class="plib-row-info">
+          <div class="plib-row-name">${c.name}</div>
+          <div class="plib-row-hex">${c.hex.toUpperCase()}</div>
+        </div>
+        <div class="plib-row-check">${on ? '✓' : ''}</div>
+      </div>`;
+    }).join('');
+  },
+
+    toggleColour(id){
     if(this.sel.has(id))this.sel.delete(id);
     else{if(this.sel.size>=6){App.toast('Max 6 colours');return}this.sel.add(id)}
     this._syncSelection();   // fast path: class-toggle only, no DOM rebuild
@@ -7239,6 +7692,24 @@ const ColourWheel = {
     this.update();
   },
 
+  // v132: sync from native <input type="color"> value
+  fromNative(hex) {
+    if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    const rgb = CS.hexToRgb(hex);
+    const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
+    this.hue = hsl.h;
+    const lEl = document.getElementById('wheel-lightness');
+    const sEl = document.getElementById('wheel-sat');
+    if (lEl) lEl.value = Math.round(hsl.l);
+    if (sEl) sEl.value = Math.round(hsl.s);
+    const nEl = document.getElementById('wheel-native-input');
+    if (nEl) nEl.value = hex;
+    this.currentHex = hex;
+    this._updatePreview(hex);
+    this._drawWheel();
+    this._drawHueStrip();
+  },
+
   fromHex(hex) {
     if (!hex.startsWith('#') || hex.length < 7) return;
     try {
@@ -7277,6 +7748,9 @@ const ColourWheel = {
     // Update hex input
     const hexIn = document.getElementById('wheel-hex-in');
     if (hexIn && document.activeElement !== hexIn) hexIn.value = hex.toUpperCase();
+    // v132: keep native quick-pick input in sync
+    const nativeIn = document.getElementById('wheel-native-input');
+    if (nativeIn) nativeIn.value = hex.toLowerCase();
 
     // Nearest matches
     const rgb = CS.hexToRgb(hex);
@@ -8354,7 +8828,7 @@ const PaletteBuilder = {
       const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
       const lrv = CS.lrv ? CS.lrv(lab) : 50;
       const txtCol = lrv < 50 ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.65)';
-      const name   = CS.autoName(hex);
+      const name   = CS.pantoneFirst(hex);  // v130
       return `<div class="pb-algo-chip" data-hex="${hex}" style="background:${hex}"
         onclick="PaletteBuilder.addColour('${hex}')" title="${name}">
         <span class="pb-algo-chip-hex" style="color:${txtCol}">${hex.toUpperCase()}</span>
@@ -8892,9 +9366,13 @@ const PaletteBuilder = {
 
 <!--  BOOT  -->
 <script>
+// v132: switchTab global alias (spec-required name)
+function switchTab(id) { App.setTab(id); }
+
 document.addEventListener('DOMContentLoaded',async ()=>{
   await App.init();
   Theme.init();
+  restoreDesignProMode(); // v132: restore Design Pro Mode state
   SharePalette.checkURLOnLoad();
   // Prompter pill clicks are handled by the inline onclick="Prompter.togglePill(this)"
   // on each pill element. The delegated listener has been removed because it caused
@@ -9000,6 +9478,578 @@ const Theme = {
 };
 
 // ─── COLOUR BLINDNESS SIMULATOR ─────────────────────────────────
+
+// ─── v119: COLOUR TRAY ───────────────────────────────────────────
+const ColourTray = {
+  isOpen: false,
+
+  toggle() {
+    this.isOpen ? this.close() : this.open();
+  },
+
+  open() {
+    this.isOpen = true;
+    const tray = document.getElementById('colour-tray');
+    const arrow = document.getElementById('tray-handle-arrow');
+    if (tray) tray.classList.add('open');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    this.render();
+  },
+
+  close() {
+    this.isOpen = false;
+    const tray = document.getElementById('colour-tray');
+    const arrow = document.getElementById('tray-handle-arrow');
+    if (tray) tray.classList.remove('open');
+    if (arrow) arrow.style.transform = '';
+  },
+
+  render() {
+    const all = DS.all();
+    const container = document.getElementById('tray-swatches');
+    const chips = document.getElementById('tray-handle-chips');
+    if (!container) return;
+
+    // Update handle preview chips
+    if (chips) {
+      chips.innerHTML = all.slice(0, 8).map(c =>
+        `<div class="tray-chip-mini" style="background:${c.hex}"></div>`
+      ).join('');
+    }
+
+    if (!all.length) {
+      container.innerHTML = '<div id="tray-empty">No saved colours yet — sample some!</div>';
+      return;
+    }
+    const sel = App.selectedHex || '';
+    container.innerHTML = all.map(c => {
+      const active = c.hex.toLowerCase() === sel.toLowerCase();
+      const yiq = CS.yiq(c.hex);
+      const textCol = yiq > 128 ? 'rgba(0,0,0,.8)' : 'rgba(255,255,255,.8)';
+      return `<div class="tray-swatch${active ? ' selected' : ''}"
+        style="background:${c.hex}"
+        onclick="ColourTray.select('${c.hex}')"
+        ontouchstart=""
+        title="${c.name || c.hex}">
+        <div class="tray-swatch-hex" style="color:${textCol}">${c.hex.toUpperCase()}</div>
+      </div>`;
+    }).join('');
+  },
+
+  select(hex) {
+    App.selectedHex = hex;
+    App.toast('Selected: ' + (CS.pantoneFirst ? CS.pantoneFirst(hex) : hex));  // v130
+    this.render();
+    // Update surface tester if open
+    if (typeof SurfaceTester !== 'undefined') SurfaceTester.onTraySelect(hex);
+  },
+
+  refresh() {
+    // Called after DS changes
+    const chips = document.getElementById('tray-handle-chips');
+    const all = DS.all();
+    if (chips) {
+      chips.innerHTML = all.slice(0, 8).map(c =>
+        `<div class="tray-chip-mini" style="background:${c.hex}"></div>`
+      ).join('');
+    }
+    if (this.isOpen) this.render();
+  }
+};
+
+// ─── v119: SURFACE TESTER ────────────────────────────────────────
+// ── v131: Library Dropdown for Explorer ──────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// v132 DESIGNER RESCUE — global helpers
+// ═══════════════════════════════════════════════════════════
+
+// state alias: bridges spec-required lowercase API to existing State/DS objects
+const state = {
+  _designPro: false,
+  get isProMode() { return this._designPro; },
+  set isProMode(v) { this._designPro = Boolean(v); },  // independent of State.proMode
+  get palette() { return DS.all(); }
+};
+
+// toggleProMode(cb) — v132: DESIGN Pro Mode only — completely separate from Simple/Pro Mode
+// Only touches: pro-mode-on body class + spectrum-design-pro-mode localStorage key
+function toggleProMode(cb) {
+  const val = (cb && typeof cb === 'object' && 'checked' in cb) ? cb.checked : Boolean(cb);
+  state.isProMode = val;
+  try { localStorage.setItem('spectrum-design-pro-mode', val ? '1' : '0'); } catch(e) {}
+  document.body.classList.toggle('pro-mode-on', val);
+  // Sync overlay checkbox + slider + label
+  const cb2 = document.getElementById('pro-mode-toggle');
+  if (cb2) cb2.checked = val;
+  const sw = document.getElementById('settings-pro-sw-ov');
+  if (sw) sw.classList.toggle('on', val);
+  const lbl = document.getElementById('dpm-lbl');
+  if (lbl) lbl.textContent = val ? 'On' : 'Off';
+  // Sync static settings tab checkbox + slider
+  const cbStatic = document.getElementById('settings-pro-checkbox-static');
+  if (cbStatic) cbStatic.checked = val;
+  const swStatic = document.getElementById('settings-pro-sw');
+  if (swStatic) swStatic.classList.toggle('on', val);
+  if (typeof App !== 'undefined') App.toast(val ? '✏️ Design Pro on' : 'Design Pro off');
+}
+
+// initDesignProToggle() — call after openSettings() injects HTML
+function initDesignProToggle() {
+  const val = state.isProMode;
+  const cb = document.getElementById('pro-mode-toggle');
+  if (cb) cb.checked = val;
+  const sw = document.getElementById('settings-pro-sw-ov');
+  if (sw) sw.classList.toggle('on', val);
+  const lbl = document.getElementById('dpm-lbl');
+  if (lbl) lbl.textContent = val ? 'On' : 'Off';
+}
+
+// Restore Design Pro Mode from localStorage on boot (called from init)
+function restoreDesignProMode() {
+  try {
+    const raw = localStorage.getItem('spectrum-design-pro-mode');
+    if (raw === '1') toggleProMode(true);
+  } catch(e) {}
+}
+
+// exportSurfacePreview() — high-res Wall & Trim canvas export
+async function exportSurfacePreview() {
+  const W = 1200, H = 800;
+  const wall = (SurfaceTester && SurfaceTester.wallHex) ? SurfaceTester.wallHex : '#888888';
+  const trim = (SurfaceTester && SurfaceTester.trimHex) ? SurfaceTester.trimHex : '#888888';
+
+  // Font gate
+  await Promise.all([
+    document.fonts.load('bold 12px "Permanent Marker"'),
+    document.fonts.load('bold 10px "Space Mono"')
+  ]).catch(() => console.warn('Font fail'));
+  await document.fonts.ready.catch(() => {});
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Wall background
+  ctx.fillStyle = wall;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle texture overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  for (let y = 0; y < H; y += 4) { ctx.fillRect(0, y, W, 2); }
+
+  // Trim inset "door" block with shadow
+  const tw = W * 0.34, th = H * 0.66;
+  const tx = (W - tw) / 2, ty = (H - th) / 2;
+  // Drop shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 8;
+  ctx.fillStyle = trim;
+  ctx.beginPath();
+  if (ctx.roundRect) { ctx.roundRect(tx, ty, tw, th, [6,6,0,0]); }
+  else { ctx.rect(tx, ty, tw, th); }
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+  // Door panel detail
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(tx + 12, ty + 12, tw - 24, th - 12);
+
+  // Label bar
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, H - 88, W, 88);
+
+  // Wall swatch circle + label
+  ctx.fillStyle = wall;
+  ctx.beginPath(); ctx.arc(32, H - 44, 18, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(32, H - 44, 18, 0, Math.PI*2); ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 14px "Space Mono",monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('WALL', 58, H - 52);
+  ctx.font = '11px "Space Mono",monospace';
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.fillText(wall.toUpperCase(), 58, H - 34);
+
+  // Trim swatch circle + label (right side)
+  ctx.fillStyle = trim;
+  ctx.beginPath(); ctx.arc(W - 32, H - 44, 18, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(W - 32, H - 44, 18, 0, Math.PI*2); ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 14px "Space Mono",monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('TRIM', W - 58, H - 52);
+  ctx.font = '11px "Space Mono",monospace';
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.fillText(trim.toUpperCase(), W - 58, H - 34);
+
+  // Spectrum watermark
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '10px "Space Mono",monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Spectrum · Wall & Trim Preview', W / 2, H - 16);
+
+  try {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `wall-trim-${wall.replace('#','')}-${trim.replace('#','')}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 8000);
+    if (typeof App !== 'undefined') App.toast('📸 Preview exported!');
+  } catch(e) {
+    console.error('exportSurfacePreview failed', e);
+    if (typeof App !== 'undefined') App.toast('Export failed: ' + e.message);
+  }
+}
+
+// TechExport — Tailwind / Swift / CSS Variables export for full library
+const TechExport = {
+  _all() { return DS.all(); },
+
+  async copyAsTailwind() {
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => console.warn('Font fail'));
+    const all = this._all();
+    if (!all.length) { App.toast('Library is empty'); return; }
+    const slug = n => n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'color';
+    const seen = {};
+    const entries = all.map((c,i) => {
+      let k = slug(c.name); seen[k]=(seen[k]||0)+1;
+      if (seen[k] > 1) k += '-' + i;
+      return `      '${k}': '${c.hex.toUpperCase()}'`;
+    });
+    const out = [
+      `// tailwind.config.js — paste into theme.extend.colors`,
+      `module.exports = { theme: { extend: { colors: {`,
+      ...entries.map(e => e + ','),
+      `  } } } };`
+    ].join('\n');
+    this._copy(out, '🎨 Tailwind config copied ✓');
+  },
+
+  async copyAsSwift() {
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => console.warn('Font fail'));
+    const all = this._all();
+    if (!all.length) { App.toast('Library is empty'); return; }
+    const camel = n => n.replace(/[^a-zA-Z0-9 ]/g,'').trim().split(/\s+/).map((w,i) => i===0?w[0].toLowerCase()+w.slice(1):w[0].toUpperCase()+w.slice(1)).join('') || 'color';
+    const hexToRgb = hex => {
+      const r = parseInt(hex.slice(1,3),16)/255;
+      const g = parseInt(hex.slice(3,5),16)/255;
+      const b = parseInt(hex.slice(5,7),16)/255;
+      return {r,g,b};
+    };
+    const lines = [
+      `import UIKit`,
+      ``,
+      `extension UIColor {`,
+      `  // Spectrum Library — generated by Spectrum v132`,
+      ...all.map(c => {
+        const {r,g,b} = hexToRgb(c.hex);
+        return `  static let ${camel(c.name)} = UIColor(red: ${r.toFixed(3)}, green: ${g.toFixed(3)}, blue: ${b.toFixed(3)}, alpha: 1.0)  // ${c.hex.toUpperCase()}`;
+      }),
+      `}`
+    ];
+    this._copy(lines.join('\n'), '🍎 Swift UIColor extension copied ✓');
+  },
+
+  async copyAsCssVars() {
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => console.warn('Font fail'));
+    const all = this._all();
+    if (!all.length) { App.toast('Library is empty'); return; }
+    const kebab = n => n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'color';
+    const lines = [
+      `/* Spectrum Library — generated by Spectrum v132 */`,
+      `:root {`,
+      ...all.map(c => `  --${kebab(c.name)}: ${c.hex.toUpperCase()};`),
+      `}`
+    ];
+    this._copy(lines.join('\n'), '🎨 CSS Variables copied ✓');
+  },
+
+  _copy(text, msg) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => App.toast(msg)).catch(() => App.toast(msg));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); App.toast(msg); } catch(e) {}
+      document.body.removeChild(ta);
+    }
+  }
+};
+
+const updateLibraryDropdown = {
+  // Populate the <select> with all library colours
+  refresh() {
+    const sel = document.getElementById('library-dropdown');
+    if (!sel) return;
+    const all = DS.all();
+    const prev = sel.value; // preserve selection if possible
+    sel.innerHTML = '<option value="">— Choose from Library —</option>' +
+      all.map(c => `<option value="${c.id}" ${c.id===prev?'selected':''}>${c.name} · ${c.hex.toUpperCase()}</option>`).join('');
+    // Hide preview if no selection
+    if (!sel.value) {
+      const p = document.getElementById('lib-dropdown-preview');
+      if (p) p.style.display = 'none';
+    } else {
+      this.onSelect(sel.value);
+    }
+  },
+
+  // Called when user picks a colour from the dropdown
+  // Also delegated to by the global updateLibraryDropdown._onSelect
+  onSelect(id) {
+    if (!id) return;
+    const c = DS.get(id);
+    if (!c) return;
+    // Set State.focusedColor so Wall/Trim buttons can use it
+    State.focusedColor = id;
+    App.selectedHex = c.hex;
+    // Update preview row
+    const dot  = document.getElementById('lib-dropdown-dot');
+    const name = document.getElementById('lib-dropdown-name');
+    const hex  = document.getElementById('lib-dropdown-hex');
+    const prev = document.getElementById('lib-dropdown-preview');
+    if (dot)  { dot.style.background = c.hex; }
+    if (name) name.textContent = c.name;
+    if (hex)  hex.textContent  = c.hex.toUpperCase();
+    if (prev) prev.style.display = 'flex';
+  }
+};
+
+const SurfaceTester = {
+  wallHex: '#888888',
+  trimHex: '#888888',
+
+  // v126: set directly from native color picker
+  setWall(hex) {
+    if (!hex) return;
+    this.wallHex = hex;
+    App.selectedHex = hex;
+    // Sync the input element value
+    const inp = document.getElementById('wall-color-input');
+    if (inp) inp.value = hex;
+    this._update();
+  },
+
+  setTrim(hex) {
+    if (!hex) return;
+    this.trimHex = hex;
+    App.selectedHex = hex;
+    const inp = document.getElementById('trim-color-input');
+    if (inp) inp.value = hex;
+    this._update();
+  },
+
+  // v126: also callable from Library (keeps backward compat)
+  applyWall() {
+    const hex = App.selectedHex;
+    if (!hex) { App.toast('Tap the Wall swatch to pick a colour'); return; }
+    this.setWall(hex);
+    App.toast('Wall → ' + hex.toUpperCase());
+  },
+
+  applyTrim() {
+    const hex = App.selectedHex;
+    if (!hex) { App.toast('Tap the Trim swatch to pick a colour'); return; }
+    this.setTrim(hex);
+    App.toast('Trim → ' + hex.toUpperCase());
+  },
+
+  onTraySelect(hex) {
+    // Highlight which is assigned — no auto-apply
+  },
+
+  copyMJPrompt() {
+    const wallName = this.wallHex.toUpperCase();
+    const trimName = this.trimHex.toUpperCase();
+    const prompt = `Interior design, walls painted in ${wallName}, architectural trim in ${trimName} --v 6.0`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(prompt)
+        .then(() => App.toast('MJ prompt copied ✓'))
+        .catch(() => { App.toast(prompt, 4000); });
+    } else {
+      App.toast('Prompt: ' + prompt, 4000);
+    }
+  },
+
+  // v129: toggle library picker panel
+  toggleLibPanel() {
+    const panel = document.getElementById('st-lib-panel');
+    if (!panel) return;
+    const isOpen = panel.classList.toggle('open');
+    const btn = document.querySelector('[onclick="SurfaceTester.toggleLibPanel()"]');
+    if (btn) btn.textContent = isOpen ? '📚 From Library ▴' : '📚 From Library ▾';
+    if (isOpen) this._renderStLibPanel();
+  },
+
+  // v129: render library colour rows with Wall / Trim assign buttons
+  _renderStLibPanel() {
+    const panel = document.getElementById('st-lib-panel');
+    if (!panel || !panel.classList.contains('open')) return;
+    const all = DS.all();
+    if (!all.length) {
+      panel.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--muted)">No colours in library yet</div>';
+      return;
+    }
+    const wHex = this.wallHex.toLowerCase();
+    const tHex = this.trimHex.toLowerCase();
+    panel.innerHTML = all.map(c => {
+      const isWall = c.hex.toLowerCase() === wHex;
+      const isTrim = c.hex.toLowerCase() === tHex;
+      return `<div class="st-lib-row">
+        <div class="st-lib-dot" style="background:${c.hex}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="st-lib-name">${c.name}</div>
+          <div class="st-lib-hex">${c.hex.toUpperCase()}</div>
+        </div>
+        <button class="st-wall-btn${isWall?' active':''}" onclick="SurfaceTester.setWall('${c.hex}');SurfaceTester._renderStLibPanel()">Wall</button>
+        <button class="st-trim-btn${isTrim?' active':''}" onclick="SurfaceTester.setTrim('${c.hex}');SurfaceTester._renderStLibPanel()">Trim</button>
+      </div>`;
+    }).join('');
+  },
+
+  // v129: auto-suggest — lightest LRV colour → Wall, darkest → Trim
+  autoSuggest() {
+    const all = DS.all();
+    if (!all.length) { App.toast('Add colours to Library first'); return; }
+    // Hydrate LRV
+    const hydrated = all.map(c => {
+      if (Number.isFinite(c.lrv)) return c;
+      try {
+        const rgb = c.rgb || CS.hexToRgb(c.hex);
+        const lab = c.lab || CS.rgbToLab(rgb.r, rgb.g, rgb.b);
+        const lrv = CS.lrv(lab);
+        return { ...c, lrv: Number.isFinite(lrv) ? lrv : 50 };
+      } catch(e) { return { ...c, lrv: 50 }; }
+    });
+    const sorted = [...hydrated].sort((a, b) => b.lrv - a.lrv);
+    const wallC = sorted[0];
+    const trimC = sorted[sorted.length - 1];
+    this.setWall(wallC.hex);
+    this.setTrim(trimC.hex);
+    const hint = document.getElementById('st-lib-hint');
+    if (hint) hint.textContent = `${wallC.name} → Wall · ${trimC.name} → Trim`;
+    this._renderStLibPanel();
+    App.toast('✨ Auto-suggested: ' + wallC.name + ' / ' + trimC.name);
+  },
+
+    _update() {
+    // v122: sync to global State slots
+    State.wallColor = this.wallHex;
+    State.trimColor = this.trimHex;
+    const wall = document.getElementById('surface-wall-bg');
+    const trim = document.getElementById('surface-trim-el');
+    const wallChip = document.getElementById('surface-wall-chip');
+    const trimChip = document.getElementById('surface-trim-chip');
+    const wallLabel = document.getElementById('surface-wall-label');
+    const trimLabel = document.getElementById('surface-trim-label');
+    const badge = document.getElementById('surface-contrast-badge');
+    // v126: keep native color picker inputs in sync
+    const wallInp = document.getElementById('wall-color-input');
+    const trimInp = document.getElementById('trim-color-input');
+
+    if (wall) wall.style.background = this.wallHex;
+    if (trim) trim.style.background = this.trimHex;
+    if (wallChip) wallChip.style.background = this.wallHex;
+    if (trimChip) trimChip.style.background = this.trimHex;
+    if (wallLabel) wallLabel.textContent = this.wallHex.toUpperCase();
+    if (trimLabel) trimLabel.textContent = this.trimHex.toUpperCase();
+    if (wallInp) wallInp.value = this.wallHex;
+    if (trimInp) trimInp.value = this.trimHex;
+
+    // Contrast ratio (WCAG)
+      if (typeof SemanticPrompter !== 'undefined') SemanticPrompter.refresh();
+    if (badge && CS.hexToRgb) {
+      try {
+        const ratio = this._contrast(this.wallHex, this.trimHex);
+        const grade = ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : ratio >= 3 ? 'AA Lg' : 'Fail';
+        badge.textContent = ratio.toFixed(1) + ':1 ' + grade;
+      } catch(e) { badge.textContent = ''; }
+    }
+  },
+
+  _lum(hex) {
+    const {r,g,b} = CS.hexToRgb(hex);
+    const s = [r,g,b].map(v => {
+      v /= 255;
+      return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    });
+    return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+  },
+
+  _contrast(h1, h2) {
+    const l1 = this._lum(h1), l2 = this._lum(h2);
+    const bright = Math.max(l1,l2), dark = Math.min(l1,l2);
+    return (bright + 0.05) / (dark + 0.05);
+  },
+
+  // v132: delegate to global exportSurfacePreview()
+  exportPreview() { return exportSurfacePreview(); }
+};
+
+const SemanticPrompter = {
+  _material: '',
+  _accent: '',
+
+  tagClick(btn) {
+    const mat = btn.dataset.material || '';
+    if (this._material === mat) {
+      // deselect
+      btn.classList.remove('on');
+      this._material = '';
+      this._accent = '';
+    } else {
+      document.querySelectorAll('#material-tags .btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      this._material = mat;
+      this._accent = btn.dataset.accent || '';
+    }
+    this._updatePrompt();
+  },
+
+  _updatePrompt() {
+    const wall = (typeof State !== 'undefined' && State.wallColor) ? State.wallColor.toUpperCase() : (typeof SurfaceTester !== 'undefined' ? SurfaceTester.wallHex.toUpperCase() : '#888888');
+    const trim = (typeof State !== 'undefined' && State.trimColor) ? State.trimColor.toUpperCase() : (typeof SurfaceTester !== 'undefined' ? SurfaceTester.trimHex.toUpperCase() : '#888888');
+    const mat = this._material || 'Paint';
+    const acc = this._accent || 'White';
+    const prompt = `Interior design, walls in ${wall} ${mat}, trim in ${trim} ${acc} --v 6.0`;
+    const ta = document.getElementById('semantic-prompt-out');
+    if (ta) ta.value = prompt;
+  },
+
+  refresh() { this._updatePrompt(); },
+
+  copy() {
+    const ta = document.getElementById('semantic-prompt-out');
+    if (!ta || !ta.value) { App.toast('Set Wall & Trim colours first'); return; }
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(ta.value).then(() => App.toast('Prompt copied ✓')).catch(() => App.toast(ta.value, 3500));
+    } else { App.toast(ta.value, 4000); }
+  },
+
+  openMJ() {
+    const ta = document.getElementById('semantic-prompt-out');
+    if (!ta || !ta.value) { App.toast('Generate a prompt first'); return; }
+    window.open('https://www.midjourney.com/imagine', '_blank');
+  }
+};
+
 const CVDSim = {
   mode: 'normal',  // normal | deuteranopia | protanopia | tritanopia | achromatopsia
 
@@ -9559,12 +10609,36 @@ self.onmessage = function(e) {
    *   [28px white border bottom]
    */
   async exportPolaroid(hexes) {
-    // v101: Font Gate — ensure fonts are loaded before canvas rendering
+    // v119: Triple-Check Font Gate — text NEVER goes missing
+    // Gate 1: Promise.all with explicit size variants
     await Promise.all([
       document.fonts.load('bold 12px "Permanent Marker"'),
-      document.fonts.load('bold 10px "Space Mono"')
-    ]).catch(() => console.log("Font load failed, using system fallback"));
-    await document.fonts.ready;
+      document.fonts.load('bold 18px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"'),
+      document.fonts.load('bold 8px "Space Mono"')
+    ]).catch(() => {});
+    // Gate 2: document.fonts.ready
+    await document.fonts.ready.catch(() => {});
+    // Gate 3: verify + fallback — if font not loaded, swap to system font
+    const pmLoaded = document.fonts.check('bold 12px "Permanent Marker"');
+    const smLoaded = document.fonts.check('bold 10px "Space Mono"');
+    if (!pmLoaded) console.warn('v119: Permanent Marker not loaded — using Arial fallback');
+    if (!smLoaded) console.warn('v119: Space Mono not loaded — using Courier fallback');
+    const FONT_PM = pmLoaded ? '"Permanent Marker",cursive' : 'Arial,sans-serif';
+    const FONT_SM = smLoaded ? '"Space Mono",monospace'     : 'Courier,monospace';
+    // Patch ctx font helper so all canvas drawing uses verified fonts
+    const _patchCtxFonts = (ctx) => {
+      const origFont = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
+      const patchedSet = function(v) {
+        v = v.replace(/"Permanent Marker",cursive/g, FONT_PM);
+        v = v.replace(/'Permanent Marker',cursive/g, FONT_PM);
+        v = v.replace(/"Space Mono",monospace/g, FONT_SM);
+        v = v.replace(/'Space Mono',monospace/g, FONT_SM);
+        v = v.replace(/Space Mono,monospace/g,   FONT_SM);
+        origFont.set.call(ctx, v);
+      };
+      Object.defineProperty(ctx, 'font', { get: () => origFont.get.call(ctx), set: patchedSet });
+    };
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
     // ── Source image ─────────────────────────────────────────────────────────
@@ -9615,6 +10689,7 @@ self.onmessage = function(e) {
     canvas.height = Math.floor(LOGICAL_H * _dpr);
     const ctx = canvas.getContext('2d');
     ctx.scale(_dpr, _dpr);
+    _patchCtxFonts(ctx); // v119 Triple-Check Font Gate: redirect font assignments to verified font
 
     // ── Helper: rounded rect path ─────────────────────────────────────────────
     const rr = (x, y, w, h, tl, tr, br, bl) => {
