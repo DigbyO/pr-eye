@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v105</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v106</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '105';
+  const APP_VERSION = '106';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -94,7 +94,7 @@ a{color:var(--accent);text-decoration:none}
 .module.active{display:flex;flex-direction:column}
 .mod-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--tab-h) + 16px + var(--safe-bottom))}
 
-#tabs{height:var(--tab-h);padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:1000}
+#tabs{height:var(--tab-h);padding-bottom:var(--safe-bottom);background:rgba(15,15,15,1);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:9999;pointer-events:auto}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--faint);transition:color var(--tr);font-size:var(--fs-xxs);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;position:relative;min-height:var(--tab-h)}
 .tab.on{color:var(--accent)}
 .tab svg{width:20px;height:20px}
@@ -168,13 +168,15 @@ a{color:var(--accent);text-decoration:none}
 
 /* Live colour bar - overlaid at bottom of camera */
 #live-bar{
-  position:absolute;bottom:calc(90px + env(safe-area-inset-bottom, 0px) + 16px);left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
+  position:absolute;bottom:calc(100px + env(safe-area-inset-bottom, 0px) + 20px);left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
   z-index:10;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
   background:rgba(15,15,15,0.85);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   padding:12px 14px;
   display:flex;align-items:center;gap:10px;
+  pointer-events:none;
 }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
+#live-swatch,#live-info,#live-matches,#live-export-btn,.live-pill{pointer-events:auto;}
 #live-info{flex:1;min-width:0}
 #live-hex{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
 #live-name{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -850,7 +852,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  #live-bar { bottom: calc(90px + env(safe-area-inset-bottom, 0px) + 16px) !important; width: 70% !important; }
+  #live-bar { bottom: calc(100px + env(safe-area-inset-bottom, 0px) + 20px) !important; width: 70% !important; }
 }
 @supports not (backdrop-filter: blur(10px)) {
   #live-bar { background: rgba(10,10,10,0.95) !important; }
