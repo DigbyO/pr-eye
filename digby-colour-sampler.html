@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.22</title>
+<title>Spectrum 4.0.23</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '422';
+  const APP_VERSION = '423';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -166,28 +166,24 @@ a{color:var(--accent);text-decoration:none}
 }
 #picker-crosshair svg{width:70px;height:70px}
 
-/* v421 UI POLISH: live-bar edge-to-edge */
+/* v423 PREMIUM GRADIENT: full-bleed native camera bar */
 #live-bar {
-  position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; width: 100%;
-  max-height: 160px; overflow: hidden; z-index: 2000; display: none;
-  align-items: center; justify-content: space-between;
-  background: rgba(15,15,15,0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border-radius: 0 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.15);
-  padding: 20px 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: calc(env(safe-area-inset-top, 40px) + 20px) 24px 40px 24px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  z-index: 2000; display: none; align-items: center; justify-content: space-between;
+  pointer-events: none;
 }
-@media (orientation: landscape) { #live-bar { max-height: 120px; padding: 16px 20px; } }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v420: body padding-top removed; clearance handled per-element */
-@supports not (backdrop-filter: blur(12px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
-/* v421: sampler-cam-col padding-top set dynamically in setMode() */
+/* v423: all live-bar children re-enable pointer events */
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
-#live-swatch{width:100px;height:100px;border-radius:var(--rs);border:4px solid #fff;flex-shrink:0;transition:background .1s}
-/* live-bar children inherit pointer-events:auto from parent */
-#live-info{flex:1;min-width:0}
+#live-swatch{width:64px;height:64px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.5);flex-shrink:0;transition:background .1s;pointer-events:auto}
+/* live-bar children */
+#live-info{flex:1;min-width:0;pointer-events:auto}
 #live-hex{font-family:var(--mono);font-size:20px;font-weight:700;color:#fff}
-#live-name{font-size:24px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#live-k{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+#live-name{font-size:22px;font-weight:800;color:rgba(255,255,255,.95);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 10px rgba(0,0,0,0.6)}
+#live-k{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
 
 /* Mini collection strip - overlaid top-right of camera */
 #cam-collection{
@@ -267,11 +263,11 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 
 /* Mode switcher — v422: iOS segmented pill at bottom of sampler */
 #mode-bar{
-  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 8px;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  padding: 6px; border-radius: 30px; z-index: 100;
-  border: 1px solid rgba(255,255,255,0.15); width: max-content;
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 2100; display: flex; gap: 8px;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  padding: 6px; border-radius: 40px;
+  border: 1px solid rgba(255,255,255,0.2); width: max-content;
 }
 #mode-bar .cap-side-btn{
   padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;
@@ -983,7 +979,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   <div class="module active" id="mod-sampler" style="position:relative">
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;min-height:0;padding-top:calc(env(safe-area-inset-top, 0px) + 180px)">
+    <div id="sampler-cam-col" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#000;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -4836,11 +4832,10 @@ const Sampler={
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
     // v132: hide mode-bar in camera mode → full-screen camera like v115
     const mb=document.getElementById('mode-bar');
-    if(mb) mb.style.display=m==='camera'?'none':'flex';
+    if(mb) mb.style.display='flex'; // v423: always visible — absolute positioned pill
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
-    // v420: padding-top clears live-bar in camera mode only; image picker gets no gap
-    if (col) { col.style.paddingTop = (m === 'camera') ? 'calc(env(safe-area-inset-top, 0px) + 180px)' : '0px'; }
+    // v423: padding-top removed — cam-col is absolute full-bleed
     document.getElementById('upload-wrap').style.display=m==='upload'?'flex':'none';
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
     this.pickQueue=[];
