@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0</title>
+<title>Spectrum 4.0.5</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '400';
+  const APP_VERSION = '405';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -169,10 +169,10 @@ a{color:var(--accent);text-decoration:none}
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v125 EXACT NORTH STAR CSS — position:fixed, centered pill above camera */
+/* v402: live-bar top clears #top header (48px) + safe-area + 8px gap */
 #live-bar {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  top: calc(var(--top-h) + env(safe-area-inset-top, 0px) + 8px);
   left: 50%;
   transform: translateX(-50%);
   width: 92%;
@@ -189,8 +189,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   align-items:center;gap:10px;pointer-events:auto;
 }
 @supports not (backdrop-filter: blur(10px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
-/* v125: sampler container padding clears fixed live-bar */
-#sampler-container { padding-top: 110px; }
+/* v402: sampler container padding clears fixed live-bar below #top */
+#sampler-container { padding-top: calc(var(--top-h) + 108px); }
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
@@ -279,8 +279,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* Mode switcher */
 #mode-bar{
   background:var(--surface);border-bottom:1px solid var(--border);
-  /* v123: pad top so Camera/Picker/Upload buttons clear the absolute live-bar */
-  padding:8px 12px;padding-top:calc(env(safe-area-inset-top,0px) + 130px); /* v132: live-bar bottom ≈ safe+100px; +30px gap for all devices */
+  /* v402: pad top so Camera/Picker/Upload buttons clear live-bar (top-h + safe-area + bar height + gap) */
+  padding:8px 12px;padding-top:calc(var(--top-h) + env(safe-area-inset-top,0px) + 108px);
   display:flex;gap:8px;flex-shrink:0;
 }
 
@@ -848,8 +848,9 @@ body.simple-mode .set-row-cvd{display:none!important}
 body.simple-mode .cvd-feature{display:none!important}
 /* Colour-blind simulation tool — Pro only */
 body.simple-mode .colour-blind-tool{display:none!important}
-/* PaletteBuilder: hide Tailwind + CVD buttons */
+/* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
+body:not(.design-pro-on) .pb-pro-btn{display:none!important}
 /* v84: Pro-only gating for LUT Generator + Capture One sections */
 body.simple-mode .pro-only{display:none!important}
 /* v137: design-pro-on gates Design Pro features — decoupled from simple/pro tab mode */
@@ -1020,7 +1021,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <!-- Capture row -->
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
-        <button class="cap-side-btn" onclick="Sampler.setMode('wheel')" title="Open colour picker">🎨</button>
+        <button class="cap-side-btn" onclick="AutoPalette.fromCamera(6)" title="Extract dominant colours from camera frame" id="auto-pal-btn">🎨</button>
         <button class="cap-side-btn wb-btn" id="wb-btn"
                 onclick="Sampler.toggleWhiteBalance()"
                 title="Set white balance">⬜ WB</button>
@@ -4295,14 +4296,14 @@ const Sampler={
 
   updateLiveBar(hex,r,g,b){
     document.getElementById('live-swatch').style.background=hex;
-    const _yiq=(r*299+g*587+b*114)/1000;
-    const _barTxt=_yiq<128?'#ffffff':'#000000';
+    // v405: live-bar has dark background — text always white regardless of sampled colour
+    // (YIQ adaptive logic only makes sense when text sits directly on the colour swatch)
     document.getElementById('live-hex').textContent=hex.toUpperCase();
-    document.getElementById('live-hex').style.color=_barTxt;
+    document.getElementById('live-hex').style.color='#ffffff';
     // MASTER-FIX 3: primary display name = closest Pantone match;
     // autoName() is the fallback if no Pantone data yet.
     document.getElementById('live-name').textContent=CS.pantoneFirst(hex);  // v130: show Pantone name live
-    document.getElementById('live-name').style.color=_yiq<128?'rgba(255,255,255,.6)':'rgba(0,0,0,.5)';
+    document.getElementById('live-name').style.color='rgba(255,255,255,.6)';
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
     document.getElementById('live-k').textContent=`~${_kC.toLocaleString()}°C ${CS.kDesc(k)}`;
@@ -5487,8 +5488,8 @@ const Library={
         </div>
       </details>
 
-            <!-- ═══ ADVANCED DATA ACCORDION (collapsed by default) ═════════════════ -->
-      <details class="insp-advanced">
+            <!-- ═══ ADVANCED DATA ACCORDION — Design Pro only (v401) ══════════════ -->
+      ${document.body.classList.contains('design-pro-on') ? `<details class="insp-advanced">
         <summary>Advanced Technical Data</summary>
         <div class="insp-advanced-grid">
 
@@ -5539,7 +5540,7 @@ const Library={
           </div>
 
         </div>
-      </details>
+      </details>` : ''}
 
 
 
@@ -10756,11 +10757,13 @@ self.onmessage = function(e) {
     ctx.save();
     rr(BORDER, BORDER, CW, photoH, 14, 14, 0, 0);
     ctx.clip();
-    ctx.fillStyle = '#f0f0f0';
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(BORDER, BORDER, CW, photoH);
-    const containScale = Math.min(CW / srcW, photoH / srcH);
-    const drawW  = Math.round(srcW * containScale);
-    const drawH  = Math.round(srcH * containScale);
+    // v404: use cover scaling (fill the photo area edge-to-edge, crop excess)
+    // This eliminates the letterbox gap line between photo and swatches
+    const coverScale = Math.max(CW / srcW, photoH / srcH);
+    const drawW  = Math.round(srcW * coverScale);
+    const drawH  = Math.round(srcH * coverScale);
     const drawX  = BORDER + Math.round((CW - drawW) / 2);
     const drawY  = BORDER + Math.round((photoH - drawH) / 2);
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
