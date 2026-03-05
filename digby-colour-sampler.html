@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '114';
+  const APP_VERSION = '115';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -1735,7 +1735,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
 
         <!-- ── CVD Palette Simulation Panel — v114: fixed bottom sheet ── -->
-        <div id="pb-cvd-panel" class="colour-blind-tool">
+        <div id="pb-cvd-panel">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <span style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);font-family:monospace">👁 Colour Blindness Preview</span>
             <button onclick="PaletteBuilder.toggleCVD()" ontouchstart="" style="background:#333;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;width:44px;height:44px;line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✕</button>
