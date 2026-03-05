@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.23</title>
+<title>Spectrum 4.0.27</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '423';
+  const APP_VERSION = '427';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -166,24 +166,38 @@ a{color:var(--accent);text-decoration:none}
 }
 #picker-crosshair svg{width:70px;height:70px}
 
-/* v423 PREMIUM GRADIENT: full-bleed native camera bar */
-#live-bar {
-  position: absolute; top: 0; left: 0; right: 0;
-  padding: calc(env(safe-area-inset-top, 40px) + 20px) 24px 40px 24px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-  z-index: 2000; display: none; align-items: center; justify-content: space-between;
-  pointer-events: none;
-}
+/* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
+#live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v423: all live-bar children re-enable pointer events */
+/* v408: live-bar sits flush below #top header */
+#live-bar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-height: 90px;
+  overflow: hidden;
+  z-index: 2000;
+  background: rgba(15,15,15,0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 16px;
+  align-items:center;gap:10px;pointer-events:auto;
+}
+@supports not (backdrop-filter: blur(10px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
+/* v408: sampler-cam-col padding-top set dynamically in setMode() */
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
-#live-swatch{width:64px;height:64px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.5);flex-shrink:0;transition:background .1s;pointer-events:auto}
-/* live-bar children */
-#live-info{flex:1;min-width:0;pointer-events:auto}
-#live-hex{font-family:var(--mono);font-size:20px;font-weight:700;color:#fff}
-#live-name{font-size:22px;font-weight:800;color:rgba(255,255,255,.95);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 10px rgba(0,0,0,0.6)}
-#live-k{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+#live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
+/* live-bar children inherit pointer-events:auto from parent */
+#live-info{flex:1;min-width:0}
+#live-hex{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
+#live-name{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#live-k{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
 
 /* Mini collection strip - overlaid top-right of camera */
 #cam-collection{
@@ -261,20 +275,13 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 #lut-badge.show{display:block}
 
 
-/* Mode switcher — v422: iOS segmented pill at bottom of sampler */
+/* Mode switcher */
 #mode-bar{
-  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-  z-index: 2100; display: flex; gap: 8px;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  padding: 6px; border-radius: 40px;
-  border: 1px solid rgba(255,255,255,0.2); width: max-content;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  /* v406: mode-bar hidden in camera mode; normal padding for picker/upload */
+  padding:8px 12px;
+  display:flex;gap:8px;flex-shrink:0;
 }
-#mode-bar .cap-side-btn{
-  padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;
-  border: none; background: transparent; color: #888; transition: all 0.2s;
-  text-transform: none; letter-spacing: 0;
-}
-#mode-bar .cap-side-btn.on{ background: #fff; color: #000; }
 
 /* Save card - shown below camera */
 #save-wrap{background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;display:none}
@@ -796,18 +803,6 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* Bottom action bar */
 .insp-hero-hex{background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.22);border-radius:6px;padding:4px 11px;font-family:var(--mono);font-size:12px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:.07em;cursor:pointer;transition:background .15s;white-space:nowrap}
 .insp-hero-hex.copied{background:rgba(0,180,80,.5);border-color:rgba(0,180,80,.7)}
-/* v422: Premium export action row */
-.premium-action-row{display:flex;gap:12px;margin-top:16px;width:100%}
-.premium-btn{
-  flex:1;min-height:56px;border-radius:16px;font-weight:600;font-size:15px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.15) 0%,rgba(255,255,255,0.05) 100%);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,0.2);border-bottom:1px solid rgba(255,255,255,0.05);
-  color:#fff;box-shadow:0 8px 20px rgba(0,0,0,0.3);
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  cursor:pointer;transition:transform 0.1s;-webkit-tap-highlight-color:transparent;
-}
-.premium-btn:active{transform:scale(0.96)}
 .det-actions{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 18px}
 .tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .tag-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--text);display:flex;align-items:center;gap:4px;cursor:pointer}
@@ -907,9 +902,10 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  /* v419: landscape handled in main live-bar block above */
+  /* v120: fixed pill — just narrow it a bit in landscape */
+  #live-bar{ width:72%; }
 }
-/* live-bar uses backdrop-filter:blur(12px) in v419 — edge-to-edge glass bar at top */
+/* live-bar uses backdrop-filter:blur(12px) in v108 — glass pill at top */
 .colour-blind-tool{transition:opacity .2s}
 
 
@@ -976,10 +972,17 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 <div id="modules">
 
   <!--  SAMPLER  -->
-  <div class="module active" id="mod-sampler" style="position:relative">
+  <div class="module active" id="mod-sampler">
+
+    <!-- Mode bar -->
+    <div id="mode-bar">
+      <button class="cap-side-btn on" id="btn-mode-cam" onclick="Sampler.setMode('camera')"> Camera</button>
+      <button class="cap-side-btn" id="btn-mode-wheel" onclick="Sampler.setMode('wheel')"> Picker</button>
+      <button class="cap-side-btn" id="btn-mode-up" onclick="Sampler.setMode('upload')"> Upload</button>
+    </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#000;">
+    <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: relative; gap: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 140px); background: #000;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -1227,13 +1230,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <button class="btn btn-p btn-sm" onclick="Sampler.saveColour()">Save</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.dismissSave()"></button>
       </div>
-    </div>
-
-    <!-- v422: Mode bar — iOS segmented pill at bottom, above bottom nav -->
-    <div id="mode-bar">
-      <button class="cap-side-btn on" id="btn-mode-cam" onclick="Sampler.setMode('camera')">Camera</button>
-      <button class="cap-side-btn" id="btn-mode-wheel" onclick="Sampler.setMode('wheel')">Picker</button>
-      <button class="cap-side-btn" id="btn-mode-up" onclick="Sampler.setMode('upload')">Upload</button>
     </div>
 
   </div>
@@ -1867,8 +1863,8 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()"> Swatch</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
-          <!-- v422: Tailwind and CVD removed from Palette view — available in Settings -->
-
+          <button class="btn btn-s btn-sm pb-pro-btn" onclick="PaletteBuilder.copyAsTailwind()" title="Copy palette as Tailwind CSS theme extension">🎨 Tailwind</button>
+          <button class="btn btn-s btn-sm pb-pro-btn colour-blind-tool" onclick="PaletteBuilder.toggleCVD()" title="Colour blindness simulation (Pro)">👁 CVD</button>
         </div>
 
         <!-- ── CVD Palette Simulation Panel — v114: fixed bottom sheet ── -->
@@ -2021,7 +2017,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.21</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.18</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3721,7 +3717,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.21</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.18</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4832,10 +4828,12 @@ const Sampler={
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
     // v132: hide mode-bar in camera mode → full-screen camera like v115
     const mb=document.getElementById('mode-bar');
-    if(mb) mb.style.display='flex'; // v423: always visible — absolute positioned pill
+    if(mb) mb.style.display=m==='camera'?'none':'flex';
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
-    // v423: padding-top removed — cam-col is absolute full-bleed
+    // v427: dynamic clearance — camera gets safe-area + 140px, other modes get none
+    const camCol=document.getElementById('sampler-cam-col');
+    if(camCol){camCol.style.paddingTop=(m==='camera')?'calc(env(safe-area-inset-top, 0px) + 140px)':'0px';}
     document.getElementById('upload-wrap').style.display=m==='upload'?'flex':'none';
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
     this.pickQueue=[];
@@ -5584,11 +5582,8 @@ const Library={
                 <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.06em">LRV ${c.lrv}%</span>
                 ${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" style="font-size:10px" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut — may clip on sRGB displays</span></span>':''} 
               </div>
-              <!-- v422: Premium Copy + Export Photo action row -->
-              <div class="premium-action-row">
-                <button class="premium-btn" data-copy="${c.hex.toUpperCase()}" onclick="_bCopy(this)">📋 Copy HEX</button>
-                <button class="premium-btn" onclick="Library.exportOne('${id}')">${Library.swatchExportMode?'🎨 Export Swatch':'📷 Export Photo'}</button>
-              </div>
+              <!-- Copy HEX button — refined pill -->
+              <button class="insp-hero-hex" data-copy="${c.hex.toUpperCase()}" onclick="_bCopy(this)">Copy HEX</button>
             </div>
             <!-- Mood pill — top-right, no backdrop blur -->
             <span class="psych-pill psych-${_psych.category}" style="font-size:9px;flex-shrink:0;margin-top:4px">${_psych.label}</span>
@@ -5607,6 +5602,7 @@ const Library={
       <!-- ═══ QUICK ACTION BAR ═══════════════════════════════════════════════ -->
       <div class="insp-action-bar">
         <button class="insp-action-btn" onclick="Library.shareOneNative('${id}')">Share ↗</button>
+        <button class="insp-action-btn" onclick="Library.exportOne('${id}')">${Library.swatchExportMode?'🎨 Export Swatch':'📷 Export Photo'}</button>
         <button class="insp-action-btn" onclick="Library.swatchExportMode=!Library.swatchExportMode;App.toast(Library.swatchExportMode?'Swatch Mode':'Photo Mode');Library.openDetail('${id}')">${Library.swatchExportMode?'📷 Photo Mode':'🎨 Swatch Mode'}</button>
         <button class="insp-action-btn" onclick="Library.toExplorer('${id}')">Explore</button>
         <button class="insp-action-btn" onclick="Library.rename('${id}')">Rename</button>
