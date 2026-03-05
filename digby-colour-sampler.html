@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '110';
+  const APP_VERSION = '112';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -9156,28 +9156,55 @@ const CVDSim = {
 
   /**
    * Open the CVD overlay panel
+   * v112: uses addEventListener (not onclick attr) so close works with touch-action:none
    */
   open() {
     const existing = document.getElementById('_cvd_panel');
     if (existing) { existing.remove(); return; }
     const d = document.createElement('div');
     d.id = '_cvd_panel';
-    d.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:9000;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;min-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+    d.style.cssText = [
+      'position:fixed',
+      'bottom:env(safe-area-inset-bottom,0px)',
+      'left:0;right:0',
+      'z-index:10000',
+      'background:var(--surface)',
+      'border-top:1px solid var(--border)',
+      'border-radius:16px 16px 0 0',
+      'padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 14px)',
+      'box-shadow:0 -4px 24px rgba(0,0,0,.5)',
+      'pointer-events:auto',
+      'touch-action:auto'
+    ].join(';');
+
+    const modeKeys = Object.keys(this.LABELS);
+    const modeBtns = modeKeys.map(k =>
+      `<button data-cvd="${k}" style="padding:7px 11px;font-size:10px;font-family:var(--mono);border-radius:6px;border:1px solid var(--border);background:${this.mode===k?'var(--accent)':'var(--surface2)'};color:${this.mode===k?'#1a1208':'var(--muted)'};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-height:36px">${this.LABELS[k]}</button>`
+    ).join('');
+
     d.innerHTML = `
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Colour Blindness Simulation</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${Object.keys(this.LABELS).map(k => `
-          <button data-cvd="${k}" class="btn btn-s btn-sm ${this.mode===k?'on':''}" style="font-size:10px"
-            onclick="CVDSim.setMode('${k}')">${this.LABELS[k]}</button>
-        `).join('')}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)">👁 Colour Blindness Simulation</div>
+        <button id="_cvd_close" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;padding:4px 12px;min-height:36px;min-width:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">✕</button>
       </div>
-      <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.5">
-        Simulates how your palette appears to people with colour vision deficiencies.<br>
-        Swatches update live. Exit simulation to restore.
-      </div>
-      <button style="margin-top:8px;width:100%;padding:7px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-size:11px;cursor:pointer" onclick="document.getElementById('_cvd_panel').remove()">Close</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${modeBtns}</div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.5">Swatches update live. Tap Normal or ✕ to exit.</div>
     `;
     document.body.appendChild(d);
+
+    /* ── Reliable close: addEventListener handles touch-action:none body ── */
+    const closeBtn = document.getElementById('_cvd_close');
+    const doClose = (e) => { e.preventDefault(); e.stopPropagation(); d.remove(); };
+    closeBtn.addEventListener('click', doClose);
+    closeBtn.addEventListener('touchend', doClose, { passive: false });
+
+    /* ── Mode buttons via addEventListener ── */
+    d.querySelectorAll('[data-cvd]').forEach(btn => {
+      const k = btn.dataset.cvd;
+      const doMode = (e) => { e.preventDefault(); e.stopPropagation(); CVDSim.setMode(k); };
+      btn.addEventListener('click', doMode);
+      btn.addEventListener('touchend', doMode, { passive: false });
+    });
   }
 };
 
