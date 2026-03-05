@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '112';
+  const APP_VERSION = '114';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -633,7 +633,7 @@ a{color:var(--accent);text-decoration:none}
 .gamut-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#2a1a00}
 
 /* ── CVD Palette Simulation Panel ──────────────────────────── */
-#pb-cvd-panel{display:none;flex-direction:column;gap:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-top:2px}
+#pb-cvd-panel{display:none;position:fixed;bottom:0;left:0;right:0;z-index:10000;flex-direction:column;gap:10px;padding:16px 16px 36px;background:#1a1a1a;border-top:2px solid rgba(255,255,255,.15);border-radius:20px 20px 0 0;box-shadow:0 -6px 32px rgba(0,0,0,.7);touch-action:auto}
 .cvd-mode-row{display:flex;gap:5px;flex-wrap:wrap}
 .cvd-mode-btn{padding:4px 8px;font-size:9px;font-family:var(--mono);border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s;text-transform:uppercase;letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
 .cvd-mode-btn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700}
@@ -1734,25 +1734,22 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <button class="btn btn-s btn-sm pb-pro-btn colour-blind-tool" onclick="PaletteBuilder.toggleCVD()" title="Colour blindness simulation (Pro)">👁 CVD</button>
         </div>
 
-        <!-- ── CVD Palette Simulation Panel ──────────────────────────── -->
+        <!-- ── CVD Palette Simulation Panel — v114: fixed bottom sheet ── -->
         <div id="pb-cvd-panel" class="colour-blind-tool">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700">Colour Blindness Preview</span>
-            <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 8px" onclick="PaletteBuilder.toggleCVD()">Close</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);font-family:monospace">👁 Colour Blindness Preview</span>
+            <button onclick="PaletteBuilder.toggleCVD()" ontouchstart="" style="background:#333;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;width:44px;height:44px;line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✕</button>
           </div>
-          <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:8px">
-            Non-destructive simulation — original colours are never modified.
+          <div class="cvd-mode-row" id="pb-cvd-modes" style="gap:8px;margin-bottom:10px">
+            <button class="cvd-mode-btn on" data-pbcvd="normal"         onclick="PaletteBuilder.setCVDMode('normal')"        ontouchstart="" style="flex:1;min-height:40px;touch-action:manipulation">Normal</button>
+            <button class="cvd-mode-btn"    data-pbcvd="deuteranopia"   onclick="PaletteBuilder.setCVDMode('deuteranopia')"  ontouchstart="" style="flex:1;min-height:40px;touch-action:manipulation">Deuteranopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="protanopia"     onclick="PaletteBuilder.setCVDMode('protanopia')"    ontouchstart="" style="flex:1;min-height:40px;touch-action:manipulation">Protanopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="tritanopia"     onclick="PaletteBuilder.setCVDMode('tritanopia')"    ontouchstart="" style="flex:1;min-height:40px;touch-action:manipulation">Tritanopia</button>
+            <button class="cvd-mode-btn"    data-pbcvd="achromatopsia"  onclick="PaletteBuilder.setCVDMode('achromatopsia')" ontouchstart="" style="flex:1;min-height:40px;touch-action:manipulation">Achromatopsia</button>
           </div>
-          <div class="cvd-mode-row" id="pb-cvd-modes">
-            <button class="cvd-mode-btn on" data-pbcvd="normal"         onclick="PaletteBuilder.setCVDMode('normal')">Normal</button>
-            <button class="cvd-mode-btn"    data-pbcvd="deuteranopia"   onclick="PaletteBuilder.setCVDMode('deuteranopia')">Deuteranopia</button>
-            <button class="cvd-mode-btn"    data-pbcvd="protanopia"     onclick="PaletteBuilder.setCVDMode('protanopia')">Protanopia</button>
-            <button class="cvd-mode-btn"    data-pbcvd="tritanopia"     onclick="PaletteBuilder.setCVDMode('tritanopia')">Tritanopia</button>
-            <button class="cvd-mode-btn"    data-pbcvd="achromatopsia"  onclick="PaletteBuilder.setCVDMode('achromatopsia')">Achromatopsia</button>
-          </div>
-          <div id="pb-cvd-preview" style="margin-top:8px;display:flex;flex-direction:column;gap:5px"></div>
-          <div style="font-size:9px;color:var(--muted);margin-top:6px;line-height:1.5">
-            Deuteranopia = green-blind · Protanopia = red-blind · Tritanopia = blue-blind · Achromatopsia = monochromatic
+          <div id="pb-cvd-preview" style="display:flex;flex-direction:column;gap:5px"></div>
+          <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:8px;line-height:1.5">
+            Deuteranopia = green-blind · Protanopia = red-blind · Tritanopia = blue-blind
           </div>
         </div>
 
@@ -8273,7 +8270,7 @@ const PaletteBuilder = {
   toggleCVD() {
     const panel = document.getElementById('pb-cvd-panel');
     if (!panel) return;
-    const showing = panel.style.display === 'flex';
+    const showing = panel.style.display === 'flex' || panel.style.display === 'block';
     panel.style.display = showing ? 'none' : 'flex';
     if (!showing) {
       this._pbCVDMode = 'normal';
@@ -9060,6 +9057,8 @@ const CVDSim = {
       btn.classList.toggle('on', btn.dataset.cvd === mode);
     });
     this._applyToUI();
+    this._syncPanelButtons();
+    if (mode === 'normal') this.close();
     App.toast(this.LABELS[mode] + (mode === 'normal' ? ' — simulation off' : ' view active'));
   },
 
@@ -9154,56 +9153,30 @@ const CVDSim = {
     });
   },
 
-  /**
-   * Open the CVD overlay panel
-   * v112: uses addEventListener (not onclick attr) so close works with touch-action:none
-   */
+  /** Toggle the static CVD panel (bottom sheet, always in DOM) */
   open() {
-    const existing = document.getElementById('_cvd_panel');
-    if (existing) { existing.remove(); return; }
-    const d = document.createElement('div');
-    d.id = '_cvd_panel';
-    d.style.cssText = [
-      'position:fixed',
-      'bottom:env(safe-area-inset-bottom,0px)',
-      'left:0;right:0',
-      'z-index:10000',
-      'background:var(--surface)',
-      'border-top:1px solid var(--border)',
-      'border-radius:16px 16px 0 0',
-      'padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 14px)',
-      'box-shadow:0 -4px 24px rgba(0,0,0,.5)',
-      'pointer-events:auto',
-      'touch-action:auto'
-    ].join(';');
+    const p = document.getElementById('_cvd_panel');
+    if (!p) return;
+    const isVisible = p.style.display !== 'none';
+    p.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) this._syncPanelButtons();
+  },
 
-    const modeKeys = Object.keys(this.LABELS);
-    const modeBtns = modeKeys.map(k =>
-      `<button data-cvd="${k}" style="padding:7px 11px;font-size:10px;font-family:var(--mono);border-radius:6px;border:1px solid var(--border);background:${this.mode===k?'var(--accent)':'var(--surface2)'};color:${this.mode===k?'#1a1208':'var(--muted)'};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-height:36px">${this.LABELS[k]}</button>`
-    ).join('');
+  /** Hide the static CVD panel */
+  close() {
+    const p = document.getElementById('_cvd_panel');
+    if (p) p.style.display = 'none';
+  },
 
-    d.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)">👁 Colour Blindness Simulation</div>
-        <button id="_cvd_close" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;padding:4px 12px;min-height:36px;min-width:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">✕</button>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${modeBtns}</div>
-      <div style="font-size:10px;color:var(--muted);line-height:1.5">Swatches update live. Tap Normal or ✕ to exit.</div>
-    `;
-    document.body.appendChild(d);
-
-    /* ── Reliable close: addEventListener handles touch-action:none body ── */
-    const closeBtn = document.getElementById('_cvd_close');
-    const doClose = (e) => { e.preventDefault(); e.stopPropagation(); d.remove(); };
-    closeBtn.addEventListener('click', doClose);
-    closeBtn.addEventListener('touchend', doClose, { passive: false });
-
-    /* ── Mode buttons via addEventListener ── */
-    d.querySelectorAll('[data-cvd]').forEach(btn => {
-      const k = btn.dataset.cvd;
-      const doMode = (e) => { e.preventDefault(); e.stopPropagation(); CVDSim.setMode(k); };
-      btn.addEventListener('click', doMode);
-      btn.addEventListener('touchend', doMode, { passive: false });
+  /** Sync active state on static panel buttons after mode change */
+  _syncPanelButtons() {
+    const p = document.getElementById('_cvd_panel');
+    if (!p) return;
+    p.querySelectorAll('[data-cvd]').forEach(btn => {
+      const on = btn.dataset.cvd === this.mode;
+      btn.style.background = on ? '#c8a84b' : '#333';
+      btn.style.color = on ? '#1a1208' : '#fff';
+      btn.style.fontWeight = on ? '700' : '400';
     });
   }
 };
@@ -9832,6 +9805,23 @@ const AIColourName = {
 };
 
 </script>
+
+
+<!-- ── CVD Overlay Panel: static HTML, shown/hidden by CVDSim.open()/close() ── -->
+<div id="_cvd_panel" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10000;background:#1a1a1a;border-top:2px solid rgba(255,255,255,.15);border-radius:20px 20px 0 0;padding:16px 16px 32px;box-shadow:0 -6px 32px rgba(0,0,0,.7);touch-action:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;font-family:monospace">👁 Colour Blindness</div>
+    <button onclick="CVDSim.close()" style="background:#333;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <button data-cvd="normal"        onclick="CVDSim.setMode('normal')"        style="flex:1;min-width:80px;padding:10px 8px;font-size:11px;font-family:monospace;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#333;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Normal</button>
+    <button data-cvd="deuteranopia"  onclick="CVDSim.setMode('deuteranopia')"  style="flex:1;min-width:80px;padding:10px 8px;font-size:11px;font-family:monospace;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#333;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Deuteranopia</button>
+    <button data-cvd="protanopia"    onclick="CVDSim.setMode('protanopia')"    style="flex:1;min-width:80px;padding:10px 8px;font-size:11px;font-family:monospace;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#333;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Protanopia</button>
+    <button data-cvd="tritanopia"    onclick="CVDSim.setMode('tritanopia')"    style="flex:1;min-width:80px;padding:10px 8px;font-size:11px;font-family:monospace;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#333;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Tritanopia</button>
+    <button data-cvd="achromatopsia" onclick="CVDSim.setMode('achromatopsia')" style="flex:1;min-width:80px;padding:10px 8px;font-size:11px;font-family:monospace;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#333;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Achromatopsia</button>
+  </div>
+  <div style="font-size:10px;color:rgba(255,255,255,.35);line-height:1.6">Tap a mode to simulate · tap Normal or ✕ to exit</div>
+</div>
 
 </body>
 </html>
