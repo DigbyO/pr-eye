@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.27</title>
+<title>Spectrum 4.0.31</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '427';
+  const APP_VERSION = '431';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -169,35 +169,72 @@ a{color:var(--accent);text-decoration:none}
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
-/* v408: live-bar sits flush below #top header */
+/* v429: live-bar — compact square draggable card */
 #live-bar {
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 4px);
   left: 50%;
   transform: translateX(-50%);
-  width: 92%;
-  max-height: 90px;
-  overflow: hidden;
+  width: 168px;
+  height: auto;
   z-index: 2000;
-  background: rgba(15,15,15,0.85);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.1);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 12px 16px;
-  align-items:center;gap:10px;pointer-events:auto;
+  background: rgba(10,10,10,0.55);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 10px 12px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.15s, background 0.15s;
+  overflow: hidden;
 }
-@supports not (backdrop-filter: blur(10px)) { #live-bar { background: rgba(15, 15, 15, 0.95); } }
+#live-bar.dragging {
+  cursor: grabbing;
+  background: rgba(10,10,10,0.72);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+/* drag handle indicator */
+#live-bar::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+@supports not (backdrop-filter: blur(16px)) { #live-bar { background: rgba(15, 15, 15, 0.88); } }
 /* v408: sampler-cam-col padding-top set dynamically in setMode() */
 /* v125: focused polaroid gets 3px white outline */
 .polaroid.focused { outline: 3px solid #fff !important; box-shadow: 0 0 0 3px #fff, 0 4px 24px rgba(0,0,0,.5) !important; }
-#live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
-/* live-bar children inherit pointer-events:auto from parent */
-#live-info{flex:1;min-width:0}
-#live-hex{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
-#live-name{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#live-k{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+/* v429: square live-bar — top row: swatch + hex; below: name; below: kelvin */
+#live-swatch{
+  width:36px;height:36px;border-radius:10px;
+  border:2px solid rgba(255,255,255,0.2);
+  flex-shrink:0;transition:background .1s;
+}
+#live-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+#live-hex{
+  font-family:var(--mono);font-size:15px;font-weight:700;color:#fff;
+  letter-spacing:.05em;white-space:nowrap;
+}
+#live-name{
+  font-size:11px;font-weight:600;color:rgba(255,255,255,0.75);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.3;
+}
+#live-k{font-size:9px;color:rgba(255,255,255,.38);margin-top:1px;white-space:nowrap;}
 
 /* Mini collection strip - overlaid top-right of camera */
 #cam-collection{
@@ -1210,16 +1247,22 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
     </div>
 
-    <!-- Floating colour console — v108: absolute glass pill at top, below safe-area -->
+    <!-- Floating colour console — v429: compact square draggable card -->
     <div id="live-bar">
+      <!-- Row 1: swatch + hex code -->
+      <div style="display:flex;align-items:center;gap:9px;">
         <div id="live-swatch"></div>
         <div id="live-info">
           <div id="live-hex">#------</div>
-          <div id="live-name">Tap to move picker</div>
+          <div id="live-name">Scanning…</div>
           <div id="live-k"></div>
         </div>
-        <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
+      </div>
+      <!-- Row 2: matches + export squeezed into bottom strip -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+        <div id="live-matches" style="display:flex;flex-direction:row;gap:3px;align-items:center;flex:1;overflow:hidden"></div>
         <button id="live-export-btn" onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}})()" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
+      </div>
     </div>
     <!-- Save card -->
     <div id="save-wrap">
@@ -4834,6 +4877,9 @@ const Sampler={
     // v427: dynamic clearance — camera gets safe-area + 140px, other modes get none
     const camCol=document.getElementById('sampler-cam-col');
     if(camCol){camCol.style.paddingTop=(m==='camera')?'calc(env(safe-area-inset-top, 0px) + 140px)':'0px';}
+    // v430: hide live-bar in upload and picker modes — only visible during camera
+    const lb=document.getElementById('live-bar');
+    if(lb){lb.style.setProperty('display', m==='camera'?'flex':'none', 'important');}
     document.getElementById('upload-wrap').style.display=m==='upload'?'flex':'none';
     document.getElementById('wheel-wrap').style.display=m==='wheel'?'block':'none';
     this.pickQueue=[];
@@ -4965,12 +5011,20 @@ const Sampler={
           this.addToQueue(hex);
         };
 
-        // Pick events: touchend + click + pointerup (belt-and-braces for all platforms)
-        newCanvas.addEventListener('touchend', pick, {passive:false});
+        // v431 FIX: touchend fires pick on mobile; pointerup covers mouse only.
+        // 'click' removed — on touch devices it was synthesised after touchend,
+        // causing addToQueue() to fire twice (double-pick bug).
+        let _lastPickTime = 0;
+        const pickOnce = (ev) => {
+          const now = Date.now();
+          if (now - _lastPickTime < 400) return; // debounce 400ms
+          _lastPickTime = now;
+          pick(ev);
+        };
+        newCanvas.addEventListener('touchend', pickOnce, {passive:false});
         newCanvas.addEventListener('touchmove', (e)=>e.preventDefault(), {passive:false});
-        newCanvas.addEventListener('click', pick);
-        // pointerup catches cases where click doesn't fire after touchend
-        newCanvas.addEventListener('pointerup', (ev) => { if (ev.pointerType !== 'touch') pick(ev); });
+        // pointerup for mouse/stylus only — skip touch to avoid double-fire
+        newCanvas.addEventListener('pointerup', (ev) => { if (ev.pointerType !== 'touch') pickOnce(ev); });
 
         // Attach safe loupe magnifier (pointer-events:none overlay — never blocks picks)
         this._initLoupe(newCanvas);
@@ -11147,5 +11201,96 @@ const AIColourName = {
   <div style="font-size:10px;color:rgba(255,255,255,.35);line-height:1.6">Tap a mode to simulate · tap Normal or ✕ to exit</div>
 </div>
 
+
+<script>
+/* v428: Draggable live-bar — touch + mouse, stays within viewport */
+(function(){
+  const bar = document.getElementById('live-bar');
+  if (!bar) return;
+
+  let dragging = false;
+  let startX = 0, startY = 0;
+  let origLeft = 0, origTop = 0;
+  // Reset to centered default position on each sampler tab activation
+  function resetBarPos() {
+    bar.style.transform = 'translateX(-50%)';
+    bar.style.left = '50%';
+    bar.style.top = 'calc(env(safe-area-inset-top, 0px) + 52px)';
+  }
+
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  function startDrag(clientX, clientY) {
+    dragging = true;
+    bar.classList.add('dragging');
+    const rect = bar.getBoundingClientRect();
+    // Switch from transform-based centering to explicit left/top
+    bar.style.transform = 'none';
+    bar.style.left = rect.left + 'px';
+    bar.style.top  = rect.top  + 'px';
+    origLeft = rect.left;
+    origTop  = rect.top;
+    startX = clientX;
+    startY = clientY;
+  }
+
+  function moveDrag(clientX, clientY) {
+    if (!dragging) return;
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    const bw = bar.offsetWidth;
+    const bh = bar.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const safeTop = parseInt(getComputedStyle(document.documentElement)
+      .getPropertyValue('--top-h') || '48') + 4;
+    const newLeft = clamp(origLeft + dx, 0, vw - bw);
+    const newTop  = clamp(origTop  + dy, safeTop, vh - bh - 70);
+    bar.style.left = newLeft + 'px';
+    bar.style.top  = newTop  + 'px';
+  }
+
+  function endDrag() {
+    dragging = false;
+    bar.classList.remove('dragging');
+  }
+
+  // Touch events
+  bar.addEventListener('touchstart', function(e) {
+    // Only drag from the bar itself, not its interactive children
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  window.addEventListener('touchend', endDrag, { passive: true });
+
+  // Mouse events (desktop/dev)
+  bar.addEventListener('mousedown', function(e) {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+    startDrag(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    moveDrag(e.clientX, e.clientY);
+  });
+
+  window.addEventListener('mouseup', endDrag);
+
+  // Double-tap to snap back to default position
+  let lastTap = 0;
+  bar.addEventListener('touchend', function(e) {
+    const now = Date.now();
+    if (now - lastTap < 300) { resetBarPos(); }
+    lastTap = now;
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
