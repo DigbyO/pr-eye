@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v97</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v98</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -20,7 +20,7 @@
 <script>
 /* v97 auto-update cache-buster */
 (function(){
-  const APP_VERSION="97";
+  const APP_VERSION="98";
   try{
     if(localStorage.getItem("stored_version")!==APP_VERSION){
       localStorage.setItem("stored_version",APP_VERSION);
@@ -3220,9 +3220,32 @@ const App={
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v80</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v98</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
+
+      <!-- v98: App Guide & Science Hub -->
+      <details class="insp-advanced" style="margin:12px 0 0;border-color:var(--accent)">
+        <summary style="color:var(--accent);font-weight:600">App Guide &amp; Science</summary>
+        <div style="padding:14px 16px;font-size:11px;color:var(--muted);line-height:1.7;background:var(--surface)">
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">🔬 The 1:1 Sampling Science</div>
+          <p style="margin:0 0 10px">Spectrum samples colours at native camera resolution — no downscaling, no interpolation. The pixel you tap is the pixel you get. The video feed runs continuously (never paused) so the browser&rsquo;s MediaStream stays healthy on all platforms, including iOS Safari.</p>
+
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">📊 LRV Glossary</div>
+          <p style="margin:0 0 4px"><strong>LRV (Light Reflectance Value)</strong> measures the percentage of visible light a surface reflects, from 0% (pure black — absorbs all light) to 100% (pure white — reflects all light).</p>
+          <p style="margin:0 0 2px"><span style="color:var(--accent)">80–100%</span> — Very bright. Great for small, dark rooms.</p>
+          <p style="margin:0 0 2px"><span style="color:var(--accent)">55–79%</span> — Mid-high. Versatile, works in most settings.</p>
+          <p style="margin:0 0 2px"><span style="color:var(--accent)">30–54%</span> — Medium. Cosy feel, needs good lighting.</p>
+          <p style="margin:0 0 2px"><span style="color:var(--accent)">10–29%</span> — Low. Dramatic — needs ample light sources.</p>
+          <p style="margin:0 0 10px"><span style="color:var(--accent)">0–9%</span> — Very dark. Absorbs most light. Use with care.</p>
+
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">🏠 3-Step Room Guide</div>
+          <p style="margin:0 0 4px"><strong>Step 1 — Measure the Light.</strong> Check which direction your room faces (N/S/E/W) and photograph the wall at midday. North-facing rooms suit warm undertones; south-facing rooms handle cooler tones well.</p>
+          <p style="margin:0 0 4px"><strong>Step 2 — Sample &amp; Compare.</strong> Use Spectrum&rsquo;s camera to sample existing surfaces (flooring, upholstery, stone). Then explore harmonies and the 60-30-10 rule to build your palette.</p>
+          <p style="margin:0"><strong>Step 3 — Test with Spec Sheet.</strong> Export the Designer Spec Sheet and take it to your paint supplier. The brand matcher gives you the closest Farrow &amp; Ball / Little Greene reference to speed up tester pot selection.</p>
+        </div>
+      </details>
+
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
         <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
@@ -3998,7 +4021,21 @@ const Sampler={
   toggleFreeze(){
     this.frozen=!this.frozen;
     const v=document.getElementById('cam-video');
-    if(this.frozen){v.pause();}else{v.play().catch(()=>{});}
+    const cc=document.getElementById('cam-canvas');
+    // v98 CRITICAL: NEVER call video.pause() — capture frame to overlay canvas instead
+    if(this.frozen){
+      // Capture current frame to cam-canvas and show it on top
+      if(v && v.videoWidth && cc){
+        cc.width=v.videoWidth; cc.height=v.videoHeight;
+        cc.getContext('2d').drawImage(v,0,0);
+        cc.style.display='block'; cc.style.position='absolute'; cc.style.inset='0';
+        cc.style.width='100%'; cc.style.height='100%'; cc.style.objectFit='contain';
+        cc.style.zIndex='5'; cc.style.pointerEvents='none';
+      }
+    }else{
+      // Hide overlay — live video shows through again
+      if(cc){cc.style.display='none'; cc.style.zIndex='';}
+    }
     const b=document.getElementById('freeze-btn');
     b.classList.toggle('on',this.frozen);
     b.textContent=this.frozen?'Unfreeze':'Freeze';
@@ -5096,11 +5133,22 @@ const Library={
             <span class="cv-val">${c.lrv}%<span class="cv-val-sub">Light Reflectance Value</span></span>
             <span class="cv-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="3" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="var(--surface2)"/></svg></span>
           </button>
-          <button class="cv-row" style="border-bottom:none" data-copy="~${kCelsius}°C (${c.kelvin||5500}K)" onclick="_cvRow(this)">
+          <button class="cv-row" data-copy="~${kCelsius}°C (${c.kelvin||5500}K)" onclick="_cvRow(this)">
             <span class="cv-label">TEMP</span>
             <span class="cv-val">~${kCelsius}°C<span class="cv-val-sub">${CS.kDesc(c.kelvin||5500)} · ${c.kelvin||5500}K</span></span>
             <span class="cv-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="3" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="var(--surface2)"/></svg></span>
           </button>
+          <!-- v98: Pro Science — LRV guide + Undertone (visible in Pro Mode only) -->
+          <div class="pro-only" style="display:none;padding:8px 16px;background:rgba(200,169,110,.06);border-top:1px solid var(--border)">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:600;margin-bottom:4px">Pro Science</div>
+            <div style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:6px">
+              <strong>LRV ${c.lrv}%</strong> — ${c.lrv >= 80 ? 'Very high reflectance — suitable for low-light rooms, opens up small spaces' : c.lrv >= 55 ? 'Mid-high reflectance — versatile for most rooms with natural light' : c.lrv >= 30 ? 'Mid reflectance — cosy, works in well-lit rooms with good artificial lighting' : c.lrv >= 10 ? 'Low reflectance — dramatic, needs ample lighting to avoid feeling enclosed' : 'Very low reflectance — absorbs light, use sparingly or in large, bright spaces'}
+            </div>
+            <div style="font-size:10px;color:var(--muted);line-height:1.6">
+              <strong>Undertone:</strong> ${typeof PaintBrands!=='undefined' ? PaintBrands.undertone(c.hex) : '—'}
+              <span style="font-size:8px;display:block;margin-top:2px">Undertone affects how the colour reads in warm vs cool lighting conditions.</span>
+            </div>
+          </div>
         </div>
       </details>
 
@@ -5621,6 +5669,40 @@ const Library={
 };
 </script>
 
+<!--  v98: PAINT BRAND MATCHER  -->
+<script>
+const PaintBrands = {
+  nearest(hex) {
+    const rgb = CS.hexToRgb(hex);
+    const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
+    const fb = CS.nearestFB(lab);
+    const lg = CS.nearestLG(lab);
+    const results = [];
+    if (fb) results.push({ brand: "Farrow & Ball", name: fb.name, code: fb.code, hex: fb.hex, de: fb.de });
+    if (lg) results.push({ brand: "Little Greene", name: lg.name, code: lg.code, hex: lg.hex, de: lg.de });
+    results.sort((a, b) => a.de - b.de);
+    return { best: results[0] || null, all: results };
+  },
+  label(hex) {
+    const m = this.nearest(hex);
+    if (!m.best) return '';
+    return `${m.best.brand} '${m.best.name}' (ΔE ${m.best.de})`;
+  },
+  // v98: Undertone analysis from HSL
+  undertone(hex) {
+    const rgb = CS.hexToRgb(hex);
+    const {h,s,l} = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
+    if (s < 8) return 'Neutral';
+    if (h >= 0 && h < 45) return 'Warm (Red-Orange)';
+    if (h >= 45 && h < 70) return 'Warm (Yellow)';
+    if (h >= 70 && h < 150) return 'Cool (Green)';
+    if (h >= 150 && h < 250) return 'Cool (Blue)';
+    if (h >= 250 && h < 310) return 'Cool (Violet)';
+    return 'Warm (Red)';
+  }
+};
+</script>
+
 <!--  EXPLORER  -->
 <script>
 const Explorer={
@@ -5726,7 +5808,7 @@ const Explorer={
         </div>`).join('')}</div>`).join('');
   },
 
-  // v97: Interior Designer Recommendations
+  // v98: Interior Designer Recommendations — Expert Curator Edition
   renderDesigner(){
     const hex = this.rootHex;
     const rgb = CS.hexToRgb(hex);
@@ -5743,25 +5825,54 @@ const Explorer={
     }
     h = Math.round(h*360); s = Math.round(s*100); l = Math.round(l*100);
 
-    // Architectural Trim: -15% lightness
-    const trimL = Math.max(0, l - 15);
-    const trimHex = this._hslToHex(h,s,trimL);
+    // v98: Architectural Trim — perceptual dark-wall fix
+    let trimS, trimL, trimDesc;
+    if (l > 40) {
+      // Normal wall: darken 15%, desaturate 10% — grounded trim
+      trimL = Math.max(0, l - 15);
+      trimS = Math.max(0, s - 10);
+      trimDesc = 'A tailored architectural contrast.';
+    } else {
+      // Dark wall: lighten 20%, desaturate 15% — sophisticated framing
+      trimL = Math.min(100, l + 20);
+      trimS = Math.max(0, s - 15);
+      trimDesc = 'A lighter frame for dark walls — sophisticated contrast.';
+    }
+    const trimHex = this._hslToHex(h, trimS, trimL);
+    const trimMatch = PaintBrands.label(trimHex);
 
-    // 60-30-10 Rule
+    // v98: 60-30-10 Rule
     const primaryHex = hex;
+    const primaryMatch = PaintBrands.label(primaryHex);
+
     // Secondary: analogous (+30° hue)
     const secH = (h + 30) % 360;
     const secondaryHex = this._hslToHex(secH, s, l);
-    // Accent: complementary (+180° hue)
-    const accH = (h + 180) % 360;
-    const accentHex = this._hslToHex(accH, Math.min(100,s+10), Math.max(25,Math.min(75,l)));
+    const secMatch = PaintBrands.label(secondaryHex);
+
+    // v98: Accent — Soft Split-Complementary (+150°), Saturation capped at 40%
+    const accH = (h + 150) % 360;
+    const accS = Math.min(40, s);
+    const accL = Math.max(30, Math.min(70, l));
+    const accentHex = this._hslToHex(accH, accS, accL);
+    const accMatch = PaintBrands.label(accentHex);
+    const accDesc = 'A soft complementary pop for textiles/art.';
+
+    // Helper: text colour for contrast
+    const txtOn = (hx) => {
+      const c = CS.hexToRgb(hx);
+      return (c.r*0.299 + c.g*0.587 + c.b*0.114) < 128 ? '#fff' : '#000';
+    };
+
+    // Store for spec sheet export
+    this._designerData = { primaryHex, trimHex, secondaryHex, accentHex, h, s, l, trimL, trimS, trimDesc, accDesc, primaryMatch, trimMatch, secMatch, accMatch };
 
     const el = document.getElementById('designer-container');
     if(!el) return;
     el.innerHTML = `
       <div class="designer-rec">
         <div class="designer-rec-title">The Architectural Trim</div>
-        <div class="designer-rec-desc">A darker version of your colour (−15% lightness) — ideal for high-end woodwork, skirting boards, and window frames.</div>
+        <div class="designer-rec-desc">${l > 40 ? 'Darker by 15% with 10% desaturation' : 'Lighter by 20% with 15% desaturation (dark wall mode)'} — ideal for woodwork, skirting boards, and window frames.</div>
         <div class="designer-sw-row">
           <div>
             <div class="designer-sw" style="background:${hex}" onclick="Explorer.setRoot('${hex}')" title="Wall / Primary"></div>
@@ -5772,31 +5883,45 @@ const Explorer={
             <div class="designer-sw" style="background:${trimHex}" onclick="Explorer.setRoot('${trimHex}')" title="Trim / Woodwork"></div>
             <div class="designer-sw-label">Trim</div>
           </div>
-          <div style="font-size:10px;color:var(--muted);padding-left:8px;line-height:1.5">
-            <span style="font-family:var(--mono);font-size:9px">${trimHex.toUpperCase()}</span><br>
-            HSL(${h}°, ${s}%, ${trimL}%)
+          <div style="font-size:10px;color:var(--muted);padding-left:8px;line-height:1.6">
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text)">${trimHex.toUpperCase()}</span><br>
+            <span style="font-size:8px;font-style:italic;color:var(--muted)">${trimDesc}</span>
+            ${trimMatch ? '<br><span style="font-size:8px;color:var(--accent)">≈ ' + trimMatch + '</span>' : ''}
           </div>
         </div>
       </div>
       <div class="designer-rec">
         <div class="designer-rec-title">The 60-30-10 Rule</div>
-        <div class="designer-rec-desc">The classic interior design ratio — 60% dominant, 30% secondary, 10% accent — for a balanced, professional scheme.</div>
+        <div class="designer-rec-desc">Classic interior design ratio — 60% dominant, 30% secondary (analogous +30°), 10% accent (soft split-complementary +150°, sat ≤40%).</div>
         <div class="designer-bar-row">
-          <div style="flex:6;background:${primaryHex};cursor:pointer" onclick="Explorer.setRoot('${primaryHex}')" title="60% Dominant: ${primaryHex.toUpperCase()}">
-            <span class="designer-pct" style="color:${CS.hexToRgb(primaryHex).r*0.299+CS.hexToRgb(primaryHex).g*0.587+CS.hexToRgb(primaryHex).b*0.114<128?'#fff':'#000'}">60%</span>
+          <div style="flex:6;background:${primaryHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${primaryHex}')" title="60% Dominant">
+            <span class="designer-pct" style="color:${txtOn(primaryHex)}">60%</span>
           </div>
-          <div style="flex:3;background:${secondaryHex};cursor:pointer" onclick="Explorer.setRoot('${secondaryHex}')" title="30% Secondary: ${secondaryHex.toUpperCase()}">
-            <span class="designer-pct" style="color:${CS.hexToRgb(secondaryHex).r*0.299+CS.hexToRgb(secondaryHex).g*0.587+CS.hexToRgb(secondaryHex).b*0.114<128?'#fff':'#000'}">30%</span>
+          <div style="flex:3;background:${secondaryHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${secondaryHex}')" title="30% Secondary">
+            <span class="designer-pct" style="color:${txtOn(secondaryHex)}">30%</span>
           </div>
-          <div style="flex:1;background:${accentHex};cursor:pointer" onclick="Explorer.setRoot('${accentHex}')" title="10% Accent: ${accentHex.toUpperCase()}">
-            <span class="designer-pct" style="color:${CS.hexToRgb(accentHex).r*0.299+CS.hexToRgb(accentHex).g*0.587+CS.hexToRgb(accentHex).b*0.114<128?'#fff':'#000'}">10%</span>
+          <div style="flex:1;background:${accentHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${accentHex}')" title="10% Accent">
+            <span class="designer-pct" style="color:${txtOn(accentHex)}">10%</span>
           </div>
         </div>
-        <div style="display:flex;gap:12px;font-size:9px;font-family:var(--mono);color:var(--muted)">
-          <span>Dominant: ${primaryHex.toUpperCase()}</span>
-          <span>Secondary: ${secondaryHex.toUpperCase()}</span>
-          <span>Accent: ${accentHex.toUpperCase()}</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:4px">
+          <div>
+            <div style="color:var(--text)">${primaryHex.toUpperCase()}</div>
+            ${primaryMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + primaryMatch + '</div>' : ''}
+          </div>
+          <div>
+            <div style="color:var(--text)">${secondaryHex.toUpperCase()}</div>
+            ${secMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + secMatch + '</div>' : ''}
+          </div>
+          <div>
+            <div style="color:var(--text)">${accentHex.toUpperCase()}</div>
+            <div style="font-size:7px;font-style:italic">${accDesc}</div>
+            ${accMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + accMatch + '</div>' : ''}
+          </div>
         </div>
+      </div>
+      <div style="text-align:right;padding-top:6px">
+        <button class="btn btn-p btn-sm" style="font-size:10px;padding:5px 14px" onclick="Explorer.exportSpecSheet()">📋 Export Spec Sheet</button>
       </div>`;
   },
 
@@ -5807,6 +5932,130 @@ const Explorer={
     const f=n=>{const k=(n+h/30)%12;return l-a*Math.max(Math.min(k-3,9-k,1),-1)};
     const toHex=x=>Math.round(x*255).toString(16).padStart(2,'0');
     return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));
+  },
+
+  // v98: Designer Spec Sheet Export
+  async exportSpecSheet(){
+    const d = this._designerData;
+    if(!d){ App.toast('Generate a recommendation first'); return; }
+    try {
+      await document.fonts.load('12px "Permanent Marker"');
+      await document.fonts.load('12px "Space Mono"');
+    } catch(e){}
+
+    const W = 420, PAD = 32, BLOCK_H = 130, GAP = 16;
+    const HEADER = 80, FOOTER = 60;
+    const H = HEADER + (BLOCK_H + GAP) * 3 + FOOTER + PAD * 2;
+    const _dpr = Math.min(window.devicePixelRatio || 2, 3);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.floor(W * _dpr);
+    canvas.height = Math.floor(H * _dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(_dpr, _dpr);
+
+    // White card background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Header
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 18px "Permanent Marker",cursive';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Interior Design Spec Sheet', PAD, PAD);
+    ctx.fillStyle = '#999';
+    ctx.font = '9px "Space Mono",monospace';
+    ctx.fillText('Generated by Spectrum · digby.shop', PAD, PAD + 26);
+    ctx.fillText(new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}), PAD, PAD + 40);
+
+    // Colour blocks
+    const blocks = [
+      { label: 'WALLS (60%)', hex: d.primaryHex, match: d.primaryMatch, desc: 'Dominant colour — walls, ceiling, large surfaces' },
+      { label: 'WOODWORK & TRIM (30%)', hex: d.trimHex, match: d.trimMatch, desc: d.trimDesc },
+      { label: 'TEXTILE ACCENT (10%)', hex: d.accentHex, match: d.accMatch, desc: d.accDesc }
+    ];
+    const txtOn = (hx) => { const c=CS.hexToRgb(hx); return (c.r*0.299+c.g*0.587+c.b*0.114)<128?'#fff':'#000'; };
+
+    let y = HEADER + PAD;
+    blocks.forEach(blk => {
+      // Colour swatch rectangle
+      const swW = 80, swH = BLOCK_H - 20;
+      ctx.fillStyle = blk.hex;
+      ctx.beginPath();
+      // Compatible rounded rect
+      const rr=8;
+      ctx.moveTo(PAD+rr, y); ctx.lineTo(PAD+swW-rr, y); ctx.arcTo(PAD+swW,y,PAD+swW,y+rr,rr);
+      ctx.lineTo(PAD+swW, y+swH-rr); ctx.arcTo(PAD+swW,y+swH,PAD+swW-rr,y+swH,rr);
+      ctx.lineTo(PAD+rr, y+swH); ctx.arcTo(PAD,y+swH,PAD,y+swH-rr,rr);
+      ctx.lineTo(PAD, y+rr); ctx.arcTo(PAD,y,PAD+rr,y,rr);
+      ctx.closePath();
+      ctx.fill();
+
+      // HEX on swatch
+      ctx.fillStyle = txtOn(blk.hex);
+      ctx.font = 'bold 10px "Space Mono",monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(blk.hex.toUpperCase(), PAD + swW/2, y + swH/2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      // Text block
+      const tx = PAD + swW + 16;
+      ctx.fillStyle = '#c8a96e';
+      ctx.font = 'bold 9px "Space Mono",monospace';
+      ctx.fillText(blk.label, tx, y + 4);
+
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = 'bold 14px "Permanent Marker",cursive';
+      ctx.fillText(CS.autoName(blk.hex), tx, y + 20);
+
+      ctx.fillStyle = '#555';
+      ctx.font = '10px "Space Mono",monospace';
+      ctx.fillText(blk.hex.toUpperCase(), tx, y + 40);
+
+      if (blk.match) {
+        ctx.fillStyle = '#8a7048';
+        ctx.font = '9px system-ui,sans-serif';
+        ctx.fillText('Closest: ' + blk.match, tx, y + 56);
+      }
+
+      ctx.fillStyle = '#999';
+      ctx.font = 'italic 9px system-ui,sans-serif';
+      const maxW = W - tx - PAD;
+      ctx.fillText(blk.desc, tx, y + 74, maxW);
+
+      y += BLOCK_H + GAP;
+    });
+
+    // Footer
+    ctx.fillStyle = '#ccc';
+    ctx.font = '7px system-ui,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('digby.shop', W - PAD, H - PAD);
+
+    // Export — same Web Share / fallback anchor pattern as Polaroid
+    const pngDataUrl = canvas.toDataURL('image/png');
+    const filename = `spectrum-spec-${Date.now()}.png`;
+    const _doAnchor = () => {
+      const a = document.createElement('a');
+      a.href = pngDataUrl; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      App.toast('Spec Sheet exported ✓');
+    };
+    try {
+      const res = await fetch(pngDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Spectrum Spec Sheet' });
+        App.toast('Spec Sheet exported ✓');
+      } else { _doAnchor(); }
+    } catch(e) {
+      if (e.name !== 'AbortError') {
+        App.toast('Sharing interrupted. Attempting direct download…');
+        _doAnchor();
+      }
+    }
   },
 
   renderMood(){
