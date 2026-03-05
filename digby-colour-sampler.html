@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.9</title>
+<title>Spectrum 4.0.18</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '409';
+  const APP_VERSION = '418';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -856,7 +856,7 @@ body.simple-mode .pro-only{display:none!important}
 body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
-body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .colour-blind-tool,body.pro-mode .pb-pro-btn,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only{display:revert!important}
+body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .colour-blind-tool,body.pro-mode .pb-pro-btn,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
 
 /* ── Pro Mode toggle in header ─────────────────────────────────────────── */
 #hdr-pro-wrap{display:flex;align-items:center;gap:4px;padding:0 2px;flex-shrink:0}
@@ -1840,30 +1840,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <button class="btn btn-s btn-sm" onclick="Prompter.clearColours()" title="Remove selected colours, keep text choices">Clear Colours</button>
       </div>
 
-      <!-- v132: Material Tags moved from Explorer into Prompter -->
-      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
-        Material Tags
-        <span style="font-size:9px;color:var(--muted);font-family:var(--mono)">Wall &amp; Trim · Midjourney</span>
-      </div>
-      <div class="card" id="semantic-prompter-card" style="padding:12px">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-family:var(--mono)">Interior design prompt builder — Set Wall &amp; Trim colours first</div>
-        <textarea id="semantic-prompt-out" rows="3" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:10px;font-family:var(--mono);padding:8px;resize:vertical;line-height:1.5;outline:none" placeholder="Set Wall and Trim colours in Explorer, then tap a material tag…" readonly></textarea>
-        <div style="margin-top:10px;font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:6px">Material Tags</div>
-        <div id="material-tags" style="display:flex;flex-wrap:wrap;gap:6px">
-          <button class="btn btn-s btn-sm" data-material="Limewash" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Limewash</button>
-          <button class="btn btn-s btn-sm" data-material="Matte Plaster" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Matte Plaster</button>
-          <button class="btn btn-s btn-sm" data-material="Brass" data-accent="Brass" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Brass</button>
-          <button class="btn btn-s btn-sm" data-material="Oak" data-accent="Oak" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Oak</button>
-          <button class="btn btn-s btn-sm" data-material="Marble" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Marble</button>
-          <button class="btn btn-s btn-sm" data-material="Linen" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Linen</button>
-          <button class="btn btn-s btn-sm" data-material="Concrete" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Concrete</button>
-          <button class="btn btn-s btn-sm" data-material="Velvet" onclick="SemanticPrompter.tagClick(this)" ontouchstart="">Velvet</button>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:10px">
-          <button class="btn btn-s btn-sm" style="flex:1" onclick="SemanticPrompter.copy()" ontouchstart="">Copy</button>
-          <button class="btn btn-p btn-sm" style="flex:1" onclick="SemanticPrompter.openMJ()" ontouchstart="">Open MJ ↗</button>
-        </div>
-      </div>
+
 
       <div class="shop-banner">
         <a href="https://digby.shop" target="_blank">digby.shop</a>
@@ -2040,7 +2017,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.9</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.18</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3477,15 +3454,6 @@ const App={
         <a href="https://digby.shop" target="_blank">digby.shop</a>
         <p>Print your palette creations as products</p>
       </div>
-      <div class="set-sec">Library</div>
-      <div class="set-row"><div><div class="set-l">${all.length} / ${DS.MAX_COLOURS} colours</div><div class="set-sub" style="${all.length > 400 ? 'color:#d4a830' : ''}">${all.length > 400 ? '⚠ Approaching limit (' + DS.MAX_COLOURS + ')' : DS._db ? '✓ Stored in IndexedDB' : 'Stored in localStorage'}</div></div></div>
-      <div class="set-row"><div><div class="set-l">Backup Library</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
-      <div class="set-row"><div><div class="set-l">Restore Library</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input').click()">Restore JSON</button></div>
-      <input type="file" id="imp-input" accept=".json" style="display:none" onchange="App.importLib(this)">
-      <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub" id="lib-size-info">Cannot be undone</div></div><button class="btn btn-d btn-sm" onclick="App.clearLib()">Clear</button></div>
-      <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
-      <div class="set-sec">Network</div>
-      <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online  API enrichment active':'Offline  local data only'}</span></div>
       <div class="set-sec">Display</div>
       <div class="set-row" style="align-items:center;gap:6px;flex-wrap:wrap">
         <div style="flex:1;min-width:0"><div class="set-l">Theme</div><div class="set-sub">Light or Dark appearance</div></div>
@@ -3518,6 +3486,8 @@ const App={
           </div>
         </div>
       </div>
+      <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
+        <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
 
       <div class="set-row">
         <div style="flex:1;min-width:0"><div class="set-l">Export Labels</div><div class="set-sub">Text shown on colour swatches in exports</div></div>
@@ -3528,16 +3498,226 @@ const App={
           <div class="seg-btn${State.swatchLabel==='none'?' on':''}" id="sl-none" data-mode="none" onclick="App.setSwatchLabel('none')">None</div>
         </div>
       </div>
-      <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
-        <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
-      <div class="set-sec" style="display:${State.proMode?'block':'none'}" id="tech-exports-sec">Technical Exports</div>
-      <div id="tech-exports-card" style="display:${State.proMode?'block':'none'}">
+      <div class="set-sec">Colour Science</div>
+      <details style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:6px 0">
+        <summary style="padding:13px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--surface2)">
+          <span>📖 Glossary &amp; Science</span>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">tap to expand</span>
+        </summary>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:14px;background:var(--surface)">
+
+          <div style="font-size:10px;color:var(--muted);line-height:1.6;padding:8px 10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+            Spectrum samples real-world colour through your camera, then runs it through a chain of perceptual colour science algorithms — all computed on-device, in real time, with no data sent anywhere.
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">📷 Camera Sampling</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Every frame, Spectrum reads the RGB pixel value at the crosshair centre and converts it to HEX. The value is smoothed across frames to reduce flicker from camera noise. Freeze locks a frame for careful inspection. The loupe provides a 2× magnified crop so you can pick exact colours from fine detail.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">HEX / RGB</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The foundation of digital colour. HEX is a 6-digit web format (#C9A38B). RGB breaks colour into Red, Green, Blue channels (0–255 each). All colours in Spectrum are stored and exported as HEX — compact, universal, and supported everywhere from CSS to paint mixing software.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌡 Kelvin (K) / Colour Temperature</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The algorithm estimates the Correlated Colour Temperature of your sampled colour using the McCamy approximation — a formula derived from the chromaticity coordinates of the colour. Candlelight ≈1800K, tungsten ≈2700K, daylight ≈5500K, overcast sky ≈7000K. Spectrum converts to °C (K−273) for intuitive reading. Essential for matching lighting conditions in film and photography.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">LRV — Light Reflectance Value</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Derived from the CIE Lab L* (lightness) channel: LRV = (L*/100)². Measures how much light a surface reflects as a percentage (0% = black, 100% = white). Critical for interior design — architects use LRV to ensure enough contrast between walls, floors, and ceilings. UK building regulations reference LRV 30 as a minimum contrast threshold for accessibility.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">CIE Lab (L*a*b*)</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The perceptual colour space that powers all of Spectrum's matching. L* = lightness (0–100), a* = green↔red axis, b* = blue↔yellow axis. Designed so equal numerical distances feel equal to the human eye. Spectrum converts every sampled colour to Lab before running Pantone, Little Greene, and Farrow &amp; Ball matching.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">ΔE CIEDE2000 — Colour Difference</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The gold-standard formula for measuring how different two colours look to a human observer. Spectrum uses the full CIEDE2000 algorithm (not the simpler CIE76) for all paint and Pantone matching — it applies correction factors for lightness, chroma, and hue that make it far more accurate near neutral greys and skin tones. A ΔE below 2.0 is generally imperceptible; below 1.0 is considered a perfect match.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Little Greene / Farrow &amp; Ball</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum carries embedded libraries of 2,000+ Pantone, 300+ Little Greene, and 130+ Farrow &amp; Ball colours. For every sampled colour, it runs a nearest-neighbour search in Lab space using CIEDE2000 distance, finding the closest match in each library instantly — no internet required. The ΔE score tells you how close the match is.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">OKLCH — Perceptual Harmony Space</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">A modern colour space (Lightness, Chroma, Hue) built on Björn Ottosson's Oklab model. More accurate than HSL for generating harmonies because equal chroma steps look equal to the eye — HSL's "equal" saturation steps produce very unequal perceived intensities. Spectrum uses OKLCH for all harmony generation: complementary, analogous, triadic, tetradic, split-complementary, and monochromatic.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🎨 Colour Harmonies</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Generated by rotating around the OKLCH hue wheel from your root colour. <b style="color:var(--text)">Complementary</b> = 180° opposite (maximum contrast). <b style="color:var(--text)">Analogous</b> = ±30° neighbours (naturally cohesive). <b style="color:var(--text)">Triadic</b> = 120° intervals (vibrant balance). <b style="color:var(--text)">Tetradic</b> = 90° intervals (rich, complex). <b style="color:var(--text)">Split Complementary</b> = 150°/210° (softer contrast than complementary). <b style="color:var(--text)">Monochromatic</b> = same hue, varied lightness and chroma.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">WCAG Contrast Ratio</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Web Content Accessibility Guidelines measure text legibility. Calculated as (L1+0.05)/(L2+0.05) where L1 and L2 are the relative luminances of the two colours. AA standard = 4.5:1 for normal text. AAA = 7:1. Spectrum calculates WCAG against both white and black for every colour, and uses it to auto-select the legible label colour on exported swatches.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">👁 CVD — Colour Vision Deficiency</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum simulates how your palette appears to people with the four main types of colour blindness using the Brettel-Viénot-Mollon algorithm. <b style="color:var(--text)">Deuteranopia</b> = reduced green sensitivity (most common, ~6% of men). <b style="color:var(--text)">Protanopia</b> = reduced red sensitivity. <b style="color:var(--text)">Tritanopia</b> = reduced blue sensitivity (rare). <b style="color:var(--text)">Achromatopsia</b> = complete colour blindness (very rare). The ΔE shift score flags colours that change dramatically.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🎬 LUT — Look-Up Table</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">A 3D colour transformation file (.cube format) that remaps every RGB value in video footage — the foundation of cinematic colour grading. Spectrum generates a LUT from your palette's dominant hue, shifting the grade toward your real-world sampled colour. Import into DaVinci Resolve, Premiere Pro, or Final Cut Pro to apply the look to any footage.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">⚡ Auto-Palette — K-Means on a Web Worker</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">K-means clustering groups all pixels in an image into k colour buckets, iteratively moving each bucket's centre to the mean of its pixels until stable. Spectrum runs this entirely in a background Web Worker thread so the UI never freezes, even on high-resolution photos. The camera version snaps a frame at the moment you tap, then extracts 3, 6, or 9 dominant colours in under a second.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🧠 Psychology Tags</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Colour psychology associations drawn from environmental psychology and marketing research, mapped by hue angle and OKLCH chroma. Reds/oranges → energy, appetite, urgency. Blues/teals → calm, trust, professionalism. Greens → nature, health, growth. Purples → creativity, luxury. Warm neutrals → approachability, warmth. Used in the Prompter to guide Midjourney prompt generation toward the right emotional register.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌐 Online Colour Names</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">When online, Spectrum queries The Color API (thecolorapi.com) to retrieve a human-readable name for each saved colour — names like "Dusty Rose" or "Slate Grey" that feel more natural than algorithmic Pantone codes. This is the only network call the app makes; everything else — all matching, all science — runs entirely on your device.</div>
+          </div>
+
+          <div style="font-size:9px;color:var(--faint);text-align:center;padding-top:4px;font-family:var(--mono);line-height:1.6">
+            All algorithms run on-device · No colour data is sent to any server<br>
+            Spectrum · Digby Oldridge · PR Eye Ltd · digby.shop
+          </div>
+
+        </div>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:6px 0">
+        <summary style="padding:13px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--surface2)">
+          <span>⚡ Quick Start Guide</span>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">tap to expand</span>
+        </summary>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">
+            <b style="color:var(--text);display:block;margin-bottom:6px">🎯 In 60 seconds</b>
+            <b style="color:var(--accent)">1.</b> Point your camera at any colour and tap <b style="color:var(--text)">⊙ Sample</b> — it saves to your Library.<br><br>
+            <b style="color:var(--accent)">2.</b> Tap <b style="color:var(--text)">Library</b> to see all saved colours. Tap any swatch to inspect it — name, HEX, Kelvin, LRV, and paint matches.<br><br>
+            <b style="color:var(--accent)">3.</b> Tap <b style="color:var(--text)">Explorer</b> to set a Root Colour and see instant colour harmonies, tints/shades, and a Wall &amp; Trim preview.<br><br>
+            <b style="color:var(--accent)">4.</b> In <b style="color:var(--text)">Palette Builder</b>, tap <b style="color:var(--text)">+ Add</b> to build a palette from your library, then export as a Polaroid card or image strip.<br><br>
+            <b style="color:var(--accent)">5.</b> In <b style="color:var(--text)">Prompter</b> (Pro), select colours and tap <b style="color:var(--text)">Generate</b> to create a Midjourney prompt with your real-world palette baked in.
+          </div>
+          <div style="font-size:10px;color:var(--faint);font-family:var(--mono);border-top:1px solid var(--border);padding-top:8px">
+            Tip: use the 📸 button in camera mode to auto-extract a full palette from any scene in one tap.
+          </div>
+        </div>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:6px 0">
+        <summary style="padding:13px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--surface2)">
+          <span>📘 Detailed User Guide</span>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">tap to expand</span>
+        </summary>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:16px;background:var(--surface)">
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">📷 Sampler Tab</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              The Sampler is your main colour capture tool with three modes:<br><br>
+              <b style="color:var(--text)">Camera</b> — Live video feed with a crosshair sampler at centre. The live bar shows the current colour name, HEX code, and Kelvin temperature in real time. Tap <b style="color:var(--text)">⊙ Sample</b> to save the current colour to your Library. Tap <b style="color:var(--text)">❄ Freeze</b> to lock the frame for careful sampling. The <b style="color:var(--text)">loupe</b> (magnifier) in the top-right helps you pick fine detail.<br><br>
+              <b style="color:var(--text)">📸 Auto-Palette</b> — Tap the camera icon to snap the current scene and extract 6 dominant colours automatically using k-means clustering. Each colour saves directly to your Library.<br><br>
+              <b style="color:var(--text)">Picker</b> — Manual hex entry or colour wheel. Type any HEX code or drag the wheel to a colour and tap Sample to save it.<br><br>
+              <b style="color:var(--text)">Upload</b> — Import a photo from your camera roll. Tap anywhere on the image to sample that colour, or use Auto-Palette to extract the dominant palette from the whole image.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">📚 Library Tab</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              All your sampled colours in one place. Tap any swatch to open the <b style="color:var(--text)">Inspector</b>, which shows:<br><br>
+              • Full colour science data: HEX, RGB, HSL, OKLCH, LRV, Kelvin temperature and description<br>
+              • Nearest <b style="color:var(--text)">Pantone®</b>, <b style="color:var(--text)">Little Greene</b>, and <b style="color:var(--text)">Farrow &amp; Ball</b> paint matches with ΔE accuracy score<br>
+              • <b style="color:var(--text)">WCAG</b> contrast ratios against white and black<br>
+              • Psychology tag and mood association<br>
+              • Export options: copy HEX, copy as CSS, share as Polaroid card<br><br>
+              Long-press or use the <b style="color:var(--text)">⋮ menu</b> to rename or delete a colour. Use <b style="color:var(--text)">Sort</b> to reorder by hue, lightness, or date. Use <b style="color:var(--text)">Search</b> to filter by name or HEX.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">🔭 Explorer Tab</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              The Explorer generates colour relationships from a single Root Colour.<br><br>
+              <b style="color:var(--text)">Root Colour</b> — Set from your Library or type a HEX. Everything below updates instantly.<br><br>
+              <b style="color:var(--text)">Colour Harmonies</b> — Complementary, Analogous, Triadic, Tetradic, Split-Complementary, and Monochromatic sets generated in OKLCH. Tap any swatch to add it to your Library. Switch between harmony types with the segmented control.<br><br>
+              <b style="color:var(--text)">Tints, Shades &amp; Tones</b> — A full lightness ramp from your root colour. Tap to save any step.<br><br>
+              <b style="color:var(--text)">Mood Analysis</b> — Psychology and emotional associations for your root colour.<br><br>
+              <b style="color:var(--text)">Surface Tester</b> — Set a Wall and Trim colour to preview them together on a simulated room render. Use Auto-Suggest to let Spectrum pick the best wall/trim pairing from your Library by LRV contrast.<br><br>
+              <b style="color:var(--text)">Aesthetic Colour Generator</b> — Generate curated palettes in a chosen aesthetic (Nordic, Japandi, Maximalist, etc.) rooted to your sampled colour.<br><br>
+              <b style="color:var(--text)">Sample-Based LUT Generator</b> <span style="font-size:9px;color:var(--accent);font-family:var(--mono)">(Pro)</span> — Build a .cube LUT file from your sampled colours for use in DaVinci Resolve, Premiere Pro, or Final Cut Pro.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">🎨 Palette Builder Tab</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              Build curated palettes from your Library colours and export them in multiple formats.<br><br>
+              Tap <b style="color:var(--text)">+ Add Slot</b> to add a colour slot, then tap a slot to fill it from your Library. Drag slots to reorder. Tap the <b style="color:var(--text)">× remove</b> button to clear a slot.<br><br>
+              <b style="color:var(--text)">Export formats:</b><br>
+              • <b style="color:var(--text)">Polaroid Card</b> — A stylised export with photo (if captured from camera) and colour swatches beneath<br>
+              • <b style="color:var(--text)">Colour Strip</b> — Clean horizontal swatch strip with names and HEX codes<br>
+              • <b style="color:var(--text)">60-30-10</b> — Interior design proportion rule visualisation<br>
+              • <b style="color:var(--text)">Wall &amp; Trim Preview</b> — Room mockup using your selected colours <span style="font-size:9px;color:var(--accent);font-family:var(--mono)">(Design Pro)</span><br><br>
+              The <b style="color:var(--text)">CVD Simulator</b> shows how your palette appears across different types of colour vision deficiency. The <b style="color:var(--text)">Harmony Check</b> scores your palette for complementary, analogous, or triadic harmony.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">✏️ Prompter Tab <span style="font-size:9px;color:var(--accent);font-family:var(--mono)">(Pro)</span></div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              Generates Midjourney image prompts using your real-world sampled colours as the colour palette anchor.<br><br>
+              <b style="color:var(--text)">1. Select colours</b> from your Library strip at the top — up to 5. The active-colour science card shows Kelvin and psychology data for your selected colour.<br><br>
+              <b style="color:var(--text)">2. Choose modifiers</b> — Subject, Medium, Style, Mood, Lighting, and Pattern. Each is multi-select. Your choices combine into a structured prompt.<br><br>
+              <b style="color:var(--text)">3. Set MJ Parameters</b> — Aspect ratio, version (v6/v7/Niji), stylise value, and chaos. These append as Midjourney flags.<br><br>
+              <b style="color:var(--text)">4. Generate &amp; Copy</b> — Tap Generate to build the prompt, then Copy to clipboard. Tap <b style="color:var(--text)">Open MJ ↗</b> to jump straight to Midjourney.com.<br><br>
+              Use <b style="color:var(--text)">Reset Modifiers</b> to clear text choices while keeping your colour selection, or <b style="color:var(--text)">Clear Colours</b> to keep modifiers and swap the palette.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">⚙️ Settings &amp; Pro Modes</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              Access Settings via the <b style="color:var(--text)">⚙ gear icon</b> in the top-right header.<br><br>
+              <b style="color:var(--text)">Pro Mode</b> — Unlocks the Prompter tab, CVD simulation, LUT Generator, and advanced inspector data. Toggle on/off here or in the header.<br><br>
+              <b style="color:var(--text)">Design Pro Mode</b> — Unlocks Wall &amp; Trim export, Technical Exports (Tailwind CSS, Swift UIColor, CSS Variables), and advanced Palette Builder exports.<br><br>
+              <b style="color:var(--text)">Export Labels</b> — Choose whether colour swatches in exports show both name and HEX, name only, HEX only, or no label.<br><br>
+              <b style="color:var(--text)">Library Backup</b> — Export all saved colours as a .json file to keep a backup or transfer to another device. Restore merges or overwrites from any saved .json.
+            </div>
+          </div>
+
+          <div style="font-size:9px;color:var(--faint);text-align:center;padding-top:4px;font-family:var(--mono);line-height:1.6">
+            Spectrum · Digby Oldridge · PR Eye Ltd · digby.shop
+          </div>
+
+        </div>
+      </details>
+      <div class="set-sec">Library</div>
+      <div class="set-row"><div><div class="set-l">${all.length} / ${DS.MAX_COLOURS} colours</div><div class="set-sub" style="${all.length > 400 ? 'color:#d4a830' : ''}">${all.length > 400 ? '⚠ Approaching limit (' + DS.MAX_COLOURS + ')' : DS._db ? '✓ Stored in IndexedDB' : 'Stored in localStorage'}</div></div></div>
+      <div class="set-row"><div><div class="set-l">Backup Library</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
+      <div class="set-row"><div><div class="set-l">Restore Library</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input').click()">Restore JSON</button></div>
+      <input type="file" id="imp-input" accept=".json" style="display:none" onchange="App.importLib(this)">
+      <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub" id="lib-size-info">Cannot be undone</div></div><button class="btn btn-d btn-sm" onclick="App.clearLib()">Clear</button></div>
+      <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
+      <div class="set-sec">Network</div>
+      <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online  API enrichment active':'Offline  local data only'}</span></div>
+      <div class="set-sec" style="display:${state.isProMode?'block':'none'}" id="tech-exports-sec">Technical Exports</div>
+      <div id="tech-exports-card" style="display:${state.isProMode?'block':'none'}">
         <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy library as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
         <div class="set-row"><div><div class="set-l">Swift UIColor</div><div class="set-sub">Copy as Swift UIColor extensions</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsSwift()">Copy</button></div>
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.9</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.18</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -9632,6 +9812,11 @@ function toggleProMode(cb) {
   const swStatic = document.getElementById('settings-pro-sw');
   if (swStatic) swStatic.classList.toggle('on', val);
   if (typeof App !== 'undefined') App.toast(val ? '✏️ Design Pro on' : 'Design Pro off');
+  // Sync Technical Exports visibility in overlay
+  const techSec = document.getElementById('tech-exports-sec');
+  const techCard = document.getElementById('tech-exports-card');
+  if (techSec) techSec.style.display = val ? 'block' : 'none';
+  if (techCard) techCard.style.display = val ? 'block' : 'none';
 }
 
 // initDesignProToggle() — call after openSettings() injects HTML
