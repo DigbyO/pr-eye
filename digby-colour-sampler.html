@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '107';
+  const APP_VERSION = '108';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -166,13 +166,22 @@ a{color:var(--accent);text-decoration:none}
 }
 #picker-crosshair svg{width:70px;height:70px}
 
-/* Live colour bar - overlaid at bottom of camera */
+/* Live colour bar - v108: glass pill floating at top of module, below status bar */
 #live-bar{
-  position:relative;width:100%;flex-shrink:0;
-  background:#151515;border-top:1px solid #333;border-radius:0;
-  padding:12px 16px;
+  position:absolute;
+  top:env(safe-area-inset-top,0px);
+  left:12px;right:12px;width:auto;
+  z-index:20;
+  background:rgba(15,15,15,0.88);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:10px 14px;
   display:flex;align-items:center;gap:10px;
-  pointer-events:auto;z-index:2;
+  pointer-events:auto;
+  box-shadow:0 4px 24px rgba(0,0,0,.45);
+  flex-shrink:0;
 }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
 /* live-bar children inherit pointer-events:auto from parent */
@@ -851,9 +860,10 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  /* #live-bar is docked in flow — no override needed */
+  /* Narrow the glass pill a bit in landscape */
+  #live-bar{ left:20%;right:20%;top:8px; }
 }
-/* @supports backdrop-filter: live-bar no longer uses backdrop-filter */
+/* live-bar uses backdrop-filter:blur(12px) in v108 — glass pill at top */
 .colour-blind-tool{transition:opacity .2s}
 
 </style>
@@ -1133,7 +1143,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
     </div>
 
-    <!-- Docked colour console — v107: in normal flow, always above nav -->
+    <!-- Floating colour console — v108: absolute glass pill at top, below safe-area -->
     <div id="live-bar">
         <div id="live-swatch"></div>
         <div id="live-info">
