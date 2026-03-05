@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '108';
+  const APP_VERSION = '109';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -142,9 +142,9 @@ a{color:var(--accent);text-decoration:none}
 #sampler-cam-wrap{
   position:relative;background:#000;
   display:flex;align-items:center;justify-content:center;
-  width:100%;aspect-ratio:1/1;
+  width:100%;flex:1;min-height:0;
   overflow:hidden!important;border-radius:16px;
-  /* v85: overflow:hidden!important prevents video leak on orientation change */
+  /* v109: flex:1 fills available col height — eliminates black gap */
 }
 #cam-video{
   position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;
