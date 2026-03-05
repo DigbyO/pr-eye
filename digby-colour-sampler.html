@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '109';
+  const APP_VERSION = '110';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -924,12 +924,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <button class="cap-side-btn on" id="btn-mode-cam" onclick="Sampler.setMode('camera')"> Camera</button>
       <button class="cap-side-btn" id="btn-mode-wheel" onclick="Sampler.setMode('wheel')"> Picker</button>
       <button class="cap-side-btn" id="btn-mode-up" onclick="Sampler.setMode('upload')"> Upload</button>
-      <div style="flex:1"></div>
-      <div id="gal-tog-wrap" class="tog-group" style="width:auto">
-        <button class="tog-btn on" onclick="Sampler.setCamCount(3)" id="ct3">3</button>
-        <button class="tog-btn" onclick="Sampler.setCamCount(6)" id="ct6">6</button>
-        <button class="tog-btn" onclick="Sampler.setCamCount(9)" id="ct9">9</button>
-      </div>
     </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
@@ -960,6 +954,13 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div id="lut-badge" onclick="Sampler.toggleLut()">Grade ON </div>
       <!-- MASTER-FIX-V52: LUT None button — restores natural camera feed -->
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
+
+      <!-- Count toggle — v110: moved inside camera, bottom-right above capture row -->
+      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:130px;right:10px;z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
+        <button class="tog-btn on" onclick="Sampler.setCamCount(3)" id="ct3" style="color:rgba(255,255,255,.8)">3</button>
+        <button class="tog-btn" onclick="Sampler.setCamCount(6)" id="ct6" style="color:rgba(255,255,255,.5)">6</button>
+        <button class="tog-btn" onclick="Sampler.setCamCount(9)" id="ct9" style="color:rgba(255,255,255,.5)">9</button>
+      </div>
 
       <!-- Capture row -->
       <div id="capture-row">
