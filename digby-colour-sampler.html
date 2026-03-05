@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum v138</title>
+<title>Spectrum v140</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -1327,6 +1327,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div class="card" id="var-card" style="padding:10px 0 4px">
         <div id="var-container"></div>
       </div>
+      <div id="designer-recs"></div>
 
 
       <!-- v122: SURFACE TESTER ────────────────────────────────── -->
@@ -1991,6 +1992,14 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">☀ Light</button>
         </div>
         <div class="set-row" style="align-items:center;gap:6px">
+          <div style="flex:1"><div class="set-l">Pro Mode</div><div class="set-sub">Unlock Prompter tab and advanced tools</div></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <div class="sw" id="settings-simple-pro-sw"
+              onclick="App.toggleProMode();var sw=document.getElementById('settings-simple-pro-sw');sw.classList.toggle('on',State.proMode);"
+              style="width:40px;height:22px;cursor:pointer;pointer-events:auto"></div>
+          </div>
+        </div>
+        <div class="set-row" style="align-items:center;gap:6px">
           <div style="flex:1"><div class="set-l">Design Pro Mode</div><div class="set-sub">Unlock Wall &amp; Trim export, technical exports, and advanced tools</div></div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
             <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Off</span>
@@ -2026,7 +2035,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v138</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v140</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3183,7 +3192,15 @@ const State = {
     const setSw = document.getElementById('settings-pro-sw');
     if (setSw) setSw.classList.toggle('on', this.proMode);
     const setCb = document.getElementById('settings-pro-checkbox');
-    if (setCb) setCb.checked = this.proMode; // v131: keep real checkbox in sync
+    if (setCb) setCb.checked = this.proMode;
+    // Sync new static settings tab Pro Mode sw
+    const simpleSw = document.getElementById('settings-simple-pro-sw');
+    if (simpleSw) simpleSw.classList.toggle('on', this.proMode);
+    // Sync overlay Pro Mode sw + label
+    const ovSw = document.getElementById('ov-pro-sw');
+    if (ovSw) ovSw.classList.toggle('on', this.proMode);
+    const ovLbl = document.getElementById('ov-pro-lbl');
+    if (ovLbl) ovLbl.textContent = this.proMode ? 'On' : 'Off';
     // Note: pro-mode-toggle is Design Pro Mode (independent) — do NOT sync here
     // v77: Remove/restore Prompter tab from DOM (not just display:none)
     const prompterTab = document.getElementById('tab-prompter');
@@ -3451,24 +3468,6 @@ const App={
     const all=DS.all();
     this.openOv(`<div id="set-body">
       <div class="ov-title">Settings</div>
-      <div class="set-sec">Design</div>
-      <div class="set-row" style="align-items:center;gap:6px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
-        <div style="flex:1">
-          <div class="set-l">Design Pro Mode</div>
-          <div class="set-sub">Wall &amp; Trim export, Tailwind, Swift, CSS Variables</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="dpm-lbl">Off</span>
-          <div style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
-            <input type="checkbox" id="pro-mode-toggle"
-              style="opacity:0;width:0;height:0;position:absolute"
-              onchange="toggleProMode(this)">
-            <div class="sw" id="settings-pro-sw-ov"
-              onclick="var cb=document.getElementById('pro-mode-toggle');cb.checked=!cb.checked;toggleProMode(cb);"
-              style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
-          </div>
-        </div>
-      </div>
       <div class="shop-banner" style="margin:0 0 12px">
         <a href="https://digby.shop" target="_blank">digby.shop</a>
         <p>Print your palette creations as products</p>
@@ -3487,6 +3486,31 @@ const App={
         <div style="flex:1;min-width:0"><div class="set-l">Theme</div><div class="set-sub">Light or Dark appearance</div></div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
           <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">☀ Light</button>
+        </div>
+      </div>
+      <div class="set-row" style="align-items:center;gap:6px">
+        <div style="flex:1;min-width:0"><div class="set-l">Pro Mode</div><div class="set-sub">Unlock Prompter tab and advanced tools</div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="ov-pro-lbl">${State.proMode?'On':'Off'}</span>
+          <div style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+            <div class="sw ${State.proMode?'on':''}" id="ov-pro-sw"
+              onclick="App.toggleProMode();"
+              style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
+          </div>
+        </div>
+      </div>
+      <div class="set-row" style="align-items:center;gap:6px">
+        <div style="flex:1;min-width:0"><div class="set-l">Design Pro Mode</div><div class="set-sub">Wall &amp; Trim export, Tailwind, Swift, CSS Variables</div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="dpm-lbl">Off</span>
+          <div style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+            <input type="checkbox" id="pro-mode-toggle"
+              style="opacity:0;width:0;height:0;position:absolute"
+              onchange="toggleProMode(this)">
+            <div class="sw" id="settings-pro-sw-ov"
+              onclick="var cb=document.getElementById('pro-mode-toggle');cb.checked=!cb.checked;toggleProMode(cb);"
+              style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
+          </div>
         </div>
       </div>
 
@@ -3508,7 +3532,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v138</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v140</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -6122,14 +6146,8 @@ const Explorer={
   },
 
   renderDesignerRecs(){
-    let container = document.getElementById('designer-recs');
-    if(!container){
-      container = document.createElement('div');
-      container.id = 'designer-recs';
-      const vc = document.getElementById('var-container');
-      if(vc && vc.parentNode) vc.parentNode.insertBefore(container, vc.nextSibling);
-      else return;
-    }
+    const container = document.getElementById('designer-recs');
+    if(!container) return;
     const hex = this.rootHex;
     const rgb = CS.hexToRgb(hex);
     const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
