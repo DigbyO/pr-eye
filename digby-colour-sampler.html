@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v99</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v101</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,17 +18,14 @@
   console.log("Analytics Ready");
 </script>
 <script>
-/* v97 auto-update cache-buster */
 (function(){
-  const APP_VERSION="99";
-  try{
-    if(localStorage.getItem("stored_version")!==APP_VERSION){
-      localStorage.setItem("stored_version",APP_VERSION);
-      if("caches" in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}
-      if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(w){w.unregister()})})}
-      location.reload();
-    }
-  }catch(e){}
+  const APP_VERSION = '101';
+  const stored = localStorage.getItem('stored_version');
+  if (stored !== APP_VERSION) {
+    localStorage.setItem('stored_version', APP_VERSION);
+    if ('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
+    location.reload(true);
+  }
 })();
 </script>
 <!-- PWA Home Screen Icon -->
@@ -171,9 +168,10 @@ a{color:var(--accent);text-decoration:none}
 
 /* Live colour bar - overlaid at bottom of camera */
 #live-bar{
-  position:absolute;bottom:0;left:0;right:0;z-index:6;
-  background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);
-  padding:28px 14px 12px;
+  position:absolute;bottom:15vh;left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
+  z-index:10;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  background:rgba(15,15,15,0.85);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  padding:12px 14px;
   display:flex;align-items:center;gap:10px;
 }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
@@ -438,7 +436,7 @@ a{color:var(--accent);text-decoration:none}
 #exp-root-chips{display:flex;gap:7px;padding:10px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--border)}
 .exp-chip{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:border-color var(--tr),transform var(--tr);flex-shrink:0}
 .exp-chip.on{border-color:var(--accent);transform:scale(1.1)}
-.harm-row{display:flex;gap:16px;padding:0 24px 10px}
+.harm-row{display:flex;gap:5px;padding:0 12px 10px}
 .harm-sw{flex:1;height:44px;border-radius:var(--rs);cursor:pointer;position:relative;transition:transform .12s}
 .harm-sw:active{transform:scale(.93)}
 .harm-hex{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;color:rgba(255,255,255,.65);font-family:var(--mono)}
@@ -541,7 +539,7 @@ a{color:var(--accent);text-decoration:none}
   background:rgba(0,0,0,.5);color:#fff;
   font-size:15px;line-height:1;
   display:flex;align-items:center;justify-content:center;
-  border:1px solid transparent;cursor:pointer;
+  border:1px solid rgba(255,255,255,.25);cursor:pointer;
   opacity:0;transition:opacity .15s;
   -webkit-tap-highlight-color:transparent;
   font-family:var(--mono);
@@ -551,7 +549,7 @@ a{color:var(--accent);text-decoration:none}
 @media(hover:none){ .trio-add-btn{ opacity:.75 } }
 
 /* Seed chips get a subtle dashed border to distinguish from library chips */
-.exp-chip-seed{ border:2px dashed rgba(255,255,255,.08)!important }
+.exp-chip-seed{ border:2px dashed rgba(255,255,255,.25)!important }
 
 /*  SAMPLE LUT GENERATOR  */
 #slut-zones{display:flex;gap:8px}
@@ -577,29 +575,6 @@ a{color:var(--accent);text-decoration:none}
 .trio-mode-btn{font-size:11px;letter-spacing:.01em;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .trio-mode-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(192,152,112,.12)}
 #trio-display{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
-/* v99: Upload floating bars — positioned at bottom, canvas padded */
-body.upload-hero #upload-wrap{display:flex!important;flex-direction:column}
-body.upload-hero #upload-wrap > div:first-child{
-  order:3;flex-shrink:0;
-  background:rgba(12,12,12,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-top:1px solid rgba(255,255,255,.1);border-bottom:none;
-  padding:8px 12px;flex-wrap:wrap;gap:6px
-}
-body.upload-hero #up-queue-bar{
-  order:2;flex-shrink:0;
-  background:rgba(12,12,12,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:none;border-top:1px solid rgba(255,255,255,.06);padding:8px 12px
-}
-body.upload-hero #upload-wrap > div:last-child{order:1;flex:1}
-.designer-rec{margin-bottom:14px}
-.designer-rec-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px;font-weight:600}
-.designer-rec-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px}
-.designer-sw-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.designer-sw{width:42px;height:42px;border-radius:var(--rs);cursor:pointer;transition:transform .15s;position:relative}
-.designer-sw:active{transform:scale(.92)}
-.designer-sw-label{font-size:8px;color:var(--muted);text-align:center;margin-top:3px;font-family:var(--mono);line-height:1.2}
-.designer-pct{font-size:9px;color:var(--text);font-weight:700;position:absolute;bottom:3px;left:50%;transform:translateX(-50%);text-shadow:0 1px 3px rgba(0,0,0,.6)}
-.designer-bar-row{display:flex;height:36px;border-radius:var(--rs);overflow:hidden;margin-bottom:4px}
 .trio-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--surface)}
 .trio-swatches{display:flex;height:80px}
 .trio-sw{flex:1;position:relative;cursor:pointer;transition:flex .2s}
@@ -782,9 +757,6 @@ body.upload-hero #upload-wrap > div:last-child{order:1;flex:1}
 .insp-advanced summary::after{content:'▾';font-size:10px;transition:transform .2s}
 .insp-advanced[open] summary::after{transform:rotate(-180deg)}
 .insp-advanced summary::-webkit-details-marker{display:none}
-/* v97: luxury-accordion styling */
-.luxury-accordion{border-color:var(--accent)!important}
-.luxury-accordion summary{color:var(--accent)!important;font-weight:600}
 .insp-advanced-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;background:var(--surface)}
 .insp-adv-col{display:flex;flex-direction:column;gap:0;min-width:0}
 .insp-adv-col-title{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-family:var(--mono);font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
@@ -872,6 +844,17 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 #hdr-pro-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 #hdr-pro-sw.on::after{left:16px}
 /* ── Colour-blind-tool: Pro-only ──────────────────────────────────── */
+.tab-inactive {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0; pointer-events: none; visibility: hidden; z-index: -1;
+  overflow: hidden; transform: translateZ(0);
+}
+@media (orientation: landscape) {
+  #live-bar { bottom: 20px !important; width: 70% !important; }
+}
+@supports not (backdrop-filter: blur(10px)) {
+  #live-bar { background: rgba(10,10,10,0.95) !important; }
+}
 .colour-blind-tool{transition:opacity .2s}
 
 </style>
@@ -1011,6 +994,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div id="no-cam">
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         <div style="font-size:15px;font-weight:700" id="no-cam-title">Camera Unavailable</div>
+        <button class="btn btn-p" style="margin:12px 0;padding:14px 28px;font-size:15px;border-radius:12px;cursor:pointer" onclick="document.getElementById('upload-input')?.click() || Sampler.setMode('upload')">Click to Upload Image</button>
         <div style="font-size:12px;text-align:center;line-height:1.8;max-width:290px" id="no-cam-msg">Detecting browser...</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
           <button class="btn btn-p btn-sm" onclick="Sampler.startCamera()"> Retry</button>
@@ -1059,7 +1043,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div id="cam-queue-swatches" style="display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
       <div id="cam-queue-count" style="font-size:10px;color:var(--muted);flex-shrink:0;white-space:nowrap"></div>
       <button class="btn btn-p btn-sm" style="flex-shrink:0" onclick="Sampler.saveQueue()">Save All</button>
-      <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="Sampler.exportManualPolaroid()">📷</button>
       <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="Sampler.clearQueue()">Clear</button>
     </div>
     </div><!-- /sampler-cam-col -->
@@ -1084,7 +1067,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
         <span id="up-queue-info" style="font-size:10px;color:var(--muted);flex-shrink:0"></span>
         <button class="btn btn-p btn-sm" onclick="Sampler.saveQueue()">Save All</button>
-        <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()">📷</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
       </div>
       <div style="position:relative;flex:1;overflow:hidden">
@@ -1244,12 +1226,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="card" id="harm-card" style="padding:10px 0 4px">
         <div id="harm-container"></div>
-      </div>
-
-      <!-- v97: Interior Designer Recommendations -->
-      <div class="sec">Designer Recommendations</div>
-      <div class="card" id="designer-card" style="padding:12px">
-        <div id="designer-container"></div>
       </div>
 
       <div class="sec">Mood Analysis</div>
@@ -2198,6 +2174,24 @@ const CS = {
   kelvin(rgb){const{r,g,b}=rgb;if(r+g+b<10)return 5500;const n=(r/255-.332)/(g/255-.1858);if(isNaN(n)||!isFinite(n))return 5500;const k=-449*n**3+3525*n**2-6823*n+5520;return Math.round(Math.max(1800,Math.min(12000,k)))},
   kDesc(k){return k<2200?'Candlelight':k<3000?'Tungsten':k<3500?'Warm White':k<4500?'Neutral':k<6000?'Daylight':k<7000?'Overcast':'Deep Sky'},
     _nameCache:null,
+  huePrefix(hex){
+    const{r,g,b}=this.hexToRgb(hex);
+    const{h,s}=this.rgbToHsl(r,g,b);
+    const diff=Math.max(Math.abs(r-g),Math.abs(g-b),Math.abs(r-b));
+    if(s<5||diff<13) return 'Monochrome';
+    if(h<30) return 'Fiery';
+    if(h<60) return 'Sunlit';
+    if(h<150) return 'Botanical';
+    if(h<210) return 'Arctic';
+    if(h<270) return 'Cinematic';
+    if(h<330) return 'Regal';
+    return 'Rose';
+  },
+  prefixedName(hex){
+    const prefix=this.huePrefix(hex);
+    const auto=this.autoName(hex);
+    return prefix+' / '+auto;
+  },
   autoName(hex){
     if(!this._nameCache){try{this._nameCache=JSON.parse(localStorage.getItem('spectrum-name-cache')||'{}');}catch(e){this._nameCache={};}}
     if(this._nameCache[hex])return this._nameCache[hex];
@@ -2865,8 +2859,8 @@ const DS = {
       lch:         CS.labToLch(lab),
       // MASTER-FIX 3: prefer closest Pantone name as the canonical name;
       // autoName() is the generative fallback when Pantone data is absent.
-      name:        CS.nearestPantone(lab)?.name || CS.autoName(hex),
-      nameSource:  CS.nearestPantone(lab) ? 'pantone' : 'auto',
+      name:        CS.prefixedName(hex),
+      nameSource:  'hue-prefix',
       pantone:     CS.nearestPantone(lab),
       littleGreene:CS.nearestLG(lab),
       farrowBall:  CS.nearestFB(lab),
@@ -3106,7 +3100,7 @@ const App={
       <span class="share-opt-icon" style="color:#25D366"></span><span class="share-opt-label">WhatsApp</span></button>`;
     html += `<button class="share-opt-btn" onclick="window.open('mailto:?subject=${mailSubj}&body=${mailBody}','_blank');App.closeShare()">
       <span class="share-opt-icon"></span><span class="share-opt-label">Email</span></button>`;
-    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(text)}).then(()=>{_haptic();App.toast('Copied!')});App.closeShare()">
+    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(text)}).then(()=>App.toast('Copied!'));App.closeShare()">
       <span class="share-opt-icon"></span><span class="share-opt-label">Copy Text</span></button>`;
     if(pngDataUrl){
       html += `<button class="share-opt-btn" onclick="App._downloadPolaroid(${JSON.stringify(pngDataUrl)},${JSON.stringify(title)});App.closeShare()">
@@ -3125,9 +3119,9 @@ const App={
           const res = await fetch(pngDataUrl);
           const blob = await res.blob();
           const file = new File([blob], `${title}.png`, {type:'image/png'});
-          await navigator.share({ files:[file] });
+          await navigator.share({title, text, files:[file]});
           App.closeShare();
-        }catch(e){ if(e.name!=='AbortError'){ App.toast('Sharing interrupted. Attempting direct download…'); App._downloadPolaroid(pngDataUrl,title); App.closeShare(); } }
+        }catch(e){ if(e.name!=='AbortError') App.toast('Share failed'); }
       };
     }
   },
@@ -3163,7 +3157,7 @@ const App={
       <span class="share-opt-icon" style="color:#25D366"></span><span class="share-opt-label">WhatsApp</span></button>`;
     html += `<button class="share-opt-btn" onclick="window.open('mailto:?subject=${mailSubj}&body=${mailBody}','_blank');App.closeShare()">
       <span class="share-opt-icon"></span><span class="share-opt-label">Email</span></button>`;
-    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(body + (url?''+fullUrl:''))}).then(()=>{_haptic();App.toast('Copied!')});App.closeShare()">
+    html += `<button class="share-opt-btn" onclick="navigator.clipboard?.writeText(${JSON.stringify(body + (url?''+fullUrl:''))}).then(()=>App.toast('Copied!'));App.closeShare()">
       <span class="share-opt-icon"></span><span class="share-opt-label">Copy to Clipboard</span></button>`;
 
     opts.innerHTML = html;
@@ -3222,32 +3216,9 @@ const App={
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v99</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 3.2 v80</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
-
-      <!-- v98: App Guide & Science Hub -->
-      <details class="insp-advanced" style="margin:12px 0 0;border-color:var(--accent)">
-        <summary style="color:var(--accent);font-weight:600">App Guide &amp; Science</summary>
-        <div style="padding:14px 16px;font-size:11px;color:var(--muted);line-height:1.7;background:var(--surface)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">🔬 The 1:1 Sampling Science</div>
-          <p style="margin:0 0 10px">Spectrum samples colours at native camera resolution — no downscaling, no interpolation. The pixel you tap is the pixel you get. The video feed runs continuously (never paused) so the browser&rsquo;s MediaStream stays healthy on all platforms, including iOS Safari.</p>
-
-          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">📊 LRV Glossary</div>
-          <p style="margin:0 0 4px"><strong>LRV (Light Reflectance Value)</strong> measures the percentage of visible light a surface reflects, from 0% (pure black — absorbs all light) to 100% (pure white — reflects all light).</p>
-          <p style="margin:0 0 2px"><span style="color:var(--accent)">80–100%</span> — Very bright. Great for small, dark rooms.</p>
-          <p style="margin:0 0 2px"><span style="color:var(--accent)">55–79%</span> — Mid-high. Versatile, works in most settings.</p>
-          <p style="margin:0 0 2px"><span style="color:var(--accent)">30–54%</span> — Medium. Cosy feel, needs good lighting.</p>
-          <p style="margin:0 0 2px"><span style="color:var(--accent)">10–29%</span> — Low. Dramatic — needs ample light sources.</p>
-          <p style="margin:0 0 10px"><span style="color:var(--accent)">0–9%</span> — Very dark. Absorbs most light. Use with care.</p>
-
-          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:12px">🏠 3-Step Room Guide</div>
-          <p style="margin:0 0 4px"><strong>Step 1 — Measure the Light.</strong> Check which direction your room faces (N/S/E/W) and photograph the wall at midday. North-facing rooms suit warm undertones; south-facing rooms handle cooler tones well.</p>
-          <p style="margin:0 0 4px"><strong>Step 2 — Sample &amp; Compare.</strong> Use Spectrum&rsquo;s camera to sample existing surfaces (flooring, upholstery, stone). Then explore harmonies and the 60-30-10 rule to build your palette.</p>
-          <p style="margin:0"><strong>Step 3 — Test with Spec Sheet.</strong> Export the Designer Spec Sheet and take it to your paint supplier. The brand matcher gives you the closest Farrow &amp; Ball / Little Greene reference to speed up tester pot selection.</p>
-        </div>
-      </details>
-
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
         <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
@@ -3363,7 +3334,7 @@ const App={
       ctx.font = 'bold ' + nameSize + 'px system-ui,-apple-system,sans-serif';
       ctx.textAlign = 'center';
       // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
-      var name = CS.nearestPantone(lab)?.name || CS.autoName(hex);
+      var name = CS.prefixedName(hex);
       // Truncate to fit within swatch width with a small margin
       var maxW = sw - 8;
       while (name.length > 3 && ctx.measureText(name).width > maxW) {
@@ -4002,11 +3973,14 @@ const Sampler={
 
   updateLiveBar(hex,r,g,b){
     document.getElementById('live-swatch').style.background=hex;
+    const _yiq=(r*299+g*587+b*114)/1000;
+    const _barTxt=_yiq<128?'#ffffff':'#000000';
     document.getElementById('live-hex').textContent=hex.toUpperCase();
+    document.getElementById('live-hex').style.color=_barTxt;
     // MASTER-FIX 3: primary display name = closest Pantone match;
     // autoName() is the fallback if no Pantone data yet.
-    const _pan=CS.nearestPantone(CS.rgbToLab(r,g,b));
-    document.getElementById('live-name').textContent=_pan?.name||CS.autoName(hex);
+    document.getElementById('live-name').textContent=CS.prefixedName(hex);
+    document.getElementById('live-name').style.color=_yiq<128?'rgba(255,255,255,.6)':'rgba(0,0,0,.5)';
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
     document.getElementById('live-k').textContent=`~${_kC.toLocaleString()}°C ${CS.kDesc(k)}`;
@@ -4023,21 +3997,7 @@ const Sampler={
   toggleFreeze(){
     this.frozen=!this.frozen;
     const v=document.getElementById('cam-video');
-    const cc=document.getElementById('cam-canvas');
-    // v98 CRITICAL: NEVER call video.pause() — capture frame to overlay canvas instead
-    if(this.frozen){
-      // Capture current frame to cam-canvas and show it on top
-      if(v && v.videoWidth && cc){
-        cc.width=v.videoWidth; cc.height=v.videoHeight;
-        cc.getContext('2d').drawImage(v,0,0);
-        cc.style.display='block'; cc.style.position='absolute'; cc.style.inset='0';
-        cc.style.width='100%'; cc.style.height='100%'; cc.style.objectFit='contain';
-        cc.style.zIndex='5'; cc.style.pointerEvents='none';
-      }
-    }else{
-      // Hide overlay — live video shows through again
-      if(cc){cc.style.display='none'; cc.style.zIndex='';}
-    }
+    if(this.frozen){v.pause();}else{v.play().catch(()=>{});}
     const b=document.getElementById('freeze-btn');
     b.classList.toggle('on',this.frozen);
     b.textContent=this.frozen?'Unfreeze':'Freeze';
@@ -4085,7 +4045,7 @@ const Sampler={
     const fb=CS.nearestFB(lab);
     const k=CS.kelvin(rgb);
     const lrv=CS.lrv(lab);
-    let name=CS.autoName(hex);
+    let name=CS.prefixedName(hex);
     document.getElementById('save-swatch').style.background=hex;
     document.getElementById('save-name').value=name;
     document.getElementById('save-meta').textContent=
@@ -4162,7 +4122,7 @@ const Sampler={
         `<div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:2px">
           <div title="Tap to remove ${h}"
             style="width:32px;height:32px;border-radius:6px;background:${h};
-            border:2px solid rgba(255,255,255,.08);flex-shrink:0;cursor:pointer;
+            border:2px solid rgba(255,255,255,.25);flex-shrink:0;cursor:pointer;
             box-shadow:0 2px 4px rgba(0,0,0,.4);position:relative"
             onclick="Sampler.removeFromQueue(${i})">
             <span style="position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1">×</span>
@@ -4338,7 +4298,6 @@ const Sampler={
 
   setMode(m){
     this.mode=m;
-    document.body.classList.toggle('upload-hero', m==='upload' && !!this.uploadImg); // v97
     document.getElementById('btn-mode-cam').classList.toggle('on',m==='camera');
     document.getElementById('btn-mode-up').classList.toggle('on',m==='upload');
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
@@ -4392,7 +4351,6 @@ const Sampler={
         this.uploadImg=img;
         this.pickQueue=[];
         this.renderQueue();
-        document.body.classList.add('upload-hero'); // v97: hero image mode
 
         // Replace canvas to remove any old event listeners
         const oldCanvas=document.getElementById('upload-canvas');
@@ -5106,8 +5064,8 @@ const Library={
         </div>`;
       })()}
 
-      <!-- ═══ COLOUR VALUES — v97 luxury-accordion ═════════════════════ -->
-      <details class="luxury-accordion insp-advanced" open>
+      <!-- ═══ COLOUR VALUES — v96 accordion (open by default) ═════════════════════ -->
+      <details class="insp-advanced" open>
         <summary>Colour Values</summary>
         <div style="background:var(--surface)">
           <button class="cv-row" data-copy="${c.hex.toUpperCase()}" onclick="_cvRow(this)">
@@ -5135,22 +5093,11 @@ const Library={
             <span class="cv-val">${c.lrv}%<span class="cv-val-sub">Light Reflectance Value</span></span>
             <span class="cv-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="3" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="var(--surface2)"/></svg></span>
           </button>
-          <button class="cv-row" data-copy="~${kCelsius}°C (${c.kelvin||5500}K)" onclick="_cvRow(this)">
+          <button class="cv-row" style="border-bottom:none" data-copy="~${kCelsius}°C (${c.kelvin||5500}K)" onclick="_cvRow(this)">
             <span class="cv-label">TEMP</span>
             <span class="cv-val">~${kCelsius}°C<span class="cv-val-sub">${CS.kDesc(c.kelvin||5500)} · ${c.kelvin||5500}K</span></span>
             <span class="cv-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="3" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="var(--surface2)"/></svg></span>
           </button>
-          <!-- v98: Pro Science — LRV guide + Undertone (visible in Pro Mode only) -->
-          <div class="pro-only" style="display:none;padding:8px 16px;background:rgba(200,169,110,.06);border-top:1px solid var(--border)">
-            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:600;margin-bottom:4px">Pro Science</div>
-            <div style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:6px">
-              <strong>LRV ${c.lrv}%</strong> — ${c.lrv >= 80 ? 'Very high reflectance — suitable for low-light rooms, opens up small spaces' : c.lrv >= 55 ? 'Mid-high reflectance — versatile for most rooms with natural light' : c.lrv >= 30 ? 'Mid reflectance — cosy, works in well-lit rooms with good artificial lighting' : c.lrv >= 10 ? 'Low reflectance — dramatic, needs ample lighting to avoid feeling enclosed' : 'Very low reflectance — absorbs light, use sparingly or in large, bright spaces'}
-            </div>
-            <div style="font-size:10px;color:var(--muted);line-height:1.6">
-              <strong>Undertone:</strong> ${typeof PaintBrands!=='undefined' ? PaintBrands.undertone(c.hex) : '—'}
-              <span style="font-size:8px;display:block;margin-top:2px">Undertone affects how the colour reads in warm vs cool lighting conditions.</span>
-            </div>
-          </div>
         </div>
       </details>
 
@@ -5382,8 +5329,7 @@ const Library={
         }
       })
       .catch(err => {
-        if (err.name === 'AbortError') return; // user cancelled share sheet
-        // Any other error → fall back to download
+        App.toast('Sharing interrupted. Attempting direct download...');
         const a=document.createElement('a');
         a.href=pngDataUrl; a.download=filename;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -5434,7 +5380,7 @@ const Library={
           while(n--) u8[n] = bstr.charCodeAt(n);
           const file = new File([u8], `${c.name.replace(/\s+/g,'-')}-spectrum.png`, { type: mime });
           if(navigator.canShare({ files: [file] })){
-            navigator.share({ files: [file] })
+            navigator.share({ title: c.name, text, files: [file] })
               .catch(err => { if(err.name!=='AbortError') App.copyToClipboard(text,'Share unavailable — details copied'); });
             return;
           }
@@ -5462,8 +5408,12 @@ const Library={
   },
 
   async _renderSharePolaroid(c){
-    // v87: redesigned — large colour swatch (~70%), compact footer with paint match rows
-    try { await document.fonts.load('12px "Permanent Marker"'); await document.fonts.load('12px "Space Mono"'); } catch(e) {}
+    // v101: Font Gate — ensure fonts are loaded before canvas rendering
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => console.log("Font load failed, using system fallback"));
+    await document.fonts.ready;
 
     const canvas    = document.getElementById('export-canvas');
     const SCALE     = Math.min(window.devicePixelRatio || 2, 3);
@@ -5671,40 +5621,6 @@ const Library={
 };
 </script>
 
-<!--  v98: PAINT BRAND MATCHER  -->
-<script>
-const PaintBrands = {
-  nearest(hex) {
-    const rgb = CS.hexToRgb(hex);
-    const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-    const fb = CS.nearestFB(lab);
-    const lg = CS.nearestLG(lab);
-    const results = [];
-    if (fb) results.push({ brand: "Farrow & Ball", name: fb.name, code: fb.code, hex: fb.hex, de: fb.de });
-    if (lg) results.push({ brand: "Little Greene", name: lg.name, code: lg.code, hex: lg.hex, de: lg.de });
-    results.sort((a, b) => a.de - b.de);
-    return { best: results[0] || null, all: results };
-  },
-  label(hex) {
-    const m = this.nearest(hex);
-    if (!m.best) return '';
-    return `${m.best.brand} '${m.best.name}' (ΔE ${m.best.de})`;
-  },
-  // v98: Undertone analysis from HSL
-  undertone(hex) {
-    const rgb = CS.hexToRgb(hex);
-    const {h,s,l} = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
-    if (s < 8) return 'Neutral';
-    if (h >= 0 && h < 45) return 'Warm (Red-Orange)';
-    if (h >= 45 && h < 70) return 'Warm (Yellow)';
-    if (h >= 70 && h < 150) return 'Cool (Green)';
-    if (h >= 150 && h < 250) return 'Cool (Blue)';
-    if (h >= 250 && h < 310) return 'Cool (Violet)';
-    return 'Warm (Red)';
-  }
-};
-</script>
-
 <!--  EXPLORER  -->
 <script>
 const Explorer={
@@ -5777,12 +5693,12 @@ const Explorer={
 
     const h = CS.harmonies(this.rootHex);
     this.renderHarmonies(h);
-    this.renderDesigner();
     this.renderMood();
     this.renderVariations();
     document.getElementById('split-grad').style.background =
       `linear-gradient(to right,${h.splitTone.shadows},${h.splitTone.highlights})`;
     this.renderTrio();
+    this.renderDesignerRecs();
   },
 
   //  Harmony swatches: tap swatch  new root, + button  add to lib 
@@ -5808,263 +5724,6 @@ const Explorer={
           <button class="harm-add-btn" onclick="event.stopPropagation();Explorer.addToLib('${hex}')"
                   title="Save to library">+</button>
         </div>`).join('')}</div>`).join('');
-  },
-
-  // v98: Interior Designer Recommendations — Expert Curator Edition
-  renderDesigner(){
-    const hex = this.rootHex;
-    const rgb = CS.hexToRgb(hex);
-    // Convert to HSL
-    const r=rgb.r/255, g=rgb.g/255, b=rgb.b/255;
-    const max=Math.max(r,g,b), min=Math.min(r,g,b);
-    let h=0, s=0, l=(max+min)/2;
-    if(max!==min){
-      const d=max-min;
-      s = l>0.5 ? d/(2-max-min) : d/(max+min);
-      if(max===r) h = ((g-b)/d + (g<b?6:0))/6;
-      else if(max===g) h = ((b-r)/d+2)/6;
-      else h = ((r-g)/d+4)/6;
-    }
-    h = Math.round(h*360); s = Math.round(s*100); l = Math.round(l*100);
-
-    // v98: Architectural Trim — perceptual dark-wall fix
-    let trimS, trimL, trimDesc;
-    if (l > 40) {
-      // Normal wall: darken 15%, desaturate 10% — grounded trim
-      trimL = Math.max(0, l - 15);
-      trimS = Math.max(0, s - 10);
-      trimDesc = 'A tailored architectural contrast.';
-    } else {
-      // Dark wall: lighten 20%, desaturate 15% — sophisticated framing
-      trimL = Math.min(100, l + 20);
-      trimS = Math.max(0, s - 15);
-      trimDesc = 'A lighter frame for dark walls — sophisticated contrast.';
-    }
-    const trimHex = this._hslToHex(h, trimS, trimL);
-    const trimMatch = PaintBrands.label(trimHex);
-
-    // v98: 60-30-10 Rule
-    const primaryHex = hex;
-    const primaryMatch = PaintBrands.label(primaryHex);
-
-    // Secondary: analogous (+30° hue)
-    const secH = (h + 30) % 360;
-    const secondaryHex = this._hslToHex(secH, s, l);
-    const secMatch = PaintBrands.label(secondaryHex);
-
-    // v98: Accent — Soft Split-Complementary (+150°), Saturation capped at 40%
-    const accH = (h + 150) % 360;
-    const accS = Math.min(40, s);
-    const accL = Math.max(30, Math.min(70, l));
-    const accentHex = this._hslToHex(accH, accS, accL);
-    const accMatch = PaintBrands.label(accentHex);
-    const accDesc = 'A soft complementary pop for textiles/art.';
-
-    // Helper: text colour for contrast
-    const txtOn = (hx) => {
-      const c = CS.hexToRgb(hx);
-      return (c.r*0.299 + c.g*0.587 + c.b*0.114) < 128 ? '#fff' : '#000';
-    };
-
-    // Store for spec sheet export
-    this._designerData = { primaryHex, trimHex, secondaryHex, accentHex, h, s, l, trimL, trimS, trimDesc, accDesc, primaryMatch, trimMatch, secMatch, accMatch };
-
-    const el = document.getElementById('designer-container');
-    if(!el) return;
-    el.innerHTML = `
-      <div class="designer-rec">
-        <div class="designer-rec-title">The Architectural Trim</div>
-        <div class="designer-rec-desc">${l > 40 ? 'Darker by 15% with 10% desaturation' : 'Lighter by 20% with 15% desaturation (dark wall mode)'} — ideal for woodwork, skirting boards, and window frames.</div>
-        <div class="designer-sw-row">
-          <div>
-            <div class="designer-sw" style="background:${hex}" onclick="Explorer.setRoot('${hex}')" title="Wall / Primary"></div>
-            <div class="designer-sw-label">Wall</div>
-          </div>
-          <div style="font-size:18px;color:var(--faint)">→</div>
-          <div>
-            <div class="designer-sw" style="background:${trimHex}" onclick="Explorer.setRoot('${trimHex}')" title="Trim / Woodwork"></div>
-            <div class="designer-sw-label">Trim</div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);padding-left:8px;line-height:1.6">
-            <span style="font-family:var(--mono);font-size:9px;color:var(--text)">${trimHex.toUpperCase()}</span><br>
-            <span style="font-size:8px;font-style:italic;color:var(--muted)">${trimDesc}</span>
-            ${trimMatch ? '<br><span style="font-size:8px;color:var(--accent)">≈ ' + trimMatch + '</span>' : ''}
-          </div>
-        </div>
-      </div>
-      <div class="designer-rec">
-        <div class="designer-rec-title">The 60-30-10 Rule</div>
-        <div class="designer-rec-desc">Classic interior design ratio — 60% dominant, 30% secondary (analogous +30°), 10% accent (soft split-complementary +150°, sat ≤40%).</div>
-        <div class="designer-bar-row">
-          <div style="flex:6;background:${primaryHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${primaryHex}')" title="60% Dominant">
-            <span class="designer-pct" style="color:${txtOn(primaryHex)}">60%</span>
-          </div>
-          <div style="flex:3;background:${secondaryHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${secondaryHex}')" title="30% Secondary">
-            <span class="designer-pct" style="color:${txtOn(secondaryHex)}">30%</span>
-          </div>
-          <div style="flex:1;background:${accentHex};cursor:pointer;position:relative" onclick="Explorer.setRoot('${accentHex}')" title="10% Accent">
-            <span class="designer-pct" style="color:${txtOn(accentHex)}">10%</span>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:4px">
-          <div>
-            <div style="color:var(--text)">${primaryHex.toUpperCase()}</div>
-            ${primaryMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + primaryMatch + '</div>' : ''}
-          </div>
-          <div>
-            <div style="color:var(--text)">${secondaryHex.toUpperCase()}</div>
-            ${secMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + secMatch + '</div>' : ''}
-          </div>
-          <div>
-            <div style="color:var(--text)">${accentHex.toUpperCase()}</div>
-            <div style="font-size:7px;font-style:italic">${accDesc}</div>
-            ${accMatch ? '<div style="font-size:7px;color:var(--accent)">≈ ' + accMatch + '</div>' : ''}
-          </div>
-        </div>
-      </div>
-      <div style="text-align:right;padding-top:6px">
-        <button class="btn btn-p btn-sm" style="font-size:10px;padding:5px 14px" onclick="Explorer.exportSpecSheet()">📋 Export Spec Sheet</button>
-      </div>`;
-  },
-
-  // v97: HSL→Hex helper (if CS doesn't have one)
-  _hslToHex(h,s,l){
-    s/=100; l/=100;
-    const a=s*Math.min(l,1-l);
-    const f=n=>{const k=(n+h/30)%12;return l-a*Math.max(Math.min(k-3,9-k,1),-1)};
-    const toHex=x=>Math.round(x*255).toString(16).padStart(2,'0');
-    return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));
-  },
-
-  // v99: Designer Spec Sheet Export — tall narrow canvas (800×1800)
-  async exportSpecSheet(){
-    const d = this._designerData;
-    if(!d){ App.toast('Generate a recommendation first'); return; }
-    try {
-      await document.fonts.load('12px "Permanent Marker"');
-      await document.fonts.load('12px "Space Mono"');
-    } catch(e){}
-
-    const W = 800, PAD = 48, GAP = 24;
-    const HEADER = 200, BLOCK_H = 420, FOOTER = 80;
-    const H = HEADER + (BLOCK_H + GAP) * 3 + FOOTER;
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    // White background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-
-    // Thin accent line at top
-    ctx.fillStyle = '#c8a96e';
-    ctx.fillRect(PAD, 36, W - PAD*2, 2);
-
-    // Header
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 42px "Permanent Marker",cursive';
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'left';
-    ctx.fillText('Interior Design Spec Sheet', PAD, 56);
-    ctx.fillStyle = '#888';
-    ctx.font = '16px "Space Mono",monospace';
-    ctx.fillText('Generated by Spectrum · digby.shop', PAD, 110);
-    ctx.fillText(new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}), PAD, 134);
-
-    // Thin line below header
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(PAD, HEADER - 16, W - PAD*2, 1);
-
-    // Colour blocks — stacked vertically
-    const blocks = [
-      { label: 'WALLS (60%)', hex: d.primaryHex, match: d.primaryMatch, desc: 'Dominant colour — walls, ceiling, large surfaces' },
-      { label: 'WOODWORK & TRIM (30%)', hex: d.trimHex, match: d.trimMatch, desc: d.trimDesc },
-      { label: 'TEXTILE ACCENT (10%)', hex: d.accentHex, match: d.accMatch, desc: d.accDesc }
-    ];
-    const txtOn = (hx) => { const c=CS.hexToRgb(hx); return (c.r*0.299+c.g*0.587+c.b*0.114)<128?'#fff':'#000'; };
-
-    let y = HEADER;
-    blocks.forEach(blk => {
-      // Large colour swatch
-      const swW = W - PAD*2, swH = 240, rr = 16;
-      ctx.fillStyle = blk.hex;
-      ctx.beginPath();
-      ctx.moveTo(PAD+rr, y); ctx.lineTo(PAD+swW-rr, y); ctx.arcTo(PAD+swW,y,PAD+swW,y+rr,rr);
-      ctx.lineTo(PAD+swW, y+swH-rr); ctx.arcTo(PAD+swW,y+swH,PAD+swW-rr,y+swH,rr);
-      ctx.lineTo(PAD+rr, y+swH); ctx.arcTo(PAD,y+swH,PAD,y+swH-rr,rr);
-      ctx.lineTo(PAD, y+rr); ctx.arcTo(PAD,y,PAD+rr,y,rr);
-      ctx.closePath();
-      ctx.fill();
-
-      // HEX centred on swatch
-      ctx.fillStyle = txtOn(blk.hex);
-      ctx.font = 'bold 22px "Space Mono",monospace';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(blk.hex.toUpperCase(), W/2, y + swH/2);
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-
-      // Text below swatch
-      const ty = y + swH + 16;
-      ctx.fillStyle = '#c8a96e';
-      ctx.font = 'bold 16px "Space Mono",monospace';
-      ctx.fillText(blk.label, PAD, ty);
-
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold 28px "Permanent Marker",cursive';
-      ctx.fillText(CS.autoName(blk.hex), PAD, ty + 26);
-
-      ctx.fillStyle = '#555';
-      ctx.font = '18px "Space Mono",monospace';
-      ctx.fillText(blk.hex.toUpperCase(), PAD, ty + 62);
-
-      if (blk.match) {
-        ctx.fillStyle = '#8a7048';
-        ctx.font = '15px system-ui,sans-serif';
-        ctx.fillText('Closest Match: ' + blk.match, PAD, ty + 88);
-      }
-
-      ctx.fillStyle = '#999';
-      ctx.font = 'italic 14px system-ui,sans-serif';
-      ctx.fillText(blk.desc, PAD, ty + 114, W - PAD*2);
-
-      // Separator
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(PAD, y + BLOCK_H - 4, W - PAD*2, 1);
-
-      y += BLOCK_H + GAP;
-    });
-
-    // Footer
-    ctx.fillStyle = '#c8a96e';
-    ctx.fillRect(PAD, H - FOOTER + 10, W - PAD*2, 2);
-    ctx.fillStyle = '#aaa';
-    ctx.font = '13px system-ui,sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('digby.shop', W - PAD, H - 30);
-
-    // Export — v99: files only for iOS compat
-    const pngDataUrl = canvas.toDataURL('image/png');
-    const filename = `spectrum-spec-${Date.now()}.png`;
-    const _doAnchor = () => {
-      const a = document.createElement('a');
-      a.href = pngDataUrl; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      App.toast('Spec Sheet exported ✓');
-    };
-    try {
-      const res = await fetch(pngDataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], filename, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file] });
-        App.toast('Spec Sheet exported ✓');
-      } else { _doAnchor(); }
-    } catch(e) {
-      if (e.name !== 'AbortError') {
-        App.toast('Sharing interrupted. Attempting direct download…');
-        _doAnchor();
-      }
-    }
   },
 
   renderMood(){
@@ -6101,6 +5760,72 @@ const Explorer={
       swRow('Shades',v.shades),
       swRow('Tones', v.tones)
     ].join('');
+  },
+
+  renderDesignerRecs(){
+    let container = document.getElementById('designer-recs');
+    if(!container){
+      container = document.createElement('div');
+      container.id = 'designer-recs';
+      const vc = document.getElementById('var-container');
+      if(vc && vc.parentNode) vc.parentNode.insertBefore(container, vc.nextSibling);
+      else return;
+    }
+    const hex = this.rootHex;
+    const rgb = CS.hexToRgb(hex);
+    const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
+    const trimL = Math.max(0, hsl.l - 15);
+    const trimHex = CS.hslToHex(hsl.h/360, hsl.s/100, trimL/100);
+    const anaH1 = ((hsl.h + 30) + 360) % 360;
+    const anaH2 = ((hsl.h - 30) + 360) % 360;
+    const compH = ((hsl.h + 180) + 360) % 360;
+    const analogousHex = CS.hslToHex(anaH1/360, hsl.s/100, hsl.l/100);
+    const compHex = CS.hslToHex(compH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
+    const yiq = (rgb.r*299+rgb.g*587+rgb.b*114)/1000;
+    const trimRgb = CS.hexToRgb(trimHex);
+    const trimYiq = (trimRgb.r*299+trimRgb.g*587+trimRgb.b*114)/1000;
+    container.innerHTML = `
+      <div style="padding:16px 12px 8px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600">Designer Recommendations</div>
+      <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--surface2);border-radius:12px;padding:14px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600">The Architectural Trim</div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Skirting, dado rail & woodwork — 15% darker for depth</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="width:56px;height:56px;border-radius:10px;background:${hex};border:1px solid var(--border);position:relative">
+              <span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:6px;font-family:var(--mono);color:${yiq<128?'rgba(255,255,255,.7)':'rgba(0,0,0,.5)'}">WALL</span>
+            </div>
+            <div style="font-size:18px;color:var(--muted)">→</div>
+            <div style="width:56px;height:56px;border-radius:10px;background:${trimHex};border:1px solid var(--border);position:relative;cursor:pointer" onclick="Explorer.setRoot('${trimHex}')" title="Explore trim colour">
+              <span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:6px;font-family:var(--mono);color:${trimYiq<128?'rgba(255,255,255,.7)':'rgba(0,0,0,.5)'}">TRIM</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text)">${trimHex.toUpperCase()}</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:2px">HSL ${hsl.h}° ${hsl.s}% ${trimL}%</div>
+              <button class="btn btn-s btn-sm" style="margin-top:6px;font-size:9px" onclick="Explorer.addToLib('${trimHex}')">+ Save Trim</button>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600">The 60-30-10 Rule</div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Professional interior balance — dominant, secondary, accent</div>
+          <div style="display:flex;border-radius:10px;overflow:hidden;height:48px;border:1px solid var(--border)">
+            <div style="flex:6;background:${hex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${hex}')" title="60% Dominant">
+              <span style="font-size:8px;font-weight:700;font-family:var(--mono);color:${yiq<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)'}">60%</span>
+            </div>
+            <div style="flex:3;background:${analogousHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${analogousHex}')" title="30% Secondary (Analogous)">
+              <span style="font-size:8px;font-weight:700;font-family:var(--mono);color:${(()=>{const r2=CS.hexToRgb(analogousHex);return(r2.r*299+r2.g*587+r2.b*114)/1000<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)';})()}">30%</span>
+            </div>
+            <div style="flex:1;background:${compHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${compHex}')" title="10% Accent (Complementary)">
+              <span style="font-size:7px;font-weight:700;font-family:var(--mono);color:${(()=>{const r3=CS.hexToRgb(compHex);return(r3.r*299+r3.g*587+r3.b*114)/1000<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)';})()}">10%</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${analogousHex}')">+ Save 30%</button>
+            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${compHex}')">+ Save 10%</button>
+            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Library.export631('${hex}','${analogousHex}','${compHex}')">Export</button>
+          </div>
+        </div>
+      </div>`;
   },
 
   //  TRIO GENERATOR 
@@ -6580,7 +6305,7 @@ const Explorer={
 
   async slutSwatch(){
     // v85: preload Permanent Marker before canvas draw
-    try { await document.fonts.load('12px "Permanent Marker"'); await document.fonts.load('12px "Space Mono"'); } catch(e) {}
+    try { await document.fonts.load('bold 13px "Permanent Marker"'); } catch(e) {}
     const s = this._slutState;
     if(!s.lut){ App.toast('Generate LUT first'); return; }
     const ramp = ['#111','#333','#555','#777','#999','#bbb','#ddd','#fff'];
@@ -6610,7 +6335,7 @@ const Explorer={
       ctx.fillStyle=h;        ctx.fillRect(x, 80,  segW-2, 80);
       ctx.fillStyle=graded[i];ctx.fillRect(x, 162, segW-2, 80);
     });
-    // v97: divider removed for breathable design
+    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(PAD,158,W-PAD*2,2);
     ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='7px Space Mono,monospace'; ctx.textAlign='left';
     ctx.fillText('ORIGINAL', PAD+2, 75); ctx.fillText('GRADED', PAD+2, 157);
     ctx.fillStyle='#fff'; ctx.font="bold 13px 'Permanent Marker',cursive"; ctx.textAlign='left';
@@ -8233,7 +7958,7 @@ const ColourGenerator = {
       const pan = CS.nearestPantone(lab);
       const lrv = CS.lrv(lab);
       const onDark = lrv < 50;
-      const name = CS.autoName(hex);
+      const name = CS.prefixedName(hex);
       return `<div class="colgen-swatch" style="background:${hex}">
         <div class="colgen-swatch-info" style="color:${onDark?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)'}">
           <div class="colgen-name">${name}</div>
@@ -8330,7 +8055,7 @@ const PaletteBuilder = {
     const rgb = CS.hexToRgb(hex);
     const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
     const pan = CS.nearestPantone(lab);
-    return { hex, name: CS.autoName(hex), pantone: pan ? pan.code : '' };
+    return { hex, name: CS.prefixedName(hex), pantone: pan ? pan.code : '' };
   },
 
   // ── Undo history ──────────────────────────────────────────────────────
@@ -9771,11 +9496,12 @@ self.onmessage = function(e) {
    *   [28px white border bottom]
    */
   async exportPolaroid(hexes) {
-    // v88: redesigned multi-swatch export
-    // — photo fills top portion naturally (contain/letterbox)
-    // — swatches fill the FULL card width as bold equal-width colour panels
-    // — hex + name overlaid directly on each panel — zero wasted white space
-    try { await document.fonts.load('12px "Permanent Marker"'); await document.fonts.load('12px "Space Mono"'); } catch(e) {}
+    // v101: Font Gate — ensure fonts are loaded before canvas rendering
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => console.log("Font load failed, using system fallback"));
+    await document.fonts.ready;
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
     // ── Source image ─────────────────────────────────────────────────────────
@@ -9803,10 +9529,8 @@ self.onmessage = function(e) {
     const LOGICAL_W   = 380;
     const BORDER      = 24;          // card outer margin
     const CW          = LOGICAL_W - BORDER * 2;  // 332px inner width
-    const SWATCH_H    = 60;          // v99: height of swatch square area
-    const LABEL_H     = 32;          // v99: white margin area for labels below squares
-    const BYLINE_PAD  = 24;          // space below labels for byline
-    const SWATCH_TOP_PAD = 12;       // breathing room below photo
+    const SWATCH_H    = 100;         // swatch panel height — tall enough for text
+    const BYLINE_PAD  = 24;          // space below swatches for byline
 
     // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
@@ -9814,7 +9538,7 @@ self.onmessage = function(e) {
     const MAX_PHOTO_H = LOGICAL_W * 2;
     const naturalH    = Math.round(CW / (srcW / srcH));
     const photoH      = Math.min(naturalH, MAX_PHOTO_H);
-    const LOGICAL_H   = BORDER + photoH + SWATCH_TOP_PAD + SWATCH_H + LABEL_H + BYLINE_PAD + BORDER;
+    const LOGICAL_H   = BORDER + photoH + SWATCH_H + BYLINE_PAD + BORDER;
 
     // ── Canvas setup ──────────────────────────────────────────────────────────
     const canvas = document.createElement('canvas');
@@ -9870,85 +9594,109 @@ self.onmessage = function(e) {
     ctx.fillRect(BORDER, BORDER, CW, photoH);
     ctx.restore();
 
-    // ── v99: Individual swatch squares with white gaps ───────────────────────
-    const n       = hexes.length;
-    const GAP     = 8;                                // white gap between squares
-    const TOTAL_GAPS = (n - 1) * GAP;
-    const maxSwSz = Math.min(60, Math.floor((CW - TOTAL_GAPS) / n));  // square size
-    const ROW_W   = n * maxSwSz + TOTAL_GAPS;
-    const rowX    = BORDER + Math.floor((CW - ROW_W) / 2);  // centre the row
-    const swY     = BORDER + photoH + 12;             // 12px breathing room below photo
+    // ── Full-width swatch panels ───────────────────────────────────────────────
+    const n    = hexes.length;
+    const swY  = BORDER + photoH;                  // flush against photo
+    const swW  = Math.floor(CW / n);               // equal width panels
+    // Last panel absorbs any rounding remainder
+    const lastExtraW = CW - swW * n;
+    const CARD_R = 14;                              // card corner radius
 
     hexes.forEach((hex, i) => {
-      const x = rowX + i * (maxSwSz + GAP);
+      const x   = BORDER + i * swW;
+      const w   = (i === n - 1) ? swW + lastExtraW : swW;
+      const isFirst = i === 0;
+      const isLast  = i === n - 1;
+      const isOnly  = n === 1;
+      const atBottom = true;
 
-      // Draw colour square with rounded corners
+      // Clip to rounded-bottom shape for first/last panels
       ctx.save();
-      const sr = 6;
-      ctx.beginPath();
-      ctx.moveTo(x+sr, swY); ctx.lineTo(x+maxSwSz-sr, swY); ctx.arcTo(x+maxSwSz,swY,x+maxSwSz,swY+sr,sr);
-      ctx.lineTo(x+maxSwSz, swY+maxSwSz-sr); ctx.arcTo(x+maxSwSz,swY+maxSwSz,x+maxSwSz-sr,swY+maxSwSz,sr);
-      ctx.lineTo(x+sr, swY+maxSwSz); ctx.arcTo(x,swY+maxSwSz,x,swY+maxSwSz-sr,sr);
-      ctx.lineTo(x, swY+sr); ctx.arcTo(x,swY,x+sr,swY,sr);
-      ctx.closePath();
+      if (isOnly) {
+        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, CARD_R);
+      } else if (isFirst) {
+        rr(x, swY, w, SWATCH_H, 0, 0, 0, CARD_R);
+      } else if (isLast) {
+        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, 0);
+      } else {
+        ctx.rect(x, swY, w, SWATCH_H);
+      }
+      ctx.clip();
       ctx.fillStyle = hex;
-      ctx.fill();
+      ctx.fillRect(x, swY, w, SWATCH_H);
       ctx.restore();
 
-      // ── Labels BELOW each square in white margin, solid black ──────
-      const cx    = x + maxSwSz / 2;
-      const maxTW = maxSwSz + GAP - 2;
+      // ── Text on swatch — v89: obeys State.swatchLabel setting ──────────────
+      const _rgb  = CS.hexToRgb(hex);
+      const _lum  = 0.299 * _rgb.r + 0.587 * _rgb.g + 0.114 * _rgb.b;
+      const onDk  = _lum < 155;
+      const txtC  = onDk ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.80)';
+      const subC  = onDk ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.40)';
+      const cx    = x + w / 2;
+      const maxTW = w - 10;
+
       const slMode   = State.swatchLabel || 'both';
       const showName = slMode === 'both' || slMode === 'name';
       const showHex  = slMode === 'both' || slMode === 'hex';
-      const lblTop   = swY + maxSwSz + 4;
+
+      // When showing both, name sits at 42% height and hex at 68%
+      // When showing only one, centre it at 55%
+      const nameY = (showName && showHex) ? swY + SWATCH_H * 0.38
+                  :  showName             ? swY + SWATCH_H * 0.55
+                  :                        0;
+      const hexY  = (showName && showHex) ? swY + SWATCH_H * 0.64
+                  :  showHex              ? swY + SWATCH_H * 0.55
+                  :                        0;
 
       if (showName) {
-        const rawName = CS.autoName(hex) || hex.toUpperCase();
-        let fSize = Math.min(9, Math.max(6, Math.floor(maxSwSz / 7)));
+        // Colour name — Permanent Marker, sized to fit panel width
+        let rawName = CS.autoName(hex) || hex.toUpperCase();
+        let fSize = Math.min(13, Math.max(8, Math.floor(w / 5.5)));
         ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
         ctx.textAlign    = 'center';
-        ctx.textBaseline = 'top';
-        let displayName = rawName;
-        while (ctx.measureText(displayName).width > maxTW && fSize > 6) {
+        ctx.textBaseline = 'middle';
+        while (ctx.measureText(rawName).width > maxTW && fSize > 8) {
           fSize -= 0.5;
           ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
         }
-        if (fSize <= 8 && ctx.measureText(displayName).width > maxTW) {
-          while (ctx.measureText(displayName + '…').width > maxTW && displayName.length > 1) {
-            displayName = displayName.slice(0, -1);
-          }
-          displayName += '…';
+        if (ctx.measureText(rawName).width > maxTW) {
+          while (rawName.length > 3 && ctx.measureText(rawName + '…').width > maxTW) rawName = rawName.slice(0, -1);
+          rawName = rawName + '…';
         }
-        ctx.fillStyle = '#000000';
-        ctx.fillText(displayName, cx, lblTop, maxTW);
+        ctx.fillStyle = txtC;
+        ctx.fillText(rawName, cx, nameY, maxTW);
 
         if (showHex) {
-          ctx.fillStyle    = '#555555';
-          ctx.font         = `bold ${Math.max(5, Math.floor(fSize * 0.7))}px "Space Mono",monospace`;
-          ctx.fillText(hex.toUpperCase(), cx, lblTop + fSize + 2, maxTW);
+          // HEX code — mono, smaller, below name
+          ctx.fillStyle    = subC;
+          ctx.font         = `bold ${Math.max(6, Math.floor(fSize * 0.65))}px "Space Mono",monospace`;
+          ctx.textAlign    = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(hex.toUpperCase(), cx, hexY, maxTW);
         }
       } else if (showHex) {
-        const hexFSize = Math.min(8, Math.max(6, Math.floor(maxSwSz / 7)));
-        ctx.fillStyle    = '#000000';
+        // HEX only — slightly larger mono text, centred
+        const hexFSize = Math.min(11, Math.max(7, Math.floor(w / 6)));
+        ctx.fillStyle    = txtC;
         ctx.font         = `bold ${hexFSize}px "Space Mono",monospace`;
         ctx.textAlign    = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText(hex.toUpperCase(), cx, lblTop + 2, maxTW);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(hex.toUpperCase(), cx, hexY, maxTW);
       }
+      // slMode === 'none': no text drawn
     });
 
+    // v101: dividers removed for clean luxury aesthetic
 
-    // v97: swatch dividers removed for breathable design
     // ── digby.shop byline ────────────────────────────────────────────────────
-    const bylineY = BORDER + photoH + SWATCH_TOP_PAD + SWATCH_H + LABEL_H + Math.round(BYLINE_PAD / 2);
+    const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);
     ctx.fillStyle    = '#999999';
     ctx.font         = '7px system-ui,-apple-system,sans-serif';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'middle';
     ctx.fillText('digby.shop', BORDER + CW - 8, bylineY);
 
-    // ── Download — v99: iOS share fix (files only, no title/text) + error toast ──
+    // ── Download — Web Share on mobile (works on iOS PWA), anchor fallback desktop ──
     const pngDataUrl = canvas.toDataURL('image/png');
     const filename   = `spectrum-${Date.now()}.png`;
     const _doAnchor  = () => {
@@ -9962,16 +9710,14 @@ self.onmessage = function(e) {
       const blob = await res.blob();
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file] });
+        await navigator.share({ files: [file], title: 'Spectrum Palette' });
         App.toast('Polaroid exported ✓');
       } else {
         _doAnchor();
       }
     } catch(e) {
-      if (e.name !== 'AbortError') {
-        App.toast('Sharing interrupted. Attempting direct download…');
-        _doAnchor();
-      }
+      App.toast('Sharing interrupted. Attempting direct download...');
+      _doAnchor();
     }
   }
 };
@@ -9994,6 +9740,7 @@ const AIColourName = {
     } catch { return null; }
   }
 };
+
 </script>
 
 </body>
