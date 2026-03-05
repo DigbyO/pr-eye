@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum v140</title>
+<title>Spectrum 4.0</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -477,11 +477,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
    MODULE 4  PROMPTER
  */
 /* Library strip pinned above Prompter scroll */
-#prom-lib-header{display:flex;align-items:center;gap:6px;padding:10px 14px 4px;flex-shrink:0;flex-wrap:wrap}
-#prom-lib-header .prom-lib-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-#prom-lib-header .prom-lib-count{font-size:10px;color:var(--accent);font-weight:700}
-#prom-lib-strip{display:flex;gap:10px;padding:4px 14px 12px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--border)}
-#prom-lib-strip::-webkit-scrollbar{display:none}
+/* Library strip CSS removed v4.0 — replaced by collapsible accordion */
 .plib-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;padding:4px 2px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:var(--tap);min-width:44px}
 .plib-sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;transition:border-color .15s,transform .15s}
 .plib-chip.on .plib-sw{border-color:var(--accent);transform:scale(1.12)}
@@ -1557,17 +1553,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 
   <!--  PROMPTER  -->
   <div class="module" id="mod-prompter">
-    <!-- Library strip: pinned above scroll, populated by Prompter.render() -->
-    <div id="prom-lib-header">
-      <span class="prom-lib-title">Library</span>
-      <span class="prom-lib-count" id="prom-lib-count"></span>
-      <div class="prom-lib-sort" id="prom-lib-sort">
-        <button class="plib-sort-btn on" data-sort="newest" onclick="Prompter.setSort(this)">Newest</button>
-        <button class="plib-sort-btn" data-sort="hue"    onclick="Prompter.setSort(this)">Hue</button>
-        <button class="plib-sort-btn" data-sort="light"  onclick="Prompter.setSort(this)">Lightness</button>
-      </div>
-    </div>
-    <div id="prom-lib-strip"></div>
     <div class="mod-scroll">
 
       <!-- Active colour science card — shown when 1 colour is selected -->
@@ -1590,18 +1575,38 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
       </div>
 
-      <!-- COLOUR CHIPS -->
-      <div class="sec">Colours <span id="prom-sel-count" style="color:var(--accent);font-weight:700"></span></div>
-      <div style="padding:0 12px 8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-        <input id="prom-chip-search" type="search" placeholder="Name or hex…" autocomplete="off"
-          oninput="Prompter.filterChips(this.value)"
-          style="width:110px;padding:5px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--fg);font-size:11px;outline:none">
-        <button class="prom-pill on" data-hf="all"    onclick="Prompter.setHueFilter('all')"     style="padding:3px 8px;font-size:10px">All</button>
-        <button class="prom-pill"    data-hf="warm"   onclick="Prompter.setHueFilter('warm')"    style="padding:3px 8px;font-size:10px">Warm</button>
-        <button class="prom-pill"    data-hf="cool"   onclick="Prompter.setHueFilter('cool')"    style="padding:3px 8px;font-size:10px">Cool</button>
-        <button class="prom-pill"    data-hf="neutral" onclick="Prompter.setHueFilter('neutral')" style="padding:3px 8px;font-size:10px">Neutral</button>
+      <!-- COLOUR LIBRARY — collapsible -->
+      <div id="prom-lib-accordion" style="margin:0 0 4px">
+        <button id="prom-lib-toggle-btn" onclick="Prompter.toggleLibAccordion()"
+          style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border:none;border-radius:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:600;color:var(--text)">Colour Library</span>
+            <span id="prom-lib-count" style="font-size:10px;color:var(--accent);font-weight:700"></span>
+            <span id="prom-sel-count" style="font-size:10px;color:var(--accent2);font-weight:700"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="prom-lib-preview-dots" style="display:flex;gap:4px"></div>
+            <span id="prom-lib-chevron" style="font-size:10px;color:var(--muted);transition:transform .2s">▾</span>
+          </div>
+        </button>
+        <div id="prom-lib-panel" style="display:none;padding:10px 12px 4px">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+            <input id="prom-chip-search" type="search" placeholder="Name or hex…" autocomplete="off"
+              oninput="Prompter.filterChips(this.value)"
+              style="flex:1;min-width:80px;padding:5px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface3);color:var(--fg);font-size:11px;outline:none">
+            <button class="plib-sort-btn on" data-sort="newest" onclick="Prompter.setSort(this)">Newest</button>
+            <button class="plib-sort-btn"    data-sort="hue"    onclick="Prompter.setSort(this)">Hue</button>
+            <button class="plib-sort-btn"    data-sort="light"  onclick="Prompter.setSort(this)">Light</button>
+          </div>
+          <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+            <button class="prom-pill on" data-hf="all"     onclick="Prompter.setHueFilter('all')"     style="padding:3px 9px;font-size:10px">All</button>
+            <button class="prom-pill"    data-hf="warm"    onclick="Prompter.setHueFilter('warm')"    style="padding:3px 9px;font-size:10px">Warm</button>
+            <button class="prom-pill"    data-hf="cool"    onclick="Prompter.setHueFilter('cool')"    style="padding:3px 9px;font-size:10px">Cool</button>
+            <button class="prom-pill"    data-hf="neutral" onclick="Prompter.setHueFilter('neutral')" style="padding:3px 9px;font-size:10px">Neutral</button>
+          </div>
+          <div class="prom-chips" id="prom-chips"></div>
+        </div>
       </div>
-      <div class="prom-chips" id="prom-chips"></div>
 
       <!-- SUBJECT -->
       <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span> <span id="subj-badge" style="display:none;font-size:10px;background:var(--accent);color:#1a1208;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--mono)"></span></div>
@@ -2035,7 +2040,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v140</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3532,7 +3537,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum v140</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -6851,7 +6856,6 @@ const Prompter={
       });
     };
     // plib-chip (lib strip) uses event delegation for selection toggle
-    delegate('prom-lib-strip', 'data-cid');
     // prom-chips use inline onclick only — clicking navigates to Library detail view
     // MASTER-FIX-V53: single source of truth is the 'active' CSS class on #prom-multi-toggle.
     // We also set 'on' for visual styling parity with other toggle buttons.
@@ -6866,7 +6870,7 @@ const Prompter={
   setSort(btn){
     this.sortMode=btn.dataset.sort;
     document.querySelectorAll('.plib-sort-btn').forEach(b=>b.classList.toggle('on',b===btn));
-    this.render();
+    this._renderChips();
   },
 
   _sortAll(all){
@@ -6879,32 +6883,26 @@ const Prompter={
     const all=DS.all();
     const sorted=this._sortAll(all);
 
-    // ── Library strip (all colours, unfiltered, horizontal scroll) ──
-    const stripEl=document.getElementById('prom-lib-strip');
-    const libCountEl=document.getElementById('prom-lib-count');
-    if(stripEl){
-      if(!all.length){
-        stripEl.innerHTML='<span class="plib-empty">Sample some colours first</span>';
-        if(libCountEl) libCountEl.textContent='';
-      } else {
-      // Belt-and-braces: both event delegation AND inline onclick
-      stripEl.innerHTML=sorted.slice(0, 12).map(c=>`<button class="plib-chip ${this.sel.has(c.id)?'on':''}"
-            type="button"
-            data-cid="${c.id}"
-            aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
-            aria-pressed="${this.sel.has(c.id)}">
-            <div class="plib-sw" style="background:${c.hex}"></div>
-            <div class="plib-label">${c.name}</div>
-          </button>`).join('');
-        if(libCountEl) libCountEl.textContent=this.sel.size?`${this.sel.size} selected`:'';
-      }
+    // ── v4.0: collapsible library accordion — update header counts + preview dots ──
+    const libCountEl = document.getElementById('prom-lib-count');
+    if (libCountEl) libCountEl.textContent = all.length ? `${all.length} colour${all.length!==1?'s':''}` : '';
+    const selCountEl = document.getElementById('prom-sel-count');
+    if (selCountEl) selCountEl.textContent = this.sel.size ? `· ${this.sel.size} selected` : '';
+    // Preview dots: show up to 6 selected, or up to 6 most recent if none selected
+    const previewDots = document.getElementById('prom-lib-preview-dots');
+    if (previewDots) {
+      const dotSrc = this.sel.size
+        ? sorted.filter(c => this.sel.has(c.id)).slice(0, 6)
+        : sorted.slice(0, 6);
+      previewDots.innerHTML = dotSrc.map(c =>
+        `<div style="width:14px;height:14px;border-radius:50%;background:${c.hex};border:1.5px solid rgba(255,255,255,.2);flex-shrink:0"></div>`
+      ).join('');
     }
-    // v128: keep selected bar and lib panel in sync
+    // keep selected bar and lib panel in sync
     this._renderSelectedBar();
-    this._renderLibPanel();
-
-    const countEl=document.getElementById('prom-sel-count');
-    if(countEl) countEl.textContent=this.sel.size?`${this.sel.size} selected`:'';
+    if (document.getElementById('prom-lib-panel')?.style.display !== 'none') {
+      this._renderChips();
+    }
 
     // ── Active colour science card (shows when exactly 1 selected) ──
     const _pcc = document.getElementById('prom-colour-card');
@@ -6928,34 +6926,7 @@ const Prompter={
         _pcc.classList.remove('show');
       }
     }
-    const _q=this._chipQ.toLowerCase(), _hf=this._hueF;
-    const vis=all.filter(c=>{
-      if(_q&&!c.name.toLowerCase().includes(_q)&&!c.hex.includes(_q)) return false;
-      const h=c.hsl?.h??0, s=c.hsl?.s??0;
-      if(_hf==='warm') return (h<50||h>330)&&s>15;
-      if(_hf==='cool') return h>=50&&h<=280&&s>15;
-      if(_hf==='neutral') return s<=15;
-      return true;
-    });
-    document.getElementById('prom-chips').innerHTML=!all.length
-      ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">Sample some colours first</div>'
-      :!vis.length
-      ?'<div style="font-size:12px;color:var(--muted);padding:4px 0">No colours match filter</div>'
-      :vis.map(c=>{
-        const _k=c.kelvin||CS.kelvin(c.rgb||CS.hexToRgb(c.hex));
-        const _pt=CS.psychTag(c.hex);
-        return`<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
-          type="button"
-          data-cid="${c.id}"
-          onclick="Prompter.toggleColour('${c.id}')"
-          title="${c.name} — tap to select"
-          aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
-          aria-pressed="${this.sel.has(c.id)}">
-          <div class="prom-sw" style="background:${c.hex}"></div>
-          <div class="prom-label">${c.name}</div>
-          <div class="kelvin-badge"><b>~${Math.round(_k-273).toLocaleString()}°C</b></div>
-          <div class="psych-pill psych-${_pt.category}">${_pt.label}</div>
-        </button>`;}).join('');;
+
   },
 
   // ── Selection-only sync: toggles .on class without rebuilding DOM ─────────
@@ -7009,13 +6980,13 @@ const Prompter={
 
   filterChips(q){
     this._chipQ=q||'';
-    this.render();
+    this._renderChips();
   },
 
   setHueFilter(f){
     this._hueF=f;
     document.querySelectorAll('[data-hf]').forEach(b=>b.classList.toggle('on',b.dataset.hf===f));
-    this.render();
+    this._renderChips();
   },
 
   // v128: render selected colours swatches bar
@@ -7055,6 +7026,56 @@ const Prompter={
     this._renderSelectedBar();
     this._renderLibPanel();
     App.toast('Selection cleared');
+  },
+
+  // v4.0: toggle the collapsible library accordion
+  toggleLibAccordion(){
+    const panel = document.getElementById('prom-lib-panel');
+    const chevron = document.getElementById('prom-lib-chevron');
+    const btn = document.getElementById('prom-lib-toggle-btn');
+    if (!panel) return;
+    const isOpen = panel.style.display === 'none';
+    panel.style.display = isOpen ? 'block' : 'none';
+    if (chevron) chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+    if (btn) btn.style.background = isOpen ? 'var(--surface3)' : 'var(--surface2)';
+    if (isOpen) this._renderChips();
+  },
+
+  // v4.0: render prom-chips respecting current filter + sort
+  _renderChips(){
+    const all = DS.all();
+    const sorted = this._sortAll(all);
+    const _q = this._chipQ ? this._chipQ.toLowerCase() : '';
+    const _hf = this._hueF || 'all';
+    const vis = sorted.filter(c => {
+      if (_q && !c.name.toLowerCase().includes(_q) && !c.hex.includes(_q)) return false;
+      const h = c.hsl?.h ?? 0, s = c.hsl?.s ?? 0;
+      if (_hf === 'warm') return (h < 50 || h > 330) && s > 15;
+      if (_hf === 'cool') return h >= 50 && h <= 280 && s > 15;
+      if (_hf === 'neutral') return s <= 15;
+      return true;
+    });
+    const el = document.getElementById('prom-chips');
+    if (!el) return;
+    el.innerHTML = !all.length
+      ? '<div style="font-size:12px;color:var(--muted);padding:4px 0">Sample some colours first</div>'
+      : !vis.length
+      ? '<div style="font-size:12px;color:var(--muted);padding:4px 0">No colours match filter</div>'
+      : vis.map(c => {
+          const _k = c.kelvin || CS.kelvin(c.rgb || CS.hexToRgb(c.hex));
+          const _pt = CS.psychTag(c.hex);
+          return `<button class="prom-chip ${this.sel.has(c.id)?'on':''}"
+            type="button" data-cid="${c.id}"
+            onclick="Prompter.toggleColour('${c.id}')"
+            title="${c.name} — tap to select"
+            aria-label="${c.name}${this.sel.has(c.id)?' (selected)':''}"
+            aria-pressed="${this.sel.has(c.id)}">
+            <div class="prom-sw" style="background:${c.hex}"></div>
+            <div class="prom-label">${c.name}</div>
+            <div class="kelvin-badge"><b>~${Math.round(_k-273).toLocaleString()}°C</b></div>
+            <div class="psych-pill psych-${_pt.category}">${_pt.label}</div>
+          </button>`;
+        }).join('');
   },
 
   // v128: toggle library dropdown panel open/closed
