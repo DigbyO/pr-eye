@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v106</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v107</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '106';
+  const APP_VERSION = '107';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -168,15 +168,14 @@ a{color:var(--accent);text-decoration:none}
 
 /* Live colour bar - overlaid at bottom of camera */
 #live-bar{
-  position:absolute;bottom:calc(100px + env(safe-area-inset-bottom, 0px) + 20px);left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
-  z-index:10;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  background:rgba(15,15,15,0.85);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  padding:12px 14px;
+  position:relative;width:100%;flex-shrink:0;
+  background:#151515;border-top:1px solid #333;border-radius:0;
+  padding:12px 16px;
   display:flex;align-items:center;gap:10px;
-  pointer-events:none;
+  pointer-events:auto;z-index:2;
 }
 #live-swatch{width:44px;height:44px;border-radius:var(--rs);border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .1s}
-#live-swatch,#live-info,#live-matches,#live-export-btn,.live-pill{pointer-events:auto;}
+/* live-bar children inherit pointer-events:auto from parent */
 #live-info{flex:1;min-width:0}
 #live-hex{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
 #live-name{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -852,11 +851,9 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  #live-bar { bottom: calc(100px + env(safe-area-inset-bottom, 0px) + 20px) !important; width: 70% !important; }
+  /* #live-bar is docked in flow — no override needed */
 }
-@supports not (backdrop-filter: blur(10px)) {
-  #live-bar { background: rgba(10,10,10,0.95) !important; }
-}
+/* @supports backdrop-filter: live-bar no longer uses backdrop-filter */
 .colour-blind-tool{transition:opacity .2s}
 
 </style>
@@ -926,7 +923,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
     </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="display:flex;flex-direction:column;gap:16px">
+    <div id="sampler-cam-col" style="display:flex;flex-direction:column;gap:16px;flex:1;overflow:hidden;min-height:0">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -980,17 +977,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
       </div>
 
-      <!-- Live colour bar -->
-      <div id="live-bar">
-        <div id="live-swatch"></div>
-        <div id="live-info">
-          <div id="live-hex">#------</div>
-          <div id="live-name">Tap to move picker</div>
-          <div id="live-k"></div>
-        </div>
-        <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
-        <button id="live-export-btn" onclick="if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
-      </div>
+
 
       <!-- No camera fallback -->
       <div id="cam-diag" style="display:none;position:absolute;bottom:60px;left:0;right:0;padding:6px 12px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-family:monospace;z-index:30;text-align:center;pointer-events:none" id="cam-diag-bar"></div>
@@ -1146,6 +1133,17 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       </div>
     </div>
 
+    <!-- Docked colour console — v107: in normal flow, always above nav -->
+    <div id="live-bar">
+        <div id="live-swatch"></div>
+        <div id="live-info">
+          <div id="live-hex">#------</div>
+          <div id="live-name">Tap to move picker</div>
+          <div id="live-k"></div>
+        </div>
+        <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
+        <button id="live-export-btn" onclick="if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
+    </div>
     <!-- Save card -->
     <div id="save-wrap">
       <div id="save-swatch"></div>
@@ -9583,8 +9581,13 @@ self.onmessage = function(e) {
     const LOGICAL_W   = 380;
     const BORDER      = 24;          // card outer margin
     const CW          = LOGICAL_W - BORDER * 2;  // 332px inner width
-    const SWATCH_H    = 100;         // swatch panel height — tall enough for text
-    const BYLINE_PAD  = 24;          // space below swatches for byline
+    // v106b: luxury spacing — safe zone margins, gaps, and label strip below colour
+    const SW_PAD      = 16;          // safe-zone: left/right margin + top/bottom breathing room
+    const SW_GAP      = 8;           // gap between individual swatches
+    const SW_COLOR_H  = 64;          // height of the coloured block
+    const SW_LABEL_H  = 32;          // white label strip below each colour block
+    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 128px
+    const BYLINE_PAD  = 28;          // space below swatches for byline
 
     // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
@@ -9648,99 +9651,94 @@ self.onmessage = function(e) {
     ctx.fillRect(BORDER, BORDER, CW, photoH);
     ctx.restore();
 
-    // ── Full-width swatch panels ───────────────────────────────────────────────
-    const n    = hexes.length;
-    const swY  = BORDER + photoH;                  // flush against photo
-    const swW  = Math.floor(CW / n);               // equal width panels
-    // Last panel absorbs any rounding remainder
-    const lastExtraW = CW - swW * n;
-    const CARD_R = 14;                              // card corner radius
+    // ── v106b: luxury swatch strip — safe-zone margins, gaps, labels BELOW colour ──
+    const n          = hexes.length;
+    // Inner drawable width for swatches, respecting left/right safe-zone padding
+    const swInnerW   = CW - SW_PAD * 2;
+    const totalGapW  = SW_GAP * (n - 1);
+    const swW        = Math.floor((swInnerW - totalGapW) / n);
+    const swRemainder = swInnerW - totalGapW - swW * n;
+    // Y positions
+    const swColorY   = BORDER + photoH + SW_PAD;       // coloured block top
+    const swLabelY   = swColorY + SW_COLOR_H;           // white label strip top
+    const SW_R       = 8;                               // swatch corner radius
+
+    // White background for entire swatch strip (card is already white, this is explicit)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(BORDER, BORDER + photoH, CW, SWATCH_H);
 
     hexes.forEach((hex, i) => {
-      const x   = BORDER + i * swW;
-      const w   = (i === n - 1) ? swW + lastExtraW : swW;
-      const isFirst = i === 0;
-      const isLast  = i === n - 1;
-      const isOnly  = n === 1;
-      const atBottom = true;
+      const x  = BORDER + SW_PAD + i * (swW + SW_GAP);
+      const w  = (i === n - 1) ? swW + swRemainder : swW;
+      const cx = x + w / 2;
+      const maxTW = w - 6;
 
-      // Clip to rounded-bottom shape for first/last panels
+      // ── Coloured block with fully rounded corners ─────────────────────────
       ctx.save();
-      if (isOnly) {
-        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, CARD_R);
-      } else if (isFirst) {
-        rr(x, swY, w, SWATCH_H, 0, 0, 0, CARD_R);
-      } else if (isLast) {
-        rr(x, swY, w, SWATCH_H, 0, 0, CARD_R, 0);
-      } else {
-        ctx.rect(x, swY, w, SWATCH_H);
-      }
+      rr(x, swColorY, w, SW_COLOR_H, SW_R);
       ctx.clip();
       ctx.fillStyle = hex;
-      ctx.fillRect(x, swY, w, SWATCH_H);
+      ctx.fillRect(x, swColorY, w, SW_COLOR_H);
       ctx.restore();
 
-      // ── Text on swatch — v89: obeys State.swatchLabel setting ──────────────
-      const _rgb  = CS.hexToRgb(hex);
-      const _lum  = 0.299 * _rgb.r + 0.587 * _rgb.g + 0.114 * _rgb.b;
-      const onDk  = _lum < 155;
-      const txtC  = onDk ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.80)';
-      const subC  = onDk ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.40)';
-      const cx    = x + w / 2;
-      const maxTW = w - 10;
+      // ── White label strip below the colour block ──────────────────────────
+      // (card background is already white — no fill needed)
 
+      // ── Labels: name + hex in solid black, strictly in white margin ───────
       const slMode   = State.swatchLabel || 'both';
       const showName = slMode === 'both' || slMode === 'name';
       const showHex  = slMode === 'both' || slMode === 'hex';
 
-      // When showing both, name sits at 42% height and hex at 68%
-      // When showing only one, centre it at 55%
-      const nameY = (showName && showHex) ? swY + SWATCH_H * 0.38
-                  :  showName             ? swY + SWATCH_H * 0.55
-                  :                        0;
-      const hexY  = (showName && showHex) ? swY + SWATCH_H * 0.64
-                  :  showHex              ? swY + SWATCH_H * 0.55
-                  :                        0;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
 
-      if (showName) {
-        // Colour name — Permanent Marker, sized to fit panel width
-        let rawName = CS.autoName(hex) || hex.toUpperCase();
-        let fSize = Math.min(13, Math.max(8, Math.floor(w / 5.5)));
+      if (showName && showHex) {
+        // Name at top of label strip, hex below
+        let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
+        // Strip the prefix (e.g. "Sunlit / ") for compactness if too wide
+        let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
         ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        while (ctx.measureText(rawName).width > maxTW && fSize > 8) {
-          fSize -= 0.5;
-          ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
-        }
+        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `bold ${fSize}px "Permanent Marker",cursive`; }
         if (ctx.measureText(rawName).width > maxTW) {
+          // Try without prefix
+          const slash = rawName.indexOf(' / ');
+          if (slash !== -1) rawName = rawName.slice(slash + 3);
           while (rawName.length > 3 && ctx.measureText(rawName + '…').width > maxTW) rawName = rawName.slice(0, -1);
-          rawName = rawName + '…';
+          if (ctx.measureText(rawName).width > maxTW) rawName = rawName + '…';
         }
-        ctx.fillStyle = txtC;
-        ctx.fillText(rawName, cx, nameY, maxTW);
+        ctx.fillStyle = '#000000';
+        ctx.fillText(rawName, cx, swLabelY + 10, maxTW);
+        // HEX below name
+        const hSize = Math.max(6, Math.floor(fSize * 0.72));
+        ctx.font      = `bold ${hSize}px "Space Mono",monospace`;
+        ctx.fillStyle = '#444444';
+        ctx.fillText(hex.toUpperCase(), cx, swLabelY + 22, maxTW);
 
-        if (showHex) {
-          // HEX code — mono, smaller, below name
-          ctx.fillStyle    = subC;
-          ctx.font         = `bold ${Math.max(6, Math.floor(fSize * 0.65))}px "Space Mono",monospace`;
-          ctx.textAlign    = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(hex.toUpperCase(), cx, hexY, maxTW);
+      } else if (showName) {
+        let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
+        let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
+        ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
+        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `bold ${fSize}px "Permanent Marker",cursive`; }
+        if (ctx.measureText(rawName).width > maxTW) {
+          const slash = rawName.indexOf(' / ');
+          if (slash !== -1) rawName = rawName.slice(slash + 3);
+          while (rawName.length > 3 && ctx.measureText(rawName + '…').width > maxTW) rawName = rawName.slice(0, -1);
         }
+        ctx.fillStyle = '#000000';
+        ctx.fillText(rawName, cx, swLabelY + SW_LABEL_H / 2, maxTW);
+
       } else if (showHex) {
-        // HEX only — slightly larger mono text, centred
-        const hexFSize = Math.min(11, Math.max(7, Math.floor(w / 6)));
-        ctx.fillStyle    = txtC;
-        ctx.font         = `bold ${hexFSize}px "Space Mono",monospace`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(hex.toUpperCase(), cx, hexY, maxTW);
+        const hSize = Math.min(10, Math.max(6, Math.floor(w / 7)));
+        ctx.font      = `bold ${hSize}px "Space Mono",monospace`;
+        ctx.fillStyle = '#000000';
+        ctx.fillText(hex.toUpperCase(), cx, swLabelY + SW_LABEL_H / 2, maxTW);
       }
-      // slMode === 'none': no text drawn
+      // slMode === 'none': no labels
     });
 
-    // v101: dividers removed for clean luxury aesthetic
+    // Thin separator line between photo and swatch strip
+    ctx.fillStyle = '#e8e4de';
+    ctx.fillRect(BORDER + SW_PAD, BORDER + photoH + SW_PAD - 1, CW - SW_PAD * 2, 1);
 
     // ── digby.shop byline ────────────────────────────────────────────────────
     const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);
