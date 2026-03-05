@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 3.2 — Digby Colour Sampler v101</title>
+<title>Spectrum 3.2 — Digby Colour Sampler v105</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '101';
+  const APP_VERSION = '105';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -94,7 +94,7 @@ a{color:var(--accent);text-decoration:none}
 .module.active{display:flex;flex-direction:column}
 .mod-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--tab-h) + 16px + var(--safe-bottom))}
 
-#tabs{height:var(--tab-h);padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:20}
+#tabs{height:var(--tab-h);padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:1000}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--faint);transition:color var(--tr);font-size:var(--fs-xxs);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;position:relative;min-height:var(--tab-h)}
 .tab.on{color:var(--accent)}
 .tab svg{width:20px;height:20px}
@@ -168,7 +168,7 @@ a{color:var(--accent);text-decoration:none}
 
 /* Live colour bar - overlaid at bottom of camera */
 #live-bar{
-  position:absolute;bottom:15vh;left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
+  position:absolute;bottom:calc(90px + env(safe-area-inset-bottom, 0px) + 16px);left:50%;transform:translateX(-50%);width:92%;max-height:90px;overflow:hidden;
   z-index:10;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
   background:rgba(15,15,15,0.85);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   padding:12px 14px;
@@ -850,7 +850,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  #live-bar { bottom: 20px !important; width: 70% !important; }
+  #live-bar { bottom: calc(90px + env(safe-area-inset-bottom, 0px) + 16px) !important; width: 70% !important; }
 }
 @supports not (backdrop-filter: blur(10px)) {
   #live-bar { background: rgba(10,10,10,0.95) !important; }
@@ -987,6 +987,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <div id="live-k"></div>
         </div>
         <div id="live-matches" style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"></div>
+        <button id="live-export-btn" onclick="if(Sampler.pickQueue&&Sampler.pickQueue.length){AutoPalette.exportPolaroid(Sampler.pickQueue)}else if(Sampler.currentHex){AutoPalette.exportPolaroid([Sampler.currentHex])}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" title="Quick Polaroid Export">📸</button>
       </div>
 
       <!-- No camera fallback -->
@@ -5774,22 +5775,55 @@ const Explorer={
     const hex = this.rootHex;
     const rgb = CS.hexToRgb(hex);
     const hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b);
-    const trimL = Math.max(0, hsl.l - 15);
+
+    // TOGGLE SHADE: Read _trimLight flag (default false = darker)
+    const trimLightMode = this._trimLight || false;
+    const trimDelta = trimLightMode ? 15 : -15;
+    const trimL = trimLightMode ? Math.min(100, hsl.l + 15) : Math.max(0, hsl.l - 15);
     const trimHex = CS.hslToHex(hsl.h/360, hsl.s/100, trimL/100);
-    const anaH1 = ((hsl.h + 30) + 360) % 360;
-    const anaH2 = ((hsl.h - 30) + 360) % 360;
-    const compH = ((hsl.h + 180) + 360) % 360;
-    const analogousHex = CS.hslToHex(anaH1/360, hsl.s/100, hsl.l/100);
-    const compHex = CS.hslToHex(compH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
+
+    // CYCLE ENGINE: Read _designerMode (default 'analogous')
+    const designerMode = this._designerMode || 'analogous';
+    let secH, accentH; // 30% and 10% hues
+
+    if(designerMode === 'analogous'){
+      secH = ((hsl.h + 30) + 360) % 360;
+      accentH = ((hsl.h + 180) + 360) % 360;
+    } else if(designerMode === 'triadic'){
+      secH = ((hsl.h + 120) + 360) % 360;
+      accentH = ((hsl.h + 240) + 360) % 360;
+    } else if(designerMode === 'split'){
+      secH = ((hsl.h + 150) + 360) % 360;
+      accentH = ((hsl.h + 210) + 360) % 360;
+    }
+
+    const analogousHex = CS.hslToHex(secH/360, hsl.s/100, hsl.l/100);
+    let compHex = CS.hslToHex(accentH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
+
+    // 60-30-10 DEDUP: If secondary and accent are too similar, shift accent by +30 more degrees
+    if(analogousHex === compHex){
+      const hueDelta = Math.abs(secH - accentH);
+      if(hueDelta < 10 || hueDelta > 350){
+        accentH = ((accentH + 30) + 360) % 360;
+        compHex = CS.hslToHex(accentH/360, Math.min(100,hsl.s+10)/100, Math.max(20,Math.min(80,hsl.l))/100);
+      }
+    }
+
     const yiq = (rgb.r*299+rgb.g*587+rgb.b*114)/1000;
     const trimRgb = CS.hexToRgb(trimHex);
     const trimYiq = (trimRgb.r*299+trimRgb.g*587+trimRgb.b*114)/1000;
+
+    // Helper for mode display label
+    const modeLabels = {analogous:'Analogous',triadic:'Triadic',split:'Split-Comp'};
+    const modeLabel = modeLabels[designerMode] || designerMode;
+    const shadeLabel = trimLightMode ? 'Light Trim (+15%)' : 'Dark Trim (-15%)';
+
     container.innerHTML = `
       <div style="padding:16px 12px 8px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600">Designer Recommendations</div>
       <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:12px">
         <div style="background:var(--surface2);border-radius:12px;padding:14px;border:1px solid var(--border)">
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600">The Architectural Trim</div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Skirting, dado rail & woodwork — 15% darker for depth</div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Skirting, dado rail & woodwork — ${shadeLabel}</div>
           <div style="display:flex;gap:10px;align-items:center">
             <div style="width:56px;height:56px;border-radius:10px;background:${hex};border:1px solid var(--border);position:relative">
               <span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:6px;font-family:var(--mono);color:${yiq<128?'rgba(255,255,255,.7)':'rgba(0,0,0,.5)'}">WALL</span>
@@ -5801,31 +5835,49 @@ const Explorer={
             <div style="flex:1;min-width:0">
               <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text)">${trimHex.toUpperCase()}</div>
               <div style="font-size:9px;color:var(--muted);margin-top:2px">HSL ${hsl.h}° ${hsl.s}% ${trimL}%</div>
-              <button class="btn btn-s btn-sm" style="margin-top:6px;font-size:9px" onclick="Explorer.addToLib('${trimHex}')">+ Save Trim</button>
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${trimHex}')">+ Save</button>
+                <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer._cycleShade()">Toggle</button>
+              </div>
             </div>
           </div>
         </div>
         <div style="background:var(--surface2);border-radius:12px;padding:14px;border:1px solid var(--border)">
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600">The 60-30-10 Rule</div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Professional interior balance — dominant, secondary, accent</div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Professional balance — ${modeLabel} scheme</div>
           <div style="display:flex;border-radius:10px;overflow:hidden;height:48px;border:1px solid var(--border)">
             <div style="flex:6;background:${hex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${hex}')" title="60% Dominant">
               <span style="font-size:8px;font-weight:700;font-family:var(--mono);color:${yiq<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)'}">60%</span>
             </div>
-            <div style="flex:3;background:${analogousHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${analogousHex}')" title="30% Secondary (Analogous)">
+            <div style="flex:3;background:${analogousHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${analogousHex}')" title="30% Secondary">
               <span style="font-size:8px;font-weight:700;font-family:var(--mono);color:${(()=>{const r2=CS.hexToRgb(analogousHex);return(r2.r*299+r2.g*587+r2.b*114)/1000<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)';})()}">30%</span>
             </div>
-            <div style="flex:1;background:${compHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${compHex}')" title="10% Accent (Complementary)">
+            <div style="flex:1;background:${compHex};display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="Explorer.setRoot('${compHex}')" title="10% Accent">
               <span style="font-size:7px;font-weight:700;font-family:var(--mono);color:${(()=>{const r3=CS.hexToRgb(compHex);return(r3.r*299+r3.g*587+r3.b*114)/1000<128?'rgba(255,255,255,.8)':'rgba(0,0,0,.6)';})()}">10%</span>
             </div>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${analogousHex}')">+ Save 30%</button>
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${compHex}')">+ Save 10%</button>
+            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer._cycleDesignerMode()">Cycle</button>
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Library.export631('${hex}','${analogousHex}','${compHex}')">Export</button>
           </div>
         </div>
       </div>`;
+  },
+
+  _cycleDesignerMode(){
+    const modes = ['analogous','triadic','split'];
+    const current = this._designerMode || 'analogous';
+    const idx = modes.indexOf(current);
+    const next = modes[(idx + 1) % modes.length];
+    this._designerMode = next;
+    this.renderDesignerRecs();
+  },
+
+  _cycleShade(){
+    this._trimLight = !this._trimLight;
+    this.renderDesignerRecs();
   },
 
   //  TRIO GENERATOR 
