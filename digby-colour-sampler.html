@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.32</title>
+<title>Spectrum 4.0.33</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '432';
+  const APP_VERSION = '433';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -484,6 +484,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* White Balance button */
 .wb-btn{font-size:9px;letter-spacing:.02em;transition:background var(--tr),color var(--tr)}
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
+.live-disp-btn{display:block;width:100%;padding:9px 12px;border-radius:var(--rs);font-size:12px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;text-align:left;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.live-disp-btn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700;}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -2001,6 +2003,20 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   <!--  SETTINGS  -->
   <div class="module" id="mod-settings">
     <div class="mod-scroll" style="padding:12px">
+      <div class="sec">Live Scanner</div>
+      <div class="card" style="padding:12px 12px 14px">
+        <div class="set-l" style="margin-bottom:4px">Display Mode</div>
+        <div class="set-sub" style="margin-bottom:10px">Choose what the floating scanner shows</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912; Pantone name</button>
+          <button class="live-disp-btn" data-ld="hex"     onclick="App.setLiveDisplay('hex')">&#11043; HEX + RGB</button>
+          <button class="live-disp-btn" data-ld="rgb"     onclick="App.setLiveDisplay('rgb')">&#128308; RGB values</button>
+          <button class="live-disp-btn" data-ld="hsl"     onclick="App.setLiveDisplay('hsl')">&#127752; HSL values</button>
+          <button class="live-disp-btn" data-ld="kelvin"  onclick="App.setLiveDisplay('kelvin')">&#127777; Kelvin temperature</button>
+          <button class="live-disp-btn" data-ld="lrv"     onclick="App.setLiveDisplay('lrv')">&#9728; LRV (light reflectance)</button>
+          <button class="live-disp-btn" data-ld="paint"   onclick="App.setLiveDisplay('paint')">&#128396; Closest paint match</button>
+        </div>
+      </div>
       <div class="sec">Library</div>
       <div class="card" style="padding:0 12px">
         <div class="set-row" id="set-lib-count"></div>
@@ -3160,6 +3176,7 @@ const State = {
   activeLUTName: '',
   proMode:       false,  // FIX 7: Pro Mode — when false, hides Prompter tab + Advanced Technical Data
   swatchLabel:   'both',  // v89: export swatch label mode — 'both' | 'name' | 'hex' | 'none'
+  liveDisplay:   'pantone', // v433: 'pantone'|'hex'|'rgb'|'hsl'|'kelvin'|'lrv'|'paint'
   subjects:      [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
   mediums:       [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
   focusedColor:  null, // v121: ID of focused/selected library colour
@@ -3174,6 +3191,7 @@ const State = {
         activeLUTName: this.activeLUTName,
         proMode:       this.proMode,
         swatchLabel:   this.swatchLabel,
+        liveDisplay:   this.liveDisplay,
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
       }));
@@ -3190,6 +3208,7 @@ const State = {
       if (data.activeLUTName !== undefined) this.activeLUTName = data.activeLUTName;
       if (data.proMode       !== undefined) this.proMode      = data.proMode;
       if (data.swatchLabel   !== undefined) this.swatchLabel  = data.swatchLabel;
+      if (data.liveDisplay   !== undefined) this.liveDisplay  = data.liveDisplay;
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
@@ -3339,6 +3358,12 @@ const App={
     ['both','name','hex','none'].forEach(m=>{
       const btn=document.getElementById('sl-'+m);
       if(btn) btn.classList.toggle('on', State.swatchLabel===m);
+    document.querySelectorAll('.live-disp-btn').forEach(b=>{
+      b.classList.toggle('on',b.dataset.ld===(State.liveDisplay||'pantone'));
+    });
+    document.querySelectorAll('.live-disp-btn').forEach(b=>{
+      b.classList.toggle('on',b.dataset.ld===(State.liveDisplay||'pantone'));
+    });
     });
   },
 
@@ -3926,6 +3951,15 @@ const App={
   exportLib(){const d=JSON.stringify(DS.all(),null,2);const b=new Blob([d],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='digby-colours.json';a.click();URL.revokeObjectURL(u);App.toast('Exported')},
   importLib(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(Array.isArray(d)){DS.save(d);App.forceCloseOv();App.toast('Imported')}else App.toast('Invalid file')}catch{App.toast('Error reading file')}};r.readAsText(f)},
   clearLib(){if(confirm('Clear all saved colours?')){DS.clear();App.forceCloseOv();App.toast('Cleared')}},
+
+  // v433: Live bar display mode
+  setLiveDisplay(mode){
+    State.liveDisplay=mode; State.save();
+    document.querySelectorAll('.live-disp-btn').forEach(b=>b.classList.toggle('on',b.dataset.ld===mode));
+    const L={pantone:'Pantone name',hex:'HEX + RGB',rgb:'RGB values',hsl:'HSL values',
+             kelvin:'Kelvin temp',lrv:'LRV',paint:'Paint match'};
+    App.toast('Live: '+(L[mode]||mode));
+  },
 
   // v89: Swatch label mode toggle — called from segmented control in Settings
   setSwatchLabel(mode) {
@@ -4518,27 +4552,37 @@ const Sampler={
 
   updateLiveBar(hex,r,g,b){
     document.getElementById('live-swatch').style.background=hex;
-    // v405: live-bar has dark background — text always white regardless of sampled colour
-    // (YIQ adaptive logic only makes sense when text sits directly on the colour swatch)
-    document.getElementById('live-hex').textContent=hex.toUpperCase();
-    document.getElementById('live-hex').style.color='#ffffff';
-    // MASTER-FIX 3: primary display name = closest Pantone match;
-    // autoName() is the fallback if no Pantone data yet.
-    document.getElementById('live-name').textContent=CS.pantoneFirst(hex);  // v130: show Pantone name live
-    document.getElementById('live-name').style.color='rgba(255,255,255,.6)';
-    const k=CS.kelvin({r,g,b});
-    const _kC=Math.round(k-273);
-    document.getElementById('live-k').textContent=`~${_kC.toLocaleString()}°C ${CS.kDesc(k)}`;
     const lab=CS.rgbToLab(r,g,b);
     const pan=CS.nearestPantone(lab);
     const lg=CS.nearestLG(lab);
     const fb=CS.nearestFB(lab);
+    const k=CS.kelvin({r,g,b});
+    const _kC=Math.round(k-273);
+    const hsl=CS.rgbToHsl(r,g,b);
+    const lrv=CS.lrv(lab);
+    // v433: driven by State.liveDisplay
+    const mode=State.liveDisplay||'pantone';
+    let nameText='', hexText=hex.toUpperCase(), kText='';
+    switch(mode){
+      case 'pantone': nameText=CS.pantoneFirst(hex); kText=pan?.code||''; break;
+      case 'hex':     nameText=hex.toUpperCase(); hexText='rgb('+r+','+g+','+b+')'; kText=''; break;
+      case 'rgb':     nameText='rgb('+r+','+g+','+b+')'; kText='R:'+r+' G:'+g+' B:'+b; break;
+      case 'hsl':     nameText='hsl('+hsl.h+'°,'+hsl.s+'%,'+hsl.l+'%)'; kText='H:'+hsl.h+' S:'+hsl.s+' L:'+hsl.l; break;
+      case 'kelvin':  nameText='~'+_kC.toLocaleString()+'°C'; hexText=k+'K'; kText=CS.kDesc(k); break;
+      case 'lrv':     nameText='LRV '+lrv+'%'; kText=lrv<20?'Very Dark':lrv<40?'Dark':lrv<60?'Mid':lrv<80?'Light':'Very Light'; break;
+      case 'paint':   nameText=fb?.name||lg?.name||CS.pantoneFirst(hex); kText=(fb?'F&B · ':'')+(lg?'LG · ':'')+(pan?.code||''); break;
+      default:        nameText=CS.pantoneFirst(hex); kText='';
+    }
+    document.getElementById('live-hex').textContent=hexText;
+    document.getElementById('live-hex').style.color='#ffffff';
+    document.getElementById('live-name').textContent=nameText;
+    document.getElementById('live-name').style.color='rgba(255,255,255,.75)';
+    document.getElementById('live-k').textContent=kText;
     const m=document.getElementById('live-matches');
-    m.innerHTML=`<div style="font-size:8px;color:rgba(255,255,255,.45);text-align:right">${pan?.code||''}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.35);text-align:right">${lg?.name||''}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.30);text-align:right">${fb?.name||''}</div>`;
+    m.innerHTML='<div style="font-size:8px;color:rgba(255,255,255,.45);text-align:right">'+(pan?.code||'')+'</div>'
+      +'<div style="font-size:8px;color:rgba(255,255,255,.35);text-align:right">'+(lg?.name||'')+'</div>'
+      +'<div style="font-size:8px;color:rgba(255,255,255,.30);text-align:right">'+(fb?.name||'')+'</div>';
   },
-
   toggleFreeze(){
     this.frozen=!this.frozen;
     const v=document.getElementById('cam-video');
