@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.33</title>
+<title>Spectrum 4.0.35</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '433';
+  const APP_VERSION = '435';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -484,7 +484,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* White Balance button */
 .wb-btn{font-size:9px;letter-spacing:.02em;transition:background var(--tr),color var(--tr)}
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
-.live-disp-btn{display:block;width:100%;padding:9px 12px;border-radius:var(--rs);font-size:12px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;text-align:left;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.live-disp-btn{display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 6px;border-radius:var(--rs);font-size:11px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.3;-webkit-tap-highlight-color:transparent;}
 .live-disp-btn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700;}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
@@ -2007,14 +2007,14 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
       <div class="card" style="padding:12px 12px 14px">
         <div class="set-l" style="margin-bottom:4px">Display Mode</div>
         <div class="set-sub" style="margin-bottom:10px">Choose what the floating scanner shows</div>
-        <div style="display:flex;flex-direction:column;gap:5px">
-          <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912; Pantone name</button>
-          <button class="live-disp-btn" data-ld="hex"     onclick="App.setLiveDisplay('hex')">&#11043; HEX + RGB</button>
-          <button class="live-disp-btn" data-ld="rgb"     onclick="App.setLiveDisplay('rgb')">&#128308; RGB values</button>
-          <button class="live-disp-btn" data-ld="hsl"     onclick="App.setLiveDisplay('hsl')">&#127752; HSL values</button>
-          <button class="live-disp-btn" data-ld="kelvin"  onclick="App.setLiveDisplay('kelvin')">&#127777; Kelvin temperature</button>
-          <button class="live-disp-btn" data-ld="lrv"     onclick="App.setLiveDisplay('lrv')">&#9728; LRV (light reflectance)</button>
-          <button class="live-disp-btn" data-ld="paint"   onclick="App.setLiveDisplay('paint')">&#128396; Closest paint match</button>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
+          <button class="live-disp-btn" data-ld="hex"     onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
+          <button class="live-disp-btn" data-ld="rgb"     onclick="App.setLiveDisplay('rgb')">&#128308;<br>RGB</button>
+          <button class="live-disp-btn" data-ld="hsl"     onclick="App.setLiveDisplay('hsl')">&#127752;<br>HSL</button>
+          <button class="live-disp-btn" data-ld="kelvin"  onclick="App.setLiveDisplay('kelvin')">&#127777;<br>Kelvin</button>
+          <button class="live-disp-btn" data-ld="lrv"     onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
+          <button class="live-disp-btn" data-ld="paint"   onclick="App.setLiveDisplay('paint')" style="grid-column:span 3">&#128396; Closest paint match</button>
         </div>
       </div>
       <div class="sec">Library</div>
@@ -3358,12 +3358,6 @@ const App={
     ['both','name','hex','none'].forEach(m=>{
       const btn=document.getElementById('sl-'+m);
       if(btn) btn.classList.toggle('on', State.swatchLabel===m);
-    document.querySelectorAll('.live-disp-btn').forEach(b=>{
-      b.classList.toggle('on',b.dataset.ld===(State.liveDisplay||'pantone'));
-    });
-    document.querySelectorAll('.live-disp-btn').forEach(b=>{
-      b.classList.toggle('on',b.dataset.ld===(State.liveDisplay||'pantone'));
-    });
     });
   },
 
@@ -3521,6 +3515,18 @@ const App={
       <div class="shop-banner" style="margin:0 0 12px">
         <a href="https://digby.shop" target="_blank">digby.shop</a>
         <p>Print your palette creations as products</p>
+      </div>
+      <div class="set-sec">Live Scanner</div>
+      <div class="set-l" style="padding:0 0 4px">Display Mode</div>
+      <div class="set-sub" style="margin-bottom:10px">What the floating scanner shows while sampling</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px">
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='pantone'?'on':''}" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='hex'?'on':''}" data-ld="hex" onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='rgb'?'on':''}" data-ld="rgb" onclick="App.setLiveDisplay('rgb')">&#128308;<br>RGB</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='hsl'?'on':''}" data-ld="hsl" onclick="App.setLiveDisplay('hsl')">&#127752;<br>HSL</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='kelvin'?'on':''}" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')">&#127777;<br>Kelvin</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='lrv'?'on':''}" data-ld="lrv" onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='paint'?'on':''}" data-ld="paint" onclick="App.setLiveDisplay('paint')" style="grid-column:span 3">&#128396; Closest paint match</button>
       </div>
       <div class="set-sec">Display</div>
       <div class="set-row" style="align-items:center;gap:6px;flex-wrap:wrap">
@@ -3785,9 +3791,11 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.18</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span style="font-size:11px;color:var(--muted)">Spectrum 4.0.34</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
+      <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
+      <div class="set-row"><div><div class="set-l">Phone</div><div class="set-sub"><a href="tel:+447879403618" style="color:var(--accent)">+44 7879 403618</a></div></div></div>
       <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
         <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
