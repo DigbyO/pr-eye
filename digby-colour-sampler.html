@@ -4805,43 +4805,17 @@ const Sampler={
     }
   },
 
-  // v447 ── Bar image picker: load → freeze → K-Means → show palette ────────
+  // v448 ── Bar folder icon: switch to Upload mode and display the image ─────
+  // Delegates entirely to loadUpload (which draws the image, sets up tap-to-pick,
+  // and shows the upload panel). Previously only ran K-Means and never showed image.
   loadFromBar(input) {
-    const file = input.files[0];
-    if (!file) return;
-    // Reset so next pick works
-    input.value = '';
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        // Store image for AutoPalette
-        this.uploadImg = img;
-        this.pickQueue = [];
-
-        // Freeze camera so the static image drives the UI
-        if (!this.frozen) {
-          this.frozen = true;
-          const v = document.getElementById('cam-video');
-          if (v) v.pause();
-          const fb = document.getElementById('freeze-btn');
-          if (fb) { fb.classList.add('on'); fb.textContent = 'Unfreeze'; }
-        }
-        // Mark picker button as active
-        const pb = document.getElementById('bar-picker-btn');
-        if (pb) pb.classList.add('active');
-
-        // Run K-Means via AutoPalette and surface results
-        AutoPalette.fromUpload(6).catch(err => {
-          console.warn('[Spectrum] bar picker K-Means failed:', err);
-          App.toast('Could not analyse image');
-        });
-      };
-      img.onerror = () => App.toast('Could not load image');
-      img.src = e.target.result;
-    };
-    reader.onerror = () => App.toast('Could not read file');
-    reader.readAsDataURL(file);
+    if (!input.files || !input.files[0]) return;
+    // Set a truthy sentinel so setMode('upload') doesn't fire a second file picker
+    if (!this.uploadImg) this.uploadImg = {};
+    // Switch Sampler to Upload mode so the canvas and wrap become visible
+    this.setMode('upload');
+    // Hand off to the full loadUpload path which draws the image and wires touch
+    this.loadUpload(input);
   },
 
   toggleLut(){
@@ -11512,10 +11486,6 @@ self.onmessage = function(e) {
       }
       // slMode === 'none': no labels
     });
-
-    // Thin separator line between photo and swatch strip
-    ctx.fillStyle = '#e8e4de';
-    ctx.fillRect(BORDER + SW_PAD, BORDER + photoH + SW_PAD - 1, CW - SW_PAD * 2, 1);
 
     // ── digby.shop byline ────────────────────────────────────────────────────
     const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);
