@@ -10,7 +10,7 @@
 <meta name="description" content="Spectrum 3.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Spectrum 4.0.35</title>
+<title>Spectrum 4.0.44</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -19,7 +19,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '435';
+  const APP_VERSION = '446';
   const stored = localStorage.getItem('stored_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('stored_version', APP_VERSION);
@@ -134,7 +134,7 @@ a{color:var(--accent);text-decoration:none}
 #ov-panel{width:100%;max-height:88dvh;background:var(--surface);border-radius:var(--r) var(--r) 0 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:su .28s cubic-bezier(.4,0,.2,1)}
 @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .ov-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 14px}
-.ov-title{font-family:var(--sharpie);font-size:clamp(1.25rem,4vw,1.5rem);padding:0 18px 14px}
+.ov-title{font-family:var(--sharpie);font-size:clamp(1.25rem,4vw,1.5rem);padding:0 24px 14px}
 
 /* 
    MODULE 1  SAMPLER (full-screen camera)
@@ -178,9 +178,9 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   width: 168px;
   height: auto;
   z-index: 2000;
-  background: rgba(10,10,10,0.55);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(15,15,15,0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border-radius: 18px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.18);
@@ -193,6 +193,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
+  -webkit-user-drag: none;
+  will-change: transform, left, top;
   transition: box-shadow 0.15s, background 0.15s;
   overflow: hidden;
 }
@@ -484,8 +486,10 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 /* White Balance button */
 .wb-btn{font-size:9px;letter-spacing:.02em;transition:background var(--tr),color var(--tr)}
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
-.live-disp-btn{display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 6px;border-radius:var(--rs);font-size:11px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.3;-webkit-tap-highlight-color:transparent;}
-.live-disp-btn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700;}
+.live-disp-btn{padding:10px 4px 8px;border-radius:var(--rs);font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;display:block;-webkit-tap-highlight-color:transparent;}
+.live-disp-btn .ld-icon{display:block;font-size:18px;margin-bottom:3px;}
+.live-disp-btn.on{background:var(--accent);color:#1a1208 !important;border-color:var(--accent);font-weight:700;}
+.live-disp-btn.on .ld-icon{color:#1a1208;}
 .det-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 
 /* 
@@ -547,8 +551,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 .set-row:last-child{border-bottom:none}
 .set-l{font-size:13px}
 .set-sub{font-size:10px;color:var(--muted);margin-top:2px}
-.set-sec{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:14px 0 6px}
-#set-body{padding:0 16px 32px}
+.set-sec{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:14px 2px 6px}
+#set-body{padding:0 24px 32px}
 
 /*  COLOUR GENERATOR SWATCHES  */
 .colgen-swatches{display:flex;height:130px;border-radius:var(--r);overflow:hidden;gap:2px}
@@ -895,7 +899,11 @@ body.simple-mode .pro-only{display:none!important}
 body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
-body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .colour-blind-tool,body.pro-mode .pb-pro-btn,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
+/* v438: .pb-pro-btn and .colour-blind-tool removed — gated by design-pro-on only */
+body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
+/* design-pro-on exclusively controls Tailwind + CVD palette buttons */
+body.design-pro-on .pb-pro-btn{display:revert!important}
+body.design-pro-on .colour-blind-tool{display:revert!important}
 
 /* ── Pro Mode toggle in header ─────────────────────────────────────────── */
 #hdr-pro-wrap{display:flex;align-items:center;gap:4px;padding:0 2px;flex-shrink:0}
@@ -941,8 +949,14 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
   overflow: hidden; transform: translateZ(0);
 }
 @media (orientation: landscape) {
-  /* v120: fixed pill — just narrow it a bit in landscape */
-  #live-bar{ width:72%; }
+  /* v437: dock to right side in landscape so camera is unobstructed */
+  body.active-tab-sampler #live-bar{
+    top: 50% !important;
+    left: auto !important;
+    right: 12px !important;
+    transform: translateY(-50%) !important;
+    width: 158px !important;
+  }
 }
 /* live-bar uses backdrop-filter:blur(12px) in v108 — glass pill at top */
 .colour-blind-tool{transition:opacity .2s}
@@ -1191,9 +1205,11 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <div style="flex:1;min-width:0">
           <div id="wheel-hex" style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1">#888888</div>
           <div id="wheel-name" style="font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-          <div id="wheel-matches" style="font-size:9px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+          <!-- v441: paint match chips -->
+          <div id="wheel-paint-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px"></div>
         </div>
         <button class="btn btn-p btn-sm" style="flex-shrink:0;font-size:15px;padding:10px 16px" onclick="Sampler.captureFromWheel()"></button>
+        <button class="btn btn-s btn-sm" style="flex-shrink:0;font-size:13px;padding:10px 14px" onclick="Sampler._exportCurrentWheelColour()" title="Export this colour as polaroid">📷</button>
       </div>
 
       <!--  WHEEL + SLIDERS side by side on wider screens, stacked on narrow -->
@@ -1212,9 +1228,17 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         <!-- Quick hue strip -->
         <canvas id="hue-strip" width="300" height="28" style="border-radius:var(--rs);width:100%;max-width:300px;touch-action:none;cursor:crosshair"></canvas>
 
-        <!-- HSL + Hex inputs  collapsible detail row -->
+                <!-- v441: Hex input always visible -->
+        <div style="width:100%;max-width:300px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Hex</div>
+          <input type="text" id="wheel-hex-in" maxlength="7" placeholder="#A3724F"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:14px"
+            oninput="ColourWheel.fromHex(this.value)">
+        </div>
+
+        <!-- HSL inputs — collapsible -->
         <details style="width:100%;max-width:300px">
-          <summary style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;cursor:pointer;list-style:none;padding:4px 0"> Manual input (HSL / Hex)</summary>
+          <summary style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;cursor:pointer;list-style:none;padding:4px 0">Manual input (HSL)</summary>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:8px">
             <div>
               <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">H</div>
@@ -1229,10 +1253,6 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
               <input type="number" id="wheel-l-in" min="0" max="100" value="50" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:7px 6px;color:var(--text);font-family:var(--mono);font-size:13px" oninput="ColourWheel.fromHSL()">
             </div>
           </div>
-          <div style="margin-top:7px">
-            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Hex</div>
-            <input type="text" id="wheel-hex-in" maxlength="7" placeholder="#A3724F" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:14px" oninput="ColourWheel.fromHex(this.value)">
-          </div>
         </details>
 
         <!-- Wheel queue display -->
@@ -1241,7 +1261,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <div id="wheel-queue-swatches" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px"></div>
           <div style="display:flex;gap:7px">
             <button class="btn btn-p btn-sm" style="flex:1" onclick="Sampler.saveQueue()">Save All</button>
-            <button class="btn btn-s btn-sm" onclick="Sampler._exportWheelPolaroid()">📷 Polaroid</button>
+            <button class="btn btn-s btn-sm" onclick="Sampler._exportWheelPolaroid()">📷 Export</button>
             <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
           </div>
         </div>
@@ -1653,6 +1673,62 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
         </div>
       </div>
 
+      <!-- BACKGROUND COLOR v445 -->
+      <div class="sec prom-sec-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Background Color
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;color:var(--muted)">Multi-Color</span>
+          <div class="sw" id="bg-multi-sw" onclick="Prompter.toggleBgMulti(this)"></div>
+        </div>
+      </div>
+      <div id="bg-color-wrap" style="padding:0 12px 14px;display:flex;flex-direction:column;gap:8px">
+        <!-- Single slot -->
+        <div id="bg-single" style="display:flex;align-items:center;gap:8px">
+          <div id="bg-chip-s" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.28);flex-shrink:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="document.getElementById('bg-inp-s').click()"></div>
+          <label style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:7px 10px;cursor:pointer;position:relative;gap:8px">
+            <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Background</span>
+            <span id="bg-name-s" style="font-size:11px;color:var(--text);font-family:var(--mono);flex-shrink:0">—</span>
+            <input id="bg-inp-s" type="color" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+              oninput="Prompter.setBgColor('s',this.value)"
+              onchange="Prompter.setBgColor('s',this.value)">
+          </label>
+        </div>
+        <!-- Multi slots (hidden by default) -->
+        <div id="bg-multi" style="display:none;flex-direction:column;gap:8px">
+          <div style="font-size:10px;color:var(--muted);line-height:1.5;padding-bottom:2px">Three colours combine as a sophisticated background pattern in the prompt.</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="bg-chip-1" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.28);flex-shrink:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="document.getElementById('bg-inp-1').click()"></div>
+            <label style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:7px 10px;cursor:pointer;position:relative;gap:8px">
+              <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Colour 1</span>
+              <span id="bg-name-1" style="font-size:11px;color:var(--text);font-family:var(--mono);flex-shrink:0">—</span>
+              <input id="bg-inp-1" type="color" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+                oninput="Prompter.setBgColor(1,this.value)"
+                onchange="Prompter.setBgColor(1,this.value)">
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="bg-chip-2" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.28);flex-shrink:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="document.getElementById('bg-inp-2').click()"></div>
+            <label style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:7px 10px;cursor:pointer;position:relative;gap:8px">
+              <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Colour 2</span>
+              <span id="bg-name-2" style="font-size:11px;color:var(--text);font-family:var(--mono);flex-shrink:0">—</span>
+              <input id="bg-inp-2" type="color" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+                oninput="Prompter.setBgColor(2,this.value)"
+                onchange="Prompter.setBgColor(2,this.value)">
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="bg-chip-3" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.28);flex-shrink:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="document.getElementById('bg-inp-3').click()"></div>
+            <label style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:7px 10px;cursor:pointer;position:relative;gap:8px">
+              <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Colour 3</span>
+              <span id="bg-name-3" style="font-size:11px;color:var(--text);font-family:var(--mono);flex-shrink:0">—</span>
+              <input id="bg-inp-3" type="color" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+                oninput="Prompter.setBgColor(3,this.value)"
+                onchange="Prompter.setBgColor(3,this.value)">
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- SUBJECT -->
       <div class="sec prom-sec-label">Subject <span class="prom-multi-hint">multi-select</span> <span id="subj-badge" style="display:none;font-size:10px;background:var(--accent);color:#1a1208;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--mono)"></span></div>
       <div class="prom-pill-grid" id="subject-grid">
@@ -1814,6 +1890,7 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           <div id="wallpaper-suggestions" style="padding:11px 13px;font-size:11px;color:var(--muted);line-height:1.7"></div>
         </div>
       </div>
+
 
       <!-- MJ PARAMETERS -->
       <div class="sec">MJ Parameters</div>
@@ -2056,12 +2133,13 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
           </div>
         </div>
         <div class="set-row">
-          <div style="flex:1"><div class="set-l">Export Labels</div><div class="set-sub">Text shown on swatches</div></div>
+          <div style="flex:1"><div class="set-l">Polaroid Export Labels</div><div class="set-sub">Text shown on polaroid swatches</div></div>
           <div class="seg-ctrl" style="margin-left:8px">
-            <div class="seg-btn on" id="sl-both" data-mode="both" onclick="App.setSwatchLabel('both')">Both</div>
-            <div class="seg-btn" id="sl-name" data-mode="name" onclick="App.setSwatchLabel('name')">Name</div>
-            <div class="seg-btn" id="sl-hex"  data-mode="hex"  onclick="App.setSwatchLabel('hex')">HEX</div>
-            <div class="seg-btn" id="sl-none" data-mode="none" onclick="App.setSwatchLabel('none')">None</div>
+            <div class="seg-btn on" id="sl-both"     data-mode="both"     onclick="App.setSwatchLabel('both')">Both</div>
+            <div class="seg-btn"   id="sl-name"     data-mode="name"     onclick="App.setSwatchLabel('name')">Name</div>
+            <div class="seg-btn"   id="sl-hex"      data-mode="hex"      onclick="App.setSwatchLabel('hex')">HEX</div>
+            <div class="seg-btn"   id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">📍 GPS</div>
+            <div class="seg-btn"   id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
           </div>
         </div>
         <div class="set-row set-row-cvd"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
@@ -3158,11 +3236,28 @@ const DS = {
       kelvin:      CS.kelvin(rgb),
       autoTags:    CS.autoTags(hex),
       tags:        [],
-      notes:       ''
+      notes:       '',
+      geo:         (() => { try { return GeoCapture.last || {lat: null, lng: null, ts: Date.now()}; } catch(e) { return {lat: null, lng: null, ts: Date.now()}; } })()
     };
   }
 };
 
+</script>
+
+<!-- v443: GeoCapture -->
+<script>
+const GeoCapture = {
+  last:null, _watchId:null,
+  init(){
+    if(!navigator.geolocation)return;
+    const o={enableHighAccuracy:false,timeout:10000,maximumAge:60000};
+    navigator.geolocation.getCurrentPosition(p=>this._store(p),()=>{},o);
+    this._watchId=navigator.geolocation.watchPosition(p=>this._store(p),()=>{},{enableHighAccuracy:false,timeout:15000,maximumAge:30000});
+  },
+  _store(pos){this.last={lat:+pos.coords.latitude.toFixed(6),lng:+pos.coords.longitude.toFixed(6),accuracy:Math.round(pos.coords.accuracy),timestamp:new Date().toISOString()};},
+  label(geo){if(!geo||geo.lat==null||geo.lng==null)return '📍 Locating...';const lat=geo.lat??0,lng=geo.lng??0;const la=Math.abs(lat).toFixed(4)+(lat>=0?'°N':'°S');const lo=Math.abs(lng).toFixed(4)+(lng>=0?'°E':'°W');return la+'  '+lo;},
+  request(){if(!navigator.geolocation){App.toast('GPS not available');return;}navigator.geolocation.getCurrentPosition(p=>{this._store(p);App.toast('📍 Location captured');},()=>{App.toast('Location permission denied');},{enableHighAccuracy:true,timeout:8000});}
+};
 </script>
 
 <!--  APP CONTROLLER  -->
@@ -3175,7 +3270,7 @@ const State = {
   multiMode:     true,
   activeLUTName: '',
   proMode:       false,  // FIX 7: Pro Mode — when false, hides Prompter tab + Advanced Technical Data
-  swatchLabel:   'both',  // v89: export swatch label mode — 'both' | 'name' | 'hex' | 'none'
+  swatchLabel:   'both',  // v89/v443: 'both'|'name'|'hex'|'none'|'location'
   liveDisplay:   'pantone', // v433: 'pantone'|'hex'|'rgb'|'hsl'|'kelvin'|'lrv'|'paint'
   subjects:      [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
   mediums:       [],   // MASTER-FIX-V53: plain Array — survives JSON.stringify round-trip
@@ -3273,6 +3368,7 @@ const App={
     window.addEventListener('online',()=>this.setOnline(true));
     window.addEventListener('offline',()=>this.setOnline(false));
     await DS.init();   // IndexedDB open + localStorage migration
+    GeoCapture.init();
     // MASTER-FIX-V52: load persisted State before modules initialise
     State.load();
     State.applyProMode(); // FIX 7: apply simple-mode class based on saved proMode state
@@ -3355,7 +3451,7 @@ const App={
     const tb=document.getElementById('settings-theme-btn');
     if(tb) tb.textContent = document.body.classList.contains('light-mode') ? '🌙 Dark' : '☀ Light';
     // Sync swatch label seg-ctrl
-    ['both','name','hex','none'].forEach(m=>{
+    ['both','name','hex','none','location'].forEach(m=>{
       const btn=document.getElementById('sl-'+m);
       if(btn) btn.classList.toggle('on', State.swatchLabel===m);
     });
@@ -3517,16 +3613,17 @@ const App={
         <p>Print your palette creations as products</p>
       </div>
       <div class="set-sec">Live Scanner</div>
-      <div class="set-l" style="padding:0 0 4px">Display Mode</div>
-      <div class="set-sub" style="margin-bottom:10px">What the floating scanner shows while sampling</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px">
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='pantone'?'on':''}" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='hex'?'on':''}" data-ld="hex" onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='rgb'?'on':''}" data-ld="rgb" onclick="App.setLiveDisplay('rgb')">&#128308;<br>RGB</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='hsl'?'on':''}" data-ld="hsl" onclick="App.setLiveDisplay('hsl')">&#127752;<br>HSL</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='kelvin'?'on':''}" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')">&#127777;<br>Kelvin</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='lrv'?'on':''}" data-ld="lrv" onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
-        <button class="live-disp-btn ${(State.liveDisplay||'pantone')==='paint'?'on':''}" data-ld="paint" onclick="App.setLiveDisplay('paint')" style="grid-column:span 3">&#128396; Closest paint match</button>
+      <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0">
+        <div><div class="set-l">Display Mode</div><div class="set-sub">What the floating scanner shows while sampling</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='pantone'?'on':''}" id="ld-pantone" data-ld="pantone" onclick="App.setLiveDisplay('pantone')"><span class="ld-icon">&#127912;</span>Pantone</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='hex'?'on':''}" id="ld-hex" data-ld="hex" onclick="App.setLiveDisplay('hex')"><span class="ld-icon">&#11043;</span>HEX+RGB</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='rgb'?'on':''}" id="ld-rgb" data-ld="rgb" onclick="App.setLiveDisplay('rgb')"><span class="ld-icon">&#128308;</span>RGB</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon">&#127752;</span>HSL</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon">&#127777;</span>Kelvin</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon">&#9728;</span>LRV</button>
+        <button class="live-disp-btn ${(State.liveDisplay||'pantone')=='paint'?'on':''}" id="ld-paint" data-ld="paint" onclick="App.setLiveDisplay('paint')" style="grid-column:span 3"><span class="ld-icon">&#128396;</span>Paint match</button>
+        </div>
       </div>
       <div class="set-sec">Display</div>
       <div class="set-row" style="align-items:center;gap:6px;flex-wrap:wrap">
@@ -3564,12 +3661,13 @@ const App={
         <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
 
       <div class="set-row">
-        <div style="flex:1;min-width:0"><div class="set-l">Export Labels</div><div class="set-sub">Text shown on colour swatches in exports</div></div>
+        <div style="flex:1;min-width:0"><div class="set-l">Polaroid Export Labels</div><div class="set-sub">Text shown on colour swatches in exports</div></div>
         <div class="seg-ctrl" style="margin-left:8px">
-          <div class="seg-btn${State.swatchLabel==='both'?' on':''}" id="sl-both" data-mode="both" onclick="App.setSwatchLabel('both')">Both</div>
-          <div class="seg-btn${State.swatchLabel==='name'?' on':''}" id="sl-name" data-mode="name" onclick="App.setSwatchLabel('name')">Name</div>
-          <div class="seg-btn${State.swatchLabel==='hex'?' on':''}"  id="sl-hex"  data-mode="hex"  onclick="App.setSwatchLabel('hex')">HEX</div>
-          <div class="seg-btn${State.swatchLabel==='none'?' on':''}" id="sl-none" data-mode="none" onclick="App.setSwatchLabel('none')">None</div>
+          <div class="seg-btn${State.swatchLabel==='both'?' on':''}"     id="sl-both"     data-mode="both"     onclick="App.setSwatchLabel('both')">Both</div>
+          <div class="seg-btn${State.swatchLabel==='name'?' on':''}"     id="sl-name"     data-mode="name"     onclick="App.setSwatchLabel('name')">Name</div>
+          <div class="seg-btn${State.swatchLabel==='hex'?' on':''}"      id="sl-hex"      data-mode="hex"      onclick="App.setSwatchLabel('hex')">HEX</div>
+          <div class="seg-btn${State.swatchLabel==='location'?' on':''}" id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">📍 GPS</div>
+          <div class="seg-btn${State.swatchLabel==='none'?' on':''}"     id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
         </div>
       </div>
       <div class="set-sec">Colour Science</div>
@@ -3581,72 +3679,72 @@ const App={
         <div style="padding:14px;display:flex;flex-direction:column;gap:14px;background:var(--surface)">
 
           <div style="font-size:10px;color:var(--muted);line-height:1.6;padding:8px 10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
-            Spectrum samples real-world colour through your camera, then runs it through a chain of perceptual colour science algorithms — all computed on-device, in real time, with no data sent anywhere.
+            Spectrum is a laboratory-grade optical instrument in your pocket. It samples real-world light through your camera and processes it through a chain of perceptual colour science algorithms — all computed on-device, in real time, with no data sent anywhere.
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">📷 Camera Sampling</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Every frame, Spectrum reads the RGB pixel value at the crosshair centre and converts it to HEX. The value is smoothed across frames to reduce flicker from camera noise. Freeze locks a frame for careful inspection. The loupe provides a 2× magnified crop so you can pick exact colours from fine detail.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">📷 Camera Sampling &amp; Temporal Smoothing</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Every frame, Spectrum reads the raw RGB value at the crosshair and converts it to HEX. <b style="color:var(--text)">Temporal Smoothing</b> averages values across several frames, eliminating flicker caused by digital camera noise and artificial lighting. <b style="color:var(--text)">Freeze Mode</b> captures a high-resolution buffer so you can sample fine details without a steady hand. The <b style="color:var(--text)">2× Loupe</b> provides a hardware-accelerated magnified crop for surgical precision.</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">HEX / RGB</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">The foundation of digital colour. HEX is a 6-digit web format (#C9A38B). RGB breaks colour into Red, Green, Blue channels (0–255 each). All colours in Spectrum are stored and exported as HEX — compact, universal, and supported everywhere from CSS to paint mixing software.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">HEX / RGB — Digital Foundation</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The bedrock of digital colour. RGB expresses the intensity of Red, Green, and Blue sub-pixels (0–255 each); HEX is its compact 6-digit shorthand (#FFFFFF). While universal for CSS, web design, and paint mixing, RGB is non-linear — it doesn't reflect how humans perceive brightness. Spectrum uses HEX/RGB as a transport format, but performs all its matching and analysis in advanced perceptual spaces.</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌡 Kelvin (K) / Colour Temperature</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">The algorithm estimates the Correlated Colour Temperature of your sampled colour using the McCamy approximation — a formula derived from the chromaticity coordinates of the colour. Candlelight ≈1800K, tungsten ≈2700K, daylight ≈5500K, overcast sky ≈7000K. Spectrum converts to °C (K−273) for intuitive reading. Essential for matching lighting conditions in film and photography.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">CIE Lab (L*a*b*) — Human Vision Mathematics</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The perceptual colour space that powers all of Spectrum's matching. <b style="color:var(--text)">L*</b> = perceived lightness (0–100). <b style="color:var(--text)">a*</b> = green↔red axis. <b style="color:var(--text)">b*</b> = blue↔yellow axis. Designed so equal numerical distances feel equal to the human eye — standard RGB math thinks pure Yellow and pure Blue are equally bright, which they are not. Spectrum converts every sampled colour to Lab before running all paint and Pantone matching.</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">LRV — Light Reflectance Value</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Derived from the CIE Lab L* (lightness) channel: LRV = (L*/100)². Measures how much light a surface reflects as a percentage (0% = black, 100% = white). Critical for interior design — architects use LRV to ensure enough contrast between walls, floors, and ceilings. UK building regulations reference LRV 30 as a minimum contrast threshold for accessibility.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">ΔE CIEDE2000 — The Gold Standard for Colour Difference</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The most sophisticated formula for measuring how different two colours look to a human observer. Spectrum uses the full CIEDE2000 algorithm (not the simpler CIE76), applying correction factors for lightness, chroma, and hue that make it far more accurate near neutral greys and skin tones. It accounts for <b style="color:var(--text)">Chroma-dependency</b> — our eyes are more sensitive to colour shifts in neutral greys than in saturated colours. <b style="color:var(--text)">ΔE &lt; 1.0</b>: a perfect match (physically indistinguishable). <b style="color:var(--text)">ΔE &lt; 2.0</b>: a professional match (undetectable by most observers).</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">CIE Lab (L*a*b*)</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">The perceptual colour space that powers all of Spectrum's matching. L* = lightness (0–100), a* = green↔red axis, b* = blue↔yellow axis. Designed so equal numerical distances feel equal to the human eye. Spectrum converts every sampled colour to Lab before running Pantone, Little Greene, and Farrow &amp; Ball matching.</div>
-          </div>
-
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">ΔE CIEDE2000 — Colour Difference</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">The gold-standard formula for measuring how different two colours look to a human observer. Spectrum uses the full CIEDE2000 algorithm (not the simpler CIE76) for all paint and Pantone matching — it applies correction factors for lightness, chroma, and hue that make it far more accurate near neutral greys and skin tones. A ΔE below 2.0 is generally imperceptible; below 1.0 is considered a perfect match.</div>
-          </div>
-
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Little Greene / Farrow &amp; Ball</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum carries embedded libraries of 2,000+ Pantone, 300+ Little Greene, and 130+ Farrow &amp; Ball colours. For every sampled colour, it runs a nearest-neighbour search in Lab space using CIEDE2000 distance, finding the closest match in each library instantly — no internet required. The ΔE score tells you how close the match is.</div>
-          </div>
-
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">OKLCH — Perceptual Harmony Space</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">A modern colour space (Lightness, Chroma, Hue) built on Björn Ottosson's Oklab model. More accurate than HSL for generating harmonies because equal chroma steps look equal to the eye — HSL's "equal" saturation steps produce very unequal perceived intensities. Spectrum uses OKLCH for all harmony generation: complementary, analogous, triadic, tetradic, split-complementary, and monochromatic.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">OKLCH — The Harmony Secret</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">A modern perceptual colour space (Lightness, Chroma, Hue) built on Björn Ottosson's Oklab model. HSL is mathematically flawed — changing the hue in HSL often accidentally shifts perceived brightness. OKLCH keeps Chroma and Lightness perceptually stable when rotating hue, so Spectrum's complementary, analogous, triadic, tetradic, and split-complementary harmonies feel genuinely balanced and high-end.</div>
           </div>
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🎨 Colour Harmonies</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Generated by rotating around the OKLCH hue wheel from your root colour. <b style="color:var(--text)">Complementary</b> = 180° opposite (maximum contrast). <b style="color:var(--text)">Analogous</b> = ±30° neighbours (naturally cohesive). <b style="color:var(--text)">Triadic</b> = 120° intervals (vibrant balance). <b style="color:var(--text)">Tetradic</b> = 90° intervals (rich, complex). <b style="color:var(--text)">Split Complementary</b> = 150°/210° (softer contrast than complementary). <b style="color:var(--text)">Monochromatic</b> = same hue, varied lightness and chroma.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Generated by rotating around the OKLCH hue wheel from your root colour. <b style="color:var(--text)">Complementary</b> = 180° opposite (maximum contrast). <b style="color:var(--text)">Analogous</b> = ±30° neighbours (naturally cohesive). <b style="color:var(--text)">Triadic</b> = 120° intervals (vibrant balance). <b style="color:var(--text)">Tetradic</b> = 90° intervals (rich, complex). <b style="color:var(--text)">Split Complementary</b> = 150°/210° (softer contrast). <b style="color:var(--text)">Monochromatic</b> = same hue, varied lightness and chroma.</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">WCAG Contrast Ratio</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Web Content Accessibility Guidelines measure text legibility. Calculated as (L1+0.05)/(L2+0.05) where L1 and L2 are the relative luminances of the two colours. AA standard = 4.5:1 for normal text. AAA = 7:1. Spectrum calculates WCAG against both white and black for every colour, and uses it to auto-select the legible label colour on exported swatches.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">LRV — Light Reflectance Value</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Derived from the CIE Lab L* (lightness) channel: LRV = (L*/100)². In Spectrum, 'Value' is treated as Perceptual Lightness (L*), ensuring measured brightness aligns with human optical sensitivity rather than raw digital intensity. Measures the percentage of light a surface reflects (0% = black, 100% = pure white). Critical for interior design — architects use LRV to balance room lighting and ensure enough contrast between walls, floors, and ceilings. UK Building Regulations and the ADA reference LRV to ensure people with visual impairments can distinguish surfaces — typically requiring a minimum 30-point LRV difference.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">WCAG 2.1 &amp; APCA Contrast</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum calculates legibility for the modern web using two standards. <b style="color:var(--text)">WCAG 2.1</b>: the current accessibility standard, measuring the luminance ratio between text and background (AA = 4.5:1 for normal text; AAA = 7:1). <b style="color:var(--text)">APCA</b> (Accessible Perceptual Contrast Algorithm) is the next-generation standard — more accurate for OLED screens, accounting for font weight and light-on-dark modes. Spectrum uses WCAG to auto-select legible label colours on exported swatches.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌡 Kelvin (K) — Colour Temperature</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum estimates the warmth of light using the <b style="color:var(--text)">McCamy Approximation</b> — a formula derived from the chromaticity coordinates of the sampled colour. Candlelight ≈1800K · Tungsten ≈2700K · Daylight ≈5500K · Overcast sky ≈7000K. Spectrum converts to °C (K−273) for intuitive climate-based reading. Essential for cinematographers matching lighting conditions or designers choosing the right warmth for a space.</div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Little Greene / Farrow &amp; Ball</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum carries embedded libraries of 2,000+ Pantone, 300+ Little Greene, and 130+ Farrow &amp; Ball colours. For every sampled colour, it runs a nearest-neighbour search in Lab space using CIEDE2000 distance — finding the closest real-world paint match instantly, no internet required.</div>
           </div>
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">👁 CVD — Colour Vision Deficiency</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum simulates how your palette appears to people with the four main types of colour blindness using the Brettel-Viénot-Mollon algorithm. <b style="color:var(--text)">Deuteranopia</b> = reduced green sensitivity (most common, ~6% of men). <b style="color:var(--text)">Protanopia</b> = reduced red sensitivity. <b style="color:var(--text)">Tritanopia</b> = reduced blue sensitivity (rare). <b style="color:var(--text)">Achromatopsia</b> = complete colour blindness (very rare). The ΔE shift score flags colours that change dramatically.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Spectrum doesn't just filter colours — it uses the <b style="color:var(--text)">Brettel-Viénot-Mollon algorithm</b> to mathematically project your palette into the reduced colour space experienced by someone with colour blindness. By calculating the ΔE shift between the normal and simulated view, it flags colours that may become confusable. <b style="color:var(--text)">Deuteranopia</b> = reduced green (~6% of men). <b style="color:var(--text)">Protanopia</b> = reduced red. <b style="color:var(--text)">Tritanopia</b> = reduced blue (rare). <b style="color:var(--text)">Achromatopsia</b> = complete colour blindness (very rare).</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🎬 LUT — Look-Up Table</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">A 3D colour transformation file (.cube format) that remaps every RGB value in video footage — the foundation of cinematic colour grading. Spectrum generates a LUT from your palette's dominant hue, shifting the grade toward your real-world sampled colour. Import into DaVinci Resolve, Premiere Pro, or Final Cut Pro to apply the look to any footage.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🎬 LUT Generation — Cinematic Colour Grading</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">A Look-Up Table (.cube format) is a 3D map used in Hollywood colour grading — it remaps every RGB value in video footage. Spectrum generates a LUT from your sampled colour profile. Import it into DaVinci Resolve, Premiere Pro, or Final Cut Pro to 'steal' the colour of a sunset, a painting, or a real-world location and apply it to your footage.</div>
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">⚡ Auto-Palette — K-Means on a Web Worker</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">K-means clustering groups all pixels in an image into k colour buckets, iteratively moving each bucket's centre to the mean of its pixels until stable. Spectrum runs this entirely in a background Web Worker thread so the UI never freezes, even on high-resolution photos. The camera version snaps a frame at the moment you tap, then extracts 3, 6, or 9 dominant colours in under a second.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">⚡ Auto-Palette — K-Means Clustering</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">To extract a palette from a photo, Spectrum runs a <b style="color:var(--text)">K-Means Clustering</b> algorithm on a background Web Worker thread, so the UI never freezes. It treats every pixel as a data point in 3D RGB space and iteratively groups them until it finds the dominant mathematical centres — ensuring your palette represents the true soul of an image, not just random pixels. Extracts 3, 6, or 9 dominant colours in under a second.</div>
           </div>
 
           <div>
@@ -3656,12 +3754,17 @@ const App={
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌐 Online Colour Names</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">When online, Spectrum queries The Color API (thecolorapi.com) to retrieve a human-readable name for each saved colour — names like "Dusty Rose" or "Slate Grey" that feel more natural than algorithmic Pantone codes. This is the only network call the app makes; everything else — all matching, all science — runs entirely on your device.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">When online, Spectrum queries The Color API (thecolorapi.com) to retrieve a human-readable name for each saved colour — names like "Dusty Rose" or "Slate Grey" that feel more natural than algorithmic codes. This is the only network call the app makes; all matching, science, and analysis runs entirely on your device.</div>
           </div>
 
           <div style="font-size:9px;color:var(--faint);text-align:center;padding-top:4px;font-family:var(--mono);line-height:1.6">
             All algorithms run on-device · No colour data is sent to any server<br>
             Spectrum · Digby Oldridge · PR Eye Ltd · digby.shop
+          </div>
+
+        </div>
+      </details>
+
           </div>
 
         </div>
@@ -3764,7 +3867,7 @@ const App={
               Access Settings via the <b style="color:var(--text)">⚙ gear icon</b> in the top-right header.<br><br>
               <b style="color:var(--text)">Pro Mode</b> — Unlocks the Prompter tab, CVD simulation, LUT Generator, and advanced inspector data. Toggle on/off here or in the header.<br><br>
               <b style="color:var(--text)">Design Pro Mode</b> — Unlocks Wall &amp; Trim export, Technical Exports (Tailwind CSS, Swift UIColor, CSS Variables), and advanced Palette Builder exports.<br><br>
-              <b style="color:var(--text)">Export Labels</b> — Choose whether colour swatches in exports show both name and HEX, name only, HEX only, or no label.<br><br>
+              <b style="color:var(--text)">Polaroid Export Labels</b> — Choose whether colour swatches in polaroid exports show both name and HEX, name only, HEX only, or no label.<br><br>
               <b style="color:var(--text)">Library Backup</b> — Export all saved colours as a .json file to keep a backup or transfer to another device. Restore merges or overwrites from any saved .json.
             </div>
           </div>
@@ -3963,7 +4066,11 @@ const App={
   // v433: Live bar display mode
   setLiveDisplay(mode){
     State.liveDisplay=mode; State.save();
-    document.querySelectorAll('.live-disp-btn').forEach(b=>b.classList.toggle('on',b.dataset.ld===mode));
+    // Update all live-disp buttons wherever they exist (overlay or static)
+    ['pantone','hex','rgb','hsl','kelvin','lrv','paint'].forEach(m=>{
+      const b=document.getElementById('ld-'+m);
+      if(b) b.classList.toggle('on', m===mode);
+    });
     const L={pantone:'Pantone name',hex:'HEX + RGB',rgb:'RGB values',hsl:'HSL values',
              kelvin:'Kelvin temp',lrv:'LRV',paint:'Paint match'};
     App.toast('Live: '+(L[mode]||mode));
@@ -3973,12 +4080,13 @@ const App={
   setSwatchLabel(mode) {
     State.swatchLabel = mode;
     State.save();
-    // Refresh the settings panel seg buttons if still open
-    ['sl-both','sl-name','sl-hex','sl-none'].forEach(id => {
+    ['sl-both','sl-name','sl-hex','sl-none','sl-location'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.toggle('on', el.dataset.mode === mode);
     });
-    App.toast({ both:'Name + HEX', name:'Name only', hex:'HEX only', none:'No labels' }[mode] + ' on exports');
+    const L={both:'Name + HEX',name:'Name only',hex:'HEX only',none:'No labels',location:'GPS location'};
+    App.toast((L[mode]||mode)+' on exports');
+    if(mode==='location'&&!GeoCapture.last)GeoCapture.request();
   },
 
   // v74: Shared Pro Mode toggle — called by BOTH header and settings toggles
@@ -4062,6 +4170,17 @@ const Sampler={
     this.startCamera();
     this.bindCameraTouch();
     this._injectManifest();
+    // v446: Permission Watcher — auto-restart camera when user grants access
+    try {
+      navigator.permissions.query({ name: 'camera' }).then(status => {
+        status.onchange = () => {
+          if (status.state === 'granted') {
+            this.stopStream();
+            this.startCamera();
+          }
+        };
+      }).catch(() => {});
+    } catch(e) {}
   },
 
   // ── Inject a PWA web-app manifest as an inline data-URI so the single-file
@@ -4105,11 +4224,18 @@ const Sampler={
     }
   },
 
-  startCamera() {
+  // v446: centralised stream teardown — prevents camera locks & battery drain
+  stopStream() {
     if (this.stream) {
-      this.stream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+      try {
+        this.stream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+      } catch(e) {}
       this.stream = null;
     }
+  },
+
+  startCamera() {
+    this.stopStream();
     const v = document.getElementById('cam-video');
     const noCam = document.getElementById('no-cam');
     noCam.classList.remove('show');
@@ -4362,10 +4488,7 @@ const Sampler={
 
   flipCamera(){
     this.camFront=!this.camFront;
-    if(this.stream){
-      this.stream.getTracks().forEach(t=>{try{t.stop();}catch(e){}});
-      this.stream=null;
-    }
+    this.stopStream();
     App.toast(this.camFront?'Front camera':'Rear camera');
     this.startCamera();
   },
@@ -4786,15 +4909,18 @@ const Sampler={
   _exportWheelPolaroid() {
     const hexes = this.pickQueue.slice();
     if (!hexes.length) { App.toast('Queue some colours first'); return; }
-    // v406: if camera is live, capture a frame for the polaroid background
-    const video = document.getElementById('cam-video');
-    if (video && video.videoWidth && this.mode === 'camera') {
-      const snap = document.createElement('canvas');
-      snap.width = video.videoWidth; snap.height = video.videoHeight;
-      snap.getContext('2d').drawImage(video, 0, 0);
-      AutoPalette._camSnap = snap;
-    }
-    AutoPalette.exportPolaroid(hexes);
+    // v442: colour-only polaroid — no image needed for picker mode
+    const title = hexes.length === 1
+      ? CS.pantoneFirst(hexes[0])
+      : hexes.length + ' Picked Colours';
+    App._downloadPolaroidPalette(hexes, title);
+  },
+
+  // v442: export single current wheel colour as standalone polaroid card
+  _exportCurrentWheelColour() {
+    const hex = ColourWheel.getCurrentHex();
+    if (!hex) { App.toast('No colour selected'); return; }
+    App._downloadPolaroidPalette([hex], CS.pantoneFirst(hex));
   },
 
   // ── Manual swatch export — exports picked colours as a clean swatch strip
@@ -6125,13 +6251,13 @@ const Library={
     ].filter(Boolean);
 
     const ROW_H    = 20;
-    const NAME_H   = 32;
-    const FOOTER_H = 14 + NAME_H + Math.max(paintRows.length, 1) * ROW_H + 20;
+    const NAME_H   = 36;
+    const FOOTER_H = 18 + NAME_H + Math.max(paintRows.length, 1) * ROW_H + 32;
     const PAD      = SAFE_ZONE;
     const CW       = BASE_W - PAD * 2;
     const SWATCH_H = 320;
     const CARD_H   = SWATCH_H + FOOTER_H;
-    const BASE_H   = PAD + CARD_H + PAD;
+    const BASE_H   = PAD + CARD_H + PAD + 10;
 
     canvas.width  = BASE_W * SCALE;
     canvas.height = BASE_H * SCALE;
@@ -6211,8 +6337,16 @@ const Library={
     const _slMode    = State.swatchLabel || 'both';
     const _showName  = _slMode === 'both' || _slMode === 'name';
     const _showHex   = _slMode === 'both' || _slMode === 'hex';
+    const _showGeo   = _slMode === 'location';
 
-    if (_showName) {
+    if (_showGeo) {
+      const geoStr = GeoCapture.label(c.geo) || GeoCapture.label(GeoCapture.last) || 'No GPS data';
+      ctx.fillStyle='#1a1a1a'; ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.font='bold 12px "Space Mono",monospace';
+      ctx.fillText('\uD83D\uDCCD '+geoStr, FX, FY+14, PAD+CW-FX-8);
+      ctx.fillStyle='#666'; ctx.font='9px "Space Mono",monospace';
+      ctx.fillText(heroName, FX, FY+32, PAD+CW-FX-8);
+    } else if (_showName) {
       ctx.fillStyle    = '#1a1a1a';
       ctx.font         = 'bold 18px "Permanent Marker",cursive';
       ctx.textAlign    = 'left';
@@ -6222,7 +6356,7 @@ const Library={
 
     // ── Paint match rows ──────────────────────────────────────────────────────
     paintRows.forEach((row, i) => {
-      const ry = FY + 14 + NAME_H + i * ROW_H;
+      const ry = FY + 18 + NAME_H + i * ROW_H;
       const circX = FX + 7;
       const circY = ry + 8;
 
@@ -7146,6 +7280,8 @@ const Prompter={
   ver:'--v 6.1',
   quality:'--q 1',
   stylize:100,
+  bgMulti:false,
+  bgHex:{'s':'#888888',1:'#888888',2:'#888888',3:'#888888'},
   // ── These MUST be initialised here to prevent .toLowerCase() crash on first render ──
   _chipQ: '',
   _hueF:  'all',
@@ -7650,6 +7786,44 @@ const Prompter={
     this._updateCharCount(out);
   },
 
+
+  // ── v445: Background Color ──────────────────────────────────────────────
+  toggleBgMulti(sw){
+    this.bgMulti = !this.bgMulti;
+    sw.classList.toggle('on', this.bgMulti);
+    const single = document.getElementById('bg-single');
+    const multi  = document.getElementById('bg-multi');
+    if(single) single.style.display = this.bgMulti ? 'none' : 'flex';
+    if(multi)  multi.style.display  = this.bgMulti ? 'flex' : 'none';
+  },
+
+  setBgColor(slot, hex){
+    this.bgHex[slot] = hex;
+    const chip  = document.getElementById('bg-chip-' + slot);
+    const label = document.getElementById('bg-name-'  + slot);
+    const input = document.getElementById('bg-inp-'   + slot);
+    if(chip)  chip.style.background = hex;
+    if(label) label.textContent = (typeof CS !== 'undefined' && CS.name) ? CS.name(hex) : hex.toUpperCase();
+    if(input) input.value = hex;
+  },
+
+  _bgPromptString(){
+    const nameOf = h => (typeof CS !== 'undefined' && CS.name) ? CS.name(h) : h.toUpperCase();
+    const isDefault = h => !h || h.toLowerCase() === '#888888';
+    if(!this.bgMulti){
+      const h = this.bgHex['s'];
+      return isDefault(h) ? '' : 'set against a solid ' + nameOf(h) + ' background';
+    }
+    const cols = [this.bgHex[1], this.bgHex[2], this.bgHex[3]]
+      .filter(Boolean);  // v446: guard against null/undefined slots
+    const valid = cols.filter(h => !isDefault(h));
+    if(!valid.length) return '';
+    if(valid.length === 1) return 'set against a solid ' + nameOf(valid[0]) + ' background';
+    const names = valid.map(nameOf);
+    const last  = names.pop();
+    return 'set against a sophisticated background pattern featuring ' + names.join(', ') + ' and ' + last;
+  },
+
   buildPrompt(colours){
     // Colour palette string (optional — omit if no colours selected)
     const colourStr = colours.length
@@ -7680,6 +7854,8 @@ const Prompter={
     if(medStr) parts.push(medStr);
     if(eraStr) parts.push(eraStr);
     if(paletteNote) parts.push(paletteNote);
+    const bgPrompt = this._bgPromptString();
+    if(bgPrompt) parts.push(bgPrompt);
     parts.push('highly detailed, fine craftsmanship, flat on white ground, textile design');
 
     // Harmony flavour note
@@ -7908,6 +8084,9 @@ const ColourWheel = {
     const W = canvas.width, H = canvas.height;
     const cx = W/2, cy = H/2, r = Math.min(cx,cy) - 4;
     ctx.clearRect(0,0,W,H);
+    // v441: fill behind circle to prevent white corners on mobile
+    ctx.fillStyle = '#0c0c0c';
+    ctx.beginPath(); ctx.arc(cx,cy,r+4,0,Math.PI*2); ctx.fill();
     // Draw hue/saturation wheel
     for (let angle = 0; angle < 360; angle += 1) {
       const startAngle = (angle - 1) * Math.PI / 180;
@@ -8078,13 +8257,26 @@ const ColourWheel = {
     const nativeIn = document.getElementById('wheel-native-input');
     if (nativeIn) nativeIn.value = hex.toLowerCase();
 
-    // Nearest matches
+    // Nearest matches — v441: labelled paint chips
     const rgb = CS.hexToRgb(hex);
     const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
     const pan = CS.nearestPantone(lab);
-    const lg = CS.nearestLG(lab);
-    const fb = CS.nearestFB(lab);
-    if (matchEl) matchEl.textContent = `${pan?.code||''} · ${lg?.name||''} · ${fb?.name||''}`;
+    const lg  = CS.nearestLG(lab);
+    const fb  = CS.nearestFB(lab);
+    const chips = document.getElementById('wheel-paint-chips');
+    if (chips) {
+      const mkChip = (brand, name, dotHex) => {
+        if (!name) return '';
+        return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 6px 2px 4px;font-size:9px;font-family:var(--mono);color:var(--muted)">'
+             + '<span style="width:8px;height:8px;border-radius:50%;background:'+(dotHex||hex)+';flex-shrink:0"></span>'
+             + '<span style="color:var(--accent);font-weight:700">'+brand+'</span>&nbsp;'
+             + '<span style="color:var(--text)">'+name+'</span></span>';
+      };
+      chips.innerHTML = mkChip('PMS', pan?.name||pan?.code||'', pan?.hex)
+                      + mkChip('F&amp;B', fb?.name||'', fb?.hex)
+                      + mkChip('LG', lg?.name||'', lg?.hex);
+    }
+    if (matchEl) matchEl.textContent = '';
 
     this.drawWheel();
     this.drawHueStrip();
@@ -8476,22 +8668,27 @@ const SwatchExport = {
 
   renderPolaroids(ctx, W, H, colours, scale) {
     const n = colours.length;
-    const cols = Math.min(4, Math.ceil(Math.sqrt(n)));
+    // v437: 3 colours  dedicated horizontal trio (3 cols, 1 row)
+    const cols = (n === 3) ? 3 : Math.min(4, Math.ceil(Math.sqrt(n)));
     const rows = Math.ceil(n / cols);
     const pad  = Math.round(18 * scale);
-    const gap  = Math.round(10 * scale);
+    const gap  = Math.round(12 * scale);
 
     // Available space for cards
     const availW = W - pad * 2 - gap * (cols - 1);
     const availH = H - pad * 2 - gap * (rows - 1);
     const cardW  = Math.floor(availW / cols);
 
-    // Strip height scales with card width but has a floor
-    const stripH = Math.max(Math.round(44 * scale), Math.round(cardW * 0.22));
+    // v437: 3-colour trio gets taller info strip for richer labels
+    const stripH = (n === 3)
+      ? Math.max(Math.round(58 * scale), Math.round(cardW * 0.30))
+      : Math.max(Math.round(44 * scale), Math.round(cardW * 0.22));
 
-    // Derive colourH so that rows of cards fit within availH  key fix
     const maxCardH = Math.floor(availH / rows);
-    const colourH  = Math.min(Math.round(cardW * 1.15), maxCardH - stripH);
+    const colourH  = Math.min(
+      (n === 3) ? Math.round(cardW * 1.55) : Math.round(cardW * 1.15),
+      maxCardH - stripH
+    );
     const cardH    = colourH + stripH;
 
     colours.forEach((c, i) => {
@@ -8539,19 +8736,28 @@ const SwatchExport = {
       ctx.fillText(dn, x + cardW / 2, iy + Math.round(nameSize * 1.4));
 
       if (this.includeText) {
-        // Hex
-        const hexSize = Math.max(5, Math.round(6.5 * scale));
-        ctx.fillStyle = '#555';
-        ctx.font = `${hexSize}px 'Space Mono',monospace`;
-        ctx.textAlign = 'center';
-        ctx.fillText(c.hex.toUpperCase(), x + cardW / 2, iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 1.5));
-
-        // Pantone below hex  only if strip is tall enough
-        const pantoneY = iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 3.2);
-        if (c.pantone?.code && pantoneY < iy + stripH - 4) {
-          ctx.fillStyle = '#aaa';
-          ctx.font = `${Math.max(4, Math.round(5.5 * scale))}px 'Space Mono',monospace`;
-          ctx.fillText(c.pantone.code, x + cardW / 2, pantoneY);
+        const slMode = State.swatchLabel || 'both';
+        if (slMode === 'location') {
+          const geoStr = GeoCapture.label(c.geo) || GeoCapture.label(GeoCapture.last);
+          if (geoStr) {
+            const gs = Math.max(4, Math.round(5 * scale));
+            ctx.fillStyle='#333'; ctx.textAlign='center';
+            ctx.font=`bold ${gs}px 'Space Mono',monospace`;
+            ctx.fillText('\uD83D\uDCCD '+geoStr, x+cardW/2, iy+Math.round(gs*1.8));
+          }
+        } else {
+          // Hex
+          const hexSize = Math.max(5, Math.round(6.5 * scale));
+          ctx.fillStyle = '#555';
+          ctx.font = `${hexSize}px 'Space Mono',monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText(c.hex.toUpperCase(), x + cardW / 2, iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 1.5));
+          const pantoneY = iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 3.2);
+          if (c.pantone?.code && pantoneY < iy + stripH - 4) {
+            ctx.fillStyle = '#aaa';
+            ctx.font = `${Math.max(4, Math.round(5.5 * scale))}px 'Space Mono',monospace`;
+            ctx.fillText(c.pantone.code, x + cardW / 2, pantoneY);
+          }
         }
       }
     });
@@ -10678,7 +10884,9 @@ self.onmessage = function(e) {
 
   // Build sample array: skip near-black, near-white, transparent
   const samples = [];
-  for (let i = 0; i < pixels.length; i += 4) {
+  // v446: stride=16 — samples every 4th pixel for 60fps on hi-res images
+  const STRIDE = 16;
+  for (let i = 0; i < pixels.length; i += STRIDE) {
     const r = pixels[i], g = pixels[i+1], b = pixels[i+2], a = pixels[i+3];
     if (a < 128) continue;
     const bright = (r + g + b) / 3;
@@ -11127,11 +11335,20 @@ self.onmessage = function(e) {
       const slMode   = State.swatchLabel || 'both';
       const showName = slMode === 'both' || slMode === 'name';
       const showHex  = slMode === 'both' || slMode === 'hex';
+      const showGeo  = slMode === 'location';
 
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
 
-      if (showName && showHex) {
+      if (showGeo) {
+        const geoStr = GeoCapture.label(GeoCapture.last);
+        if (geoStr) {
+          const gs = Math.max(5, Math.floor(w/14));
+          ctx.font=`bold ${gs}px 'Space Mono',monospace`;
+          ctx.fillStyle='#000';
+          ctx.fillText('\uD83D\uDCCD '+geoStr, cx, swLabelY+SW_LABEL_H/2, maxTW);
+        }
+      } else if (showName && showHex) {
         // Name at top of label strip, hex below
         let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
         // Strip the prefix (e.g. "Sunlit / ") for compactness if too wide
@@ -11263,9 +11480,17 @@ const AIColourName = {
   let origLeft = 0, origTop = 0;
   // Reset to centered default position on each sampler tab activation
   function resetBarPos() {
-    bar.style.transform = 'translateX(-50%)';
-    bar.style.left = '50%';
-    bar.style.top = 'calc(env(safe-area-inset-top, 0px) + 52px)';
+    if (window.innerWidth > window.innerHeight) {
+      bar.style.transform = 'translateY(-50%)';
+      bar.style.left  = 'auto';
+      bar.style.right = '12px';
+      bar.style.top   = '50%';
+    } else {
+      bar.style.transform = 'translateX(-50%)';
+      bar.style.left  = '50%';
+      bar.style.right = 'auto';
+      bar.style.top   = 'calc(env(safe-area-inset-top, 0px) + 52px)';
+    }
   }
 
   function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
@@ -11295,7 +11520,7 @@ const AIColourName = {
     const safeTop = parseInt(getComputedStyle(document.documentElement)
       .getPropertyValue('--top-h') || '48') + 4;
     const newLeft = clamp(origLeft + dx, 0, vw - bw);
-    const newTop  = clamp(origTop  + dy, safeTop, vh - bh - 70);
+    const newTop  = clamp(origTop  + dy, safeTop, vh - bh - 100);
     bar.style.left = newLeft + 'px';
     bar.style.top  = newTop  + 'px';
   }
@@ -11320,6 +11545,9 @@ const AIColourName = {
   window.addEventListener('touchend', endDrag, { passive: true });
 
   // Mouse events (desktop/dev)
+  window.addEventListener('orientationchange', function() { setTimeout(resetBarPos, 200); });
+  window.addEventListener('resize', function() { setTimeout(resetBarPos, 100); });
+
   bar.addEventListener('mousedown', function(e) {
     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
     startDrag(e.clientX, e.clientY);
