@@ -341,7 +341,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 .live-act-btn:active { background: var(--accent); border-color: var(--accent); color: #000; }
 .live-act-btn.on { background: rgba(255,180,0,.22); border-color: rgba(255,180,0,.6); color: #ffb400; }
 /* v:F1 D65 WB button — pro-mode only visibility */
-#live-wb-btn { opacity: 0.32; pointer-events: none; }
+#live-wb-btn { opacity: 0.6; pointer-events: auto; }
 body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 
 /* v449: WB Preset Panel — floats above live-bar */
@@ -5588,7 +5588,7 @@ const Sampler={
 
 
   toggleWBDropdown() {
-    if (!State.proMode) { App.toast('D65 Calibration requires Pro Mode'); return; }
+    // WB dropdown available in all modes
     const d = document.getElementById('wb-dropdown');
     if (!d) return;
     d.classList.toggle('open');
@@ -6104,10 +6104,22 @@ const Sampler={
       }
     }
     if(m==='wheel') setTimeout(()=>ColourWheel.init(),50);
-    // v:F1.11 — Restart camera stream when returning to camera mode.
-    // Mobile browsers drop the video stream when its parent is display:none.
-    // startCamera() re-acquires the stream and restarts the sampling RAF loop.
-    if(m==='camera') setTimeout(()=>this.startCamera(),80);
+    // v:F1.12 — Restore camera on mode switch back.
+    // If the stream is still alive, reattach directly — no stop/re-request needed.
+    // Only fall back to full startCamera() if the stream was lost.
+    if(m==='camera') setTimeout(()=>{
+      const v=document.getElementById('cam-video');
+      if(this.stream&&this.stream.active&&v){
+        const col=document.getElementById('sampler-cam-col');
+        if(col) col.style.display='flex';
+        v.srcObject=null;
+        v.srcObject=this.stream;
+        v.play().catch(()=>{});
+        this.startSampling();
+      } else {
+        this.startCamera();
+      }
+    },80);
   },
 
   captureFromWheel(){
