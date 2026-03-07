@@ -12484,7 +12484,7 @@ self.onmessage = function(e) {
         const widthStyle = mosaic
           ? 'flex:' + Math.max(ws[i]*100,4) + ' 0 0%;min-width:28px;max-width:none'
           : 'flex:0 0 44px;width:44px';
-        return '<div data-ap-idx="' + i + '" style="' + widthStyle + ';height:120px;border-radius:6px;background:' + h + ';border:1px solid rgba(255,255,255,.12);cursor:pointer;position:relative;transition:transform .12s,box-shadow .12s;overflow:hidden" onclick="AutoPalette._addOne(window._apHexes[' + i + '],this)" title="Tap to save ' + h.toUpperCase() + '" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''">'
+        return '<div data-ap-idx="' + i + '" style="' + widthStyle + ';height:120px;border-radius:6px;background:' + h + ';border:1px solid rgba(255,255,255,.12);cursor:pointer;position:relative;transition:transform .12s,box-shadow .12s;overflow:hidden" onclick="AutoPalette._addOne(window._apHexes[' + i + '],this)" title="Tap to save ' + h.toUpperCase() + '" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'\'">'
           + '<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:' + tc + ';letter-spacing:.04em;line-height:1.4">'
           + (mosaic ? Math.round(window._apWeights[i]*100)+'%<br>' : '')
           + h.toUpperCase()
