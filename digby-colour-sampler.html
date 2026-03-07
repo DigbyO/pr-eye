@@ -4141,10 +4141,11 @@ const App={
         if (Sampler.rafId) { cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
       } else {
         if (App.tab === 'sampler' && Sampler.mode === 'camera' && !Sampler.frozen) {
-          // v:F1.13 check video is actually playing before just resuming RAF.
-          // If videoWidth is 0 or video is paused the feed died — do full restart.
-          const v = document.getElementById('cam-video');
-          if(v && v.videoWidth > 0 && !v.paused){
+          // v:F1.14 — check track.readyState, not videoWidth/paused.
+          // iOS zombie tracks report stale non-zero videoWidth even when dead.
+          // track.readyState === 'live' is the only reliable liveness signal.
+          const _vt = Sampler.stream?.getVideoTracks?.()[0];
+          if (_vt && _vt.readyState === 'live') {
             Sampler.startSampling();
           } else {
             setTimeout(()=>Sampler.startCamera(), 80);
@@ -5119,6 +5120,17 @@ const Sampler={
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       this.stream = stream;
       _diag('Stream OK — tracks: ' + stream.getVideoTracks().length);
+      // v:F1.14 — watchdog: auto-restart if track dies mid-session.
+      // Catches iOS/Android killing the hardware camera without a visibilitychange event.
+      const _vt14 = stream.getVideoTracks()[0];
+      if (_vt14) {
+        _vt14.onended = () => {
+          console.warn('[CAM] Video track ended unexpectedly');
+          if (Sampler.mode === 'camera' && !document.hidden && !Sampler.frozen) {
+            setTimeout(() => Sampler.startCamera(), 300);
+          }
+        };
+      }
 
       // ── iOS Safari / PWA black-screen fix ─────────────────────────
       // Safari pauses the track and never renders if srcObject is
