@@ -2025,6 +2025,18 @@ body.hud-on:not(.design-pro-on) #hud-wbcal-row { display: none !important; }
       <div class="card" id="var-card" style="padding:10px 0 4px">
         <div id="var-container"></div>
       </div>
+      <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        Colour Scales
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Save scale steps to library" onclick="Explorer.saveScalesAll()">+ Save All</button>
+          <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Swatch export" onclick="Explorer.exportScalesSwatches()">🎨 Swatch</button>
+          <button class="btn btn-p btn-sm" style="font-size:10px;padding:3px 8px" title="Export as PNG" onclick="Explorer.exportScalesPng()">📷 PNG</button>
+        </div>
+      </div>
+      <div class="card" id="scales-card" style="padding:10px 0 4px">
+        <div id="scales-container"></div>
+      </div>
+
       <div id="designer-recs"></div>
 
 
@@ -7733,6 +7745,7 @@ const Explorer={
     this.renderHarmonies(h);
     this.renderMood();
     this.renderVariations();
+    this.renderScales();
     document.getElementById('split-grad').style.background =
       `linear-gradient(to right,${h.splitTone.shadows},${h.splitTone.highlights})`;
     this.renderTrio();
@@ -7800,6 +7813,35 @@ const Explorer={
       swRow('Shades',v.shades),
       swRow('Tones', v.tones)
     ].join('');
+  },
+
+  renderScales(){
+    const sc = document.getElementById('scales-container');
+    if (!sc) return;
+    const scales = PaletteBuilder._colourScalesFromHex(this.rootHex);
+    const steps = [
+      { hex: scales.pale,    label: 'Pale',    sub: 'Ceiling' },
+      { hex: scales.main,    label: 'Wall',    sub: 'Base'    },
+      { hex: scales.deep,    label: 'Deep',    sub: 'Door'    },
+      { hex: scales.neutral, label: 'Neutral', sub: 'Trim'    },
+    ];
+    const hexArr = steps.map(s => s.hex);
+    sc.innerHTML = `
+      <div style="padding:2px 12px 0;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between">
+        <span>Little Greene · Pale · Wall · Deep · Trim</span>
+        <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 7px"
+          onclick="SwatchExport.openFromHexes(${JSON.stringify(hexArr).replace(/"/g,"'")},'polaroids')"
+          title="Export as swatches"></button>
+      </div>
+      <div class="harm-row">${steps.map(({hex,label,sub}) => `
+        <div class="harm-sw" style="background:${hex}"
+             onclick="Explorer.setRoot('${hex}')"
+             title="${label} · ${sub} · ${hex}">
+          <div style="position:absolute;top:3px;left:0;right:0;text-align:center;font-size:7px;color:rgba(255,255,255,.7);font-family:var(--mono);pointer-events:none">${label}</div>
+          <div class="harm-hex">${hex.toUpperCase()}</div>
+          <button class="harm-add-btn" onclick="event.stopPropagation();Explorer.addToLib('${hex}')"
+                  title="Save ${label} to library">+</button>
+        </div>`).join('')}</div>`;
   },
 
   renderDesignerRecs(){
@@ -8194,6 +8236,23 @@ const Explorer={
     const label = CS.autoName(this.rootHex) + ' Tints & Shades';
     const lines = hexes.map(h => ' ' + CS.autoName(h) + ' ' + h.toUpperCase()).join('');
     App.share(label, label + lines + 'digby.shop', 'https://digby.shop');
+  },
+
+  _scalesHexes(){
+    const sc = PaletteBuilder._colourScalesFromHex(this.rootHex);
+    return [sc.pale, sc.main, sc.deep, sc.neutral];
+  },
+  saveScalesAll(){
+    const sc = PaletteBuilder._colourScalesFromHex(this.rootHex);
+    const toSave = [sc.pale, sc.deep, sc.neutral]; // main is root — skip it
+    toSave.forEach(h => { const e = DS.makeEntry(h,'explorer'); DS.add(e); });
+    App.refresh(); App.toast(toSave.length + ' colour scale steps saved');
+  },
+  exportScalesSwatches(){
+    SwatchExport.openFromHexes(this._scalesHexes(), 'polaroids');
+  },
+  exportScalesPng(){
+    App._downloadPolaroidPalette(this._scalesHexes(), CS.autoName(this.rootHex) + ' Colour Scales');
   },
 
   // ── STAGE1: Sample-Based LUT export helpers ──────────────────────────────
