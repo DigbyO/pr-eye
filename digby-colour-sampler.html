@@ -449,6 +449,23 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
   -webkit-tap-highlight-color:transparent;
 }
 .cam-swatch-mini:active{transform:scale(.9)}
+
+/* v:F1.12 — Upload picked colours: vertical overlay column, mirrors cam-collection */
+#up-collection{
+  position:absolute;top:10px;right:10px;z-index:6;
+  display:flex;flex-direction:column;gap:5px;
+  align-items:center;
+  max-height:calc(100% - 20px);
+  overflow-y:auto;
+  scrollbar-width:none;
+  pointer-events:auto;
+}
+#up-collection::-webkit-scrollbar{display:none}
+#up-count-badge{
+  background:rgba(0,0,0,.7);color:rgba(255,255,255,.6);
+  font-size:9px;padding:2px 5px;border-radius:8px;font-family:var(--mono);
+  margin-bottom:2px;
+}
 #cam-count-badge{
   background:rgba(0,0,0,.7);color:rgba(255,255,255,.6);
   font-size:9px;padding:2px 5px;border-radius:8px;font-family:var(--mono);
@@ -1715,6 +1732,10 @@ body.hud-on:not(.design-pro-on) #hud-wbcal-row { display: none !important; }
       </div>
       <div style="position:relative;flex:1;overflow:hidden">
         <canvas id="upload-canvas" style="display:block;width:100%;height:100%;object-fit:contain;touch-action:none"></canvas>
+        <!-- v:F1.12 — Picked colours: vertical overlay right column, same as cam-collection -->
+        <div id="up-collection" style="display:none">
+          <div id="up-count-badge">0</div>
+        </div>
         <!-- crosshair drawn directly on canvas on tap -->
       </div>
     </div>
