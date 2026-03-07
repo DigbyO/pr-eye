@@ -20,11 +20,15 @@
 <script>
 (function(){
   const APP_VERSION = 'F1.11';
-  const stored = localStorage.getItem('stored_version');
-  if (stored !== APP_VERSION) {
-    localStorage.setItem('stored_version', APP_VERSION);
-    if ('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-    location.reload(true);
+  try {
+    const stored = localStorage.getItem('stored_version');
+    if (stored !== APP_VERSION) {
+      localStorage.setItem('stored_version', APP_VERSION);
+      if ('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
+      window.location.reload();
+    }
+  } catch(e) {
+    // Safari Private Mode — localStorage throws; skip version check silently
   }
   // v:F1.11 — Sync version strings to APP_VERSION so they never drift
   document.addEventListener('DOMContentLoaded', function() {
@@ -10851,6 +10855,59 @@ const PaletteBuilder = {
       const minDE = existing.length ? Math.min(...existing.map(e => CS.dE(lab, e))) : 100;
       return minDE > w.score ? { hex, score: minDE } : w;
     }, { hex: candidates[0], score: -1 }).hex;
+  },
+
+  _colourScalesFromHex(hex) {
+    if (!hex || typeof CS === 'undefined') return { pale: '#F0EDE8', main: hex||'#C09870', deep: '#3A2E28', neutral: '#E8E4DE' };
+    try {
+      const { r, g, b } = CS.hexToRgb(hex);
+      const lab  = CS.rgbToLab(r, g, b);
+      const lch  = CS.labToLch(lab);
+      return {
+        pale:    CS.lchToHex(90, Math.max(lch.c * 0.55, 4),  lch.h),
+        main:    hex,
+        deep:    CS.lchToHex(30, Math.min(lch.c * 1.1,  55), lch.h),
+        neutral: CS.lchToHex(85, 5,                          lch.h),
+      };
+    } catch(e) {
+      return { pale: '#F0EDE8', main: hex, deep: '#3A2E28', neutral: '#E8E4DE' };
+    }
+  },
+
+  addAllScales() {
+    const root = (this.colours.length ? this.colours[this.colours.length-1].hex : null)
+      || (ColourWheel && ColourWheel.getCurrentHex ? ColourWheel.getCurrentHex() : null)
+      || Sampler.currentHex || '#C09870';
+    const sc = this._colourScalesFromHex(root);
+    const toAdd = [sc.pale, sc.deep, sc.neutral].filter(h => h && !this._isDuplicate(h));
+    if (!toAdd.length) { App.toast('All scale steps already in palette'); return; }
+    if (this.colours.length + toAdd.length > this.MAX) {
+      App.toast(`Only ${this.MAX - this.colours.length} slot(s) free`); return;
+    }
+    this._pushHistory();
+    toAdd.forEach(h => this.addColour(h));
+    App.toast(`+ ${toAdd.length} scale step${toAdd.length>1?'s':''} · Pale · Deep · Neutral Trim`);
+  },
+
+  previewScales() {
+    const root = (this.colours.length ? this.colours[this.colours.length-1].hex : null)
+      || (ColourWheel && ColourWheel.getCurrentHex ? ColourWheel.getCurrentHex() : null)
+      || Sampler.currentHex || '#C09870';
+    const sc = this._colourScalesFromHex(root);
+    const chip = (hex, label) =>
+      `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px">
+         <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:${hex};border:1px solid rgba(255,255,255,.2)"></span>
+         <span style="font-size:9px;color:#ccc;font-family:var(--mono)">${label}</span>
+       </span>`;
+    App.openOv(`<div style="padding:20px">
+      <div style="font-size:10px;margin-bottom:10px;color:var(--accent);font-family:var(--mono);letter-spacing:.08em">COLOUR SCALES · Little Greene</div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px">
+        ${chip(sc.pale,'Pale / Ceiling')}${chip(sc.main,'Wall / Base')}${chip(sc.deep,'Deep / Door')}${chip(sc.neutral,'Neutral / Trim')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-p btn-sm" style="flex:1" onclick="PaletteBuilder.addAllScales();App.closeOv()">+ Add All 3 Steps</button>
+        <button class="btn btn-s btn-sm" onclick="App.closeOv()">Close</button>
+      </div></div>`);
   },
 
   suggestFromTheme() {
