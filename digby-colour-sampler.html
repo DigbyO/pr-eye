@@ -1240,9 +1240,14 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
 }
 body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
 /* v:F1.12 — Telemetry rows only visible in Design Pro mode */
-body.hud-on:not(.design-pro-on) #lab-hud .hud-telemetry { display: none !important; }
-body.hud-on:not(.design-pro-on) #hud-gps-row { display: none !important; }
-body.hud-on:not(.design-pro-on) #hud-wbcal-row { display: none !important; }
+/* v:F1.15 — HUD clean: always hide telemetry/GPS/WB; COLOUR row only */
+#lab-hud .hud-telemetry,
+#hud-gps-row,
+#hud-wbcal-row { display: none !important; }
+/* v:F1.15 — Large clean COLOUR identity */
+body.hud-on #lab-hud { padding: 10px 14px 12px; }
+body.hud-on #lab-hud .hud-static:first-child .hud-dim { font-size: 9px; letter-spacing: .18em; opacity: .6; }
+body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .04em; line-height: 1.3; }
 #lab-hud .hud-dim { color: rgba(0,255,0,0.55); }
 #lab-hud .hud-val { color: #7fff7f; }
 
@@ -5309,17 +5314,18 @@ const Sampler={
   },
 
   flipCamera(){
-    this.camFront=!this.camFront;
-    this.stopStream();
-    App.toast(this.camFront?'Front camera':'Rear camera');
-    this.startCamera();
+    this.camFront = !this.camFront;
+    const label = this.camFront ? '🤳 Front' : '📷 Rear';
+    try { this.stopStream(); } catch(e){}
+    App.toast(label + ' camera — switching…');
+    setTimeout(() => { try { this.startCamera(); } catch(e){ App.toast('⚠ Camera switch failed'); } }, 120);
   },
 
   bindCameraTouch(){
     const wrap=document.getElementById('sampler-cam-wrap');
     const moveHandler=(ev)=>{
       // Check for button tap BEFORE preventDefault  otherwise onclick never fires
-      if(ev.target?.tagName==='BUTTON'||ev.target?.closest('button'))return;
+      if(ev.target?.tagName==='BUTTON'||ev.target?.closest('button')||ev.target?.closest('#cam-tap-overlay'))return;
       ev.preventDefault();
       const touch=ev.touches?ev.touches[0]:ev;
       const rect=wrap.getBoundingClientRect();
@@ -10791,10 +10797,10 @@ const PaletteBuilder = {
     // ── PALETTE THEMES ───────────────────────────────────────────────────
     const themeHTML =
       hdr('CLASSICAL')
-      + makeCard('harmony',       'Analogous',      '',  _ad)
-      + makeCard('triadic',       'Triadic',        '△', _td)
-      + makeCard('complementary', 'Complementary',  '↔', _cd)
-      + makeCard('split_comp',    'Split-Comp',     '⟨', _sd)
+      + makeCard('harmony',       'Analogous',      '',  _ad, '_genAnalogous')
+      + makeCard('triadic',       'Triadic',        '△', _td, '_genTriadic')
+      + makeCard('complementary', 'Complementary',  '↔', _cd, '_genComplementary')
+      + makeCard('split_comp',    'Split-Comp',     '⟨', _sd, '_genSplitComp')
 
       + hdr('STRUCTURAL')
       + makeCard('monochromatic', 'Monochromatic',  '◎', ['#1A2A4A','#2E4A8A','#5A7EC8','#C0D4F0'])
@@ -10955,6 +10961,50 @@ const PaletteBuilder = {
     // Re-apply the 'on' class after re-render (el reference becomes stale)
     const freshCard = document.querySelector(`.pb-theme-card[onclick*="'${key}'"]`);
     if (freshCard) freshCard.classList.add('on');
+  },
+
+  // v:F1.15 — Direct HSL harmony generators → populate algo suggest tray immediately on card tap
+  _genAnalogous() {
+    const root = this._rootHex();
+    const { r, g, b } = CS.hexToRgb(root);
+    const hsl = CS.rgbToHsl(r, g, b);
+    const h = hsl.h, s = hsl.s / 100, l = hsl.l / 100;
+    const hexes = [-30, -15, 0, 15, 30].map(dh => CS.hslToHex((h + dh + 360) % 360, s, l));
+    this.setSuggestTheme('harmony', null);
+    this.suggestAlgo('Analogous · ±15° / ±30°', hexes);
+  },
+  _genTriadic() {
+    const root = this._rootHex();
+    const { r, g, b } = CS.hexToRgb(root);
+    const hsl = CS.rgbToHsl(r, g, b);
+    const h = hsl.h, s = hsl.s / 100, l = hsl.l / 100;
+    const hexes = [0, 120, 240].map(dh => CS.hslToHex((h + dh) % 360, s, l));
+    this.setSuggestTheme('triadic', null);
+    this.suggestAlgo('Triadic · 120° intervals', hexes);
+  },
+  _genComplementary() {
+    const root = this._rootHex();
+    const { r, g, b } = CS.hexToRgb(root);
+    const hsl = CS.rgbToHsl(r, g, b);
+    const h = hsl.h, s = hsl.s / 100, l = hsl.l / 100;
+    const comp = (h + 180) % 360;
+    const hexes = [
+      root,
+      CS.hslToHex(comp, s, l),
+      CS.hslToHex(comp, Math.min(1, s * 1.15), Math.max(0.15, l - 0.1)),
+      CS.hslToHex(h,    s, Math.min(0.92, l + 0.12)),
+    ];
+    this.setSuggestTheme('complementary', null);
+    this.suggestAlgo('Complementary · 180°', hexes);
+  },
+  _genSplitComp() {
+    const root = this._rootHex();
+    const { r, g, b } = CS.hexToRgb(root);
+    const hsl = CS.rgbToHsl(r, g, b);
+    const h = hsl.h, s = hsl.s / 100, l = hsl.l / 100;
+    const hexes = [root, CS.hslToHex((h + 150) % 360, s, l), CS.hslToHex((h + 210) % 360, s, l)];
+    this.setSuggestTheme('split_comp', null);
+    this.suggestAlgo('Split-Comp · 150° / 210°', hexes);
   },
 
   _themeCandidate() {
