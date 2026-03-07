@@ -1182,6 +1182,7 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
 
 /* v:F1.1 Laboratory HUD overlay */
 #lab-hud {
+  display: none; /* v:F1.12 hidden by default — toggled via Lab HUD setting */
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 10px);
   left: 15px;
@@ -1200,6 +1201,7 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
   -webkit-backdrop-filter: blur(4px);
   white-space: nowrap;
 }
+body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
 #lab-hud .hud-dim { color: rgba(0,255,0,0.55); }
 #lab-hud .hud-val { color: #7fff7f; }
 
@@ -2639,9 +2641,9 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
   <div class="module" id="mod-settings">
     <div class="mod-scroll" style="padding:12px">
       <div class="sec">Live Scanner</div>
-      <div class="card" style="padding:12px 12px 14px">
-        <div class="set-l" style="margin-bottom:4px">Display Mode</div>
-        <div class="set-sub" style="margin-bottom:10px">Choose what the floating scanner shows</div>
+      <div class="card" style="padding:0 12px 12px">
+        <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0 10px">
+        <div><div class="set-l">Display Mode</div><div class="set-sub">Choose what the floating scanner shows</div></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
           <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
           <button class="live-disp-btn" data-ld="hex"     onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
@@ -2651,6 +2653,7 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
           <button class="live-disp-btn" data-ld="lrv"     onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
           <button class="live-disp-btn" data-ld="fb" onclick="App.setLiveDisplay('fb')" style="grid-column:span 1">&#127968;<br>F&amp;B</button>
           <button class="live-disp-btn" data-ld="lg" onclick="App.setLiveDisplay('lg')" style="grid-column:span 2">&#127808;<br>Little Greene</button>
+        </div>
         </div>
       </div>
       <div class="sec">Library</div>
@@ -3909,6 +3912,7 @@ const State = {
   activeLUTName: '',
   proMode:       false,  // FIX 7: Pro Mode — when false, hides Prompter tab + Advanced Technical Data
   swatchLabel:   'both',  // v89/v443: 'both'|'name'|'hex'|'none'|'location'
+  hudOn:         false,   // v:F1.12 Lab HUD overlay — off by default
   liveDisplay:   'pantone', // v433: 'pantone'|'hex'|'rgb'|'hsl'|'kelvin'|'lrv'|'paint'
   wbPresetId:    'awb',    // v449: WB preset id
   wbCustomK:     5500,     // v449: custom Kelvin for manual WB
@@ -3931,6 +3935,7 @@ const State = {
         wbCustomK:     this.wbCustomK,
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
+        hudOn:         this.hudOn,      // v:F1.12 Lab HUD toggle
       }));
     } catch(e) { /* non-fatal — localStorage may be unavailable */ }
   },
@@ -3951,6 +3956,7 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
+      if (data.hudOn !== undefined)     this.hudOn    = data.hudOn;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
     try {
@@ -3960,6 +3966,19 @@ const State = {
   },
 
   // v74: Apply/remove simple-mode class + persist key + sync BOTH header and settings toggles
+  applyHUD() {
+    document.body.classList.toggle('hud-on', this.hudOn);
+    const sw  = document.getElementById('hud-toggle-sw');
+    const lbl = document.getElementById('hud-toggle-lbl');
+    if (sw)  sw.classList.toggle('on', this.hudOn);
+    if (lbl) lbl.textContent = this.hudOn ? 'On' : 'Off';
+  },
+  toggleHUD() {
+    this.hudOn = !this.hudOn;
+    this.applyHUD();
+    this.save();
+    App.toast(this.hudOn ? 'Lab HUD on' : 'Lab HUD off');
+  },
   applyProMode() {
     if (this.proMode) {
       document.body.classList.remove('simple-mode');
@@ -4016,6 +4035,7 @@ const App={
     // MASTER-FIX-V52: load persisted State before modules initialise
     State.load();
     State.applyProMode(); // FIX 7: apply simple-mode class based on saved proMode state
+    State.applyHUD();     // v:F1.12 apply Lab HUD visibility
     FolderManager.init(); // Init folders + migrate old entries after DS is ready
     // Apply persisted white balance to Sampler (including v449 preset state)
     Sampler.wb = { ...State.wb };
@@ -4041,7 +4061,14 @@ const App={
         if (Sampler.rafId) { cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
       } else {
         if (App.tab === 'sampler' && Sampler.mode === 'camera' && !Sampler.frozen) {
-          Sampler.startSampling();
+          // v:F1.13 check video is actually playing before just resuming RAF.
+          // If videoWidth is 0 or video is paused the feed died — do full restart.
+          const v = document.getElementById('cam-video');
+          if(v && v.videoWidth > 0 && !v.paused){
+            Sampler.startSampling();
+          } else {
+            setTimeout(()=>Sampler.startCamera(), 80);
+          }
         }
       }
     });
@@ -4064,9 +4091,14 @@ const App={
     if (this.tab === 'sampler' && t !== 'sampler') {
       Sampler._cleanupGlobalListeners();
       if(Sampler.rafId){ cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
+      // v:F1.13 stop stream on tab leave — prevents zombie iOS track
+      if(Sampler.mode === 'camera') Sampler.stopStream();
     }
     if(t === 'sampler' && this.tab !== 'sampler'){
-      if(Sampler.mode === 'camera' && !Sampler.frozen) Sampler.startSampling();
+      if(Sampler.mode === 'camera' && !Sampler.frozen){
+        // v:F1.13 restart camera fully — don't trust a stream that may have died in background
+        setTimeout(()=>Sampler.startCamera(), 80);
+      }
     }
     // v121: 4-tab nav — sampler/library/explorer/settings
     const validMods = ['sampler','library','explorer','prompter','palette','settings'];
@@ -4310,6 +4342,13 @@ const App={
               onclick="var cb=document.getElementById('pro-mode-toggle');cb.checked=!cb.checked;toggleProMode(cb);"
               style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
           </div>
+        </div>
+      </div>
+      <div class="set-row" style="align-items:center;gap:6px">
+        <div style="flex:1;min-width:0"><div class="set-l">Lab HUD</div><div class="set-sub">Show LCH, GPS and temperature overlay on camera</div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="hud-toggle-lbl">Off</span>
+          <div class="sw" id="hud-toggle-sw" onclick="State.toggleHUD()"></div>
         </div>
       </div>
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
@@ -6105,22 +6144,16 @@ const Sampler={
       }
     }
     if(m==='wheel') setTimeout(()=>ColourWheel.init(),50);
-    // v:F1.12 — Restore camera on mode switch back.
-    // If the stream is still alive, reattach directly — no stop/re-request needed.
-    // Only fall back to full startCamera() if the stream was lost.
-    if(m==='camera') setTimeout(()=>{
-      const v=document.getElementById('cam-video');
-      if(this.stream&&this.stream.active&&v){
-        const col=document.getElementById('sampler-cam-col');
-        if(col) col.style.display='flex';
-        v.srcObject=null;
-        v.srcObject=this.stream;
-        v.play().catch(()=>{});
-        this.startSampling();
-      } else {
-        this.startCamera();
-      }
-    },80);
+    // v:F1.13 — Clean stream lifecycle on mode switch.
+    // Stop the stream immediately when leaving camera — avoids iOS zombie-track bug
+    // where stream.active stays true but the video track is silently dead.
+    // On return, always do a fresh startCamera() — permission is already granted so
+    // re-acquisition is fast (< 200ms on iOS/Android).
+    if(m!=='camera'){
+      if(this.rafId){ cancelAnimationFrame(this.rafId); this.rafId=null; }
+      this.stopStream();
+    }
+    if(m==='camera') setTimeout(()=>this.startCamera(),80);
   },
 
   captureFromWheel(){
