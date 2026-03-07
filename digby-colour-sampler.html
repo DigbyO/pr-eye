@@ -449,6 +449,21 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
   -webkit-tap-highlight-color:transparent;
 }
 .cam-swatch-mini:active{transform:scale(.9)}
+/* v:F1.12 — Instant Schemes row */
+.instant-scheme-btn{
+  display:flex;align-items:center;gap:4px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;cursor:pointer;color:var(--fg);
+  transition:background .15s,border-color .15s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.instant-scheme-btn:hover,.instant-scheme-btn:active{
+  background:var(--surface2);border-color:var(--accent);
+}
+.isch-dots{display:flex;gap:2px;flex-shrink:0}
+.isch-dot{display:inline-block;width:9px;height:9px;border-radius:50%}
+.isch-label{font-size:9px;font-family:var(--mono);letter-spacing:.06em;color:var(--accent);font-weight:600}
+.isch-sub{font-size:8px;color:var(--muted);font-family:var(--mono);margin-left:2px}
 
 /* v:F1.12 — Upload picked colours: vertical overlay column, mirrors cam-collection */
 #up-collection{
@@ -1716,6 +1731,37 @@ body.hud-on:not(.design-pro-on) #hud-wbcal-row { display: none !important; }
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()" title="Export picked colours as polaroid with photo">📷 Export Polaroid</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
+      </div>
+      <!-- v:F1.12 — Instant Schemes row -->
+      <div id="instant-schemes-bar" style="display:flex;gap:6px;padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;flex-shrink:0;margin-right:2px">SCHEMES</div>
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('neutral')" title="Pale architectural neutrals — L=90, C≤4">
+          <span class="isch-dots">
+            <span class="isch-dot" style="background:#EDEBE4"></span>
+            <span class="isch-dot" style="background:#E8E6DF"></span>
+            <span class="isch-dot" style="background:#EAE7E0"></span>
+          </span>
+          <span class="isch-label">NEUTRAL</span>
+          <span class="isch-sub">Pale wash</span>
+        </button>
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('muted')" title="Half-chroma — tonally quiet version">
+          <span class="isch-dots">
+            <span class="isch-dot" style="background:#B5A898"></span>
+            <span class="isch-dot" style="background:#98A8A0"></span>
+            <span class="isch-dot" style="background:#A89898"></span>
+          </span>
+          <span class="isch-label">MUTED</span>
+          <span class="isch-sub">Tonal quiet</span>
+        </button>
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('vivid')" title="Boosted chroma — saturated punchy version">
+          <span class="isch-dots">
+            <span class="isch-dot" style="background:#E8532A"></span>
+            <span class="isch-dot" style="background:#2A7CE8"></span>
+            <span class="isch-dot" style="background:#E8C12A"></span>
+          </span>
+          <span class="isch-label">VIVID</span>
+          <span class="isch-sub">Saturated</span>
+        </button>
       </div>
       <!-- Picked colours strip — shown after any tap -->
       <div id="up-queue-bar" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 12px;flex-shrink:0;align-items:center;gap:8px;flex-wrap:wrap">
@@ -12802,6 +12848,54 @@ self.onmessage = function(e) {
     } else {
       App.toast('No active source to resample');
     }
+  },
+
+  // v:F1.12 — Instant Schemes: extract palette then apply LCH transform
+  async applyScheme(mode) {
+    if (!Sampler.uploadImg) { App.toast('Load an image first'); return; }
+    const labels = { neutral:'Neutral Scheme', muted:'Muted Scheme', vivid:'Vivid Scheme' };
+    const k = this._density || 6;
+    this._showSpinner('Building ' + (labels[mode] || mode) + '\u2026');
+    const manualPick = (Sampler.pickQueue && Sampler.pickQueue.length > 0) ? Sampler.pickQueue[0] : null;
+    const kTarget = manualPick ? k - 1 : k;
+    const pixelData = this.extract(Sampler.uploadImg, Math.max(1, kTarget));
+    let hexes, weights;
+    try {
+      ({ hexes, weights } = await this._runWorker(pixelData, Math.max(1, kTarget)));
+    } catch(e) {
+      ({ hexes, weights } = this._syncKMeans(pixelData, Math.max(1, kTarget)));
+    }
+    if (manualPick) {
+      hexes   = [manualPick, ...hexes];
+      weights = [1 / hexes.length, ...weights.map(w => w * (hexes.length - 1) / hexes.length)];
+    }
+    const fn = this['_scheme' + mode.charAt(0).toUpperCase() + mode.slice(1)];
+    const transformed = fn ? hexes.map(h => fn.call(this, h)) : hexes;
+    this._showResults(transformed, labels[mode] || mode, weights);
+  },
+
+  _schemeNeutral(hex) {
+    try {
+      const { r, g, b } = CS.hexToRgb(hex);
+      const { c, h }    = CS.rgbToLch(r, g, b);
+      return CS.lchToHex(90, Math.min(c, 4), h);
+    } catch(e) { return hex; }
+  },
+
+  _schemeMuted(hex) {
+    try {
+      const { r, g, b } = CS.hexToRgb(hex);
+      const { l, c, h } = CS.rgbToLch(r, g, b);
+      return CS.lchToHex(l, Math.max(c * 0.5, 0), h);
+    } catch(e) { return hex; }
+  },
+
+  _schemeVivid(hex) {
+    try {
+      const { r, g, b } = CS.hexToRgb(hex);
+      const { l, c, h } = CS.rgbToLch(r, g, b);
+      return CS.lchToHex(l, Math.min(c * 1.4, 80), h);
+    } catch(e) { return hex; }
   },
 
   _addOne(hex, el) {
