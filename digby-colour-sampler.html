@@ -3850,16 +3850,51 @@ const DS = {
 <!-- v443: GeoCapture -->
 <script>
 const GeoCapture = {
-  last:null, _watchId:null,
-  init(){
-    if(!navigator.geolocation)return;
-    const o={enableHighAccuracy:false,timeout:10000,maximumAge:60000};
-    navigator.geolocation.getCurrentPosition(p=>this._store(p),()=>{},o);
-    this._watchId=navigator.geolocation.watchPosition(p=>this._store(p),()=>{},{enableHighAccuracy:false,timeout:15000,maximumAge:30000});
+  last: null, _watchId: null,
+  // v:F1.11 — track denied separately so HUD can distinguish "loading" from "blocked"
+  denied: false,
+  init() {
+    if (!navigator.geolocation) return;
+    const onErr = () => {
+      this.denied = true;
+      // Refresh HUD immediately so it shows ⚠ DENIED instead of "Locating…"
+      const gpsEl  = document.getElementById('hud-gps');
+      const gpsRow = document.getElementById('hud-gps-row');
+      if (gpsEl)  gpsEl.textContent = '⚠ DENIED';
+      if (gpsRow) gpsRow.classList.add('denied');
+    };
+    const o = { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 };
+    navigator.geolocation.getCurrentPosition(p => this._store(p), onErr, o);
+    this._watchId = navigator.geolocation.watchPosition(
+      p => this._store(p), onErr,
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
+    );
   },
-  _store(pos){this.last={lat:+pos.coords.latitude.toFixed(6),lng:+pos.coords.longitude.toFixed(6),accuracy:Math.round(pos.coords.accuracy),timestamp:new Date().toISOString()};},
-  label(geo){if(!geo||geo.lat==null||geo.lng==null)return '📍 Locating...';const lat=geo.lat??0,lng=geo.lng??0;const la=Math.abs(lat).toFixed(4)+(lat>=0?'°N':'°S');const lo=Math.abs(lng).toFixed(4)+(lng>=0?'°E':'°W');return la+'  '+lo;},
-  request(){if(!navigator.geolocation){App.toast('GPS not available');return;}navigator.geolocation.getCurrentPosition(p=>{this._store(p);App.toast('📍 Location captured');},()=>{App.toast('Location permission denied');},{enableHighAccuracy:true,timeout:8000});}
+  _store(pos) {
+    this.denied = false; // clear denied if a fix eventually comes through
+    this.last = {
+      lat:       +pos.coords.latitude.toFixed(6),
+      lng:       +pos.coords.longitude.toFixed(6),
+      accuracy:  Math.round(pos.coords.accuracy),
+      timestamp: new Date().toISOString()
+    };
+  },
+  label(geo) {
+    if (!geo || geo.lat == null || geo.lng == null) return '📍 Locating...';
+    const lat = geo.lat ?? 0, lng = geo.lng ?? 0;
+    const la = Math.abs(lat).toFixed(4) + (lat >= 0 ? '°N' : '°S');
+    const lo = Math.abs(lng).toFixed(4) + (lng >= 0 ? '°E' : '°W');
+    return la + '  ' + lo;
+  },
+  request() {
+    if (!navigator.geolocation) { App.toast('GPS not available'); return; }
+    this.denied = false; // reset before re-requesting
+    navigator.geolocation.getCurrentPosition(
+      p => { this._store(p); App.toast('📍 Location captured'); },
+      () => { this.denied = true; App.toast('Location permission denied — check browser settings'); },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
 };
 </script>
 
@@ -5536,11 +5571,17 @@ const Sampler={
         gpsEl.textContent = 'N/A';
         if (gpsRow) gpsRow.classList.remove('denied');
       } else if (GeoCapture.last) {
+        // Got a fix — show coordinates
         gpsEl.textContent = GeoCapture.label(GeoCapture.last);
         if (gpsRow) gpsRow.classList.remove('denied');
-      } else {
+      } else if (GeoCapture.denied) {
+        // Permission explicitly denied (error callback fired)
         gpsEl.textContent = '⚠ DENIED';
         if (gpsRow) gpsRow.classList.add('denied');
+      } else {
+        // Still waiting for first fix — do NOT show DENIED, just show loading
+        gpsEl.textContent = 'Locating…';
+        if (gpsRow) gpsRow.classList.remove('denied');
       }
     }
   },
@@ -5920,7 +5961,7 @@ const Sampler={
     const target = this.activeExportTarget;
     const queue  = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
     if (!target && !queue.length) {
-      App.toast('Tap a colour swatch to select it for export');
+      App.toast('Tap colours on the image first, then export');
       return;
     }
     // Build export list: activeExportTarget first (deduped), then remaining queue
@@ -6062,7 +6103,11 @@ const Sampler={
         try{ document.getElementById('up-input').click(); } catch(e){}
       }
     }
-    if(m==='wheel')setTimeout(()=>ColourWheel.init(),50);
+    if(m==='wheel') setTimeout(()=>ColourWheel.init(),50);
+    // v:F1.11 — Restart camera stream when returning to camera mode.
+    // Mobile browsers drop the video stream when its parent is display:none.
+    // startCamera() re-acquires the stream and restarts the sampling RAF loop.
+    if(m==='camera') setTimeout(()=>this.startCamera(),80);
   },
 
   captureFromWheel(){
