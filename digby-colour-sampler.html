@@ -4807,7 +4807,7 @@ const App={
       // Font scales with swatch width: bigger swatches → larger type, capped
       var nameSize = Math.round(Math.max(8 * SCALE, Math.min(10 * SCALE, sw * 0.065)));
       ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold ' + nameSize + 'px system-ui,-apple-system,sans-serif';
+      ctx.font = 'bold ' + nameSize + 'px \'Permanent Marker\',cursive';
       ctx.textAlign = 'center';
       // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
       var name = CS.pantoneFirst(hex);  // v130: Pantone name on polaroid
@@ -4823,7 +4823,7 @@ const App={
       // v85: WCAG-adaptive label contrast based on swatch luminance
       var _lum85 = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
       ctx.fillStyle = _lum85 > 150 ? '#333333' : '#999999';
-      ctx.font = hexSize + 'px system-ui,-apple-system,sans-serif';
+      ctx.font = hexSize + 'px \'Space Mono\',monospace';
       ctx.textAlign = 'center';
       ctx.fillText(hex.toUpperCase(), cx, PAD + SW_H + nameSize + Math.round(4 * SCALE) + hexSize + Math.round(5 * SCALE));
     });
