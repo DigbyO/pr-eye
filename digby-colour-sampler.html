@@ -6055,6 +6055,23 @@ const Sampler={
       ).join('');
     }
 
+    //  Upload collection overlay (vertical mini-swatches on canvas, mirrors cam-collection) 
+    const upc=document.getElementById('up-collection');
+    const upcBadge=document.getElementById('up-count-badge');
+    if(upc){
+      upc.style.display=isEmpty?'none':'flex';
+      if(upcBadge) upcBadge.textContent=q.length;
+      upc.querySelectorAll('.up-swatch-mini').forEach(e=>e.remove());
+      q.forEach((h,i)=>{
+        const d=document.createElement('div');
+        d.className='cam-swatch-mini up-swatch-mini';
+        d.style.background=h;
+        d.title=h.toUpperCase()+'\u202f\u2014 tap to remove';
+        d.onclick=()=>Sampler.removeFromQueue(i);
+        upc.appendChild(d);
+      });
+    }
+
     //  Wheel queue bar 
     const wqb=document.getElementById('wheel-queue-bar');
     const wqs=document.getElementById('wheel-queue-swatches');
