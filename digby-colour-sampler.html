@@ -170,9 +170,10 @@ a{color:var(--accent);text-decoration:none}
   pointer-events:none;
   z-index:5;
   top:50%;left:50%;
-  transition:top .05s, left .05s;
+  image-rendering:crisp-edges;
+  will-change:top,left;
 }
-#picker-crosshair svg{width:70px;height:70px}
+#picker-crosshair svg{width:70px;height:70px;shape-rendering:crispEdges}
 
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 #live-bar { display: none !important; }
@@ -1296,7 +1297,8 @@ body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
 #wb-dropdown {
   display: none;
   position: absolute;
-  bottom: 100%;
+  top: 100%;
+  margin-top: 6px;
   left: 0;
   right: 0;
   min-width: 230px;
@@ -1690,7 +1692,7 @@ body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
       <!-- Picked colours strip — shown after any tap -->
       <div id="up-queue-bar" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 12px;flex-shrink:0;align-items:center;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;min-height:42px">
-          <div id="up-pick-queue" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          <div id="up-pick-queue" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
           <div style="display:flex;align-items:center;gap:6px;padding-left:4px">
             <div id="up-live-swatch" style="width:32px;height:32px;border-radius:6px;background:#888;border:2.5px solid var(--accent);flex-shrink:0"></div>
             <div id="up-live-hex" style="font-size:11px;flex-shrink:0;font-family:var(--mono);min-width:64px;color:var(--accent)"></div>
@@ -5232,8 +5234,8 @@ const Sampler={
     const ch=document.getElementById('picker-crosshair');
     const wrap=document.getElementById('sampler-cam-wrap');
     const w=wrap.offsetWidth,h=wrap.offsetHeight;
-    const cx=Math.max(35,Math.min(w-35,x));
-    const cy=Math.max(35,Math.min(h-35,y));
+    const cx=Math.round(Math.max(35,Math.min(w-35,x)));
+    const cy=Math.round(Math.max(35,Math.min(h-35,y)));
     ch.style.left=cx+'px';
     ch.style.top=cy+'px';
   },
@@ -5818,6 +5820,9 @@ const Sampler={
   },
 
   capture(){
+    // v:F1.13 — guard on live video, not stale hex value
+    const v=document.getElementById('cam-video');
+    if(!v||!v.videoWidth||v.paused){App.toast('Camera warming up…');return;}
     const hex=this.currentHex;
     if(!hex||hex==='#888888')return;
     if(navigator.vibrate) navigator.vibrate(12); // v:F1.8 Leica 12ms precision pulse
@@ -6120,7 +6125,7 @@ const Sampler={
 
   setMode(m){
     this.mode=m;
-    if(m==='camera') this.currentHex=null; // clear stale picker colour on return
+    // don't null currentHex — capture() guards on video readiness instead
     document.getElementById('btn-mode-cam').classList.toggle('on',m==='camera');
     document.getElementById('btn-mode-up').classList.toggle('on',m==='upload');
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
