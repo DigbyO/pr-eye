@@ -327,7 +327,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   padding: 8px 22px 0;
 }
 .live-act-btn {
-  width: 32px; height: 32px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.15);
   background: transparent;
@@ -740,7 +740,7 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 .shop-banner p{font-size:10px;color:var(--muted);margin-top:4px}
 
 /* settings */
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);gap:10px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px max(20px,env(safe-area-inset-right,20px)) 14px max(20px,env(safe-area-inset-left,20px));border-bottom:1px solid var(--border);gap:10px}
 .set-row:last-child{border-bottom:none}
 .set-l{font-size:13px}
 .set-sub{font-size:10px;color:var(--muted);margin-top:2px}
@@ -1149,12 +1149,12 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
 }
 /* v447: live-bar upload/picker button */
 #bar-picker-btn {
-  width: 32px; height: 32px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.22);
   background: rgba(255,255,255,.08);
   color: rgba(255,255,255,.85);
-  font-size: 15px;
+  font-size: 18px;
   cursor: pointer;
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -1203,6 +1203,10 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
   white-space: nowrap;
 }
 body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
+/* v:F1.12 — Telemetry rows only visible in Design Pro mode */
+body.hud-on:not(.design-pro-on) #lab-hud .hud-telemetry { display: none !important; }
+body.hud-on:not(.design-pro-on) #hud-gps-row { display: none !important; }
+body.hud-on:not(.design-pro-on) #hud-wbcal-row { display: none !important; }
 #lab-hud .hud-dim { color: rgba(0,255,0,0.55); }
 #lab-hud .hud-val { color: #7fff7f; }
 
@@ -1223,7 +1227,7 @@ body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
 
 /* v:F1.1 Rainbow Ball picker button */
 #bar-picker-btn-rainbow {
-  width: 32px; height: 32px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,.35);
   background: conic-gradient(from 0deg,
@@ -1546,12 +1550,15 @@ body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
     <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; overflow: hidden; z-index: 1;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
-      <!-- v:F1.1 Laboratory HUD -->
+      <!-- v:F1.12 Laboratory HUD -->
       <div id="lab-hud" aria-hidden="true">
-        <div class="hud-static"><span class="hud-dim">MODE.LAB    </span><span class="hud-val" id="hud-profile">D65</span></div>
-        <div class="hud-static"><span class="hud-dim">LCH.VAL     </span><span class="hud-val" id="hud-lch">L:— C:— H:—°</span></div>
-        <div class="hud-static"><span class="hud-dim">LRV.PCT     </span><span class="hud-val" id="hud-lrv">—%</span></div>
-        <div class="hud-static"><span class="hud-dim">TEMP.C      </span><span class="hud-val" id="hud-kelvin">5500K</span></div>
+        <!-- Always visible: one-piece colour identity -->
+        <div class="hud-static"><span class="hud-dim">COLOUR      </span><span class="hud-val" id="hud-one-info">—</span></div>
+        <!-- Telemetry: Design Pro only (gated via CSS) -->
+        <div class="hud-static hud-telemetry"><span class="hud-dim">MODE.LAB    </span><span class="hud-val" id="hud-profile">D65</span></div>
+        <div class="hud-static hud-telemetry"><span class="hud-dim">LCH.VAL     </span><span class="hud-val" id="hud-lch">L:— C:— H:—°</span></div>
+        <div class="hud-static hud-telemetry"><span class="hud-dim">LRV.PCT     </span><span class="hud-val" id="hud-lrv">—%</span></div>
+        <div class="hud-static hud-telemetry"><span class="hud-dim">TEMP.C      </span><span class="hud-val" id="hud-kelvin">5500K</span></div>
         <div id="hud-gps-row" title="Tap to re-request GPS" onclick="GeoCapture.request();Sampler._updateLabHUD(0,0,0)"><span class="hud-dim">LOC.GPS     </span><span class="hud-val" id="hud-gps">Locating…</span></div>
         <div id="hud-wbcal-row" title="Tap to open White Balance calibration" onclick="Sampler.toggleWhiteBalance()" style="cursor:pointer"><span class="hud-dim">WB_CAL      </span><span class="hud-val" id="hud-wb">TAP</span></div>
       </div>
@@ -5585,6 +5592,13 @@ const Sampler={
     const hProfile=document.getElementById('hud-profile');
     const hKelvin=document.getElementById('hud-kelvin');
     if(!hProfile)return;
+    // v:F1.12 — Always update one-info row (Pantone + HEX) regardless of Pro mode
+    if(r||g||b){
+      const hex='#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+      const pantone=typeof CS!=='undefined'&&CS.pantoneFirst?CS.pantoneFirst(hex):'';
+      const oneEl=document.getElementById('hud-one-info');
+      if(oneEl) oneEl.textContent=(pantone&&pantone!==hex)?pantone+'  '+hex.toUpperCase():hex.toUpperCase();
+    }
     // Profile label from current preset
     const presetLabels={awb:'AWB',day:'D65',tung_d65:'TUNGSTEN',cloud_d65:'CLOUDY',
                         sun:'SUN 5500K',shade:'SHADE 7500K',tung:'BULB 3200K',
@@ -9585,8 +9599,10 @@ const SwatchExport = {
       </div>
       ${sel.length === 0 ? `<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px 0">Select at least one colour above</div>` : ''}
 
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-p" style="flex:1" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>Download PNG</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-p" style="flex:1;min-width:120px" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>↓ PNG</button>
+        <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
+        <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
       </div>
     </div>`;
@@ -9920,6 +9936,87 @@ const SwatchExport = {
     } else {
       App.toast('Palette saved');
     }
+  },
+
+  // v:F1.12 — Adobe Swatch Exchange (.ase) binary export
+  downloadASE() {
+    const sel = this.selectedColours();
+    if (!sel.length) { App.toast('Select at least one colour'); return; }
+    // ASE binary format: header + colour blocks
+    const hexToRgbF = h => {
+      const n = parseInt(h.replace('#',''), 16);
+      return [(n>>16&255)/255, (n>>8&255)/255, (n&255)/255];
+    };
+    // Calculate total size: 12 (header) + each block: 2+4+2+(name.length+1)*2+4+12+2
+    const blocks = sel.map(c => {
+      const name = (c.name || c.hex).toUpperCase();
+      const nameUTF16Len = (name.length + 1); // +1 for null terminator
+      const blockLen = 2 + nameUTF16Len * 2 + 4 + 12 + 2; // name len field + UTF-16 name + model + RGB floats + type
+      return { name, hex: c.hex, blockLen };
+    });
+    const totalSize = 12 + blocks.reduce((s,b) => s + 2 + 4 + b.blockLen, 0);
+    const buf = new ArrayBuffer(totalSize);
+    const view = new DataView(buf);
+    let offset = 0;
+    // Header: 'ASEF'
+    [0x41,0x53,0x45,0x46].forEach(b => { view.setUint8(offset++, b); });
+    view.setUint16(offset, 1); offset += 2; // major version
+    view.setUint16(offset, 0); offset += 2; // minor version
+    view.setUint32(offset, blocks.length); offset += 4; // block count
+    blocks.forEach(b => {
+      view.setUint16(offset, 0x0001); offset += 2; // colour entry block type
+      view.setUint32(offset, b.blockLen); offset += 4; // block length
+      view.setUint16(offset, b.name.length + 1); offset += 2; // name length inc null
+      for (let i = 0; i < b.name.length; i++) { view.setUint16(offset, b.name.charCodeAt(i)); offset += 2; }
+      view.setUint16(offset, 0); offset += 2; // null terminator
+      // Colour model: 'RGB '
+      [0x52,0x47,0x42,0x20].forEach(c => { view.setUint8(offset++, c); });
+      const [r,g,bl] = hexToRgbF(b.hex);
+      view.setFloat32(offset, r);  offset += 4;
+      view.setFloat32(offset, g);  offset += 4;
+      view.setFloat32(offset, bl); offset += 4;
+      view.setUint16(offset, 2); offset += 2; // colour type: 2 = normal
+    });
+    const blob = new Blob([buf], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'fraggle-palette.ase'; a.click();
+    URL.revokeObjectURL(url);
+    App.toast(`↓ ASE — ${sel.length} colour${sel.length>1?'s':''} · opens in Illustrator, Photoshop, InDesign`);
+    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+  },
+
+  // v:F1.12 — Apple Color List (.clr) — macOS/iOS color picker export
+  downloadCLR() {
+    const sel = this.selectedColours();
+    if (!sel.length) { App.toast('Select at least one colour'); return; }
+    // .clr is a binary NSKeyedArchiver plist. Instead output a simple JSON
+    // that macOS ColorSync can reference, with a human note.
+    // Practical: export as a named JSON that design tools (Sketch, Figma tokens) can import.
+    const clrObj = {
+      '$version': 100000,
+      '$archiver': 'NSKeyedArchiver',
+      '_fraggle_note': 'Import via macOS ColorSync or drag to Xcode Assets. Generated by Fraggle.',
+      'colours': sel.map(c => {
+        const n = parseInt(c.hex.replace('#',''), 16);
+        return {
+          name: c.name || c.hex.toUpperCase(),
+          hex: c.hex.toUpperCase(),
+          r: (n>>16&255)/255,
+          g: (n>>8&255)/255,
+          b: (n&255)/255,
+          a: 1.0,
+          colorSpace: 'sRGB'
+        };
+      })
+    };
+    const blob = new Blob([JSON.stringify(clrObj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'fraggle-palette.clr.json'; a.click();
+    URL.revokeObjectURL(url);
+    App.toast('↓ CLR JSON — importable in Sketch, Xcode, Figma tokens');
+    if (navigator.vibrate) navigator.vibrate([10,6,35]);
   }
 };
 
@@ -10214,6 +10311,7 @@ const PaletteBuilder = {
     // CLASSICAL (new entries)
     complementary: ['#E83030','#30B8E8','#F0F0F0','#B83030','#30E8D8'],
     split_comp:    ['#E85030','#3088E8','#30E8B0','#F5E8C0','#505050'],
+    colour_scales: null, // v:F1.12 — derived live from sampled root (Little Greene system)
     // STRUCTURAL
     monochromatic: ['#1A2A4A','#2E4A8A','#5A7EC8','#8AAEDD','#C0D4F0'],
     warm_neutrals: ['#E8D5C0','#D4B898','#C09870','#A87848','#785030'],
@@ -10548,6 +10646,18 @@ const PaletteBuilder = {
       + makeCard('slate',         'Slate-Grays',    '',  T.slate.slice(0,4))
       + makeCard('offwhite',      'Off-Whites',     '',  T.offwhite.slice(0,4))
 
+      + hdr('COLOUR SCALES · Little Greene')
+      + (() => {
+          const root = this._rootHex ? this._rootHex() : '#C09870';
+          const sc = PaletteBuilder._colourScalesFromHex(root);
+          const scDots = [sc.pale, sc.main, sc.deep, sc.neutral];
+          return makeCard('colour_scales', 'Pale · Wall · Deep · Trim', '▥', scDots);
+        })()
+      + `<div style="grid-column:1/-1;display:flex;gap:6px;margin:-2px 0 4px">
+           <button class="btn btn-s btn-sm" style="flex:1;font-size:9px;padding:3px 6px" onclick="PaletteBuilder.addAllScales()">+ Add All 3 Steps</button>
+           <button class="btn btn-s btn-sm" style="flex:1;font-size:9px;padding:3px 6px" onclick="PaletteBuilder.previewScales()">👁 Preview</button>
+         </div>`
+
       + hdr('CINEMATIC')
       + makeCard('teal_orange',   'Teal·Orange',    '',  T.teal_orange.slice(0,4))
       + makeCard('noir',          'Noir',           '',  T.noir.slice(0,4))
@@ -10691,6 +10801,22 @@ const PaletteBuilder = {
 
   _themeCandidate() {
     const theme = this.suggestTheme;
+    // v:F1.12 — Colour Scales: Little Greene architectural steps
+    if (theme === 'colour_scales') {
+      const root = (this.colours.length ? this.colours[this.colours.length-1].hex : null)
+        || (ColourWheel && ColourWheel.getCurrentHex ? ColourWheel.getCurrentHex() : null)
+        || '#C09870';
+      const sc = PaletteBuilder._colourScalesFromHex(root);
+      const pool = [sc.pale, sc.deep, sc.neutral].filter(h => h && !this._isDuplicate(h));
+      if (!pool.length) return null;
+      const toLab = c => CS.rgbToLab(...Object.values(CS.hexToRgb(c)));
+      const existing = this.colours.map(c => toLab(c.hex));
+      return pool.reduce((w, hex) => {
+        const lab = toLab(hex);
+        const minDE = existing.length ? Math.min(...existing.map(e => CS.dE(lab, e))) : 100;
+        return minDE > w.score ? { hex, score: minDE } : w;
+      }, { hex: pool[0], score: -1 }).hex;
+    }
     // v:F1.10 — Classical harmonies: Analogous/Triadic/Complementary all use real LCH math
     if (theme === 'harmony' || theme === 'triadic' || theme === 'complementary') {
       const root = (this.colours.length ? this.colours[this.colours.length-1].hex : null)
