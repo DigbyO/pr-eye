@@ -6081,6 +6081,7 @@ const Sampler={
 
   setMode(m){
     this.mode=m;
+    if(m==='camera') this.currentHex=null; // clear stale picker colour on return
     document.getElementById('btn-mode-cam').classList.toggle('on',m==='camera');
     document.getElementById('btn-mode-up').classList.toggle('on',m==='upload');
     document.getElementById('btn-mode-wheel').classList.toggle('on',m==='wheel');
@@ -12823,12 +12824,12 @@ self.onmessage = function(e) {
     });
 
     // ── digby.shop byline ────────────────────────────────────────────────────
-    const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);
+    const bylineY = BORDER + photoH + SWATCH_H + Math.round((BYLINE_PAD + 8) / 2);
     ctx.fillStyle    = '#999999';
     ctx.font         = "7px 'SF Mono','Space Mono',monospace";
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Fraggle v1.11 · digby.shop', BORDER + CW - 8, bylineY);
+    ctx.fillText('digby.shop', BORDER + CW - 8, bylineY);
 
     // ── Download — Web Share on mobile (works on iOS PWA), anchor fallback desktop ──
     const pngDataUrl = canvas.toDataURL('image/png');
