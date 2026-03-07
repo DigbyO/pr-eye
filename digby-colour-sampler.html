@@ -186,12 +186,12 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 4px);
   left: 50%;
   transform: translateX(-50%);
-  width: 260px;
+  width: min(300px, calc(100vw - 24px));
   height: auto;
   z-index: 2000;
-  background: rgba(15,15,15,0.92);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: rgba(18,18,18,0.97);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   border-radius: 18px;
   box-shadow: 0 4px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
   border: 1px solid rgba(255,255,255,0.16);
@@ -240,9 +240,9 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   flex-shrink: 0;
   border-radius: 14px;
   border: none;
-  box-shadow: 0 2px 16px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.10);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12);
   cursor: pointer;
-  transition: background 0.08s, transform 0.12s, box-shadow 0.12s;
+  transition: background 0.06s;
   align-self: center;
   margin-bottom: 8px;
   position: relative;
@@ -323,8 +323,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px;
-  padding: 8px 22px 0;
+  gap: 10px;
+  padding: 8px 12px 0;
 }
 .live-act-btn {
   width: 50px; height: 50px;
@@ -9960,22 +9960,22 @@ const SwatchExport = {
     let offset = 0;
     // Header: 'ASEF'
     [0x41,0x53,0x45,0x46].forEach(b => { view.setUint8(offset++, b); });
-    view.setUint16(offset, 1); offset += 2; // major version
-    view.setUint16(offset, 0); offset += 2; // minor version
-    view.setUint32(offset, blocks.length); offset += 4; // block count
+    view.setUint16(offset, 1,    false); offset += 2; // major version (BE)
+    view.setUint16(offset, 0,    false); offset += 2; // minor version (BE)
+    view.setUint32(offset, blocks.length, false); offset += 4; // block count (BE)
     blocks.forEach(b => {
-      view.setUint16(offset, 0x0001); offset += 2; // colour entry block type
-      view.setUint32(offset, b.blockLen); offset += 4; // block length
-      view.setUint16(offset, b.name.length + 1); offset += 2; // name length inc null
-      for (let i = 0; i < b.name.length; i++) { view.setUint16(offset, b.name.charCodeAt(i)); offset += 2; }
-      view.setUint16(offset, 0); offset += 2; // null terminator
+      view.setUint16(offset, 0x0001,          false); offset += 2; // colour entry block type (BE)
+      view.setUint32(offset, b.blockLen,      false); offset += 4; // block length (BE)
+      view.setUint16(offset, b.name.length + 1, false); offset += 2; // name length inc null (BE)
+      for (let i = 0; i < b.name.length; i++) { view.setUint16(offset, b.name.charCodeAt(i), false); offset += 2; }
+      view.setUint16(offset, 0, false); offset += 2; // null terminator (BE)
       // Colour model: 'RGB '
       [0x52,0x47,0x42,0x20].forEach(c => { view.setUint8(offset++, c); });
       const [r,g,bl] = hexToRgbF(b.hex);
-      view.setFloat32(offset, r);  offset += 4;
-      view.setFloat32(offset, g);  offset += 4;
-      view.setFloat32(offset, bl); offset += 4;
-      view.setUint16(offset, 2); offset += 2; // colour type: 2 = normal
+      view.setFloat32(offset, r,  false); offset += 4; // R (BE)
+      view.setFloat32(offset, g,  false); offset += 4; // G (BE)
+      view.setFloat32(offset, bl, false); offset += 4; // B (BE)
+      view.setUint16(offset, 2,   false); offset += 2; // colour type: 2 = normal (BE)
     });
     const blob = new Blob([buf], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
