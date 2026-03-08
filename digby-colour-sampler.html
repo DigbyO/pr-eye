@@ -63,7 +63,7 @@
   document.head.appendChild(link);
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1725,13 +1725,14 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <!-- Upload canvas (hidden by default) -->
     <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
       <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="document.getElementById('up-input').click()">Change</button>
+        <button class="btn btn-s btn-sm" onclick="document.getElementById(\'up-input\').click()">Change</button>
         <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap">
         <button class="btn btn-s btn-sm" onclick="AutoPalette.fromUploadDensity()" title="Extract dominant colours via k-means">🎨 Auto-Palette</button>
         <div id="extraction-density" style="display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px">
-          <button class="density-btn" id="dk3" onclick="AutoPalette.setDensity(3); this.parentNode.querySelectorAll('.density-btn').forEach(b=>b.classList.remove('on')); this.classList.add('on')" title="Extract 3 colours">3</button>
-          <button class="density-btn on" id="dk6" onclick="AutoPalette.setDensity(6); this.parentNode.querySelectorAll('.density-btn').forEach(b=>b.classList.remove('on')); this.classList.add('on')" title="Extract 6 colours">6</button>
-          <button class="density-btn" id="dk9" onclick="AutoPalette.setDensity(9); this.parentNode.querySelectorAll('.density-btn').forEach(b=>b.classList.remove('on')); this.classList.add('on')" title="Extract 9 colours">9</button>
+          <button class="density-btn" id="dk3" onclick="AutoPalette.setDensity(3)" title="Extract 3 colours">3</button>
+          <button class="density-btn on" id="dk6" onclick="AutoPalette.setDensity(6)" title="Extract 6 colours">6</button>
+          <button class="density-btn" id="dk9" onclick="AutoPalette.setDensity(9)" title="Extract 9 colours">9</button>
+          <button class="density-btn" id="dk12" onclick="AutoPalette.setDensity(12)" title="Extract 12 colours">12</button>
         </div>
       </div>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
@@ -4804,8 +4805,9 @@ const App={
       document.fonts.load('bold 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
-    const pmLoaded = document.fonts.check('bold 12px "Permanent Marker"');
-    const smLoaded = document.fonts.check('bold 10px "Space Mono"');
+    // Permanent Marker is weight-400 only — must check regular, not bold
+    const pmLoaded = document.fonts.check('400 12px "Permanent Marker"');
+    const smLoaded = document.fonts.check('400 10px "Space Mono"');
     const FONT_PM = pmLoaded ? '"Permanent Marker",cursive' : 'Arial,sans-serif';
     const FONT_SM = smLoaded ? '"Space Mono",monospace'     : 'Courier,monospace';
 
@@ -5986,6 +5988,10 @@ const Sampler={
     App.toast(`\u2713 ${e.name}`);
     // Also push to pickQueue for polaroid export
     this.addToQueue(hex);
+    // v:F1.12 Smart Expand — single pick seeds a 5-colour cinematic palette instantly
+    if(typeof AutoPalette!=='undefined'){
+      try{ AutoPalette._smartExpand(hex); }catch(err){}
+    }
   },
 
   async showSave(hex){
@@ -6160,19 +6166,29 @@ const Sampler={
   // ── Manual swatch export — exports picked colours as a clean swatch strip
   // Calls SwatchExport.openFromHexes() for a clean, consistent panel with no photo.
   exportManualSwatches() {
-    // v:F1.11 — If user explicitly tapped a result swatch (_addOne sets activeExportTarget),
-    // export that first. Fall back to full pickQueue, then prompt if empty.
+    // v:F1.12 — Priority chain: activeExportTarget → pickQueue → currentHex (live crosshair)
     const target = this.activeExportTarget;
     const queue  = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
-    if (!target && !queue.length) {
-      App.toast('Tap colours on the image first, then export');
+
+    let hexes;
+    if (target) {
+      // Explicit tap target leads, deduped queue follows
+      hexes = [target, ...queue.filter(h => h !== target)];
+    } else if (queue.length) {
+      hexes = queue;
+    } else if (this.currentHex && this.currentHex !== '#888888') {
+      // Fallback: export whatever the crosshair is currently reading
+      hexes = [this.currentHex];
+    } else {
+      App.toast('Point the camera at a colour or tap a swatch first');
       return;
     }
-    // Build export list: activeExportTarget first (deduped), then remaining queue
-    const hexes = target
-      ? [target, ...queue.filter(h => h !== target)]
-      : queue;
-    SwatchExport.openFromHexes(hexes, 'polaroids');
+
+    // v:F1.11 — respect user\'s saved layout; never force-reset to polaroids
+    const layout = (SwatchExport && SwatchExport._userLayout)
+      || localStorage.getItem('fraggle_export_layout')
+      || 'polaroids';
+    SwatchExport.openFromHexes(hexes, layout);
   },
 
   // Alias kept for any legacy call sites
@@ -6335,10 +6351,16 @@ const Sampler={
 
   setCamCount(n){
     this.camCount=n;
-    [3,6,9,12].forEach(c=>document.getElementById('ct'+c)?.classList.toggle('on',c===n));
+    // v:F1.12 — keep AutoPalette density in sync so re-extraction uses the correct k
+    if(typeof AutoPalette!=='undefined') AutoPalette._density=n;
+    // Highlight both camera (ct) and upload (dk) button sets
+    [3,6,9,12].forEach(c=>{
+      document.getElementById('ct'+c)?.classList.toggle('on',c===n);
+      const dk=document.getElementById('dk'+c);
+      if(dk) dk.classList.toggle('on',c===n);
+    });
     this.updateCamCollection();
-    this.renderQueue(); // v:F1.11 — refresh count badge immediately
-    // v:F1.15 — immediately re-extract dominant colours when density changes in camera mode
+    this.renderQueue();
     if(this.mode==='camera' && typeof AutoPalette!=='undefined'){
       try{ AutoPalette.fromCameraDensity(); }catch(e){}
     }
@@ -10131,12 +10153,32 @@ const SwatchExport = {
     ctx.closePath();
   },
 
-  download() {
+  async download() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select at least one colour'); return; }
-    if(navigator.vibrate) navigator.vibrate([10,6,35]);
-    // Rerouted to shared Polaroid palette layout for visual consistency.
-    App._downloadPolaroidPalette(sel.map(c => c.hex), `${sel.length} Colour${sel.length > 1 ? 's' : ''}`);
+    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+    const title = `${sel.length} Colour${sel.length > 1 ? 's' : ''}`;
+    // polaroids layout → use the dedicated high-quality renderer
+    if (!this.layout || this.layout === 'polaroids') {
+      App._downloadPolaroidPalette(sel.map(c => c.hex), title);
+      return;
+    }
+    // All other layouts — font gate then render from the shared canvas pipeline
+    await Promise.all([
+      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 10px "Space Mono"')
+    ]).catch(() => {});
+    await document.fonts.ready.catch(() => {});
+    const { w, h } = this.getCanvasSize();
+    const canvas = document.createElement('canvas');
+    canvas.width = w * 2; canvas.height = h * 2; // @2× for crisp export
+    canvas.getContext('2d').scale(2, 2);
+    this.renderToCanvas(canvas.getContext('2d'), w, h);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `swatch-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    App.toast(title + ' exported');
   },
 
   share() {
@@ -12903,14 +12945,18 @@ self.onmessage = function(e) {
 
   setDensity(k) {
     this._density = k;
-    [3, 6, 9].forEach(v => {
-      const btn = document.getElementById('dk' + v);
-      if (btn) btn.classList.toggle('on', v === k);
+    // v:F1.12 — sync Sampler queue cap so pick queue matches extraction count
+    if (typeof Sampler !== 'undefined') Sampler.camCount = k;
+    // Update ALL density indicators: upload strip (dk) and camera count (ct) buttons
+    [3, 6, 9, 12].forEach(v => {
+      const dk = document.getElementById('dk' + v);
+      if (dk) dk.classList.toggle('on', v === k);
+      const ct = document.getElementById('ct' + v);
+      if (ct) ct.classList.toggle('on', v === k);
     });
-    // v:F1.10 — haptic pulse + density feedback toast
     if (navigator.vibrate) navigator.vibrate(8);
     App.toast('Density: ' + k + ' colours');
-    // v:F1.7 — zero-latency density refresh: if image/camera already loaded, re-run immediately
+    // Immediate re-extraction from whichever source is live
     if (Sampler.uploadImg && Sampler.uploadImg.width) {
       this.fromUploadDensity();
     } else if (document.getElementById('cam-video')?.videoWidth) {
@@ -13053,6 +13099,23 @@ self.onmessage = function(e) {
     } else {
       App.toast('No active source to resample');
     }
+  },
+
+  // v:F1.12 Smart Expand — one seed colour → 5-colour cinematic palette
+  // Roles: Seed / Deep Shadow / Highlight / Cinematic Accent / Muted Neutral
+  _smartExpand(seedHex) {
+    const { r, g, b } = CS.hexToRgb(seedHex);
+    const { h, s, l } = CS.rgbToHsl(r, g, b);
+    const sN = s / 100, lN = l / 100;
+    const clamp = (v, lo=0, hi=1) => Math.max(lo, Math.min(hi, v));
+    const hexes = [
+      seedHex,
+      CS.hslToHex(h,                    clamp(sN + 0.10), clamp(lN - 0.22)),  // Deep Shadow
+      CS.hslToHex(h,                    clamp(sN - 0.12), clamp(lN + 0.24)),  // Highlight
+      CS.hslToHex((h + 32 + 360) % 360, clamp(sN * 0.90), clamp(lN - 0.04)), // Cinematic Accent
+      CS.hslToHex(h,                    clamp(sN * 0.12), clamp(0.58 + (lN - 0.5) * 0.18)), // Muted Neutral
+    ];
+    this._showResults(hexes, 'Smart Expand \u2014 ' + CS.pantoneFirst(seedHex));
   },
 
   // v:F1.12 — Instant Schemes: extract palette then apply LCH transform
