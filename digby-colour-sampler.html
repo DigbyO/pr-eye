@@ -2629,6 +2629,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
   <div class="module" id="mod-palette">
     <div class="mod-scroll">
       <div id="palette-builder-panel">
+        <div id="pb-mood-label" style="display:none;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:0 0 8px;text-align:center"></div>
         <div id="pb-grid"></div>
         <div id="pb-actions">
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleWheelPicker()">+ Wheel</button>
@@ -3266,7 +3267,9 @@ const CS = {
   autoName(hex){
     if(!this._nameCache){try{this._nameCache=JSON.parse(localStorage.getItem('spectrum-name-cache')||'{}');}catch(e){this._nameCache={};}}
     if(this._nameCache[hex])return this._nameCache[hex];
-    const{r,g,b}=this.hexToRgb(hex);const{h,s,l}=this.rgbToHsl(r,g,b);if(s<10)return l>85?'Near White':l>65?'Light Grey':l>45?'Grey':l>25?'Dark Grey':'Near Black';const hns=['Red','Rose','Tangerine','Amber','Gold','Lime','Green','Teal','Sky Blue','Blue','Indigo','Violet'];const hn=hns[Math.round(h/30)%12];const px=l>72?'Pale':l<28?'Deep':s<22?'Muted':s>70?'Vivid':'Warm';const _n=`${px} ${hn}`;this._nameCache[hex]=_n;try{if(Object.keys(this._nameCache).length<500)localStorage.setItem('spectrum-name-cache',JSON.stringify(this._nameCache));}catch(e){}return _n},
+    const{r,g,b}=this.hexToRgb(hex);const{h,s,l}=this.rgbToHsl(r,g,b);if(s<10)return l>85?'Near White':l>65?'Light Grey':l>45?'Grey':l>25?'Dark Grey':'Near Black';// v:F1.15 — greens override before array fallback (75-165° hue band)
+if(h>=75&&h<=165){const gfx=l>72?'Pale ':l<28?'Deep ':s<22?'Muted ':'';const gn=(s>35&&l>30&&l<68)?'Sage':'Natural Green';const _gn=gfx+gn;this._nameCache[hex]=_gn;try{if(Object.keys(this._nameCache).length<500)localStorage.setItem('spectrum-name-cache',JSON.stringify(this._nameCache));}catch(e){}return _gn;}
+const hns=['Red','Rose','Tangerine','Amber','Gold','Lime','Fern','Teal','Sky Blue','Blue','Indigo','Violet'];const hn=hns[Math.round(h/30)%12];const px=l>72?'Pale':l<28?'Deep':s<22?'Muted':s>70?'Vivid':'Warm';const _n=`${px} ${hn}`;this._nameCache[hex]=_n;try{if(Object.keys(this._nameCache).length<500)localStorage.setItem('spectrum-name-cache',JSON.stringify(this._nameCache));}catch(e){}return _n},
   harmonies(hex){const{r,g,b}=this.hexToRgb(hex);const lab=this.rgbToLab(r,g,b);const{l,c,h}=this.labToLch(lab);const mk=(dh,dl=0,dc=0)=>this.lchToHex(Math.max(8,Math.min(96,l+dl)),Math.max(5,c+dc),(h+dh+360)%360);return{complementary:[hex,mk(180)],analogous:[mk(-30),hex,mk(30)],triadic:[hex,mk(120),mk(240)],tetradic:[hex,mk(90),mk(180),mk(270)],splitComp:[hex,mk(150),mk(210)],mono:[mk(0,22,-12),mk(0,10,-6),hex,mk(0,-14,4),mk(0,-28,8)],splitTone:{shadows:mk(180,-(l*.4),c*.3),highlights:mk(0,+(95-l)*.3,c*.3)}}},
 
   // Tints (lighten), Shades (darken), Tones (desaturate) — 5 steps each in LCH
@@ -4854,13 +4857,21 @@ const App={
     ctx.fillStyle = '#E8E4DE';
     ctx.fillRect(PAD, footY, photoW, 1 * SCALE);
 
-    // v79: Footer — digby.shop byline only (hero labels deleted)
+    // v:F1.15 — Footer: Sharpie "Fraggle Technical Match" left + digby.shop right
     var footTextY = footY + Math.round(FOOT_H * 0.38);
-    ctx.fillStyle = '#AAAAAA';
-    ctx.font = Math.round(6.5 * SCALE) + 'px system-ui,-apple-system,sans-serif';
-    ctx.textAlign = 'right';
+    var footFontSz = Math.round(6.5 * SCALE);
     ctx.textBaseline = 'top';
-    ctx.fillText('digby.shop', CARD_W - PAD, footTextY + Math.round(14 * SCALE));
+    var ftY = footTextY + Math.round(14 * SCALE);
+    // Left: Fraggle Technical Match in Permanent Marker
+    ctx.fillStyle = '#888888';
+    ctx.font = 'bold ' + footFontSz + 'px \'Permanent Marker\',cursive';
+    ctx.textAlign = 'left';
+    ctx.fillText('Fraggle Technical Match', PAD, ftY);
+    // Right: digby.shop in system font
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = footFontSz + 'px system-ui,-apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('digby.shop', CARD_W - PAD, ftY);
 
     var a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
@@ -6191,6 +6202,12 @@ const Sampler={
         0, 0, 88, 88
       );
       lCtx.restore();
+      // v:F1.15 — ring border matches centre pixel colour for precision feedback
+      try{
+        const px=lCtx.getImageData(44,44,1,1).data;
+        overlay.style.borderColor=`rgb(${px[0]},${px[1]},${px[2]})`;
+        overlay.style.boxShadow=`0 4px 18px rgba(0,0,0,.55),0 0 0 2px rgba(255,255,255,.5),0 0 0 4.5px rgb(${px[0]},${px[1]},${px[2]})`;
+      }catch(e){}
 
       // Position overlay above the finger — offset 60px up + centred horizontally
       overlay.style.left = cx + 'px';
@@ -6302,6 +6319,10 @@ const Sampler={
     this.camCount=n;
     [3,6,9].forEach(c=>document.getElementById('ct'+c)?.classList.toggle('on',c===n));
     this.updateCamCollection();
+    // v:F1.15 — immediately re-extract dominant colours when density changes in camera mode
+    if(this.mode==='camera' && typeof AutoPalette!=='undefined'){
+      try{ AutoPalette.fromCameraDensity(); }catch(e){}
+    }
   },
 
   updateCamCollection(){
@@ -8836,6 +8857,19 @@ const Prompter={
     else{if(this.sel.size>=6){App.toast('Max 6 colours');return}this.sel.add(id)}
     this._syncSelection();   // fast path: class-toggle only, no DOM rebuild
     this._updateColourScience();
+    // v:F1.15 — sync bg colour to most recently selected swatch with contrast-safe text
+    if(this.sel.has(id)){
+      try{
+        const c = DS.all().find(x=>x.id===id);
+        if(c){ this.setBgColor('s', c.hex); }
+        // contrast-safe text: update prompt output area if visible
+        const {r,g,b} = CS.hexToRgb(c?.hex||'#888888');
+        const lum = (0.299*r + 0.587*g + 0.114*b)/255;
+        const safe = lum>0.5?'#111111':'#ffffff';
+        const pout = document.getElementById('prom-output');
+        if(pout) pout.style.color = safe;
+      }catch(e){}
+    }
   },
 
   // Generic pill toggle  called by onclick on each pill
@@ -11608,6 +11642,22 @@ const PaletteBuilder = {
       html += `<div class="pb-slot-empty" onclick="PaletteBuilder.addFromWheel()">+</div>`;
     }
     grid.innerHTML = html;
+    // v:F1.15 — Mood DNA: 2-word label from palette hue/saturation average
+    const moodEl = document.getElementById('pb-mood-label');
+    if(moodEl){
+      if(this.colours.length >= 2){
+        const hslVals = this.colours.map(c=>{ const {r,g,b}=CS.hexToRgb(c.hex); return CS.rgbToHsl(r,g,b); });
+        const avgH = hslVals.reduce((s,v)=>s+v.h,0)/hslVals.length;
+        const avgS = hslVals.reduce((s,v)=>s+v.s,0)/hslVals.length;
+        const avgL = hslVals.reduce((s,v)=>s+v.l,0)/hslVals.length;
+        const mood1 = avgL>68?'Light':avgL<32?'Deep':avgS<20?'Muted':'Rich';
+        const mood2 = avgH<30||avgH>330?'Ember':avgH<60?'Harvest':avgH<165?'Grove':avgH<195?'Sage':avgH<255?'Marine':avgH<285?'Twilight':'Bloom';
+        moodEl.textContent = mood1+' '+mood2;
+        moodEl.style.display = 'block';
+      } else {
+        moodEl.style.display = 'none';
+      }
+    }
   },
 
   sharePalette() {
