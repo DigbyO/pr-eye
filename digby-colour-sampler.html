@@ -4804,13 +4804,18 @@ const App={
     canvas.height = CARD_H;
     const ctx = canvas.getContext('2d');
 
-    // v:F1.12 Font gate — request weight 400 (the only weight PM ships with)
-    // No fallback to Arial — cursive is an acceptable handwriting fallback if offline
+    // v:F1.13 DOM primer — forces PM binary download before canvas draw
+    const _pmPrimer = document.createElement('div');
+    _pmPrimer.style.cssText = 'font:400 18px "Permanent Marker",cursive;position:fixed;top:-9999px;left:-9999px;opacity:0.01;pointer-events:none;white-space:nowrap';
+    _pmPrimer.textContent = 'Colour';
+    document.body.appendChild(_pmPrimer);
+    void _pmPrimer.offsetWidth;
     await Promise.all([
-      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 18px "Permanent Marker"'),
       document.fonts.load('400 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
+    document.body.removeChild(_pmPrimer);
     const FONT_PM = '"Permanent Marker",cursive';
     const FONT_SM = '"Space Mono",monospace';
 
@@ -5986,10 +5991,6 @@ const Sampler={
     App.toast(`\u2713 ${e.name}`);
     // Also push to pickQueue for polaroid export
     this.addToQueue(hex);
-    // v:F1.13 — open captured colour in Explorer (colour picker / harmonies view)
-    if(typeof Explorer!=='undefined'){
-      try{ Explorer.setRoot(hex); App.setTab('explorer'); }catch(err){}
-    }
   },
 
   async showSave(hex){
@@ -7517,12 +7518,18 @@ const Library={
   },
 
   async _renderSharePolaroid(c){
-    // v:F1.12 Font Gate — PM ships weight 400 only, bold variant does not exist
+    // v:F1.13 DOM primer — forces PM binary download before canvas draw
+    const _pmPrimer = document.createElement('div');
+    _pmPrimer.style.cssText = 'font:400 18px "Permanent Marker",cursive;position:fixed;top:-9999px;left:-9999px;opacity:0.01;pointer-events:none;white-space:nowrap';
+    _pmPrimer.textContent = c.name || 'Colour';
+    document.body.appendChild(_pmPrimer);
+    void _pmPrimer.offsetWidth;
     await Promise.all([
-      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 18px "Permanent Marker"'),
       document.fonts.load('400 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
+    document.body.removeChild(_pmPrimer);
 
     const canvas    = document.getElementById('export-canvas');
     const SCALE     = Math.min(window.devicePixelRatio || 2, 3);
