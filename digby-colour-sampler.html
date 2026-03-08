@@ -4799,17 +4799,15 @@ const App={
     canvas.height = CARD_H;
     const ctx = canvas.getContext('2d');
 
-    // v:F1.11 Font gate — await before any canvas text draw
+    // v:F1.12 Font gate — request weight 400 (the only weight PM ships with)
+    // No fallback to Arial — cursive is an acceptable handwriting fallback if offline
     await Promise.all([
-      document.fonts.load('bold 12px "Permanent Marker"'),
-      document.fonts.load('bold 10px "Space Mono"')
+      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
-    // Permanent Marker is weight-400 only — must check regular, not bold
-    const pmLoaded = document.fonts.check('400 12px "Permanent Marker"');
-    const smLoaded = document.fonts.check('400 10px "Space Mono"');
-    const FONT_PM = pmLoaded ? '"Permanent Marker",cursive' : 'Arial,sans-serif';
-    const FONT_SM = smLoaded ? '"Space Mono",monospace'     : 'Courier,monospace';
+    const FONT_PM = '"Permanent Marker",cursive';
+    const FONT_SM = '"Space Mono",monospace';
 
     // White Polaroid card
     ctx.fillStyle = '#FFFFFF';
