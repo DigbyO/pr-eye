@@ -1630,9 +1630,10 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 
       <!-- Count toggle — v110: moved inside camera, bottom-right above capture row -->
       <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:130px;right:10px;z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
-        <button class="tog-btn on" onclick="Sampler.setCamCount(3)" id="ct3" style="color:rgba(255,255,255,.8)">3</button>
-        <button class="tog-btn" onclick="Sampler.setCamCount(6)" id="ct6" style="color:rgba(255,255,255,.5)">6</button>
-        <button class="tog-btn" onclick="Sampler.setCamCount(9)" id="ct9" style="color:rgba(255,255,255,.5)">9</button>
+        <button class="tog-btn on" onclick="Sampler.setCamCount(3)"  id="ct3"  style="color:rgba(255,255,255,.8)">3</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(6)"  id="ct6"  style="color:rgba(255,255,255,.5)">6</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(9)"  id="ct9"  style="color:rgba(255,255,255,.5)">9</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(12)" id="ct12" style="color:rgba(255,255,255,.5)">12</button>
       </div>
 
       <!-- Capture row -->
@@ -4757,7 +4758,7 @@ const App={
     return null; // stub — callback-based sharing uses exportOne path
   },
 
-  _downloadPolaroidPalette(hexes, title) {
+  async _downloadPolaroidPalette(hexes, title) {
     title = title || 'Palette';
     if (!hexes || !hexes.length) { this.toast('No colours to export'); return; }
 
@@ -4797,6 +4798,17 @@ const App={
     canvas.height = CARD_H;
     const ctx = canvas.getContext('2d');
 
+    // v:F1.11 Font gate — await before any canvas text draw
+    await Promise.all([
+      document.fonts.load('bold 12px "Permanent Marker"'),
+      document.fonts.load('bold 10px "Space Mono"')
+    ]).catch(() => {});
+    await document.fonts.ready.catch(() => {});
+    const pmLoaded = document.fonts.check('bold 12px "Permanent Marker"');
+    const smLoaded = document.fonts.check('bold 10px "Space Mono"');
+    const FONT_PM = pmLoaded ? '"Permanent Marker",cursive' : 'Arial,sans-serif';
+    const FONT_SM = smLoaded ? '"Space Mono",monospace'     : 'Courier,monospace';
+
     // White Polaroid card
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, CARD_W, CARD_H);
@@ -4827,7 +4839,7 @@ const App={
       // Font scales with swatch width: bigger swatches → larger type, capped
       var nameSize = Math.round(Math.max(8 * SCALE, Math.min(10 * SCALE, sw * 0.065)));
       ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold ' + nameSize + 'px \'Permanent Marker\',cursive';
+      ctx.font = 'bold ' + nameSize + 'px ' + FONT_PM;
       ctx.textAlign = 'center';
       // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
       var name = CS.pantoneFirst(hex);  // v130: Pantone name on polaroid
@@ -4843,7 +4855,7 @@ const App={
       // v85: WCAG-adaptive label contrast based on swatch luminance
       var _lum85 = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
       ctx.fillStyle = _lum85 > 150 ? '#333333' : '#999999';
-      ctx.font = hexSize + 'px \'Space Mono\',monospace';
+      ctx.font = hexSize + 'px ' + FONT_SM;
       ctx.textAlign = 'center';
       ctx.fillText(hex.toUpperCase(), cx, PAD + SW_H + nameSize + Math.round(4 * SCALE) + hexSize + Math.round(5 * SCALE));
     });
@@ -4864,7 +4876,7 @@ const App={
     var ftY = footTextY + Math.round(14 * SCALE);
     // Left: Fraggle Technical Match in Permanent Marker
     ctx.fillStyle = '#888888';
-    ctx.font = 'bold ' + footFontSz + 'px \'Permanent Marker\',cursive';
+    ctx.font = 'bold ' + footFontSz + 'px ' + FONT_PM;
     ctx.textAlign = 'left';
     ctx.fillText('Fraggle Technical Match', PAD, ftY);
     // Right: digby.shop in system font
@@ -5577,8 +5589,12 @@ const Sampler={
     }
     const ctx = tmp.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(v, 0, 0); // 1:1 draw — no scaling, no artefacts
-    const px  = Math.round(this.sampleX * v.videoWidth);
-    const py  = Math.round(this.sampleY * v.videoHeight);
+    // v:F1.11 — when 2× zoom active, map touch position back to native video coords
+    const _zs = this._zoom2x ? 2 : 1;
+    const _sx = 0.5 + (this.sampleX - 0.5) / _zs;
+    const _sy = 0.5 + (this.sampleY - 0.5) / _zs;
+    const px  = Math.round(_sx * v.videoWidth);
+    const py  = Math.round(_sy * v.videoHeight);
     const r   = 10;
     const gx  = Math.max(0, px - r);
     const gy  = Math.max(0, py - r);
@@ -5805,10 +5821,12 @@ const Sampler={
   toggle2xZoom(){
     this._zoom2x = !this._zoom2x;
     const v = document.getElementById('cam-video');
-    if (v) {
-      v.style.transition = 'transform 0.22s cubic-bezier(0.22,1,0.36,1)';
-      v.style.transform  = this._zoom2x ? 'scale(2)' : 'scale(1)';
-    }
+    const xform = this._zoom2x ? 'scale(2)' : 'scale(1)';
+    const trans  = 'transform 0.22s cubic-bezier(0.22,1,0.36,1)';
+    if (v) { v.style.transition = trans; v.style.transform = xform; }
+    // v:F1.11 — scale canvas in lockstep so LUT overlay zooms too
+    const c = document.getElementById('cam-canvas');
+    if (c) { c.style.transition = trans; c.style.transform = xform; }
     const btn = document.getElementById('zoom2x-btn');
     if (btn) btn.classList.toggle('on', this._zoom2x);
     App.toast(this._zoom2x ? '2× Zoom ON' : '2× Zoom OFF');
@@ -6317,8 +6335,9 @@ const Sampler={
 
   setCamCount(n){
     this.camCount=n;
-    [3,6,9].forEach(c=>document.getElementById('ct'+c)?.classList.toggle('on',c===n));
+    [3,6,9,12].forEach(c=>document.getElementById('ct'+c)?.classList.toggle('on',c===n));
     this.updateCamCollection();
+    this.renderQueue(); // v:F1.11 — refresh count badge immediately
     // v:F1.15 — immediately re-extract dominant colours when density changes in camera mode
     if(this.mode==='camera' && typeof AutoPalette!=='undefined'){
       try{ AutoPalette.fromCameraDensity(); }catch(e){}
@@ -9671,8 +9690,8 @@ const SwatchExport = {
   // Hex values already in the library use their existing entry; others are created in-memory
   openFromHexes(hexes, layoutHint) {
     if (!hexes || !hexes.length) { App.toast('No colours to export'); return; }
-    // Always reset to polaroids unless the caller explicitly requests a layout
-    this.layout = layoutHint || 'polaroids';
+    // v:F1.11 — respect user's explicit layout pick; only fall back if none saved
+    this.layout = this._userLayout || layoutHint || 'polaroids';
     const lib = DS.all();
     this._ephemeral = [];
     this.selectedIds = new Set();
@@ -9687,7 +9706,6 @@ const SwatchExport = {
         this.selectedIds.add(entry.id);
       }
     });
-    if (layoutHint) this.layout = layoutHint;
     App.openOv(this.buildPanel());
     setTimeout(() => this.preview(), 100);
   },
@@ -9826,7 +9844,7 @@ const SwatchExport = {
   },
 
   setRatio(r)  { this.ratio = r;  this.refresh(); },
-  setLayout(l) { this.layout = l; this.refresh(); },
+  setLayout(l) { this.layout = l; this._userLayout = l; this.refresh(); },
   toggleText(el) { this.includeText = !this.includeText; el.classList.toggle('on', this.includeText); this.preview(); },
   setBg(bg)    { this.bgColor = bg; this.refresh(); },
 
