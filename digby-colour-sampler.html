@@ -1643,11 +1643,11 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
 
       <!-- Count toggle — v110: moved inside camera, bottom-right above capture row -->
-      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:130px;right:10px;z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
-        <button class="tog-btn on" onclick="Sampler.setCamCount(3)"  id="ct3"  style="color:rgba(255,255,255,.8)">3</button>
-        <button class="tog-btn"    onclick="Sampler.setCamCount(6)"  id="ct6"  style="color:rgba(255,255,255,.5)">6</button>
-        <button class="tog-btn"    onclick="Sampler.setCamCount(9)"  id="ct9"  style="color:rgba(255,255,255,.5)">9</button>
-        <button class="tog-btn"    onclick="Sampler.setCamCount(12)" id="ct12" style="color:rgba(255,255,255,.5)">12</button>
+      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
+        <button class="tog-btn on" onclick="Sampler.setCamCount(3)"  id="ct3">3</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(6)"  id="ct6">6</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(9)"  id="ct9">9</button>
+        <button class="tog-btn"    onclick="Sampler.setCamCount(12)" id="ct12">12</button>
       </div>
 
       <!-- Capture row -->
@@ -4879,12 +4879,7 @@ const App={
     var footFontSz = Math.round(6.5 * SCALE);
     ctx.textBaseline = 'top';
     var ftY = footTextY + Math.round(14 * SCALE);
-    // Left: Fraggle Technical Match in Permanent Marker
-    ctx.fillStyle = '#888888';
-    ctx.font = 'bold ' + footFontSz + 'px ' + FONT_PM;
-    ctx.textAlign = 'left';
-    ctx.fillText('Fraggle Technical Match', PAD, ftY);
-    // Right: digby.shop in system font
+    // Footer: digby.shop right-aligned only
     ctx.fillStyle = '#AAAAAA';
     ctx.font = footFontSz + 'px system-ui,-apple-system,sans-serif';
     ctx.textAlign = 'right';
@@ -7522,10 +7517,10 @@ const Library={
   },
 
   async _renderSharePolaroid(c){
-    // v101: Font Gate — ensure fonts are loaded before canvas rendering
+    // v:F1.12 Font Gate — PM ships weight 400 only, bold variant does not exist
     await Promise.all([
-      document.fonts.load('bold 12px "Permanent Marker"'),
-      document.fonts.load('bold 10px "Space Mono"')
+      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
 
@@ -7639,7 +7634,7 @@ const Library={
       ctx.fillText(heroName, FX, FY+32, PAD+CW-FX-8);
     } else if (_showName) {
       ctx.fillStyle    = '#1a1a1a';
-      ctx.font         = 'bold 18px "Permanent Marker",cursive';
+      ctx.font         = '18px "Permanent Marker",cursive';
       ctx.textAlign    = 'left';
       ctx.textBaseline = 'top';
       ctx.fillText(heroName, FX, FY + 14, maxTW);
