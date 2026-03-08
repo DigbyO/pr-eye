@@ -7,19 +7,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fraggle">
 <meta name="application-name" content="Fraggle">
-<meta name="description" content="Fraggle v1.11 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Fraggle v1.12 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Fraggle v1.11</title>
+<title>Fraggle v1.12</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
   // The app logic is entirely separate; this block is safe to edit independently.
-  console.log("Analytics Ready");
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F1.11';
+  const APP_VERSION = 'F1.12';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -4906,8 +4905,46 @@ const App={
   },
 
   exportLib(){const d=JSON.stringify(DS.all(),null,2);const b=new Blob([d],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='digby-colours.json';a.click();URL.revokeObjectURL(u);App.toast('Exported')},
-  importLib(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(Array.isArray(d)){DS.save(d);App.forceCloseOv();App.toast('Imported')}else App.toast('Invalid file')}catch{App.toast('Error reading file')}};r.readAsText(f)},
-  clearLib(){if(confirm('Clear all saved colours?')){DS.clear();App.forceCloseOv();App.toast('Cleared')}},
+  importLib(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(Array.isArray(d)&&d.length&&d[0]?.hex){DS.save(d);App.forceCloseOv();App.toast('Imported')}else App.toast('Invalid file — expected Fraggle colour JSON')}catch{App.toast('Error reading file')}};r.readAsText(f)},
+  // v:F1.12 iOS-safe confirm — two-tap within 3 s; avoids confirm() which silently fails in PWA standalone
+  _confirmPending: null,
+  _confirm(msg, onYes) {
+    if (this._confirmPending) {
+      clearTimeout(this._confirmPending.t);
+      this._confirmPending = null;
+      onYes();
+      return;
+    }
+    this.toast(msg + ' — tap again to confirm');
+    this._confirmPending = { t: setTimeout(() => { this._confirmPending = null; }, 3000) };
+  },
+  // v:F1.12 iOS-safe prompt — inline input overlay; avoids prompt() which silently fails in PWA standalone
+  _prompt(label, defaultVal, maxLen, cb) {
+    const existing = document.getElementById('_fraggle-prompt-ov');
+    if (existing) existing.remove();
+    const ov = document.createElement('div');
+    ov.id = '_fraggle-prompt-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
+    const safe = (defaultVal || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    ov.innerHTML = `<div style="background:#1e1e1e;border:1px solid #444;border-radius:12px;padding:22px 20px 16px;width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px">
+      <div style="color:#bbb;font-size:13px;font-family:var(--mono);line-height:1.45">${label}</div>
+      <input id="_fraggle-prompt-inp" type="text" maxlength="${maxLen || 50}" value="${safe}"
+        style="background:#2a2a2a;border:1px solid #555;border-radius:6px;padding:9px 11px;color:#fff;font-size:15px;font-family:var(--mono);width:100%;box-sizing:border-box;outline:none">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="document.getElementById('_fraggle-prompt-ov').remove()"
+          style="padding:8px 14px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#aaa;font-size:13px;cursor:pointer">Cancel</button>
+        <button id="_fraggle-prompt-ok"
+          style="padding:8px 18px;background:#1a5c1a;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">OK</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    const inp = document.getElementById('_fraggle-prompt-inp');
+    setTimeout(() => { inp.focus(); inp.select(); }, 80);
+    const ok = () => { const v = inp.value.trim(); ov.remove(); if (v) cb(v); };
+    document.getElementById('_fraggle-prompt-ok').onclick = ok;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') ov.remove(); });
+  },
+  clearLib(){ App._confirm('Clear all saved colours?', () => { DS.clear(); App.forceCloseOv(); App.toast('Cleared'); }); },
 
   // v449: Live bar display mode — fb and lg are now separate options
   setLiveDisplay(mode){
@@ -5163,7 +5200,7 @@ const Sampler={
     const _diag = (msg) => {
       const d = document.getElementById('cam-diag-bar');
       if(d){d.style.display='block';d.textContent=msg;}
-      console.log('[CAM]', msg);
+      // v:F1.12 debug log removed
     };
 
     const tryCamera = async (constraints) => {
@@ -5405,7 +5442,7 @@ const Sampler={
     if (ov) ov.style.display = 'none';
     try {
       await v.play();
-      console.log('[CAM] _tapToPlay: play() OK after user gesture');
+      // v:F1.12 debug log removed
       // FIXED: ensure sampling loop is running now that video is live
       this.startSampling();
     } catch (e) {
@@ -6709,15 +6746,17 @@ const FolderManager = {
 
   deleteFolder(name) {
     if (name === 'Default') { App.toast('Cannot delete Default folder'); return; }
-    if (!confirm(`Delete folder "${name}"? Colours in it will move to Default.`)) return;
-    DS.all().filter(c => c.folder === name).forEach(c => DS.update(c.id, { folder: 'Default' }));
-    this._folders = this._folders.filter(f => f !== name);
-    if (this._active === name) this._active = 'Default';
-    this._save();
-    // v:F1.13 Persistence audit — hard flush guarantees no entry orphaning on close
-    try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
-    this.renderUI();
-    Library.render();
+    // v:F1.12 iOS-safe confirm — two-tap replaces native confirm() which silently fails in PWA standalone
+    App._confirm(`Delete folder "${name}"? Colours will move to Default`, () => {
+      DS.all().filter(c => c.folder === name).forEach(c => DS.update(c.id, { folder: 'Default' }));
+      this._folders = this._folders.filter(f => f !== name);
+      if (this._active === name) this._active = 'Default';
+      this._save();
+      // v:F1.13 Persistence audit — hard flush guarantees no entry orphaning on close
+      try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
+      this.renderUI();
+      Library.render();
+    });
   },
 
   tagEntry(e) { e.folder = this._active; return e; },
@@ -6732,10 +6771,11 @@ const FolderManager = {
   },
 
   _promptNew() {
-    const raw = prompt('Enter folder name:');
-    const n = (raw || '').trim();
-    if (n) this.createFolder(n);
-    else if (raw !== null) App.toast('Folder name cannot be empty');
+    // v:F1.12 iOS-safe prompt — inline overlay replaces native prompt() which silently fails in PWA standalone
+    App._prompt('New folder name:', '', 30, n => {
+      if (n) this.createFolder(n);
+      else App.toast('Folder name cannot be empty');
+    });
   }
 };
 </script>
@@ -7369,14 +7409,14 @@ const Library={
 
   rename(id){
     const c=DS.get(id);if(!c)return;
-    const n=prompt('New name:',c.name);
-    if(n&&n.trim()){
-      DS.update(id,{name:n.trim()});
+    // v:F1.12 iOS-safe prompt — inline overlay replaces native prompt() which silently fails in PWA standalone
+    App._prompt('Rename colour:', c.name || '', 40, n => {
+      DS.update(id,{name:n});
       const nameEl=document.querySelector('#inspector-body .insp-name');
-      if(nameEl)nameEl.textContent=n.trim();
+      if(nameEl)nameEl.textContent=n;
       App.refresh();
-      App.toast('Renamed to “'+n.trim()+'”');
-    }
+      App.toast('Renamed to “'+n+'”');
+    });
   },
 
   toExplorer(id){const c=DS.get(id);if(!c)return;Explorer.setRoot(c.hex);App.forceCloseOv();App.setTab('explorer')},
@@ -7385,17 +7425,25 @@ const Library={
     const c=DS.get(id);if(!c)return;
     const folders=FolderManager.folders;
     if(!folders||folders.length<=1){App.toast('No extra folders — create one first');return;}
-    const opts=folders.map((f,i)=>`${i+1}. ${f}${c.folder===f?' ✓':''}`).join('\n');
-    const raw=prompt(`Move "${c.name}" to folder:\n${opts}\n\nEnter folder name:`);
-    if(!raw)return;
-    const name=raw.trim();
-    if(!folders.includes(name)){App.toast('Folder not found');return;}
-    DS.update(id,{folder:name});
-    App.toast(`Moved to "${name}"`);
-    App.refresh();
+    // v:F1.12 iOS-safe folder picker — replaces native prompt() which silently fails in PWA standalone
+    const ov=document.createElement('div');
+    ov.id='_fraggle-folder-ov';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
+    const btns=folders.map(f=>{const isCur=c.folder===f;return`<button onclick="Library._doMove('${id.replace(/'/g,"\\'")}','${f.replace(/'/g,"\\'")}');document.getElementById('_fraggle-folder-ov').remove()"
+      style="display:block;width:100%;text-align:left;padding:10px 14px;background:${isCur?'#243824':'#242424'};border:1px solid ${isCur?'#3a6a3a':'#3a3a3a'};border-radius:7px;color:${isCur?'#7fff7f':'#ccc'};font-size:13px;font-family:var(--mono);cursor:pointer;margin-bottom:6px">${f}${isCur?' ✓':''}</button>`;}).join('');
+    const label=(c.name||c.hex||'colour').toUpperCase().slice(0,24);
+    ov.innerHTML=`<div style="background:#1e1e1e;border:1px solid #444;border-radius:12px;padding:20px;width:100%;max-width:300px">
+      <div style="color:#888;font-size:10px;letter-spacing:.1em;font-family:var(--mono);margin-bottom:12px">MOVE "${label}" TO FOLDER</div>
+      ${btns}
+      <button onclick="document.getElementById('_fraggle-folder-ov').remove()"
+        style="display:block;width:100%;padding:8px;background:transparent;border:1px solid #2a2a2a;border-radius:6px;color:#555;font-size:12px;cursor:pointer;margin-top:2px">Cancel</button>
+    </div>`;
+    document.body.appendChild(ov);
   },
+  _doMove(id,name){DS.update(id,{folder:name});App.toast(`Moved to "${name}"`);App.refresh();},
   del(id){
-    if(confirm('Delete this colour?')){
+    // v:F1.12 iOS-safe confirm — two-tap replaces native confirm() which silently fails in PWA standalone
+    App._confirm('Delete this colour?', () => {
       DS.remove(id);
       App.forceCloseOv();
       App.refresh();
@@ -7407,7 +7455,7 @@ const Library={
         clearTimeout(App._toastT);
         App._toastT = setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.innerHTML=''; }, 7000);
       }
-    }
+    });
   },
 
   swatchExportMode: false,
@@ -11730,7 +11778,8 @@ const PaletteBuilder = {
 
   remove(index) { this._pushHistory(); this.colours.splice(index, 1); this.render(); },
 
-  clear() { this._pushHistory(); this.colours = []; this.render(); App.toast('Palette cleared'); },
+  // v:F1.12 — also reset _mutateDir so first mutate on a fresh palette is always Vibrant
+  clear() { this._pushHistory(); this.colours = []; this._mutateDir = 0; this.render(); App.toast('Palette cleared'); },
 
   //  DRAG TO REORDER 
   _onDragStart(e, idx) {
