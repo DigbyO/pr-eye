@@ -1616,6 +1616,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <div class="hud-static hud-telemetry"><span class="hud-dim">TEMP.C      </span><span class="hud-val" id="hud-kelvin">5500K</span></div>
         <div id="hud-gps-row" title="Tap to re-request GPS" onclick="GeoCapture.request();Sampler._updateLabHUD(0,0,0)"><span class="hud-dim">LOC.GPS     </span><span class="hud-val" id="hud-gps">Locating…</span></div>
         <div id="hud-wbcal-row" title="Tap to open White Balance calibration" onclick="Sampler.toggleWhiteBalance()" style="cursor:pointer"><span class="hud-dim">WB_CAL      </span><span class="hud-val" id="hud-wb">TAP</span></div>
+        <div class="hud-static"><span class="hud-dim">SEASON      </span><span class="hud-val" id="hud-season">—</span></div>
       </div>
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
       <canvas id="cam-canvas"></canvas>
@@ -2652,6 +2653,8 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()"> Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()"> Swatch</button>
@@ -5724,12 +5727,30 @@ const Sampler={
     const hProfile=document.getElementById('hud-profile');
     const hKelvin=document.getElementById('hud-kelvin');
     if(!hProfile)return;
-    // v:F1.12 — Always update one-info row (Pantone + HEX) regardless of Pro mode
+    // v:F1.13 — COLOUR row: Pantone + HEX + contrast badge + seasonal DNA
     if(r||g||b){
       const hex='#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
       const pantone=typeof CS!=='undefined'&&CS.pantoneFirst?CS.pantoneFirst(hex):'';
+      // Contrast pass: W = white text safe (dark bg), B = black text safe (light bg)
+      const lrvVal = (typeof CS!=='undefined'&&CS.lrv&&CS.rgbToLab) ? CS.lrv(CS.rgbToLab(r,g,b)) : 50;
+      const contrastBadge = lrvVal < 50 ? ' [W]' : ' [B]';
       const oneEl=document.getElementById('hud-one-info');
-      if(oneEl) oneEl.textContent=(pantone&&pantone!==hex)?pantone+'  '+hex.toUpperCase():hex.toUpperCase();
+      if(oneEl) oneEl.textContent=((pantone&&pantone!==hex)?pantone+'  ':'')+hex.toUpperCase()+contrastBadge;
+      // Seasonal DNA: derive from HSL warm/cool + light/dark + saturation
+      const _hsl = (typeof CS!=='undefined'&&CS.rgbToHsl) ? CS.rgbToHsl(r,g,b) : {h:0,s:50,l:50};
+      const _warm   = _hsl.h < 90 || _hsl.h > 270;
+      const _light  = _hsl.l >= 50;
+      const _bright = _hsl.s >= 55;
+      const _season = _warm  &&  _light &&  _bright ? 'Bright Spring'
+                    : _warm  &&  _light             ? 'True Spring'
+                    : !_warm &&  _light &&  _bright ? 'Light Summer'
+                    : !_warm &&  _light             ? 'Soft Summer'
+                    : _warm  && !_light &&  _bright ? 'True Autumn'
+                    : _warm  && !_light             ? 'Deep Autumn'
+                    : !_warm && !_light &&  _bright ? 'True Winter'
+                    :                                 'Deep Winter';
+      const seasonEl = document.getElementById('hud-season');
+      if(seasonEl) seasonEl.textContent = _season;
     }
     // Profile label from current preset
     const presetLabels={awb:'AWB',day:'D65',tung_d65:'TUNGSTEN',cloud_d65:'CLOUDY',
@@ -6679,6 +6700,8 @@ const FolderManager = {
     this._folders.push(clean);
     this._save();
     this.setActive(clean);
+    // v:F1.13 Persistence audit — hard flush after all mutations are complete
+    try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
   },
 
   deleteFolder(name) {
@@ -6688,6 +6711,8 @@ const FolderManager = {
     this._folders = this._folders.filter(f => f !== name);
     if (this._active === name) this._active = 'Default';
     this._save();
+    // v:F1.13 Persistence audit — hard flush guarantees no entry orphaning on close
+    try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
     this.renderUI();
     Library.render();
   },
@@ -10648,6 +10673,45 @@ const PaletteBuilder = {
     if (!this.colours[i]) return;
     this.colours[i].locked = !this.colours[i].locked;
     this.render(); // re-render to flip padlock icon
+  },
+
+  // v:F1.13 — Fisher-Yates shuffle of unlocked slots; locked slots stay in place
+  shuffle() {
+    if (this.colours.length < 2) { App.toast('Add more colours first'); return; }
+    this._pushHistory();
+    const unlocked = this.colours.map((c, i) => ({ c, i })).filter(x => !x.c.locked);
+    for (let n = unlocked.length - 1; n > 0; n--) {
+      const k = Math.floor(Math.random() * (n + 1));
+      [unlocked[n], unlocked[k]] = [unlocked[k], unlocked[n]];
+    }
+    const next = [...this.colours];
+    unlocked.forEach(({ c }, idx) => {
+      next[this.colours.map((x, i) => !x.locked ? i : -1).filter(i => i >= 0)[idx]] = c;
+    });
+    this.colours = next;
+    this.render();
+    App.toast('Palette shuffled');
+  },
+
+  // v:F1.13 — Alternate ±10% HSL Saturation/Lightness to create Vibrant or Muted variant
+  mutate() {
+    if (!this.colours.length) { App.toast('No colours to mutate'); return; }
+    this._pushHistory();
+    // Toggle between vibrant (+10% S, +5% L) and muted (−10% S, −5% L) on each call
+    this._mutateDir = (this._mutateDir === 1) ? -1 : 1;
+    const dir = this._mutateDir;
+    const label = dir === 1 ? 'Vibrant' : 'Muted';
+    this.colours = this.colours.map(c => {
+      if (c.locked) return c;
+      const { r, g, b } = CS.hexToRgb(c.hex);
+      const hsl = CS.rgbToHsl(r, g, b);
+      const ns = Math.max(0, Math.min(100, hsl.s + dir * 10));
+      const nl = Math.max(5, Math.min(95, hsl.l + dir * 5));
+      const hex = CS.hslToHex(hsl.h, ns / 100, nl / 100);
+      return this._makeEntry(hex);
+    });
+    this.render();
+    App.toast(label + ' variant applied');
   },
 
   // ── Initialiser (called from App.init) ────────────────────────────────
