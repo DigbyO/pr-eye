@@ -363,6 +363,9 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
   padding: 10px 10px 8px;
   z-index: 20;
   box-shadow: 0 -4px 24px rgba(0,0,0,.6);
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 #wb-panel.open { display: block; }
 #wb-panel-hdr {
@@ -13341,12 +13344,12 @@ self.onmessage = function(e) {
     const BORDER      = 24;          // card outer margin
     const CW          = LOGICAL_W - BORDER * 2;  // 332px inner width
     // v106b: luxury spacing — safe zone margins, gaps, and label strip below colour
-    const SW_PAD      = 10;          // v:F1.5 tightened safe-zone padding
+    const SW_PAD      = 8;           // v:F1.13 tightened further
     const SW_GAP      = 8;           // gap between individual swatches
-    const SW_COLOR_H  = 64;          // height of the coloured block
-    const SW_LABEL_H  = 28;          // v:F1.5 tightened label strip
-    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 128px
-    const BYLINE_PAD  = 8;           // v:F1.11 tighter byline space
+    const SW_COLOR_H  = 52;          // v:F1.13 reduced from 64 — saves 12px per export
+    const SW_LABEL_H  = 24;          // v:F1.13 reduced from 28 — saves 4px per export
+    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 92px
+    const BYLINE_PAD  = 4;           // v:F1.13 minimal byline clearance
 
     // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
