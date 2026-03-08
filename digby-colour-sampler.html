@@ -4844,7 +4844,7 @@ const App={
       // Font scales with swatch width: bigger swatches → larger type, capped
       var nameSize = Math.round(Math.max(8 * SCALE, Math.min(10 * SCALE, sw * 0.065)));
       ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold ' + nameSize + 'px ' + FONT_PM;
+      ctx.font = nameSize + 'px ' + FONT_PM;
       ctx.textAlign = 'center';
       // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
       var name = CS.pantoneFirst(hex);  // v130: Pantone name on polaroid
@@ -5986,9 +5986,9 @@ const Sampler={
     App.toast(`\u2713 ${e.name}`);
     // Also push to pickQueue for polaroid export
     this.addToQueue(hex);
-    // v:F1.12 Smart Expand — single pick seeds a 5-colour cinematic palette instantly
-    if(typeof AutoPalette!=='undefined'){
-      try{ AutoPalette._smartExpand(hex); }catch(err){}
+    // v:F1.13 — open captured colour in Explorer (colour picker / harmonies view)
+    if(typeof Explorer!=='undefined'){
+      try{ Explorer.setRoot(hex); App.setTab('explorer'); }catch(err){}
     }
   },
 
