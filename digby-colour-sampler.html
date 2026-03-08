@@ -1101,7 +1101,7 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 @media (max-width: 480px) { .advanced-grid,.insp-advanced-grid { grid-template-columns: 1fr; } }
 
 /* ── v72/v73: Simple Mode (Pro Mode OFF) — hides advanced UI elements ────── */
-body.simple-mode #tab-prompter{display:none!important}
+body:not(.design-pro-on) #tab-prompter{display:none!important}
 body.simple-mode .insp-advanced{display:none!important}
 body.simple-mode #manual-picker-section{display:none!important}
 /* Sampler: hide Manual Picker + Upload buttons */
@@ -1129,7 +1129,7 @@ body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
 /* v438: .pb-pro-btn and .colour-blind-tool removed — gated by design-pro-on only */
-body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode #tab-prompter,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
+body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
 /* design-pro-on exclusively controls Tailwind + CVD palette buttons */
 body.design-pro-on .pb-pro-btn{display:revert!important}
 body.design-pro-on .colour-blind-tool{display:revert!important}
@@ -1260,6 +1260,20 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 @keyframes breathe-upload {
   0%, 100% { opacity: 0.5; transform: translateY(0); }
   50%       { opacity: 1.0; transform: translateY(-1.5px); }
+}
+/* v:F1.12 — Upload trigger: 52×52 glass pill, matches Picker visual weight */
+#bar-upload-trigger {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,.11);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,.28);
+  box-shadow: 0 2px 10px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.15);
+}
+#bar-upload-trigger:active {
+  background: rgba(255,255,255,.28);
+  border-color: rgba(255,255,255,.55);
+  transform: scale(0.90);
 }
 .live-act-btn#bar-upload-trigger svg {
   animation: breathe-upload 2s ease-in-out infinite;
@@ -4106,16 +4120,7 @@ const State = {
     const ovLbl = document.getElementById('ov-pro-lbl');
     if (ovLbl) ovLbl.textContent = this.proMode ? 'On' : 'Off';
     // Note: pro-mode-toggle is Design Pro Mode (independent) — do NOT sync here
-    // v77: Remove/restore Prompter tab from DOM (not just display:none)
-    const prompterTab = document.getElementById('tab-prompter');
-    if (!this.proMode) {
-      if (prompterTab) { this._prompterTabBackup = prompterTab; prompterTab.remove(); }
-    } else {
-      if (!document.getElementById('tab-prompter') && this._prompterTabBackup) {
-        const tabs = document.getElementById('tabs');
-        if (tabs) tabs.appendChild(this._prompterTabBackup);
-      }
-    }
+    // v:F1.12 — Prompter tab now gated by Design Pro Mode via CSS (body:not(.design-pro-on))
     // Dedicated key for quick read without full State parse
     try { localStorage.setItem('spectrum-pro-mode', this.proMode ? '1' : '0'); } catch(e) {}
   }
@@ -6187,6 +6192,7 @@ const Sampler={
       || localStorage.getItem('fraggle_export_layout')
       || 'polaroids';
     SwatchExport.openFromHexes(hexes, layout);
+    this.activeExportTarget = null; // v:F1.12 — clear after use so next export is fresh
   },
 
   // Alias kept for any legacy call sites
@@ -7886,15 +7892,15 @@ const Explorer={
     if (!sc) return;
     const scales = PaletteBuilder._colourScalesFromHex(this.rootHex);
     const steps = [
-      { hex: scales.pale,    label: 'Pale',    sub: 'Ceiling' },
-      { hex: scales.main,    label: 'Wall',    sub: 'Base'    },
+      { hex: scales.trim,    label: 'Trim',    sub: 'Ceiling' },
+      { hex: scales.wall,    label: 'Wall',    sub: 'Base'    },
       { hex: scales.deep,    label: 'Deep',    sub: 'Door'    },
-      { hex: scales.neutral, label: 'Neutral', sub: 'Trim'    },
+      { hex: scales.neutral, label: 'Neutral', sub: 'Accent'  },
     ];
     const hexArr = steps.map(s => s.hex);
     sc.innerHTML = `
       <div style="padding:2px 12px 0;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between">
-        <span>Little Greene · Pale · Wall · Deep · Trim</span>
+        <span>Little Greene · Trim · Wall · Deep · Neutral</span>
         <button class="btn btn-s btn-sm" style="font-size:9px;padding:2px 7px"
           onclick="SwatchExport.openFromHexes(${JSON.stringify(hexArr).replace(/"/g,"'")},'polaroids')"
           title="Export as swatches"></button>
@@ -10544,7 +10550,7 @@ const ColourGenerator = {
 <!--  PALETTE BUILDER  -->
 <script>
 const PaletteBuilder = {
-  MAX: 9,
+  MAX: 12,
   colours: [],
   suggestTheme: 'harmony',
   _dragIdx: null,
@@ -11154,19 +11160,28 @@ const PaletteBuilder = {
   },
 
   _colourScalesFromHex(hex) {
-    if (!hex || typeof CS === 'undefined') return { pale: '#F0EDE8', main: hex||'#C09870', deep: '#3A2E28', neutral: '#E8E4DE' };
+    // v:F1.12 — Little Greene Architectural Scale: TRIM 92% L · WALL original · DEEP 32% L
+    if (!hex || typeof CS === 'undefined') return { pale: '#F5F2EE', main: hex||'#C09870', deep: '#3D2E24', neutral: '#ECEAE6', trim: '#F5F2EE', wall: hex||'#C09870' };
     try {
       const { r, g, b } = CS.hexToRgb(hex);
-      const lab  = CS.rgbToLab(r, g, b);
-      const lch  = CS.labToLch(lab);
+      const hsl = CS.rgbToHsl(r, g, b);      // {h: 0-360, s: 0-100, l: 0-100}
+      const sN  = hsl.s / 100;               // normalise s to 0-1 for hslToHex
+      // TRIM: near-white ceiling — preserve hue, reduce sat, lift to 92% L
+      const trimHex    = CS.hslToHex(hsl.h, sN * 0.50, 0.92);
+      // DEEP: rich shadow — preserve hue, slightly boost sat, drop to 32% L
+      const deepHex    = CS.hslToHex(hsl.h, Math.min(sN * 1.08, 1.0), 0.32);
+      // NEUTRAL: warm white accent — almost desaturated, very light
+      const neutralHex = CS.hslToHex(hsl.h, sN * 0.10, 0.88);
       return {
-        pale:    CS.lchToHex(90, Math.max(lch.c * 0.55, 4),  lch.h),
+        pale:    trimHex,     // backward-compat alias (pale → TRIM)
         main:    hex,
-        deep:    CS.lchToHex(30, Math.min(lch.c * 1.1,  55), lch.h),
-        neutral: CS.lchToHex(85, 5,                          lch.h),
+        deep:    deepHex,
+        neutral: neutralHex,
+        trim:    trimHex,     // v:F1.12 Little Greene TRIM  (92% L)
+        wall:    hex,         // v:F1.12 Little Greene WALL  (original L)
       };
     } catch(e) {
-      return { pale: '#F0EDE8', main: hex, deep: '#3A2E28', neutral: '#E8E4DE' };
+      return { pale: '#F5F2EE', main: hex, deep: '#3D2E24', neutral: '#ECEAE6', trim: '#F5F2EE', wall: hex };
     }
   },
 
@@ -11198,7 +11213,7 @@ const PaletteBuilder = {
     App.openOv(`<div style="padding:20px">
       <div style="font-size:10px;margin-bottom:10px;color:var(--accent);font-family:var(--mono);letter-spacing:.08em">COLOUR SCALES · Little Greene</div>
       <div style="display:flex;flex-wrap:wrap;gap:2px">
-        ${chip(sc.pale,'Pale / Ceiling')}${chip(sc.main,'Wall / Base')}${chip(sc.deep,'Deep / Door')}${chip(sc.neutral,'Neutral / Trim')}
+        ${chip(sc.trim,'Trim / Ceiling')}${chip(sc.wall,'Wall / Base')}${chip(sc.deep,'Deep / Door')}${chip(sc.neutral,'Neutral / Accent')}
       </div>
       <div style="display:flex;gap:8px;margin-top:16px">
         <button class="btn btn-p btn-sm" style="flex:1" onclick="PaletteBuilder.addAllScales();App.closeOv()">+ Add All 3 Steps</button>
@@ -13201,23 +13216,19 @@ self.onmessage = function(e) {
      Fix: reduced to save ~40-45px in each export path; no logic changes.
   */
     async exportPolaroid(hexes) {
-    // v119: Triple-Check Font Gate — text NEVER goes missing
-    // Gate 1: Promise.all with explicit size variants
+    // v:F1.12 Triple Font Gate — PM ships weight 400 ONLY, never bold
+    // Gate 1: Promise.all — request the weights that actually exist
     await Promise.all([
-      document.fonts.load('bold 12px "Permanent Marker"'),
-      document.fonts.load('bold 18px "Permanent Marker"'),
-      document.fonts.load('bold 10px "Space Mono"'),
-      document.fonts.load('bold 8px "Space Mono"')
+      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 18px "Permanent Marker"'),
+      document.fonts.load('400 10px "Space Mono"'),
+      document.fonts.load('700 10px "Space Mono"')
     ]).catch(() => {});
     // Gate 2: document.fonts.ready
     await document.fonts.ready.catch(() => {});
-    // Gate 3: verify + fallback — if font not loaded, swap to system font
-    const pmLoaded = document.fonts.check('bold 12px "Permanent Marker"');
-    const smLoaded = document.fonts.check('bold 10px "Space Mono"');
-    if (!pmLoaded) console.warn('v119: Permanent Marker not loaded — using Arial fallback');
-    if (!smLoaded) console.warn('v119: Space Mono not loaded — using Courier fallback');
-    const FONT_PM = pmLoaded ? '"Permanent Marker",cursive' : 'Arial,sans-serif';
-    const FONT_SM = smLoaded ? '"Space Mono",monospace'     : 'Courier,monospace';
+    // PM has no bold variant — skip load-check, always use font directly
+    const FONT_PM = '"Permanent Marker",cursive';
+    const FONT_SM = '"Space Mono",monospace';
     // Patch ctx font helper so all canvas drawing uses verified fonts
     const _patchCtxFonts = (ctx) => {
       const origFont = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
