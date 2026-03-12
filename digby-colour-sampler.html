@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fraggle">
 <meta name="application-name" content="Fraggle">
-<meta name="description" content="Fraggle v1.12 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Fraggle v1.12.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Fraggle v1.12</title>
+<title>Fraggle v1.12.5</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F1.12';
+  const APP_VERSION = 'F1.12.5';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -571,8 +571,8 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 #upload-wrap.show{display:block}
 #upload-canvas{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
 /* ── Loupe magnifier ───────────────────────────────────────────────── */
-#loupe-overlay{position:fixed;width:88px;height:88px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 4px 18px rgba(0,0,0,.55),0 0 0 1.5px rgba(0,0,0,.3);pointer-events:none;z-index:9999;display:none;overflow:hidden;background:#111;transform:translate(-50%,-110%)}
-#loupe-canvas{width:88px;height:88px;display:block}
+#loupe-overlay{position:fixed;width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.85);box-shadow:0 4px 22px rgba(0,0,0,.6),0 0 0 2px rgba(0,0,0,.35);pointer-events:none;z-index:9999;display:none;overflow:hidden;background:#111;transform:translate(-50%,-115%)}
+#loupe-canvas{width:120px;height:120px;display:block}
 #loupe-cross{position:absolute;inset:0;pointer-events:none}
 #loupe-cross::before,#loupe-cross::after{content:'';position:absolute;background:rgba(255,255,255,.7)}
 #loupe-cross::before{left:50%;top:20%;width:1px;height:60%;transform:translateX(-50%)}
@@ -1543,6 +1543,31 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
   line-height: 1;
 }
 
+/* v:F1.12.5 — Welcome Screen overlay */
+#welcome-screen{
+  position:fixed;inset:0;z-index:10000;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:0;padding:36px 24px 24px;
+  background:linear-gradient(160deg,#0d0d17 0%,#18112a 55%,#080c1a 100%);
+  transition:opacity .35s ease;}
+#welcome-screen.ws-hidden{opacity:0;pointer-events:none;}
+.ws-logo{font-family:var(--mono);font-size:30px;font-weight:700;color:#fff;letter-spacing:.06em;margin-bottom:4px;}
+.ws-sub{font-size:11px;color:rgba(255,255,255,.38);font-family:var(--mono);margin-bottom:28px;}
+.ws-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px;}
+.ws-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:9px;padding:22px 10px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);
+  border-radius:14px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.75);
+  -webkit-tap-highlight-color:transparent;transition:background .14s,transform .1s;}
+.ws-btn:active{transform:scale(.94);background:rgba(255,255,255,.14);}
+.ws-btn svg{width:30px;height:30px;opacity:.75;}
+.ws-skip{
+  font-size:9px;color:rgba(255,255,255,.25);margin-top:22px;
+  font-family:var(--mono);cursor:pointer;}
+.ws-skip:hover{color:rgba(255,255,255,.5);}
+
 </style>
 </head>
 <body>
@@ -1572,6 +1597,40 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     </filter>
   </defs>
 </svg>
+<!-- v:F1.12.5 — Welcome Screen -->
+<div id="welcome-screen">
+  <div class="ws-logo">Fraggle</div>
+  <div class="ws-sub">Colour Sampler · digby.shop</div>
+  <div class="ws-grid">
+    <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" d="M23 7l-7 5 7 5V7z"/>
+        <rect x="1" y="5" width="15" height="14" rx="2" stroke-linejoin="round"/>
+      </svg>Live Camera
+    </div>
+    <div class="ws-btn" onclick="WelcomeScreen.go('sampler');setTimeout(function(){var fi=document.getElementById('up-input');if(fi){fi.value='';fi.click();}},350)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+      </svg>Upload Image
+    </div>
+    <div class="ws-btn" onclick="WelcomeScreen.go('sampler');setTimeout(function(){try{Sampler.openWheel();}catch(e){}},400)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="9"/>
+        <path stroke-linecap="round" d="M12 3c0 4.97-4.03 9-9 9"/>
+        <path stroke-linecap="round" d="M12 3c0 4.97 4.03 9 9 9"/>
+        <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+      </svg>Pick a Colour
+    </div>
+    <div class="ws-btn" onclick="WelcomeScreen.go('explore')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>Library
+    </div>
+  </div>
+  <div class="ws-skip" onclick="WelcomeScreen.hide(true)">Don't show again</div>
+</div>
+
 <div id="app">
 
 <!-- TOP BAR -->
@@ -1742,7 +1801,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <!-- Upload canvas (hidden by default) -->
     <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
       <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="document.getElementById(\'up-input\').click()">Change</button>
+        <button class="btn btn-s btn-sm" onclick="(function(){var fi=document.getElementById(\'up-input\');if(fi){fi.value=\'\';fi.click();}})()">Change</button>
         <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap">
         <button class="btn btn-s btn-sm" onclick="AutoPalette.fromUploadDensity()" title="Extract dominant colours via k-means">🎨 Auto-Palette</button>
         <div id="extraction-density" style="display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px">
@@ -2207,7 +2266,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
             <div class="harm-sw slut-swatch" id="slut-sw-shadow"
                  onclick="Explorer.slutPickZone('shadow')"
                  style="background:#1a1a2e;height:52px;border-radius:8px;border:2px solid var(--border)">
-              <div class="harm-hex" id="slut-hex-shadow">#1A1A2E</div>
+              <div class="harm-hex" id="slut-hex-shadow" style="color:#fff">#1A1A2E</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('shadow')">+</button>
             </div>
@@ -2218,7 +2277,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
             <div class="harm-sw slut-swatch" id="slut-sw-mid"
                  onclick="Explorer.slutPickZone('mid')"
                  style="background:#C09870;height:52px;border-radius:8px;border:2px solid var(--border)">
-              <div class="harm-hex" id="slut-hex-mid">#C09870</div>
+              <div class="harm-hex" id="slut-hex-mid" style="color:#111">#C09870</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('mid')">+</button>
             </div>
@@ -2229,7 +2288,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
             <div class="harm-sw slut-swatch" id="slut-sw-high"
                  onclick="Explorer.slutPickZone('high')"
                  style="background:#f0e8d8;height:52px;border-radius:8px;border:2px solid var(--border)">
-              <div class="harm-hex" id="slut-hex-high">#F0E8D8</div>
+              <div class="harm-hex" id="slut-hex-high" style="color:#111">#F0E8D8</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('high')">+</button>
             </div>
@@ -2897,7 +2956,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 <canvas id="export-canvas"></canvas>
 <!-- Loupe magnifier overlay — Safe: pointer-events:none, never blocks canvas clicks -->
 <div id="loupe-overlay" style="pointer-events:none!important">
-  <canvas id="loupe-canvas" width="88" height="88" style="pointer-events:none"></canvas>
+  <canvas id="loupe-canvas" width="120" height="120" style="pointer-events:none"></canvas>
   <div id="loupe-cross"></div>
 </div>
 <canvas id="sw-preview-canvas" style="display:none"></canvas>
@@ -3112,6 +3171,9 @@ const FB=[
   {code:"No.286",name:"Inchyra Blue",hex:"#5A7080",url:"https://www.farrow-ball.com/paint/inchyra-blue"},
   {code:"No.287",name:"St Giles Blue",hex:"#5868A0",url:"https://www.farrow-ball.com/paint/st-giles-blue"},
 ];
+
+// v:F1.12.5 — Unified paint brand database: single searchable source across all three libraries
+const PAINT_DB = [...PANTONE, ...LG, ...FB];
 </script>
 
 <!--  COLOUR SCIENCE  -->
@@ -4032,6 +4094,7 @@ const State = {
   multiMode:     true,
   activeLUTName: '',
   proMode:       false,  // FIX 7: Pro Mode — when false, hides Prompter tab + Advanced Technical Data
+  showWelcome:  true,   // v:F1.12.5 — show welcome screen on launch (persisted via localStorage)
   swatchLabel:   'both',  // v89/v443: 'both'|'name'|'hex'|'none'|'location'
   hudOn:         false,   // v:F1.12 Lab HUD overlay — off by default
   liveDisplay:   'pantone', // v433: 'pantone'|'hex'|'rgb'|'hsl'|'kelvin'|'lrv'|'paint'
@@ -5394,15 +5457,23 @@ const Sampler={
 
   bindCameraTouch(){
     const wrap=document.getElementById('sampler-cam-wrap');
+    // v:F1.12 fat-finger fix — on touch, sample 60px above the finger so the
+    // crosshair is never hidden under the thumb. Mouse stays 1:1.
+    const TOUCH_LIFT = 60;
     const moveHandler=(ev)=>{
       // Check for button tap BEFORE preventDefault  otherwise onclick never fires
       if(ev.target?.tagName==='BUTTON'||ev.target?.closest('button')||ev.target?.closest('#cam-tap-overlay'))return;
       ev.preventDefault();
       const touch=ev.touches?ev.touches[0]:ev;
       const rect=wrap.getBoundingClientRect();
-      this.sampleX=Math.max(0,Math.min(1,(touch.clientX-rect.left)/rect.width));
-      this.sampleY=Math.max(0,Math.min(1,(touch.clientY-rect.top)/rect.height));
-      this.movePicker(touch.clientX-rect.left,touch.clientY-rect.top);
+      const rawX = touch.clientX - rect.left;
+      const rawY = touch.clientY - rect.top;
+      // Touch: lift sampling point above finger. Mouse: unchanged.
+      const pickY = ev.touches ? Math.max(0, rawY - TOUCH_LIFT) : rawY;
+      this.sampleX = Math.max(0, Math.min(1, rawX / rect.width));
+      this.sampleY = Math.max(0, Math.min(1, pickY / rect.height));
+      // movePicker clamps to 35px from all edges — handles top-edge protection
+      this.movePicker(rawX, pickY);
     };
     wrap.addEventListener('touchmove',moveHandler,{passive:false});
     wrap.addEventListener('touchstart',moveHandler,{passive:false});
@@ -5776,21 +5847,25 @@ const Sampler={
       const contrastBadge = lrvVal < 50 ? ' [W]' : ' [B]';
       const oneEl=document.getElementById('hud-one-info');
       if(oneEl) oneEl.textContent=((pantone&&pantone!==hex)?pantone+'  ':'')+hex.toUpperCase()+contrastBadge;
-      // Seasonal DNA: derive from HSL warm/cool + light/dark + saturation
-      const _hsl = (typeof CS!=='undefined'&&CS.rgbToHsl) ? CS.rgbToHsl(r,g,b) : {h:0,s:50,l:50};
-      const _warm   = _hsl.h < 90 || _hsl.h > 270;
-      const _light  = _hsl.l >= 50;
-      const _bright = _hsl.s >= 55;
-      const _season = _warm  &&  _light &&  _bright ? 'Bright Spring'
-                    : _warm  &&  _light             ? 'True Spring'
-                    : !_warm &&  _light &&  _bright ? 'Light Summer'
-                    : !_warm &&  _light             ? 'Soft Summer'
-                    : _warm  && !_light &&  _bright ? 'True Autumn'
-                    : _warm  && !_light             ? 'Deep Autumn'
-                    : !_warm && !_light &&  _bright ? 'True Winter'
-                    :                                 'Deep Winter';
-      const seasonEl = document.getElementById('hud-season');
-      if(seasonEl) seasonEl.textContent = _season;
+      // v:F1.12 Seasonal DNA throttle — recalculate at ~1 Hz (every 10 calls) to
+      // save CPU on mobile; season name changes slowly so 1 Hz is plenty.
+      this._hudSeasonTick = ((this._hudSeasonTick || 0) + 1) % 10;
+      if (this._hudSeasonTick === 0) {
+        const _hsl = (typeof CS!=='undefined'&&CS.rgbToHsl) ? CS.rgbToHsl(r,g,b) : {h:0,s:50,l:50};
+        const _warm   = _hsl.h < 90 || _hsl.h > 270;
+        const _light  = _hsl.l >= 50;
+        const _bright = _hsl.s >= 55;
+        const _season = _warm  &&  _light &&  _bright ? 'Bright Spring'
+                      : _warm  &&  _light             ? 'True Spring'
+                      : !_warm &&  _light &&  _bright ? 'Light Summer'
+                      : !_warm &&  _light             ? 'Soft Summer'
+                      : _warm  && !_light &&  _bright ? 'True Autumn'
+                      : _warm  && !_light             ? 'Deep Autumn'
+                      : !_warm && !_light &&  _bright ? 'True Winter'
+                      :                                 'Deep Winter';
+        const seasonEl = document.getElementById('hud-season');
+        if(seasonEl) seasonEl.textContent = _season;
+      }
     }
     // Profile label from current preset
     const presetLabels={awb:'AWB',day:'D65',tung_d65:'TUNGSTEN',cloud_d65:'CLOUDY',
@@ -6286,20 +6361,20 @@ const Sampler={
       // Draw 2× zoomed crop into loupe canvas (44×44 src → 88×88 dst)
       const crop = 44;
       const lCtx = this._loupe.ctx;
-      lCtx.clearRect(0, 0, 88, 88);
+      lCtx.clearRect(0, 0, 120, 120);
       lCtx.save();
       lCtx.beginPath();
-      lCtx.arc(44, 44, 44, 0, Math.PI * 2);
+      lCtx.arc(60, 60, 60, 0, Math.PI * 2);
       lCtx.clip();
       lCtx.drawImage(
         uploadCanvas,
         px - crop / 2, py - crop / 2, crop, crop,
-        0, 0, 88, 88
+        0, 0, 120, 120
       );
       lCtx.restore();
-      // v:F1.15 — ring border matches centre pixel colour for precision feedback
+      // v:F1.12.4.3 — ring border matches centre pixel colour for precision feedback
       try{
-        const px=lCtx.getImageData(44,44,1,1).data;
+        const px=lCtx.getImageData(60,60,1,1).data;
         overlay.style.borderColor=`rgb(${px[0]},${px[1]},${px[2]})`;
         overlay.style.boxShadow=`0 4px 18px rgba(0,0,0,.55),0 0 0 2px rgba(255,255,255,.5),0 0 0 4.5px rgb(${px[0]},${px[1]},${px[2]})`;
       }catch(e){}
@@ -8479,15 +8554,18 @@ const Explorer={
     const chips   = document.getElementById('slut-picker-chips');
     overlay.style.display = 'block';
     chips.innerHTML = all.length
-      ? all.map(c => `
+      ? all.map(c => {
+          const _r=parseInt(c.hex.slice(1,3),16)/255, _g=parseInt(c.hex.slice(3,5),16)/255, _b=parseInt(c.hex.slice(5,7),16)/255;
+          const _tc = (0.2126*_r+0.7152*_g+0.0722*_b) > 0.4 ? '#111' : '#fff';
+          return `
           <div class="harm-sw" style="width:44px;height:44px;border-radius:var(--rs);background:${c.hex};flex-shrink:0"
                onclick="Explorer.slutAssignColour('${c.hex}')"
                title="${c.name||c.hex}">
-            <div class="harm-hex">${c.hex.toUpperCase()}</div>
+            <div class="harm-hex" style="color:${_tc}">${c.hex.toUpperCase()}</div>
             <button class="harm-add-btn" title="Save to library"
                     onclick="event.stopPropagation();Explorer.addToLib('${c.hex}')">+</button>
-          </div>`
-        ).join('')
+          </div>`;
+        }).join('')
       : `<div style="font-size:10px;color:var(--muted)">No colours saved — sample some first</div>`;
   },
 
@@ -8517,7 +8595,12 @@ const Explorer={
       sw.style.background = hex;
       // hex label lives inside the swatch as .harm-hex child
       const label = sw.querySelector('.harm-hex');
-      if (label) label.textContent = hex.toUpperCase();
+      if (label) {
+        label.textContent = hex.toUpperCase();
+        // Contrast-safe text: luminance > 0.4 → dark label, else white
+        const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+        label.style.color = (0.2126*r+0.7152*g+0.0722*b) > 0.4 ? '#111' : '#fff';
+      }
     }
   },
 
@@ -8605,44 +8688,72 @@ const Explorer={
   },
 
   async slutSwatch(){
-    // v85: preload Permanent Marker before canvas draw
-    try { await document.fonts.load('bold 13px "Permanent Marker"'); } catch(e) {}
+    // v:F1.12.4.3 — redesigned swatch: full-width zone panels + clean ramp comparison
     const s = this._slutState;
     if(!s.lut){ App.toast('Generate LUT first'); return; }
+    try { await document.fonts.load('bold 14px "Permanent Marker"'); } catch(e) {}
+
+    // Build LUT-graded ramp from 8 neutral greys
     const ramp = ['#111','#333','#555','#777','#999','#bbb','#ddd','#fff'];
-    const graded = ramp.map(hex=>{
+    const graded = ramp.map(hex => {
       const {r,g,b} = CS.hexToRgb(hex);
-      const ri = Math.min(16, Math.round(r/255*16));
-      const gi = Math.min(16, Math.round(g/255*16));
-      const bi = Math.min(16, Math.round(b/255*16));
-      const idx = bi*17*17 + gi*17 + ri;
-      const [lr,lg,lb] = s.lut[idx] || [r/255,g/255,b/255];
-      return CS.rgbToHex(Math.round(lr*255), Math.round(lg*255), Math.round(lb*255));
+      const ri=Math.min(16,Math.round(r/255*16)), gi=Math.min(16,Math.round(g/255*16)), bi=Math.min(16,Math.round(b/255*16));
+      const li = bi*17*17 + gi*17 + ri;
+      const [lr,lg,lb] = s.lut[li] || [r/255,g/255,b/255];
+      return CS.rgbToHex(Math.round(lr*255),Math.round(lg*255),Math.round(lb*255));
     });
-    const W=640, H=300, PAD=16;
+
+    const W=640, H=340, PAD=16;
     const canvas = document.getElementById('export-canvas');
     canvas.width=W; canvas.height=H;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle='#1a1a1a'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#111'; ctx.fillRect(0,0,W,H);
+
+    // ── Zone panels (full width, top section) ───────────────────────────────────────
     const zones = [{hex:s.shadow,label:'Shadows'},{hex:s.mid,label:'Midtones'},{hex:s.high,label:'Highlights'}];
-    zones.forEach((z,i)=>{
-      ctx.fillStyle=z.hex; ctx.fillRect(PAD+i*52, PAD, 46, 46);
-      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='6px Space Mono,monospace'; ctx.textAlign='center';
-      ctx.fillText(z.label, PAD+i*52+23, PAD+58);
+    const zH=155, zGap=5;
+    const zW=(W-PAD*2-zGap*2)/3;
+    zones.forEach((z, i) => {
+      const x = PAD + i*(zW+zGap);
+      ctx.fillStyle = z.hex;
+      ctx.fillRect(x, PAD, zW, zH);
+      // Contrast-safe labels
+      const rr=parseInt(z.hex.slice(1,3),16)/255, gg=parseInt(z.hex.slice(3,5),16)/255, bb=parseInt(z.hex.slice(5,7),16)/255;
+      const luma = 0.2126*rr + 0.7152*gg + 0.0722*bb;
+      ctx.textAlign = 'center';
+      const cx2 = x + zW/2;
+      // Zone name — top of panel
+      ctx.fillStyle = luma>0.4 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.5)';
+      ctx.font = '8px Space Mono,monospace';
+      ctx.fillText(z.label.toUpperCase(), cx2, PAD+14);
+      // Hex value — bottom of panel
+      ctx.fillStyle = luma>0.4 ? '#111' : '#fff';
+      ctx.font = 'bold 10px Space Mono,monospace';
+      ctx.fillText(z.hex.toUpperCase(), cx2, PAD+zH-8);
     });
+
+    // ── Ramp comparison (original vs graded) ────────────────────────────────
+    const rampY=PAD+zH+16, rampH=50, rampGap=7;
     const segW=(W-PAD*2)/ramp.length;
-    ramp.forEach((h,i)=>{
-      const x=PAD+i*segW;
-      ctx.fillStyle=h;        ctx.fillRect(x, 80,  segW-2, 80);
-      ctx.fillStyle=graded[i];ctx.fillRect(x, 162, segW-2, 80);
-    });
-    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(PAD,158,W-PAD*2,2);
     ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='7px Space Mono,monospace'; ctx.textAlign='left';
-    ctx.fillText('ORIGINAL', PAD+2, 75); ctx.fillText('GRADED', PAD+2, 157);
-    ctx.fillStyle='#fff'; ctx.font="bold 13px 'Permanent Marker',cursive"; ctx.textAlign='left';
-    ctx.fillText('Sample LUT', PAD, H-PAD-5);
-    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font='7px Space Mono,monospace';
-    ctx.fillText(`${s.shadow} · ${s.mid} · ${s.high} · ${s.strength}% · digby.shop`, PAD, H-PAD+7);
+    ctx.fillText('ORIGINAL', PAD, rampY-3);
+    ctx.fillText('GRADED',   PAD, rampY+rampH+rampGap+rampH-3+6);
+    ramp.forEach((h, i) => {
+      const x = PAD+i*segW;
+      ctx.fillStyle=h;         ctx.fillRect(x, rampY,              segW-2, rampH);
+      ctx.fillStyle=graded[i]; ctx.fillRect(x, rampY+rampH+rampGap, segW-2, rampH);
+    });
+    ctx.fillStyle='rgba(255,255,255,.12)';
+    ctx.fillRect(PAD, rampY+rampH+1, W-PAD*2, rampGap-2);
+
+    // ── Footer ─────────────────────────────────────────────────────────────
+    const footY = H-10;
+    ctx.fillStyle='#fff'; ctx.font="bold 14px 'Permanent Marker',cursive"; ctx.textAlign='left';
+    ctx.fillText('Sample LUT', PAD, footY);
+    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='7px Space Mono,monospace'; ctx.textAlign='right';
+    ctx.fillText(`${s.shadow} · ${s.mid} · ${s.high} · ${s.strength}% str · digby.shop`, W-PAD, footY);
+
+    // Export PNG
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
     a.download = `digby-sample-lut-swatch-${Date.now()}.png`;
@@ -8996,6 +9107,9 @@ const Prompter={
         const safe = lum>0.5?'#111111':'#ffffff';
         const pout = document.getElementById('prom-output');
         if(pout) pout.style.color = safe;
+        // v:F1.12 export sync — keep activeExportTarget in step with swatch selection
+        // so the camera quick-export button always captures the intended colour
+        if(c && typeof Sampler \!== 'undefined') Sampler.activeExportTarget = c.hex;
       }catch(e){}
     }
   },
@@ -9929,6 +10043,7 @@ const SwatchExport = {
         <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
         <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
+        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()" ${sel.length===0?'disabled':''}>↓ MJ Strip (SREF)</button>
       </div>
     </div>`;
   },
@@ -10508,6 +10623,33 @@ const ColourGenerator = {
         ['#CC0000','#FFCC00','#003399','#EEEEEE','#222222'],
       ]
     },
+  },
+
+  // v:F1.12.5 — MJ SREF Strip: 1000×200 clean colour band (no text/borders)
+  // If colours carry .weight (from k-means extraction), widths are proportional; else equal.
+  downloadSREF() {
+    const sel = this.selectedColours();
+    if (!sel.length) { App.toast('Select colours to export'); return; }
+    const W = 1000, H = 200;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    // Use proportional weights if available, otherwise equal widths
+    const weights = sel.map(c => (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1);
+    const total   = weights.reduce((a, b) => a + b, 0);
+    let x = 0;
+    sel.forEach((c, i) => {
+      const isLast = (i === sel.length - 1);
+      const w = isLast ? (W - x) : Math.round((weights[i] / total) * W);
+      ctx.fillStyle = c.hex;
+      ctx.fillRect(x, 0, w, H);
+      x += w;
+    });
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'mj-sref-strip.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    App.toast('MJ SREF strip downloaded');
   },
 
   currentPalette: null,
@@ -11908,6 +12050,23 @@ const PaletteBuilder = {
 
 <!--  BOOT  -->
 <script>
+// v:F1.12.5 — Welcome Screen controller
+const WelcomeScreen = {
+  el: null,
+  _el()  { return this.el || (this.el = document.getElementById('welcome-screen')); },
+  show() {
+    const el = this._el(); if(!el) return;
+    el.classList.remove('ws-hidden'); el.style.display = 'flex';
+  },
+  hide(persist) {
+    const el = this._el(); if(!el) return;
+    el.classList.add('ws-hidden');
+    setTimeout(()=>{ el.style.display = 'none'; }, 380);
+    if(persist) try { localStorage.setItem('fraggle_skipWelcome','1'); } catch(e){}
+  },
+  go(tab) { this.hide(); App.setTab(tab); }
+};
+
 // v132: switchTab global alias (spec-required name)
 function switchTab(id) { App.setTab(id); }
 
@@ -11915,6 +12074,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   await App.init();
   Theme.init();
   restoreDesignProMode(); // v132: restore Design Pro Mode state
+  // v:F1.12.5 — Welcome screen: show unless user has dismissed it
+  try { if(State.showWelcome && !localStorage.getItem('fraggle_skipWelcome')) WelcomeScreen.show(); } catch(e){}
   SharePalette.checkURLOnLoad();
   // Prompter pill clicks are handled by the inline onclick="Prompter.togglePill(this)"
   // on each pill element. The delegated listener has been removed because it caused
