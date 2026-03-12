@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fraggle">
 <meta name="application-name" content="Fraggle">
-<meta name="description" content="Fraggle v12.6 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Fraggle v12.7 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Fraggle v12.6</title>
+<title>Fraggle v12.7</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.6';
+  const APP_VERSION = 'F12.7';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1998,6 +1998,14 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         </button>
         <button class="live-act-btn" id="live-export-btn" title="Quick Polaroid Export"
           onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}/* v:F1.11 prefer explicit tap target */const _t=Sampler.activeExportTarget;const _q=Sampler.pickQueue&&Sampler.pickQueue.length?Sampler.pickQueue:null;const _hexes=_t?[_t,...(_q||[]).filter(h=>h!==_t)]:_q||[Sampler.currentHex];if(_hexes[0]){AutoPalette.exportPolaroid(_hexes)}else{App.toast('Tap a swatch to select export target')}})()">📸</button>
+        <!-- v:F12.7 — Save Scene: stores entire pickQueue as a named palette strip -->
+        <button class="live-act-btn" id="live-save-scene-btn"
+                title="Save current palette as a Scene"
+                onclick="App.saveScene()"
+                style="font-family:var(--mono);font-size:8px;font-weight:700;
+                       letter-spacing:-.3px;background:rgba(224,255,0,.12);
+                       border:1px solid rgba(224,255,0,.3);color:#d8f500;
+                       width:44px;height:44px;border-radius:12px;line-height:1.2">SCENE</button>
         <button id="bar-picker-btn-rainbow" title="Open in Colour Picker" onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker"></button>
         <button class="live-act-btn" id="live-wb-btn" title="White Balance"
                 onclick="Sampler.toggleWBDropdown()"
@@ -2052,6 +2060,8 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <!-- 60-30-10 view -->
       <div id="gal-631-view"></div>
+      <!-- v:F12.7 — Saved Scenes strips -->
+      <div id="lib-scenes-bar"></div>
       <!-- Grid -->
       <div id="library-grid"></div>
       <!-- v:F1.5 explicit bottom spacer — WebKit ignores padding-bottom on scroll containers -->
@@ -5090,6 +5100,32 @@ const App={
     App.toast(`Grade: ${name}`)
   },
 
+  // v:F12.7 — Save Scene: snapshot the current sampler palette strip
+  // Uses the same hex priority chain as the polaroid export:
+  //   activeExportTarget → pickQueue → currentHex
+  saveScene() {
+    const _t  = Sampler.activeExportTarget;
+    const _q  = (Sampler.pickQueue && Sampler.pickQueue.length) ? Sampler.pickQueue : null;
+    const hexes = _t ? [_t, ...(_q || []).filter(h => h !== _t)]
+                     : _q || (Sampler.currentHex ? [Sampler.currentHex] : null);
+    if (!hexes || !hexes.length) {
+      App.toast('Sample some colours first — tap swatches in the bar');
+      return;
+    }
+    const now   = new Date();
+    const label = 'Scene ' + now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const scene = { id: Date.now(), ts: now.toISOString(), hexes, label };
+    try {
+      const KEY      = 'fraggle_scenes';
+      const existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+      existing.unshift(scene);
+      localStorage.setItem(KEY, JSON.stringify(existing.slice(0, 20)));
+      App.toast('Scene saved ✓');
+      // Refresh library if it's currently visible
+      if (this.tab === 'library') Library.render();
+    } catch(e) { App.toast('Could not save scene (storage full?)'); }
+  },
+
   toast(msg,ms=2200){
     const e=document.getElementById('toast');
     e.textContent=msg;e.classList.add('show');
@@ -6989,6 +7025,38 @@ const Library={
   activeMoodFilter: null,
 
   render(){
+    // v:F12.7 — Saved Scenes: render horizontal palette strips above grid
+    const scenesBar = document.getElementById('lib-scenes-bar');
+    if (scenesBar) {
+      try {
+        const scenes = JSON.parse(localStorage.getItem('fraggle_scenes') || '[]');
+        if (scenes.length) {
+          const sceneCards = scenes.map(s => {
+            const strip = s.hexes.map(h =>
+              `<div style="flex:1;background:${h};min-width:4px"></div>`
+            ).join('');
+            const dateStr = new Date(s.ts).toLocaleDateString([], { month:'short', day:'numeric' });
+            return `<div style="margin-bottom:8px;cursor:pointer"
+                        onclick="App.setTab('sampler')" title="${s.label}">
+              <div style="display:flex;height:24px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">${strip}</div>
+              <div style="font-size:8px;color:var(--muted);font-family:var(--mono);
+                          margin-top:3px;display:flex;justify-content:space-between">
+                <span>${s.label}</span><span>${dateStr}</span>
+              </div>
+            </div>`;
+          }).join('');
+          scenesBar.innerHTML =
+            `<div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;
+                          color:var(--accent);font-family:var(--mono);font-weight:700;
+                          padding:10px 12px 6px">Saved Scenes</div>
+             <div style="padding:0 12px 4px">${sceneCards}</div>
+             <div style="border-top:1px solid var(--border);margin-bottom:6px"></div>`;
+        } else {
+          scenesBar.innerHTML = '';
+        }
+      } catch(e) { scenesBar.innerHTML = ''; }
+    }
+
     const allRaw=DS.all();
     // Filter by active folder (FolderManager may not exist yet on first load)
     const activeFolder = (typeof FolderManager !== 'undefined') ? FolderManager.active : 'Default';
@@ -13774,7 +13842,13 @@ self.onmessage = function(e) {
     ctx.fillText('digby.shop', BORDER + CW - 8, bylineY);
 
     // ── Download — Web Share on mobile (works on iOS PWA), anchor fallback desktop ──
-    const pngDataUrl = canvas.toDataURL('image/png');
+    // v:F12.7 — Guard against SecurityError if canvas is CORS-tainted
+    let pngDataUrl;
+    try { pngDataUrl = canvas.toDataURL('image/png'); }
+    catch(e) {
+      App.toast('Export blocked — image may contain cross-origin content');
+      return;
+    }
     const filename   = `spectrum-${Date.now()}.png`;
     const _doAnchor  = () => {
       const a = document.createElement('a');
