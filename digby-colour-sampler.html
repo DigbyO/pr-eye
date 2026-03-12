@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fraggle">
 <meta name="application-name" content="Fraggle">
-<meta name="description" content="Fraggle v1.12.5 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Fraggle v12.6 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Fraggle v1.12.5</title>
+<title>Fraggle v12.6</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F1.12.5';
+  const APP_VERSION = 'F12.6';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2714,6 +2714,9 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleSuggest()"> Suggest</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.clear()">Clear</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.seedHarmony('analogous')" title="Fill empty slots with analogous colours from seed">≈ Analogous</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.seedHarmony('complementary')" title="Fill empty slots with complementary harmony from seed">↔ Comp</button>
+          <button class="btn btn-s btn-sm" onclick="PaletteBuilder.seedHarmony('triadic')" title="Fill empty slots with triadic harmony from seed">△ Triadic</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
@@ -10040,8 +10043,10 @@ const SwatchExport = {
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-p" style="flex:1;min-width:120px" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>↓ PNG</button>
-        <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
-        <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
+        \${App.isProMode ? `
+          <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadASE()" \${sel.length===0?'disabled':''}>↓ ASE</button>
+          <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" \${sel.length===0?'disabled':''}>↓ CLR</button>
+        ` : ''}
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
         <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()" ${sel.length===0?'disabled':''}>↓ MJ Strip (SREF)</button>
       </div>
@@ -11367,6 +11372,46 @@ const PaletteBuilder = {
     const hexes = [root, CS.hslToHex((h + 150) % 360, s, l), CS.hslToHex((h + 210) % 360, s, l)];
     this.setSuggestTheme('split_comp', null);
     this.suggestAlgo('Split-Comp · 150° / 210°', hexes);
+  },
+
+  // v:F12.6 — Seeded harmony: fill all EMPTY palette slots from root colour
+  // One-tap alternative to the algo-tray chip flow (which still exists).
+  seedHarmony(type) {
+    const root = this._rootHex();
+    const { r, g, b } = CS.hexToRgb(root);
+    const { h, s, l } = CS.rgbToHsl(r, g, b);
+    const hs = s / 100, hl = l / 100;
+    let hexes = [];
+    if (type === 'analogous') {
+      hexes = [-30, -15, 0, 15, 30].map(dh => CS.hslToHex((h + dh + 360) % 360, hs, hl));
+    } else if (type === 'triadic') {
+      hexes = [0, 120, 240].map(dh => CS.hslToHex((h + dh) % 360, hs, hl));
+    } else if (type === 'complementary') {
+      const comp = (h + 180) % 360;
+      hexes = [
+        root,
+        CS.hslToHex(comp, hs, hl),
+        CS.hslToHex(comp, Math.min(1, hs * 1.15), Math.max(0.15, hl - 0.1)),
+        CS.hslToHex(h, hs, Math.min(0.92, hl + 0.12)),
+      ];
+    } else if (type === 'splitcomp') {
+      hexes = [
+        root,
+        CS.hslToHex((h + 150) % 360, hs, hl),
+        CS.hslToHex((h + 210) % 360, hs, hl),
+      ];
+    }
+    const emptySlots = this.MAX - this.colours.length;
+    if (emptySlots === 0) { App.toast('Palette full — clear some slots first'); return; }
+    const toAdd = hexes.filter(hx => !this.colours.find(c => c.hex === hx)).slice(0, emptySlots);
+    if (!toAdd.length) { App.toast('All suggested colours already in palette'); return; }
+    this._pushHistory();
+    toAdd.forEach(hex => {
+      const name = CS.pantoneFirst ? CS.pantoneFirst(hex) : hex.toUpperCase();
+      this.colours.push({ hex, name, locked: false, pantone: name });
+    });
+    this.render();
+    App.toast(toAdd.length + ' ' + type + ' colour' + (toAdd.length > 1 ? 's' : '') + ' added');
   },
 
   _themeCandidate() {
