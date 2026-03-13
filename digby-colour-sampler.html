@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.22';
+  const APP_VERSION = 'F12.25';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -85,7 +85,7 @@
   --accent-soft:rgba(200,169,110,0.18);
   /* ── Z-index scale ── */
   --z-bar:20;--z-toast:300;--z-dropdown:1000;
-  --z-overlay:2000;--z-tabs:9999;--z-modal:10000;--z-top:20000;
+  --z-overlay:2000;--z-tabs:9999;--z-modal:10000;--z-top:20000;--z-max:99999;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{height:100%;overflow:hidden;font-size:16px}
@@ -462,12 +462,19 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
   display:flex;align-items:center;gap:4px;
   background:var(--surface);border:1px solid var(--border);border-radius:8px;
   padding:6px 10px;cursor:pointer;color:var(--fg);
-  transition:background .15s,border-color .15s;flex-shrink:0;
-  -webkit-tap-highlight-color:transparent;
+  transition:background .15s,border-color .15s,opacity .15s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  opacity:0.65;
 }
 .instant-scheme-btn:hover,.instant-scheme-btn:active{
-  background:var(--surface2);border-color:var(--accent);
+  background:var(--surface2);border-color:var(--accent);opacity:1;
 }
+.instant-scheme-btn.active{
+  background:var(--surface2);border-color:var(--accent);
+  box-shadow:0 0 0 1px var(--accent),0 0 8px var(--accent-soft);
+  opacity:1;
+}
+.instant-scheme-btn.active .isch-label{color:var(--accent)}
 .isch-dots{display:flex;gap:2px;flex-shrink:0}
 .isch-dot{display:inline-block;width:9px;height:9px;border-radius:50%}
 .isch-label{font-size:9px;font-family:var(--mono);letter-spacing:.06em;color:var(--accent);font-weight:600}
@@ -1844,7 +1851,8 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <!-- Upload canvas (hidden by default) -->
     <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
       <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="(function(){var fi=document.getElementById(\'up-input\');if(fi){fi.value=\'\';fi.click();}})()">Change</button>
+        <button class="btn btn-s btn-sm" onclick="Sampler.setMode('camera')" title="Back to camera" style="flex-shrink:0;font-size:14px;padding:6px 10px" aria-label="Back to camera">←</button>
+        <button class="btn btn-s btn-sm" onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();}">Change</button>
         <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap">
         <button class="btn btn-s btn-sm" onclick="AutoPalette.fromUploadDensity()" title="Extract dominant colours via k-means">🎨 Auto-Palette</button>
         <div id="extraction-density" style="display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px">
@@ -1860,9 +1868,9 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
       <!-- v:F1.12 — Instant Schemes row -->
-      <div id="instant-schemes-bar" style="display:flex;gap:6px;padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+      <div id="instant-schemes-bar" style="display:flex;gap:6px;padding:6px 12px;background:rgba(15,15,15,0.75);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border-bottom:1px solid rgba(255,255,255,0.08);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
         <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;flex-shrink:0;margin-right:2px">SCHEMES</div>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('neutral')" title="Pale architectural neutrals — L=90, C≤4">
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('neutral');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Pale architectural neutrals — L=90, C≤4">
           <span class="isch-dots">
             <span class="isch-dot" style="background:#EDEBE4"></span>
             <span class="isch-dot" style="background:#E8E6DF"></span>
@@ -1871,7 +1879,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
           <span class="isch-label">NEUTRAL</span>
           <span class="isch-sub">Pale wash</span>
         </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('muted')" title="Half-chroma — tonally quiet version">
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('muted');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Half-chroma — tonally quiet version">
           <span class="isch-dots">
             <span class="isch-dot" style="background:#B5A898"></span>
             <span class="isch-dot" style="background:#98A8A0"></span>
@@ -1880,7 +1888,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
           <span class="isch-label">MUTED</span>
           <span class="isch-sub">Tonal quiet</span>
         </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('vivid')" title="Boosted chroma — saturated punchy version">
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('vivid');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Boosted chroma — saturated punchy version">
           <span class="isch-dots">
             <span class="isch-dot" style="background:#E8532A"></span>
             <span class="isch-dot" style="background:#2A7CE8"></span>
@@ -1888,6 +1896,24 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
           </span>
           <span class="isch-label">VIVID</span>
           <span class="isch-sub">Saturated</span>
+        </button>
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('true');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Raw k-means extraction — no LCH transform">
+          <span class="isch-dots">
+            <span class="isch-dot" style="background:#5D8A5E"></span>
+            <span class="isch-dot" style="background:#8A5D6A"></span>
+            <span class="isch-dot" style="background:#5D6E8A"></span>
+          </span>
+          <span class="isch-label">TRUE</span>
+          <span class="isch-sub">Raw colours</span>
+        </button>
+        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('opposites');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="180° LCH hue shift — complementary palette">
+          <span class="isch-dots">
+            <span class="isch-dot" style="background:#8A5D5D"></span>
+            <span class="isch-dot" style="background:#5D8A7E"></span>
+            <span class="isch-dot" style="background:#7E5D8A"></span>
+          </span>
+          <span class="isch-label">OPPOSITE</span>
+          <span class="isch-sub">180° complement</span>
         </button>
       </div>
       <!-- Picked colours strip — shown after any tap -->
@@ -3694,6 +3720,15 @@ const hns=['Red','Rose','Tangerine','Amber','Gold','Lime','Fern','Teal','Sky Blu
   },
 
   // ── WCAG relative luminance & contrast ───────────────────────────
+  // v:F12.25 — Adaptive contrast: returns true if hex is perceptually dark
+  //   Uses relative luminance; threshold 0.179 (WCAG midpoint) → flip UI to white/black
+  isDark(hex) {
+    try {
+      const { r, g, b } = this.hexToRgb(hex);
+      return this.relativeLuminance(r, g, b) < 0.179;
+    } catch(e) { return true; }
+  },
+
   relativeLuminance(r, g, b) {
     const f = v => {
       v /= 255;
@@ -4399,6 +4434,23 @@ const App={
     PaletteBuilder.init();   // registers Ctrl/Cmd+Z undo
     ColourGenerator.init();
     this.updateDot();
+
+    // v:F12.25 — PWA Share Target: handle images shared from phone gallery
+    // launchQueue is the File Handling API (Chrome 89+ / Edge 89+)
+    try {
+      if ('launchQueue' in window) {
+        window.launchQueue.setConsumer(async (params) => {
+          if (!params.files || !params.files.length) return;
+          try {
+            const file = await params.files[0].getFile();
+            if (file && file.type.startsWith('image/')) {
+              App.toast('Opening shared image…');
+              Sampler._loadFile(file);
+            }
+          } catch(e) { /* launchQueue unavailable or file unreadable */ }
+        });
+      }
+    } catch(e) { /* non-fatal */ }
   },
 
   setTab(t){
@@ -5409,7 +5461,19 @@ const Sampler={
         theme_color: '#0c0c0c',
         icons: [
           { src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%230c0c0c"/><circle cx="50" cy="38" r="10" fill="%23c8a96e"/><circle cx="68" cy="52" r="10" fill="%236eb5c8"/><circle cx="60" cy="70" r="10" fill="%23c86e8a"/><circle cx="40" cy="70" r="10" fill="%238ac86e"/><circle cx="32" cy="52" r="10" fill="%238e6ec8"/></svg>', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
-        ]
+        ],
+        // v:F12.25 — Share Target: receive images shared from phone gallery
+        share_target: {
+          action: '.',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            title: 'title',
+            text: 'text',
+            url: 'url',
+            files: [{ name: 'file', accept: ['image/*'] }]
+          }
+        }
       };
       const json = JSON.stringify(manifest);
       const url  = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
@@ -6838,7 +6902,7 @@ const Sampler={
     if (!ov) {
       ov = document.createElement('div');
       ov.id = 'immersive-overlay';
-      ov.style.cssText = 'position:fixed;inset:0;z-index:var(--z-top);display:none;'
+      ov.style.cssText = 'position:fixed;inset:0;z-index:var(--z-max,99999);display:none;'
         + 'flex-direction:column;align-items:center;justify-content:center;'
         + 'transition:background 1.2s ease;cursor:pointer;'
         + 'padding-bottom:env(safe-area-inset-bottom,0px)';
@@ -6993,6 +7057,14 @@ const Sampler={
       d.onclick=()=>Library.openDetail(c.id);
       wrap.insertBefore(d,badge);
     });
+  },
+
+  // v:F12.25 — Accept a raw File object (e.g. from PWA share target / launchQueue)
+  _loadFile(file) {
+    if (!file || !file.type.startsWith('image/')) { App.toast('Not an image'); return; }
+    this.setMode('upload');
+    // Wrap in a fake input-like object so loadUpload can reuse its full pipeline
+    setTimeout(() => this.loadUpload({ files: [file] }), 300);
   },
 
   loadUpload(input){
@@ -7718,7 +7790,7 @@ const Library={
             return `<div style="margin-bottom:8px;position:relative">
               <button onclick="event.stopPropagation();(function(){
                 try{var KEY='fraggle_scenes';var arr=JSON.parse(localStorage.getItem(KEY)||'[]');
-                arr=arr.filter(function(x){return x.id!=='${s.id}';});
+                arr=arr.filter(function(x){return x.id!==${s.id};});
                 localStorage.setItem(KEY,JSON.stringify(arr));}
                 catch(e){}
                 var sb=document.getElementById('lib-scenes-bar');
@@ -14245,7 +14317,7 @@ self.onmessage = function(e) {
   // v:F1.12 — Instant Schemes: extract palette then apply LCH transform
   async applyScheme(mode) {
     if (!Sampler.uploadImg) { App.toast('Load an image first'); return; }
-    const labels = { neutral:'Neutral Scheme', muted:'Muted Scheme', vivid:'Vivid Scheme' };
+    const labels = { neutral:'Neutral Scheme', muted:'Muted Scheme', vivid:'Vivid Scheme', true:'True Colours', opposites:'Opposites' };
     const k = this._density || 6;
     this._showSpinner('Building ' + (labels[mode] || mode) + '\u2026');
     const manualPick = (Sampler.pickQueue && Sampler.pickQueue.length > 0) ? Sampler.pickQueue[0] : null;
@@ -14287,6 +14359,20 @@ self.onmessage = function(e) {
       const { r, g, b } = CS.hexToRgb(hex);
       const { l, c, h } = CS.rgbToLch(r, g, b);
       return CS.lchToHex(l, Math.min(c * 1.4, 80), h);
+    } catch(e) { return hex; }
+  },
+
+  _schemeTrue(hex) {
+    // v:F12.25 — raw k-means result, no LCH transform applied
+    return hex;
+  },
+
+  _schemeOpposites(hex) {
+    // v:F12.25 — 180° hue complement in LCH space; preserves lightness and chroma
+    try {
+      const { r, g, b } = CS.hexToRgb(hex);
+      const { l, c, h } = CS.rgbToLch(r, g, b);
+      return CS.lchToHex(l, c, (h + 180) % 360);
     } catch(e) { return hex; }
   },
 
