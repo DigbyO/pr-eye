@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.25';
+  const APP_VERSION = 'F12.27';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -198,12 +198,12 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   width: min(300px, calc(100vw - 24px));
   height: auto;
   z-index: var(--z-overlay);
-  background: rgba(18,18,18,0.97);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  background: rgba(12,12,12,0.72);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
   border-radius: 18px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
   padding: 0 0 10px;
   display: flex;
   flex-direction: column;
@@ -1850,9 +1850,9 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 
     <!-- Upload canvas (hidden by default) -->
     <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
-      <div style="display:flex;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="Sampler.setMode('camera')" title="Back to camera" style="flex-shrink:0;font-size:14px;padding:6px 10px" aria-label="Back to camera">←</button>
-        <button class="btn btn-s btn-sm" onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();}">Change</button>
+      <div style="display:flex;gap:6px;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap">
+        <button class="btn btn-s btn-sm" onclick="Sampler.setMode('camera')" title="Back to camera" style="flex-shrink:0;font-size:15px;padding:5px 9px;line-height:1" aria-label="Back to camera">←</button>
+        <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();}">Change</button>
         <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap">
         <button class="btn btn-s btn-sm" onclick="AutoPalette.fromUploadDensity()" title="Extract dominant colours via k-means">🎨 Auto-Palette</button>
         <div id="extraction-density" style="display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px">
@@ -1929,7 +1929,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <button class="btn btn-p btn-sm" onclick="Sampler.saveQueue()">Save All</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
       </div>
-      <div style="position:relative;flex:1;overflow:hidden">
+      <div style="position:relative;flex:1;overflow:hidden;min-height:180px">
         <canvas id="upload-canvas" style="display:block;width:100%;height:100%;object-fit:contain;touch-action:none"></canvas>
         <!-- v:F1.12 — Picked colours: vertical overlay right column, same as cam-collection -->
         <div id="up-collection" style="display:none">
@@ -2147,10 +2147,11 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <button class="live-act-btn" id="live-save-scene-btn"
                 title="Save current palette as a Scene"
                 onclick="App.saveScene()"
-                style="font-family:var(--mono);font-size:8px;font-weight:700;
-                       letter-spacing:-.3px;background:rgba(224,255,0,.12);
-                       border:1px solid rgba(224,255,0,.3);color:#d8f500;
-                       width:44px;height:44px;border-radius:12px;line-height:1.2">SCENE</button>
+                aria-label="Save scene"
+                style="font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.04em">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 2px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          SCENE
+        </button>
         <button id="bar-picker-btn-rainbow" title="Open in Colour Picker" onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker"></button>
         <button class="live-act-btn" id="live-wb-btn" title="White Balance"
                 onclick="Sampler.toggleWBDropdown()"
@@ -6844,6 +6845,7 @@ const Sampler={
       try { target.removeEventListener(event, handler); } catch(e) {}
     });
     this._globalListeners = [];
+    this.frozen = false;  // v:F12.27 — explicit reset: prevent camera staying frozen after mode switch
     const _ll = document.getElementById('live-loupe');
     if (_ll) _ll.style.background = 'transparent';
   },
@@ -6905,7 +6907,7 @@ const Sampler={
       ov.style.cssText = 'position:fixed;inset:0;z-index:var(--z-max,99999);display:none;'
         + 'flex-direction:column;align-items:center;justify-content:center;'
         + 'transition:background 1.2s ease;cursor:pointer;'
-        + 'padding-bottom:env(safe-area-inset-bottom,0px)';
+        + 'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
       ov.innerHTML =
         '<div id="imm-hex" style="font-family:var(--mono);font-size:clamp(28px,8vw,64px);'
         + 'font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,0.92);'
@@ -7494,7 +7496,12 @@ const ColorMath = {
     hexes.forEach(hex => {
       const rgb = CS.hexToRgb(hex);
       if (!rgb) return;
-      const nameBuf = encName(hex.toUpperCase());
+      // v:F12.27 — colour entry name: "PantoneName — Category" or "#HEX — Category"
+      // so the swatch is searchable by category name inside Photoshop / InDesign
+      const _pantone = (typeof CS !== 'undefined' && CS.pantoneFirst)
+        ? CS.pantoneFirst(hex) : hex.toUpperCase();
+      const colorEntryName = _pantone + ' — ' + label;
+      const nameBuf = encName(colorEntryName);
       // Block data: name + "RGB " + R f32 + G f32 + B f32 + colorType u16
       const colorPartLen = 4 + 4 + 4 + 4 + 2;  // "RGB " + 3×float32 + type
       const buf = new ArrayBuffer(nameBuf.byteLength + colorPartLen);
@@ -14225,8 +14232,11 @@ self.onmessage = function(e) {
     const buildStrip = (mosaic) => {
       const ws = window._apWeights;
       return hexes.map((h, i) => {
-        const lum = CS.lrvLinear ? CS.lrvLinear(...Object.values(CS.hexToRgb(h))) : 50;
-        const tc  = lum < 40 ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.65)';
+        // v:F12.27 — per-swatch WCAG contrast: each colour (incl. Opposites) gets
+        // its own luminance check so text is always legible on the swatch background
+        const tc = (typeof CS !== 'undefined' && CS.isDark)
+          ? (CS.isDark(h) ? 'rgba(255,255,255,.88)' : 'rgba(0,0,0,.70)')
+          : 'rgba(255,255,255,.88)';
         const pct = mosaic ? Math.max(ws[i]*100, 4).toFixed(1) : null;
         const widthStyle = mosaic
           ? 'flex:' + Math.max(ws[i]*100,4) + ' 0 0%;min-width:28px;max-width:none'
