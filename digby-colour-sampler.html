@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.34 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.37 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.34</title>
+<title>Digby v12.37</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.34';
+  const APP_VERSION = 'F12.37';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -605,9 +605,11 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 #save-meta{padding:0 12px 8px;font-size:10px;color:var(--muted);line-height:1.8}
 
 /* Upload mode */
-#upload-wrap{flex:1;overflow:hidden;position:relative;background:#000;display:none}
+/* v:F12.35 - transparent wrap; no black bars around image */
+#upload-wrap{flex:1;overflow:hidden;position:relative;background:transparent;display:none}
 #upload-wrap.show{display:block}
-#upload-canvas{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
+/* v:F12.35 - height:auto lets canvas respect its pixel height set in JS */
+#upload-canvas{width:100%;height:auto;object-fit:contain;display:block;touch-action:none}
 /* ── Loupe magnifier ───────────────────────────────────────────────── */
 #loupe-overlay{position:fixed;width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.85);box-shadow:0 4px 22px rgba(0,0,0,.6),0 0 0 2px rgba(0,0,0,.35);pointer-events:none;z-index:var(--z-tabs);display:none;overflow:hidden;background:#111;transform:translate(-50%,-115%)}
 #loupe-canvas{width:120px;height:120px;display:block}
@@ -1375,64 +1377,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
   will-change: opacity;
 }
 
-/* v:F1.1 Rainbow Ball picker button */
-#bar-picker-btn-rainbow {
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.35);
-  background: conic-gradient(from 0deg,
-    #ff0000 0deg,
-    #ff6600 30deg,
-    #ffcc00 60deg,
-    #aaff00 90deg,
-    #00ff44 120deg,
-    #00ffcc 150deg,
-    #00ccff 180deg,
-    #0066ff 210deg,
-    #4400ff 240deg,
-    #aa00ff 270deg,
-    #ff00cc 300deg,
-    #ff0044 330deg,
-    #ff0000 360deg
-  );
-  box-shadow: 0 0 10px rgba(255,255,255,.2), 0 2px 8px rgba(0,0,0,.5);
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .15s, box-shadow .15s;
-  overflow: hidden;
-  position: relative;
-}
-/* Glass Layer 1 — primary highlight at 11 o'clock */
-#bar-picker-btn-rainbow::before {
-  content: '';
-  position: absolute;
-  width: 65%; height: 65%;
-  top: 3%; left: 3%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 28% 25%,
-    rgba(255,255,255,.82) 0%,
-    rgba(255,255,255,.32) 38%,
-    rgba(255,255,255,.05) 65%,
-    transparent 76%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-/* Glass Layer 2 — subtle rim light at bottom right */
-#bar-picker-btn-rainbow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 78% 82%, rgba(255,255,255,.20) 0%, transparent 35%),
-    radial-gradient(circle at 50% 50%, rgba(0,0,0,.12) 40%, transparent 72%);
-  pointer-events: none;
-  z-index: 2;
-}
-#bar-picker-btn-rainbow:active { transform: scale(0.88); box-shadow: 0 0 14px rgba(255,255,255,.3); }
+/* v:F12.36 — rainbow picker CSS removed; button now uses standard sbd-btn with SVG */
 
 /* v:F1.1 Abstract shutter mark — geometric overlay on cap-btn */
 #cap-inner::after {
@@ -2228,6 +2173,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       <button class="sort-btn on"  id="gsort-newest"   onclick="Library.setSort('newest')">Newest</button>
       <button class="sort-btn"     id="gsort-hue"      onclick="Library.setSort('hue')">Hue</button>
       <button class="sort-btn"     id="gsort-lightness" onclick="Library.setSort('lightness')">Lightness</button>
+      <button class="sort-btn"     id="gsort-palette"   onclick="Library.setSort('palette')">Palette</button>
     </div>
     <!-- Tag filter bar (hidden until tags exist) -->
     <div id="gal-tag-bar" style="display:none"></div>
@@ -3100,7 +3046,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.34</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.37</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3136,17 +3082,18 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <span class="sbd-icon">🎞</span>
     <span class="sbd-label">Strip</span>
   </button>
-  <button class="sbd-btn pro-only" id="live-save-scene-btn" title="Save Scene"
-          onclick="App.saveScene()" aria-label="Save scene">
-    <span class="sbd-icon">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+  <!-- v:F12.37 Scene button removed — palette numbering replaces scene capture -->
+  <button class="sbd-btn" id="bar-picker-btn" title="Open in Colour Picker"
+          onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker">
+    <span class="sbd-icon"><!-- v:F12.36 premium picker icon -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="10" cy="10" r="3.5"/>
+        <line x1="10" y1="1" x2="10" y2="5.5"/>
+        <line x1="10" y1="14.5" x2="10" y2="19"/>
+        <line x1="1" y1="10" x2="5.5" y2="10"/>
+        <line x1="14.5" y1="10" x2="19" y2="10"/>
+      </svg>
     </span>
-    <span class="sbd-label">Scene</span>
-  </button>
-  <button class="sbd-btn" id="bar-picker-btn-rainbow" title="Open in Colour Picker"
-          onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker"
-          style="padding:4px 2px">
-    <span class="sbd-icon" style="width:28px;height:28px;border-radius:50%;background:conic-gradient(from 0deg,#ff0000 0deg,#ffcc00 60deg,#00ff44 120deg,#00ccff 180deg,#4400ff 240deg,#ff00cc 300deg,#ff0000 360deg);border:1.5px solid rgba(255,255,255,.3);box-shadow:0 0 8px rgba(255,255,255,.15)"></span>
     <span class="sbd-label">Picker</span>
   </button>
   <button class="sbd-btn" id="live-wb-btn" title="White Balance"
@@ -4200,6 +4147,8 @@ const DS = {
     } else if (!e.folder) {
       e.folder = 'Default';
     }
+    // v:F12.37 — assign captureSeq if not pre-set by a batch save
+    if (!e.captureSeq) e.captureSeq = this._nextCapSeq();
     this._cache.unshift(e);
     this._idbPut(e);
     if (!this._db) this._lsSave(this._cache);
@@ -4256,6 +4205,13 @@ const DS = {
   },
 
   uid()    { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); },
+  // v:F12.37 — auto-incrementing palette batch counter
+  _nextCapSeq() {
+    const k = 'digby_cap_seq';
+    const n = (parseInt(localStorage.getItem(k)) || 0) + 1;
+    localStorage.setItem(k, String(n));
+    return n;
+  },
   settings() { try { return JSON.parse(localStorage.getItem(this.SK) || '{}'); } catch { return {}; } },
   saveSettings(s) { try { localStorage.setItem(this.SK, JSON.stringify(s)); } catch(e) { console.warn('Settings save failed', e); } },
 
@@ -4283,6 +4239,7 @@ const DS = {
       autoTags:    CS.autoTags(hex),
       tags:        [],
       notes:       '',
+      captureSeq:  0,          // v:F12.37 — palette batch identifier (set by DS.add or batch save)
       geo:         (() => { try { return GeoCapture.last || {lat: null, lng: null, ts: Date.now()}; } catch(e) { return {lat: null, lng: null, ts: Date.now()}; } })()
     };
   }
@@ -5108,7 +5065,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.34</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.37</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -5466,28 +5423,7 @@ const App={
   // v:F12.7 — Save Scene: snapshot the current sampler palette strip
   // Uses the same hex priority chain as the polaroid export:
   //   activeExportTarget → pickQueue → currentHex
-  saveScene() {
-    const _t  = Sampler.activeExportTarget;
-    const _q  = (Sampler.pickQueue && Sampler.pickQueue.length) ? Sampler.pickQueue : null;
-    const hexes = _t ? [_t, ...(_q || []).filter(h => h !== _t)]
-                     : _q || (Sampler.currentHex ? [Sampler.currentHex] : null);
-    if (!hexes || !hexes.length) {
-      App.toast('Sample some colours first — tap swatches in the bar');
-      return;
-    }
-    const now   = new Date();
-    const label = 'Scene ' + now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    const scene = { id: Date.now(), ts: now.toISOString(), hexes, label };
-    try {
-      const KEY      = 'fraggle_scenes';
-      const existing = JSON.parse(localStorage.getItem(KEY) || '[]');
-      existing.unshift(scene);
-      localStorage.setItem(KEY, JSON.stringify(existing.slice(0, 20)));
-      App.toast('Scene saved ✓');
-      // Refresh library if it's currently visible
-      if (this.tab === 'library') Library.render();
-    } catch(e) { App.toast('Could not save scene (storage full?)'); }
-  },
+  // v:F12.37 saveScene() removed — palette capture numbers replace scene functionality
 
   toast(msg,ms=2200){
     const e=document.getElementById('toast');
@@ -7317,7 +7253,7 @@ const Sampler={
     const canvas=document.getElementById('upload-canvas'); if(!canvas) return;
     const ctx=canvas.getContext('2d');
     const {ox,oy,dw,dh,iw,ih}=this._upOffsets;
-    ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);  // v:F12.35 no black repaint
     if(this._uploadLutOn && App.activeLut){
       // Render LUT-graded version via offscreen
       const oc=document.createElement('canvas');oc.width=Math.round(dw);oc.height=Math.round(dh);
@@ -7818,6 +7754,10 @@ const Library={
   },
 
   _sortedEntries(all){
+    if(this.sort === 'palette'){
+      // v:F12.37 — group by captureSeq desc (newest palette first); colours with no seq go last
+      return [...all].sort((a,b) => (b.captureSeq||0) - (a.captureSeq||0));
+    }
     if(this.sort === 'hue'){
       return [...all].sort((a,b) => this._hslH(a) - this._hslH(b));
     }
@@ -7833,7 +7773,7 @@ const Library={
     if(this.sort === s) return;
     this.sort = s;
     // Update button states
-    ['newest','hue','lightness'].forEach(k => {
+    ['newest','hue','lightness','palette'].forEach(k => {
       const btn = document.getElementById('gsort-' + k);
       if(btn) btn.classList.toggle('on', k === s);
     });
@@ -7875,54 +7815,8 @@ const Library={
   activeMoodFilter: null,
 
   render(){
-    // v:F12.7 — Saved Scenes: render horizontal palette strips above grid
-    const scenesBar = document.getElementById('lib-scenes-bar');
-    if (scenesBar) {
-      try {
-        const scenes = JSON.parse(localStorage.getItem('fraggle_scenes') || '[]');
-        if (scenes.length) {
-          const sceneCards = scenes.map(s => {
-            const strip = s.hexes.map(h =>
-              `<div style="flex:1;background:${h};min-width:4px"></div>`
-            ).join('');
-            const dateStr = new Date(s.ts).toLocaleDateString([], { month:'short', day:'numeric' });
-            return `<div style="margin-bottom:8px;position:relative">
-              <button onclick="event.stopPropagation();(function(){
-                try{var KEY='fraggle_scenes';var arr=JSON.parse(localStorage.getItem(KEY)||'[]');
-                arr=arr.filter(function(x){return x.id!==${s.id};});
-                localStorage.setItem(KEY,JSON.stringify(arr));}
-                catch(e){}
-                var sb=document.getElementById('lib-scenes-bar');
-                if(sb){try{Library.render();}catch(e){sb.innerHTML='';}};
-              })()"
-              style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;
-                background:var(--surface3);border:1px solid var(--border);border-radius:50%;
-                font-size:9px;color:var(--muted);cursor:pointer;display:flex;
-                align-items:center;justify-content:center;z-index:2;
-                touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-                line-height:1;padding:0">×</button>
-              <div style="cursor:pointer"
-                   onclick="(function(){var _h='${s.hexes.join()}';if(typeof PaletteBuilder!=='undefined'){PaletteBuilder.colours=_h.split(',').map(function(x){return PaletteBuilder._makeEntry(x)});PaletteBuilder.render();App.setTab('palette');App.toast('Scene loaded ✓');}})();"
-                   title="${s.label}">
-                <div style="display:flex;height:24px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">${strip}</div>
-                <div style="font-size:8px;color:var(--muted);font-family:var(--mono);
-                            margin-top:3px;display:flex;justify-content:space-between">
-                  <span>${s.label}</span><span>${dateStr}</span>
-                </div>
-              </div>
-            </div>`;
-          }).join('');
-          scenesBar.innerHTML =
-            `<div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;
-                          color:var(--accent);font-family:var(--mono);font-weight:700;
-                          padding:10px 12px 6px">Saved Scenes</div>
-             <div style="padding:0 12px 4px">${sceneCards}</div>
-             <div style="border-top:1px solid var(--border);margin-bottom:6px"></div>`;
-        } else {
-          scenesBar.innerHTML = '';
-        }
-      } catch(e) { scenesBar.innerHTML = ''; }
-    }
+    // v:F12.37 — Saved Scenes removed; palette numbers replace scene capture
+   }
 
     const allRaw=DS.all();
     // Filter by active folder (FolderManager may not exist yet on first load)
@@ -11719,7 +11613,8 @@ const ColourGenerator = {
 
   saveAll() {
     if (!this.currentPalette) return;
-    this.currentPalette.forEach(hex => { const e=DS.makeEntry(hex,'generator'); DS.add(e); });
+    const _capSeq = DS._nextCapSeq();  // v:F12.37 — batch palette number
+    this.currentPalette.forEach(hex => { const e=DS.makeEntry(hex,'generator'); e.captureSeq=_capSeq; DS.add(e); });
     App.refresh();
     App.toast(`${this.currentPalette.length} colours saved`);
   },
@@ -11930,8 +11825,10 @@ const PaletteBuilder = {
 
   saveAll() {
     if (!this.colours.length) { App.toast('No colours in palette'); return; }
+    const _capSeq = DS._nextCapSeq();  // v:F12.37 — batch palette number
     this.colours.forEach(c => {
       const e = DS.makeEntry(c.hex, 'palette');
+      e.captureSeq = _capSeq;  // all colours in this palette share the same number
       DS.add(e);
     });
     App.refresh();
@@ -14184,7 +14081,7 @@ self.onmessage = function(e) {
     if (existing) existing.remove();
     const d = document.createElement('div');
     d.id = '_ap_panel';
-    d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
+    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
 background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div id="ap-spinner">
@@ -14379,7 +14276,7 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
 
     const d = document.createElement('div');
     d.id = '_ap_panel';
-    d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
+    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
 background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -14532,8 +14429,10 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
 
   _saveAll(hexes) {
     if (!Array.isArray(hexes) || !hexes.length) { App.toast('No colours to save'); return; }
+    const _capSeq = DS._nextCapSeq();  // v:F12.37 — one palette number for all colours in this batch
     hexes.forEach((hex, i) => {
       const e = DS.makeEntry(hex, 'autopick');
+      e.captureSeq = _capSeq;  // all share the same palette number
       // v:F12.9 — attach proportional weight from k-means extraction
       if (window._apWeights && typeof window._apWeights[i] === 'number') e.weight = window._apWeights[i];
       DS.add(e);
@@ -14693,9 +14592,23 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
     const n          = hexes.length;
     // Inner drawable width for swatches, respecting left/right safe-zone padding
     const swInnerW   = CW - SW_PAD * 2;
-    const totalGapW  = SW_GAP * (n - 1);
-    const swW        = Math.floor((swInnerW - totalGapW) / n);
-    const swRemainder = swInnerW - totalGapW - swW * n;
+    // v:F12.36 — proportional or equal swatch widths, mirrors film-strip behaviour
+    const _proportional = !!window._apMosaic;
+    const _rawW = (_proportional && window._apWeights && window._apWeights.length === n)
+      ? window._apWeights : hexes.map(() => 1 / n);
+    const _totalRaw = _rawW.reduce((a, b) => a + b, 0);
+    const _weights  = _rawW.map(w => w / _totalRaw);   // normalised fractions
+
+    // Pixel-perfect accumulator — same technique as film strip; no rounding gaps
+    const totalGapW = SW_GAP * (n - 1);
+    const availW    = swInnerW - totalGapW;
+    const swWidths  = [];
+    let _wAcc = 0, _usedW = 0;
+    for (let i = 0; i < n; i++) {
+      if (i === n - 1) { swWidths.push(availW - _usedW); }
+      else { _wAcc += _weights[i] * availW; const nw = Math.round(_wAcc); swWidths.push(nw - _usedW); _usedW = nw; }
+    }
+
     // Y positions
     const swColorY   = BORDER + photoH + SW_PAD;       // coloured block top
     const swLabelY   = swColorY + SW_COLOR_H;           // white label strip top
@@ -14705,9 +14618,11 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(BORDER, BORDER + photoH, CW, SWATCH_H);
 
+    let _swX = BORDER + SW_PAD;
     hexes.forEach((hex, i) => {
-      const x  = BORDER + SW_PAD + i * (swW + SW_GAP);
-      const w  = (i === n - 1) ? swW + swRemainder : swW;
+      const x  = _swX;
+      const w  = swWidths[i];
+      _swX += w + SW_GAP;
       const cx = x + w / 2;
       const maxTW = w - 6;
 
@@ -14717,6 +14632,16 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
       ctx.clip();
       ctx.fillStyle = hex;
       ctx.fillRect(x, swColorY, w, SW_COLOR_H);
+      // v:F12.36 — % overlay on mosaic-mode swatches (band must be ≥26px wide)
+      if (_proportional && w >= 26) {
+        const pct = Math.round(_weights[i] * 100);
+        const isDk = (typeof CS !== 'undefined' && CS.isDark) ? CS.isDark(hex) : true;
+        ctx.fillStyle = isDk ? 'rgba(255,255,255,.82)' : 'rgba(0,0,0,.62)';
+        const ps = Math.max(6, Math.min(11, Math.floor(w * 0.22)));
+        ctx.font = `bold ${ps}px 'Space Mono',monospace`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText(pct + '%', x + w / 2, swColorY + SW_COLOR_H - 3, w - 4);
+      }
       ctx.restore();
 
       // ── White label strip below the colour block ──────────────────────────
