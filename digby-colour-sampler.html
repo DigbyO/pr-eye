@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.10 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.13 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.10</title>
+<title>Digby v12.13</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.10';
+  const APP_VERSION = 'F12.13';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1700,6 +1700,14 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <div id="cam-count-badge">0</div>
       </div>
 
+      <!-- v:F12.12 Live Loupe — colour circle for camera mode -->
+      <div id="live-loupe"
+           style="position:absolute;top:20px;right:20px;width:45px;height:45px;
+                  border-radius:50%;border:3px solid rgba(255,255,255,.9);
+                  box-shadow:0 4px 12px rgba(0,0,0,.55);
+                  z-index:100;display:none;pointer-events:none;
+                  background:#888888;transition:background .08s linear">
+      </div>
       <!-- LUT badge -->
       <div id="lut-badge" onclick="Sampler.toggleLut()">Grade ON </div>
       <!-- MASTER-FIX-V52: LUT None button — restores natural camera feed -->
@@ -1814,6 +1822,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()" title="Export picked colours as polaroid with photo">📷 Export Polaroid</button>
+        <button class="btn btn-s btn-sm" onclick="App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
       <!-- v:F1.12 — Instant Schemes row -->
@@ -1872,7 +1881,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <input type="file" id="up-input" accept="image/*" style="display:none" onchange="Sampler.loadUpload(this)">
 
     <!-- Colour Wheel Picker -->
-    <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;background:var(--bg)">
+    <div id="wheel-wrap" style="display:none;flex:1;overflow:visible;position:relative;background:var(--bg)">
 
       <!-- v132: v115-style quick native colour picker -->
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border)">
@@ -1900,6 +1909,23 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 
       <!--  WHEEL + SLIDERS side by side on wider screens, stacked on narrow -->
       <div style="padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:10px">
+
+        <!-- v:F12.12 — Paint / Pantone search bar -->
+        <div style="width:100%;max-width:300px;position:relative">
+          <input type="text" id="sampler-paint-search"
+            placeholder="Search F&amp;B, Little Greene, Pantone…"
+            autocomplete="off" spellcheck="false"
+            style="width:100%;padding:9px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:12px;box-sizing:border-box;outline:none"
+            oninput="Sampler._paintSearchInput(this.value)">
+          <div id="sampler-paint-dropdown"
+            style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);overflow:visible;box-shadow:0 6px 20px rgba(0,0,0,.55)">
+          </div>
+        </div>
+
+        <!-- v:F12.12 — Mini-palette: shows current pick-queue swatches -->
+        <div id="picker-mini-palette"
+          style="display:none;width:100%;max-width:300px;height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
+        </div>
 
         <canvas id="wheel-canvas" width="260" height="260" style="border-radius:50%;touch-action:none;cursor:crosshair;max-width:min(260px,80vw);height:auto"></canvas>
 
@@ -1999,6 +2025,9 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         </button>
         <button class="live-act-btn" id="live-export-btn" title="Quick Polaroid Export"
           onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}/* v:F1.11 prefer explicit tap target */const _t=Sampler.activeExportTarget;const _q=Sampler.pickQueue&&Sampler.pickQueue.length?Sampler.pickQueue:null;const _hexes=_t?[_t,...(_q||[]).filter(h=>h!==_t)]:_q||[Sampler.currentHex];if(_hexes[0]){AutoPalette.exportPolaroid(_hexes)}else{App.toast('Tap a swatch to select export target')}})()">📸</button>
+        <button class="live-act-btn" id="live-strip-btn" title="Film Strip export"
+                onclick="App.exportPaletteStrip()"
+                style="font-family:var(--mono);font-size:12px;background:transparent;border:1px solid rgba(255,255,255,.15)">🎞</button>
         <!-- v:F12.7 — Save Scene: stores entire pickQueue as a named palette strip -->
         <button class="live-act-btn" id="live-save-scene-btn"
                 title="Save current palette as a Scene"
@@ -2896,6 +2925,15 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
             <div class="seg-btn"   id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
           </div>
         </div>
+        <div class="set-row" style="align-items:center;gap:8px">
+          <div style="flex:1"><div class="set-l">Film Strip Labels</div><div class="set-sub">Show % proportions on exported strip</div></div>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0">
+            <input type="checkbox" id="toggle-strip-text"
+              style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)"
+              onchange="App.showStripText = this.checked">
+            <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Show&nbsp;%</span>
+          </label>
+        </div>
         <div class="set-row set-row-cvd"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
           <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
       </div>
@@ -2908,7 +2946,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.10</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.13</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4210,6 +4248,7 @@ const State = {
 
 const App={
   tab:'sampler',
+  showStripText: false,    // v:F12.11 — show % labels on Film Strip export
   activeLut:null,
   activeLutName:'',
   online:false,
@@ -4803,7 +4842,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.10</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.13</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -4986,6 +5025,46 @@ const App={
     this.toast(title + ' exported');
   },
 
+  // v:F12.11 — Global Film Strip export: uses AP extraction weights or equal widths
+  exportPaletteStrip() {
+    const hexes = (window._apHexes && window._apHexes.length)
+      ? window._apHexes
+      : (Sampler.pickQueue && Sampler.pickQueue.length ? Sampler.pickQueue : []);
+    if (!hexes.length) { App.toast('Extract a palette first'); return; }
+    const rawW = (window._apWeights && window._apWeights.length === hexes.length)
+      ? window._apWeights
+      : hexes.map(() => 1);
+    const total   = rawW.reduce((a, b) => a + b, 0);
+    const weights = rawW.map(w => w / total);  // normalised fractions
+    const W = 1200, H = 200;
+    const canvas  = document.createElement('canvas');
+    canvas.width  = W; canvas.height = H;
+    const ctx     = canvas.getContext('2d');
+    let x = 0;
+    hexes.forEach((hex, i) => {
+      const isLast = (i === hexes.length - 1);
+      const w = isLast ? (W - x) : Math.round(weights[i] * W);
+      ctx.fillStyle = hex;
+      ctx.fillRect(x, 0, w, H);
+      if (App.showStripText && w > 24) {
+        const pct = Math.round(weights[i] * 100);
+        const rgb = CS.hexToRgb(hex);
+        const lum = rgb ? (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) : 128;
+        ctx.fillStyle = lum > 128 ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.88)';
+        const fs = Math.min(32, Math.max(10, Math.floor(w * 0.22)));
+        ctx.font = 'bold ' + fs + 'px sans-serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pct + '%', x + w / 2, H / 2);
+      }
+      x += w;
+    });
+    const a = document.createElement('a');
+    a.href  = canvas.toDataURL('image/png');
+    a.download = 'digby-palette-strip.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    App.toast('Film strip downloaded ✓');
+  },
   exportLib(){const d=JSON.stringify(DS.all(),null,2);const b=new Blob([d],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='digby-colours.json';a.click();URL.revokeObjectURL(u);App.toast('Exported')},
   importLib(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(Array.isArray(d)&&d.length&&d[0]?.hex){DS.save(d);App.forceCloseOv();App.toast('Imported')}else App.toast('Invalid file — expected Digby colour JSON')}catch{App.toast('Error reading file')}};r.readAsText(f)},
   // v:F1.12 iOS-safe confirm — two-tap within 3 s; avoids confirm() which silently fails in PWA standalone
@@ -5775,6 +5854,10 @@ const Sampler={
     B=Math.round(Math.min(255,Math.max(0,B*this.wb.b)));
     const hex=CS.rgbToHex(R,G,B);
     this.currentHex=hex;
+    // v:F12.13 — live-loupe: strict null + format guard before DOM write
+    const _ll=document.getElementById('live-loupe');
+    if(_ll && typeof hex==='string' && hex.startsWith('#') && hex.length>=4 && _ll.style.display!=='none')
+      _ll.style.background=hex;
     if(this.lutOn&&App.activeLut) this.drawLutOverlay(v.videoWidth,v.videoHeight);
     this.updateLiveBar(hex,R,G,B);
   },
@@ -6055,8 +6138,10 @@ const Sampler={
   // Freezes the camera, switches to Wheel mode, and seeds ColourWheel with
   // the current sampled hex so the user can fine-tune from exactly where they were.
   openInPicker() {
-    const hex = this.currentHex;
-    if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    // v:F12.13 — fallback chain: currentHex → lastHex → activeExportTarget → white
+    const hex = (this.currentHex && /^#[0-9a-fA-F]{6}$/.test(this.currentHex))
+      ? this.currentHex
+      : (this.lastHex || this.activeExportTarget || '#ffffff');
 
     // Freeze the camera so the colour is held while the user works in the picker
     if (!this.frozen) {
@@ -6067,20 +6152,51 @@ const Sampler={
       if (fb) { fb.classList.add('on'); fb.textContent = 'Unfreeze'; }
     }
 
-    // Switch sampler to wheel/picker mode
+    // Switch sampler to wheel/picker mode (schedules ColourWheel.init() at +50ms)
     this.setMode('wheel');
 
-    // Seed the colour wheel with the current hex
-    if (typeof ColourWheel !== 'undefined') {
+    // v:F12.13 — no setTimeout race: delegate all seeding to _seedWheel()
+    this._seedWheel(hex, 8);
+  },
+
+  // v:F12.13 — Retry seeder: polls ColourWheel.ready before calling fromHex.
+  //   setMode('wheel') schedules ColourWheel.init() at +50ms via its own
+  //   setTimeout. We poll every 20ms (up to `attempts` tries = max 160ms)
+  //   so the seed fires as soon as init() sets ready=true.
+  _seedWheel(hex, attempts) {
+    if (typeof ColourWheel === 'undefined') return;
+    if (ColourWheel.ready) {
+      // Wheel initialised — seed colour and sync all inputs
       try {
         if (ColourWheel.fromNative) ColourWheel.fromNative(hex);
         else if (ColourWheel.fromHex) ColourWheel.fromHex(hex);
       } catch(e) {}
+      const nativeIn = document.getElementById('wheel-native-input');
+      if (nativeIn) nativeIn.value = hex;
+      // Render pick-queue mini-palette
+      const mp = document.getElementById('picker-mini-palette');
+      if (mp) {
+        const q = this.pickQueue || [];
+        if (q.length) {
+          mp.style.display = 'block';
+          mp.innerHTML = q.map(c =>
+            '<div style="flex:1;background:' + c + ';cursor:pointer;height:100%" '
+            + 'title="' + c + '" '
+            + 'onclick="ColourWheel.fromHex(\'' + c + '\');document.getElementById(\'sampler-paint-search\').value=\'\'"></div>'
+          ).join('');
+        } else {
+          mp.style.display = 'none';
+        }
+      }
+      // Reset search state
+      const si = document.getElementById('sampler-paint-search');
+      if (si) si.value = '';
+      const dd = document.getElementById('sampler-paint-dropdown');
+      if (dd) { dd.innerHTML = ''; dd.style.display = 'none'; }
+      return;
     }
-
-    // Also sync the native quick-pick input at the top of the wheel panel
-    const nativeIn = document.getElementById('wheel-native-input');
-    if (nativeIn) nativeIn.value = hex;
+    // Wheel not ready yet — retry after 20ms
+    if (attempts > 0) setTimeout(() => Sampler._seedWheel(hex, attempts - 1), 20);
   },
 
   // v448: updateUI — refresh the live bar display with currentHex
@@ -6497,6 +6613,9 @@ const Sampler={
     if(mb) mb.style.display=m==='camera'?'none':'flex';
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
+    // v:F12.12 — live-loupe: visible in camera, hidden in all other modes
+    const _llEl=document.getElementById('live-loupe');
+    if(_llEl) _llEl.style.display=m==='camera'?'block':'none';
     // v432: padding-top removed — cam-col is full-bleed absolute; live-bar floats above
     // v430: hide live-bar in upload and picker modes — only visible during camera
     const lb=document.getElementById('live-bar');
@@ -6806,6 +6925,51 @@ const Sampler={
     inp.classList.remove('invalid');
     document.getElementById('hex-fb-preview').style.background = '#888888';
     App.toast(`${val} added to queue`);
+  },
+
+  // v:F12.12 — Paint / Pantone search: filter PAINT_DB, render dropdown
+  _paintSearchInput(query) {
+    const dd = document.getElementById('sampler-paint-dropdown');
+    if (!dd) return;
+    // v:F12.13 — hex shortcut: valid hex input bypasses paint DB entirely
+    const hexRegex = /^#?([0-9a-fA-F]{3}){1,2}$/;
+    if (hexRegex.test(query.trim())) {
+      let h = query.trim();
+      if (!h.startsWith('#')) h = '#' + h;
+      if (h.length === 4) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3]; // #RGB → #RRGGBB
+      if (typeof ColourWheel !== 'undefined' && ColourWheel.fromHex) {
+        try { ColourWheel.fromHex(h); } catch(e) {}
+      }
+      dd.innerHTML = ''; dd.style.display = 'none';
+      return;
+    }
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) { dd.innerHTML = ''; dd.style.display = 'none'; return; }
+    // PAINT_DB = [...PANTONE, ...LG, ...FB]
+    const results = (typeof PAINT_DB !== 'undefined' ? PAINT_DB : [])
+      .filter(p =>
+        (p.name  && p.name.toLowerCase().includes(q)) ||
+        (p.code  && p.code.toLowerCase().includes(q))
+      ).slice(0, 5);
+    if (!results.length) { dd.innerHTML = ''; dd.style.display = 'none'; return; }
+    dd.innerHTML = results.map(p => {
+      const label = p.name ? p.name + (p.code ? ' · ' + p.code : '') : p.code;
+      // Determine brand tag
+      const brand = (typeof FB !== 'undefined' && FB.includes(p)) ? 'F&B'
+                  : (typeof LG !== 'undefined' && LG.includes(p)) ? 'LG'
+                  : 'PMS';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;'
+           + 'cursor:pointer;border-bottom:1px solid var(--border);user-select:none"'
+           + ' onmouseenter="this.style.background=\'var(--surface2)\'"'
+           + ' onmouseleave="this.style.background=\'\'"'
+           + ' onclick="ColourWheel.fromHex(\'' + p.hex + '\');document.getElementById(\'sampler-paint-search\').value=\'' + label.replace(/'/g,'\\\'') + '\';document.getElementById(\'sampler-paint-dropdown\').style.display=\'none\'">'
+           + '<div style="width:22px;height:22px;border-radius:4px;background:' + p.hex + ';border:1px solid rgba(128,128,128,.35);flex-shrink:0"></div>'
+           + '<div style="flex:1;min-width:0">'
+           + '<div style="font-size:11px;color:var(--text);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</div>'
+           + '<div style="font-size:9px;color:var(--muted)">' + brand + ' · ' + p.hex.toUpperCase() + '</div>'
+           + '</div></div>';
+    }).join('');
+    dd.style.display = 'block';
   },
 };
 </script>
@@ -9693,13 +9857,16 @@ const Prompter={
 const ColourWheel = {
   hue: 0, sat: 70, lit: 50,
   dragging: false,
+  ready: false,  // v:F12.13 — true after init() completes; read by Sampler._seedWheel
 
   init() {
+    this.ready = false;  // reset on each re-init (mode switch)
     this.drawWheel();
     this.drawHueStrip();
     this.bindWheel();
     this.bindHueStrip();
     this.update();
+    this.ready = true;   // v:F12.13 — signal: safe to seed now
   },
 
   drawWheel() {
@@ -10709,26 +10876,39 @@ const ColourGenerator = {
   downloadSREF() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select colours to export'); return; }
-    const W = 1000, H = 200;
+    const W = 1200, H = 200;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-    // Use proportional weights if available, otherwise equal widths
-    const weights = sel.map(c => (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1);
-    const total   = weights.reduce((a, b) => a + b, 0);
+    // Normalize weights so blocks fill edge-to-edge with no whitespace
+    const raw     = sel.map(c => (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1);
+    const total   = raw.reduce((a, b) => a + b, 0);
+    const weights = raw.map(w => w / total);  // normalised fractions
     let x = 0;
     sel.forEach((c, i) => {
       const isLast = (i === sel.length - 1);
-      const w = isLast ? (W - x) : Math.round((weights[i] / total) * W);
+      const w = isLast ? (W - x) : Math.round(weights[i] * W);
       ctx.fillStyle = c.hex;
       ctx.fillRect(x, 0, w, H);
+      // v:F12.11 — optional % text overlay
+      if (App.showStripText && w > 24) {
+        const pct = Math.round(weights[i] * 100);
+        const rgb = CS.hexToRgb(c.hex);
+        const lum = rgb ? (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) : 128;
+        ctx.fillStyle = lum > 128 ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.88)';
+        const fs = Math.min(32, Math.max(10, Math.floor(w * 0.22)));
+        ctx.font = 'bold ' + fs + 'px sans-serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pct + '%', x + w / 2, H / 2);
+      }
       x += w;
     });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
-    a.download = 'mj-sref-strip.png';
+    a.download = 'digby-palette-strip.png';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    App.toast('MJ SREF strip downloaded');
+    App.toast('Film strip downloaded ✓');
   },
 
   currentPalette: null,
@@ -13485,6 +13665,7 @@ self.onmessage = function(e) {
         <button class="btn btn-s btn-sm" onclick="AutoPalette._loadToPalette(window._apHexes)">🎨 Auto Palettes</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette._resample()">🔄 Resample</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette.exportPolaroid(window._apHexes)">📷 Polaroid</button>
+        <button class="btn btn-s btn-sm" style="grid-column:1/-1" onclick="App.exportPaletteStrip()">🎞 Film Strip</button>
       </div>
       <button class="btn btn-s btn-sm" style="width:100%" onclick="document.getElementById('_ap_panel').remove()">Close</button>
     </div>`;
