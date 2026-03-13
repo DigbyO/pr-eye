@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.21';
+  const APP_VERSION = 'F12.22';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1915,7 +1915,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <input type="file" id="up-input" accept="image/*" style="display:none" onchange="Sampler.loadUpload(this)">
 
     <!-- Colour Wheel Picker -->
-    <div id="wheel-wrap" style="display:none;flex:1;overflow:visible;position:relative;background:var(--bg)">
+    <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--bg)">
 
       <!-- v132: v115-style quick native colour picker -->
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border)">
@@ -2014,6 +2014,56 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
             <button class="btn btn-p btn-sm" style="flex:1" onclick="Sampler.saveQueue()">Save All</button>
             <button class="btn btn-s btn-sm" onclick="Sampler._exportWheelPolaroid()">📷 Export</button>
             <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
+          </div>
+        </div>
+
+        <!-- v:F12.22 — Discover quick-links: surface deep features from the picker -->
+        <div style="width:100%;max-width:300px;padding:10px 0 4px">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;
+                      color:var(--muted);font-family:var(--mono);margin-bottom:7px">Discover</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button onclick="App.setTab('explorer')" style="display:flex;flex-direction:column;
+              align-items:flex-start;gap:3px;padding:8px 10px;
+              background:var(--surface2);border:1px solid var(--border);
+              border-radius:var(--rs);cursor:pointer;touch-action:manipulation;
+              -webkit-tap-highlight-color:transparent;text-align:left">
+              <span style="font-size:14px">🎨</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text);font-family:var(--mono)">Harmonies</span>
+              <span style="font-size:8px;color:var(--muted);line-height:1.3">Triadic · analogous · tints &amp; scales</span>
+            </button>
+            <button onclick="App.setTab('palette');setTimeout(function(){try{PaletteBuilder.openSuggest();}catch(e){}},120)"
+              style="display:flex;flex-direction:column;
+              align-items:flex-start;gap:3px;padding:8px 10px;
+              background:var(--surface2);border:1px solid var(--border);
+              border-radius:var(--rs);cursor:pointer;touch-action:manipulation;
+              -webkit-tap-highlight-color:transparent;text-align:left">
+              <span style="font-size:14px">◑</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text);font-family:var(--mono)">Palette Themes</span>
+              <span style="font-size:8px;color:var(--muted);line-height:1.3">Two-tone · 60-30-10 · complementary</span>
+            </button>
+            <button onclick="App.setTab('explorer');setTimeout(function(){
+                var ms=document.querySelector('#mod-explorer .mod-scroll');
+                var cg=document.getElementById('trio-mode-row');
+                if(ms&&cg)ms.scrollTop=cg.offsetTop-10;
+              },120)"
+              style="display:flex;flex-direction:column;
+              align-items:flex-start;gap:3px;padding:8px 10px;
+              background:var(--surface2);border:1px solid var(--border);
+              border-radius:var(--rs);cursor:pointer;touch-action:manipulation;
+              -webkit-tap-highlight-color:transparent;text-align:left">
+              <span style="font-size:14px">✦</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text);font-family:var(--mono)">Aesthetic Gen</span>
+              <span style="font-size:8px;color:var(--muted);line-height:1.3">Japandi · Nordic · Art Deco · 20 styles</span>
+            </button>
+            <button onclick="Sampler.setMode('upload')" style="display:flex;flex-direction:column;
+              align-items:flex-start;gap:3px;padding:8px 10px;
+              background:var(--surface2);border:1px solid var(--border);
+              border-radius:var(--rs);cursor:pointer;touch-action:manipulation;
+              -webkit-tap-highlight-color:transparent;text-align:left">
+              <span style="font-size:14px">📷</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text);font-family:var(--mono)">From Photo</span>
+              <span style="font-size:8px;color:var(--muted);line-height:1.3">Upload an image · auto-extract palette</span>
+            </button>
           </div>
         </div>
 
@@ -6449,7 +6499,9 @@ const Sampler={
   //  Queue system for multi-pick 
   addToQueue(hex){
     // Upload mode: unlimited (up to 20). Camera/wheel mode: capped at camCount.
-    const max = this.mode === 'upload' ? 20 : (this.camCount === 1 ? 1 : this.camCount);
+    // v:F12.22 — upload & wheel both allow up to 20; camera stays at camCount
+    const max = (this.mode === 'upload' || this.mode === 'wheel') ? 20
+      : (this.camCount === 1 ? 1 : this.camCount);
     if (this.pickQueue.length >= max) {
       App.toast(`Queue full (${max}) — save or clear first`);
       return;
@@ -7663,12 +7715,29 @@ const Library={
               `<div style="flex:1;background:${h};min-width:4px"></div>`
             ).join('');
             const dateStr = new Date(s.ts).toLocaleDateString([], { month:'short', day:'numeric' });
-            return `<div style="margin-bottom:8px;cursor:pointer"
-                        onclick="(function(){var _h='${s.hexes.join()}';if(typeof PaletteBuilder!=='undefined'){PaletteBuilder.colours=_h.split(',').map(function(x){return PaletteBuilder._makeEntry(x)});PaletteBuilder.render();App.setTab('palette');App.toast('Scene loaded ✓');}})()" title="${s.label}">
-              <div style="display:flex;height:24px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">${strip}</div>
-              <div style="font-size:8px;color:var(--muted);font-family:var(--mono);
-                          margin-top:3px;display:flex;justify-content:space-between">
-                <span>${s.label}</span><span>${dateStr}</span>
+            return `<div style="margin-bottom:8px;position:relative">
+              <button onclick="event.stopPropagation();(function(){
+                try{var KEY='fraggle_scenes';var arr=JSON.parse(localStorage.getItem(KEY)||'[]');
+                arr=arr.filter(function(x){return x.id!=='${s.id}';});
+                localStorage.setItem(KEY,JSON.stringify(arr));}
+                catch(e){}
+                var sb=document.getElementById('lib-scenes-bar');
+                if(sb){try{Library.render();}catch(e){sb.innerHTML='';}};
+              })()"
+              style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;
+                background:var(--surface3);border:1px solid var(--border);border-radius:50%;
+                font-size:9px;color:var(--muted);cursor:pointer;display:flex;
+                align-items:center;justify-content:center;z-index:2;
+                touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+                line-height:1;padding:0">×</button>
+              <div style="cursor:pointer"
+                   onclick="(function(){var _h='${s.hexes.join()}';if(typeof PaletteBuilder!=='undefined'){PaletteBuilder.colours=_h.split(',').map(function(x){return PaletteBuilder._makeEntry(x)});PaletteBuilder.render();App.setTab('palette');App.toast('Scene loaded ✓');}})();"
+                   title="${s.label}">
+                <div style="display:flex;height:24px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">${strip}</div>
+                <div style="font-size:8px;color:var(--muted);font-family:var(--mono);
+                            margin-top:3px;display:flex;justify-content:space-between">
+                  <span>${s.label}</span><span>${dateStr}</span>
+                </div>
               </div>
             </div>`;
           }).join('');
