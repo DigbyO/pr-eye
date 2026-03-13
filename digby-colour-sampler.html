@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.20 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.30 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.20</title>
+<title>Digby v12.30</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.27';
+  const APP_VERSION = 'F12.30';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -475,6 +475,31 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
   opacity:1;
 }
 .instant-scheme-btn.active .isch-label{color:var(--accent)}
+/* ── v:F12.30 — Designer's Dock ──────────────────────────────────────────── */
+#designers-dock{
+  display:flex;align-items:center;justify-content:center;
+  gap:2px;padding:6px;
+  background:rgba(15,15,15,0.8);
+  backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);
+  border-radius:40px;border:1px solid rgba(255,255,255,0.10);
+  margin:6px auto;
+  width:fit-content;max-width:calc(100% - 24px);
+  flex-shrink:0;
+  padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
+}
+.dock-pill{
+  padding:7px 16px;border-radius:34px;border:none;
+  background:transparent;color:rgba(255,255,255,0.5);
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.08em;cursor:pointer;white-space:nowrap;
+  transition:background .15s,color .15s,box-shadow .15s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.dock-pill:hover,.dock-pill:active{color:rgba(255,255,255,0.9)}
+.dock-pill.active{
+  background:rgba(255,255,255,0.12);color:#fff;
+  box-shadow:0 0 0 1.5px var(--accent),0 0 12px var(--accent-soft);
+}
 .isch-dots{display:flex;gap:2px;flex-shrink:0}
 .isch-dot{display:inline-block;width:9px;height:9px;border-radius:50%}
 .isch-label{font-size:9px;font-family:var(--mono);letter-spacing:.06em;color:var(--accent);font-weight:600}
@@ -1479,6 +1504,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
   animation: quizSlideUp 0.38s cubic-bezier(0.22,1,0.36,1) both;
 }
 #ai-quiz-card {
+  z-index: var(--z-modal);
   background: rgba(18,18,24,0.96);
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 20px;
@@ -1867,56 +1893,25 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <button class="btn btn-s btn-sm" onclick="App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
-      <!-- v:F1.12 — Instant Schemes row -->
-      <div id="instant-schemes-bar" style="display:flex;gap:6px;padding:6px 12px;background:rgba(15,15,15,0.75);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border-bottom:1px solid rgba(255,255,255,0.08);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;flex-shrink:0;margin-right:2px">SCHEMES</div>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('neutral');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Pale architectural neutrals — L=90, C≤4">
-          <span class="isch-dots">
-            <span class="isch-dot" style="background:#EDEBE4"></span>
-            <span class="isch-dot" style="background:#E8E6DF"></span>
-            <span class="isch-dot" style="background:#EAE7E0"></span>
-          </span>
-          <span class="isch-label">NEUTRAL</span>
-          <span class="isch-sub">Pale wash</span>
-        </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('muted');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Half-chroma — tonally quiet version">
-          <span class="isch-dots">
-            <span class="isch-dot" style="background:#B5A898"></span>
-            <span class="isch-dot" style="background:#98A8A0"></span>
-            <span class="isch-dot" style="background:#A89898"></span>
-          </span>
-          <span class="isch-label">MUTED</span>
-          <span class="isch-sub">Tonal quiet</span>
-        </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('vivid');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Boosted chroma — saturated punchy version">
-          <span class="isch-dots">
-            <span class="isch-dot" style="background:#E8532A"></span>
-            <span class="isch-dot" style="background:#2A7CE8"></span>
-            <span class="isch-dot" style="background:#E8C12A"></span>
-          </span>
-          <span class="isch-label">VIVID</span>
-          <span class="isch-sub">Saturated</span>
-        </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('true');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="Raw k-means extraction — no LCH transform">
-          <span class="isch-dots">
-            <span class="isch-dot" style="background:#5D8A5E"></span>
-            <span class="isch-dot" style="background:#8A5D6A"></span>
-            <span class="isch-dot" style="background:#5D6E8A"></span>
-          </span>
-          <span class="isch-label">TRUE</span>
-          <span class="isch-sub">Raw colours</span>
-        </button>
-        <button class="instant-scheme-btn" onclick="AutoPalette.applyScheme('opposites');document.querySelectorAll('#instant-schemes-bar .instant-scheme-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')" title="180° LCH hue shift — complementary palette">
-          <span class="isch-dots">
-            <span class="isch-dot" style="background:#8A5D5D"></span>
-            <span class="isch-dot" style="background:#5D8A7E"></span>
-            <span class="isch-dot" style="background:#7E5D8A"></span>
-          </span>
-          <span class="isch-label">OPPOSITE</span>
-          <span class="isch-sub">180° complement</span>
-        </button>
+      <!-- v:F12.30 — Designer's Dock: scheme picker pill menu (replaces instant-schemes-bar) -->
+      <div id="designers-dock">
+        <button class="dock-pill" id="dp-true"
+          onclick="AutoPalette.applyScheme('true');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
+          title="Raw k-means — no LCH transform">TRUE</button>
+        <button class="dock-pill" id="dp-opp"
+          onclick="AutoPalette.applyScheme('opposites');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
+          title="Perceptual 180° LCH complement with L correction">OPP</button>
+        <button class="dock-pill" id="dp-neu"
+          onclick="AutoPalette.applyScheme('neutral');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
+          title="Architectural pale wash — L=90, C≤4">NEU</button>
+        <button class="dock-pill" id="dp-mut"
+          onclick="AutoPalette.applyScheme('muted');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
+          title="Half-chroma — tonally quiet">MUT</button>
+        <button class="dock-pill" id="dp-sat"
+          onclick="AutoPalette.applyScheme('vivid');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
+          title="Boosted chroma — ×1.4 saturation">SAT</button>
       </div>
-      <!-- Picked colours strip — shown after any tap -->
+            <!-- Picked colours strip — shown after any tap -->
       <div id="up-queue-bar" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 12px;flex-shrink:0;align-items:center;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;min-height:42px">
           <div id="up-pick-queue" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
@@ -3062,7 +3057,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.20</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.30</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5028,7 +5023,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.20</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.30</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -6830,12 +6825,17 @@ const Sampler={
     // v:F12.21 — Release hardware constraints back to continuous BEFORE killing
     // the track. Without this, some Android devices leave the sensor locked in
     // manual AF/AE state and exhibit a "sensor hang" on next camera open.
+    // v:F12.30 — M2: guard readyState before releasing sensor constraints.
+    // Only apply to 'live' tracks — calling applyConstraints on an ended track
+    // throws on some Android HALs and can prevent the stream from being killed.
     if (this.stream) {
       try {
         this.stream.getTracks().filter(t => t.kind === 'video').forEach(t => {
-          t.applyConstraints({ advanced: [{
-            focusMode: 'continuous', exposureMode: 'continuous', whiteBalanceMode: 'continuous'
-          }] }).catch(() => {});
+          if (t.readyState === 'live') {
+            t.applyConstraints({ advanced: [{
+              focusMode: 'continuous', exposureMode: 'continuous', whiteBalanceMode: 'continuous'
+            }] }).catch(() => {});
+          }
         });
       } catch(e) {}
     }
@@ -6845,7 +6845,8 @@ const Sampler={
       try { target.removeEventListener(event, handler); } catch(e) {}
     });
     this._globalListeners = [];
-    this.frozen = false;  // v:F12.27 — explicit reset: prevent camera staying frozen after mode switch
+    this.frozen = false;             // M1: reset freeze state on every mode switch
+    this.activeExportTarget = null;  // v:F12.30 — M1: clear export target to prevent stale reference
     const _ll = document.getElementById('live-loupe');
     if (_ll) _ll.style.background = 'transparent';
   },
@@ -14378,11 +14379,19 @@ self.onmessage = function(e) {
   },
 
   _schemeOpposites(hex) {
-    // v:F12.25 — 180° hue complement in LCH space; preserves lightness and chroma
+    // v:F12.30 — Perceptual LCH Opposite Engine
+    // Naive 180° shift on dark colours produces dark-mud accents that are
+    // invisible against dark UI. We apply a perceptual L correction:
+    //   dark  seed (L < 35) → lift opposite by +35 → visible mid-tone accent
+    //   light seed (L > 75) → drop opposite by -35 → grounded mid-tone accent
+    //   mid   seed (35–75)  → L preserved (standard complement)
     try {
       const { r, g, b } = CS.hexToRgb(hex);
       const { l, c, h } = CS.rgbToLch(r, g, b);
-      return CS.lchToHex(l, c, (h + 180) % 360);
+      let oppL = l;
+      if (l < 35)      oppL = Math.min(l + 35, 95);
+      else if (l > 75) oppL = Math.max(l - 35, 20);
+      return CS.lchToHex(oppL, c, (h + 180) % 360);
     } catch(e) { return hex; }
   },
 
