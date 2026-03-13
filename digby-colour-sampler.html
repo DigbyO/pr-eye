@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.0.1 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.0.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.0.1</title>
+<title>Digby v13.0.2</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'v13.0.1';
+  const APP_VERSION = 'v13.0.2';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3051,7 +3051,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.0.1</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.0.2</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5071,7 +5071,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.0.1</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.0.2</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -14528,15 +14528,15 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
 
     // ── Constants ─────────────────────────────────────────────────────────────
     const LOGICAL_W   = 380;
-    const BORDER      = 24;          // card outer margin
-    const CW          = LOGICAL_W - BORDER * 2;  // 332px inner width
-    // v106b: luxury spacing — safe zone margins, gaps, and label strip below colour
-    const SW_PAD      = 8;           // v:F1.13 tightened further
-    const SW_GAP      = 8;           // gap between individual swatches
-    const SW_COLOR_H  = 52;          // v:F1.13 reduced from 64 — saves 12px per export
-    const SW_LABEL_H  = 24;          // v:F1.13 reduced from 28 — saves 4px per export
-    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 92px
-    const BYLINE_PAD  = 4;           // v:F1.13 minimal byline clearance
+    const BORDER      = 14;          // v:v13.0.2 — tighter outer ring; less grey margin
+    const CW          = LOGICAL_W - BORDER * 2;  // 352px inner width
+    // v:v13.0.2 — rebalanced: shorter margins, taller swatches, tighter gaps
+    const SW_PAD      = 5;           // inner strip top/bottom padding
+    const SW_GAP      = 5;           // gap between individual swatches
+    const SW_COLOR_H  = 68;          // taller colour blocks — more visual weight
+    const SW_LABEL_H  = 18;          // compact label strip (7-8px mono reads in 18px)
+    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 96px
+    const BYLINE_PAD  = 2;           // tight byline clearance
 
     // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
     const srcW = img.naturalWidth  || img.width  || 1;
