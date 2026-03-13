@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.30 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.31 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.30</title>
+<title>Digby v12.31</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.30';
+  const APP_VERSION = 'F12.31';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -528,7 +528,7 @@ body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
 
 /* Capture row - overlaid at very bottom above live-bar */
 #capture-row{
-  position:absolute;bottom:80px;left:0;right:0;z-index:6;
+  position:absolute;bottom:136px;left:0;right:0;z-index:6;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;
 }
@@ -1174,6 +1174,55 @@ body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,b
 /* design-pro-on exclusively controls Tailwind + CVD palette buttons */
 body.design-pro-on .pb-pro-btn{display:revert!important}
 body.design-pro-on .colour-blind-tool{display:revert!important}
+
+/* v:F12.31 — Sampler Bottom Dock: labelled action bar above tabs */
+#sampler-bottom-dock {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+  left: 0; right: 0;
+  height: 58px;
+  background: rgba(10,10,10,0.93);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  z-index: calc(var(--z-tabs) - 1);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px;
+}
+body.active-tab-sampler #sampler-bottom-dock { display: flex; }
+/* sbd-btn: icon + label stacked vertically */
+.sbd-btn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; flex: 1; height: 100%; min-width: 0;
+  background: none; border: none;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer; padding: 5px 2px;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--mono);
+  transition: color 0.15s;
+  border-radius: 8px;
+}
+.sbd-btn:active { color: var(--accent); background: rgba(255,255,255,0.07); }
+.sbd-btn.on { color: var(--accent); }
+.sbd-icon { font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.sbd-label { font-size: 8px; text-transform: uppercase; letter-spacing: .055em; white-space: nowrap; }
+/* Pro-only dock items hidden until pro mode */
+.sbd-btn.pro-only { display: none !important; }
+body.pro-mode .sbd-btn.pro-only { display: flex !important; }
+/* Live-bar resize handle (v:F12.31) */
+#live-bar-resize {
+  position: absolute; bottom: 4px; right: 6px;
+  width: 22px; height: 22px;
+  cursor: se-resize; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.45; color: rgba(255,255,255,0.7); font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
+}
+#live-bar-resize:active { opacity: 1; }
 
 /* ── Pro Mode toggle in header ─────────────────────────────────────────── */
 #hdr-pro-wrap{display:flex;align-items:center;gap:4px;padding:0 2px;flex-shrink:0}
@@ -1937,6 +1986,17 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 
     <!-- Colour Wheel Picker -->
     <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--bg)">
+      <!-- v:F12.31 — Upload from picker -->
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 0">
+        <button class="btn btn-s btn-sm" style="flex-shrink:0"
+                onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();Sampler.setMode('upload');}">
+          ↑ Upload Image
+        </button>
+        <button class="btn btn-s btn-sm" style="flex-shrink:0"
+                onclick="Sampler.setMode('camera')" title="Back to camera">
+          ← Camera
+        </button>
+      </div>
 
       <!-- v132: v115-style quick native colour picker -->
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border)">
@@ -2124,34 +2184,12 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
         <div id="live-undertone">—</div>
       </div>
-      <!-- v449: 4-button action row: upload | export | picker | WB -->
-      <div id="live-actions">
+      <!-- v:F12.31 — live-actions emptied; buttons moved to #sampler-bottom-dock -->
+      <div id="live-actions" style="display:none">
         <input type="file" id="bar-image-upload" accept="image/*" style="display:none" onchange="Sampler.loadFromBar(this)">
-        <button class="live-act-btn" id="bar-upload-trigger" title="Upload photo" onclick="document.getElementById('bar-image-upload').click()" aria-label="Upload image">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 10V2M8 2L5 5M8 2L11 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 12v1.5A1.5 1.5 0 003.5 15h9A1.5 1.5 0 0014 13.5V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="live-act-btn" id="live-export-btn" title="Quick Polaroid Export"
-          onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}/* v:F1.11 prefer explicit tap target */const _t=Sampler.activeExportTarget;const _q=Sampler.pickQueue&&Sampler.pickQueue.length?Sampler.pickQueue:null;const _hexes=_t?[_t,...(_q||[]).filter(h=>h!==_t)]:_q||[Sampler.currentHex];if(_hexes[0]){AutoPalette.exportPolaroid(_hexes)}else{App.toast('Tap a swatch to select export target')}})()">📸</button>
-        <button class="live-act-btn" id="live-strip-btn" title="Film Strip export"
-                onclick="App.exportPaletteStrip()"
-                style="font-family:var(--mono);font-size:12px;background:transparent;border:1px solid rgba(255,255,255,.15)">🎞</button>
-        <!-- v:F12.7 — Save Scene: stores entire pickQueue as a named palette strip -->
-        <button class="live-act-btn" id="live-save-scene-btn"
-                title="Save current palette as a Scene"
-                onclick="App.saveScene()"
-                aria-label="Save scene"
-                style="font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.04em">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 2px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-          SCENE
-        </button>
-        <button id="bar-picker-btn-rainbow" title="Open in Colour Picker" onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker"></button>
-        <button class="live-act-btn" id="live-wb-btn" title="White Balance"
-                onclick="Sampler.toggleWBDropdown()"
-                style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:-.5px;background:transparent;border:1px solid rgba(255,255,255,.15)">WB</button>
       </div>
+      <!-- Resize handle for live-bar scaling -->
+      <span id="live-bar-resize" title="Drag to resize">⤡</span>
     </div>
     <!-- Save card -->
     <div id="save-wrap">
@@ -3057,7 +3095,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.30</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.31</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -3070,6 +3108,48 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 
 
 <!-- v121: Colour Tray removed — Library is a dedicated tab again -->
+
+<!-- v:F12.31 — Sampler Bottom Dock: action buttons above tab bar -->
+<div id="sampler-bottom-dock">
+  <button class="sbd-btn" id="bar-upload-trigger" title="Upload photo"
+          onclick="document.getElementById('bar-image-upload').click()" aria-label="Upload image">
+    <span class="sbd-icon">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+        <path d="M8 10V2M8 2L5 5M8 2L11 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12v1.5A1.5 1.5 0 003.5 15h9A1.5 1.5 0 0014 13.5V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="sbd-label">Upload</span>
+  </button>
+  <button class="sbd-btn" id="live-export-btn" title="Quick Polaroid Export"
+    onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}const _t=Sampler.activeExportTarget;const _q=Sampler.pickQueue&&Sampler.pickQueue.length?Sampler.pickQueue:null;const _hexes=_t?[_t,...(_q||[]).filter(h=>h!==_t)]:_q||[Sampler.currentHex];if(_hexes[0]){AutoPalette.exportPolaroid(_hexes)}else{App.toast('Tap a swatch to select export target')}})()">
+    <span class="sbd-icon">📸</span>
+    <span class="sbd-label">Polaroid</span>
+  </button>
+  <button class="sbd-btn pro-only" id="live-strip-btn" title="Film Strip export"
+          onclick="App.exportPaletteStrip()">
+    <span class="sbd-icon">🎞</span>
+    <span class="sbd-label">Strip</span>
+  </button>
+  <button class="sbd-btn pro-only" id="live-save-scene-btn" title="Save Scene"
+          onclick="App.saveScene()" aria-label="Save scene">
+    <span class="sbd-icon">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+    </span>
+    <span class="sbd-label">Scene</span>
+  </button>
+  <button class="sbd-btn" id="bar-picker-btn-rainbow" title="Open in Colour Picker"
+          onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker"
+          style="padding:4px 2px">
+    <span class="sbd-icon" style="width:28px;height:28px;border-radius:50%;background:conic-gradient(from 0deg,#ff0000 0deg,#ffcc00 60deg,#00ff44 120deg,#00ccff 180deg,#4400ff 240deg,#ff00cc 300deg,#ff0000 360deg);border:1.5px solid rgba(255,255,255,.3);box-shadow:0 0 8px rgba(255,255,255,.15)"></span>
+    <span class="sbd-label">Picker</span>
+  </button>
+  <button class="sbd-btn" id="live-wb-btn" title="White Balance"
+          onclick="Sampler.toggleWBDropdown()">
+    <span class="sbd-icon" style="font-size:11px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono)">WB</span>
+    <span class="sbd-label">Balance</span>
+  </button>
+</div>
 
 <!-- TABS -->
 <div id="tabs">
@@ -5023,7 +5103,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.30</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.31</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -10842,6 +10922,8 @@ const SwatchExport = {
         <button class="btn btn-s btn-sm" onclick="SwatchExport.selectNone()">None</button>
         <button class="btn btn-s btn-sm" onclick="SwatchExport.selectTop(3)">Top 3</button>
         <button class="btn btn-s btn-sm" onclick="SwatchExport.selectTop(6)">Top 6</button>
+        <button class="btn btn-s btn-sm" onclick="SwatchExport.selectTop(9)">Top 9</button>
+        <button class="btn btn-s btn-sm" onclick="SwatchExport.selectTop(12)">Top 12</button>
         <button class="btn btn-s btn-sm" onclick="SwatchExport.selectByLrv()">By LRV</button>
       </div>
 
@@ -10914,7 +10996,7 @@ const SwatchExport = {
   },
   selectByLrv() {
     // Sort lightdark, take up to 6
-    const sorted = [...DS.all()].sort((a,b)=>(b.lrv||50)-(a.lrv||50)).slice(0,6);
+    const sorted = [...DS.all()].sort((a,b)=>(b.lrv||50)-(a.lrv||50)).slice(0,12); // v:F12.31 — raised to 12
     this.selectedIds = new Set(sorted.map(c=>c.id));
     this.refresh();
   },
@@ -14905,7 +14987,61 @@ const AIColourName = {
   }, { passive: true });
 })();
 
-// v448 ── Live-bar swatch tap: open current colour in Picker mode ──────────
+/* v:F12.31 - Live-bar pinch-to-scale + resize handle */
+(function(){
+  const bar = document.getElementById('live-bar');
+  if (!bar) return;
+  const MIN_W = 200, MAX_W = window.innerWidth - 16;
+  const handle = document.getElementById('live-bar-resize');
+  if (handle) {
+    let resizing = false, rStartX = 0, rStartW = 0;
+    function onResizeStart(e) {
+      e.preventDefault(); e.stopPropagation();
+      resizing = true;
+      rStartX = e.touches ? e.touches[0].clientX : e.clientX;
+      rStartW = bar.offsetWidth;
+      document.addEventListener('mousemove', onResizeMove);
+      document.addEventListener('mouseup', onResizeEnd);
+      document.addEventListener('touchmove', onResizeMove, { passive: false });
+      document.addEventListener('touchend', onResizeEnd);
+    }
+    function onResizeMove(e) {
+      if (!resizing) return; e.preventDefault();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const newW = Math.min(MAX_W, Math.max(MIN_W, rStartW + (cx - rStartX) * 2));
+      bar.style.width = newW + 'px';
+    }
+    function onResizeEnd() {
+      resizing = false;
+      document.removeEventListener('mousemove', onResizeMove);
+      document.removeEventListener('mouseup', onResizeEnd);
+      document.removeEventListener('touchmove', onResizeMove);
+      document.removeEventListener('touchend', onResizeEnd);
+    }
+    handle.addEventListener('mousedown', onResizeStart);
+    handle.addEventListener('touchstart', onResizeStart, { passive: false });
+  }
+  let pinchActive = false, pinchStartDist = 0, pinchStartW = 0;
+  function pinchDist(t) {
+    const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  bar.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      pinchActive = true; pinchStartDist = pinchDist(e.touches);
+      pinchStartW = bar.offsetWidth; e.preventDefault();
+    }
+  }, { passive: false });
+  bar.addEventListener('touchmove', function(e) {
+    if (!pinchActive || e.touches.length !== 2) return;
+    e.preventDefault();
+    const ratio = pinchDist(e.touches) / pinchStartDist;
+    bar.style.width = Math.min(MAX_W, Math.max(MIN_W, Math.round(pinchStartW * ratio))) + 'px';
+  }, { passive: false });
+  bar.addEventListener('touchend', function(e) { if (e.touches.length < 2) pinchActive = false; });
+})();
+
+// v448 -- Live-bar swatch tap: open current colour in Picker mode ──────────
 (function() {
   var swatch = document.getElementById('live-swatch');
   if (!swatch) return;
