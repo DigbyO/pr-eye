@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.0 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.0.1 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.0</title>
+<title>Digby v13.0.1</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'v13.0';
+  const APP_VERSION = 'v13.0.1';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1678,7 +1678,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <rect x="1" y="5" width="15" height="14" rx="2" stroke-linejoin="round"/>
       </svg>Live Camera
     </div>
-    <div class="ws-btn" onclick="WelcomeScreen.go('sampler');setTimeout(function(){var fi=document.getElementById('up-input');if(fi){fi.value='';fi.click();}},350)">
+    <div class="ws-btn" onclick="WelcomeScreen.go('sampler');setTimeout(function(){Sampler.setMode('upload');},300)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
       </svg>Upload Image
@@ -1877,7 +1877,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     </div><!-- /sampler-cam-col -->
 
     <!-- Upload canvas (hidden by default) -->
-    <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:#000">
+    <div id="upload-wrap" style="display:none;flex:1;overflow:hidden;flex-direction:column;background:transparent">
       <div style="display:flex;gap:6px;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap">
         <button class="btn btn-s btn-sm" onclick="Sampler.setMode('camera')" title="Back to camera" style="flex-shrink:0;font-size:15px;padding:5px 9px;line-height:1" aria-label="Back to camera">←</button>
         <button class="btn btn-s btn-sm" style="flex-shrink:0" onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();}">Change</button>
@@ -3051,7 +3051,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.0</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.0.1</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5071,7 +5071,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.0</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.0.1</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
