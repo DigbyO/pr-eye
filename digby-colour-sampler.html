@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.37 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.0 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.37</title>
+<title>Digby v13.0</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.37';
+  const APP_VERSION = 'v13.0';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1336,11 +1336,13 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
   white-space: nowrap;
 }
 body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
-/* v:F1.12 — Telemetry rows only visible in Design Pro mode */
-/* v:F1.15 — HUD clean: always hide telemetry/GPS/WB; COLOUR row only */
+/* v:v13.0 — Telemetry hidden by default; Pro Mode + HUD = full telemetry */
 #lab-hud .hud-telemetry,
 #hud-gps-row,
 #hud-wbcal-row { display: none !important; }
+body.pro-mode.hud-on #lab-hud .hud-telemetry,
+body.pro-mode.hud-on #hud-gps-row,
+body.pro-mode.hud-on #hud-wbcal-row { display: flex !important; }
 /* v:F1.15 — Large clean COLOUR identity */
 body.hud-on #lab-hud { padding: 10px 14px 12px; }
 body.hud-on #lab-hud .hud-static:first-child .hud-dim { font-size: 9px; letter-spacing: .18em; opacity: .6; }
@@ -1466,7 +1468,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
   font-family: var(--mono);
   font-weight: 700;
   padding: 2px 6px;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
   color: var(--muted);
@@ -1477,7 +1479,8 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 .density-btn.on,
 .density-btn.active {
   background: var(--accent);
-  color: #fff;
+  color: #000;
+  border-color: rgba(255,255,255,.7);
 }
 .density-btn:active { opacity: 0.7; }
 
@@ -2174,6 +2177,8 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       <button class="sort-btn"     id="gsort-hue"      onclick="Library.setSort('hue')">Hue</button>
       <button class="sort-btn"     id="gsort-lightness" onclick="Library.setSort('lightness')">Lightness</button>
       <button class="sort-btn"     id="gsort-palette"   onclick="Library.setSort('palette')">Palette</button>
+      <button class="sort-btn" id="gsort-seq"
+              onclick="App.showSeq=!App.showSeq;this.classList.toggle('on',App.showSeq);Library.render()">№</button>
     </div>
     <!-- Tag filter bar (hidden until tags exist) -->
     <div id="gal-tag-bar" style="display:none"></div>
@@ -2936,7 +2941,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
               title="Undo last change (Ctrl+Z / Cmd+Z)"
               disabled
               style="padding:10px 14px;font-size:16px;flex-shrink:0">↩</button>
-            <button class="btn btn-s btn-sm" style="flex:1" onclick="PaletteBuilder.closeSuggest()">Done</button>
+            <button class="btn btn-s btn-sm" style="flex:1" onclick="PaletteBuilder._addAllAlgo();PaletteBuilder.closeSuggest()" title="Add remaining suggestions and close">Done</button>
           </div>
         </div>
 
@@ -3046,7 +3051,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.37</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.0</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4411,6 +4416,7 @@ const State = {
 const App={
   tab:'sampler',
   showStripText: false,    // v:F12.11 — show % labels on Film Strip export
+  showSeq: false,          // v:F12.38 — show palette capture number on library cards
   activeLut:null,
   activeLutName:'',
   online:false,
@@ -5065,7 +5071,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.37</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.0</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -5145,7 +5151,7 @@ const App={
 
     // ── Info strip height scales gently with available swatch width ──────────
     const INFO_H = Math.round(Math.max(56 * SCALE, Math.min(72 * SCALE, avgVis * 0.38)));
-    const FOOT_H = 48 * SCALE;  // v:F1.5 tightened footer — removed excess bottom space
+    const FOOT_H = 28 * SCALE;  // v:v13.0 — tight footer; 28px at 1x eliminates bottom whitespace
     const CARD_H = PAD + SW_H + INFO_H + FOOT_H + PAD;
 
     const canvas = document.createElement('canvas');
@@ -7027,6 +7033,9 @@ const Sampler={
     if(mb) mb.style.display=m==='camera'?'none':'flex';
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
+    // v:F12.38 — hide outer cam-wrap so its #000 background doesn't ghost in upload/wheel
+    const camWrap=document.getElementById('sampler-cam-wrap');
+    if(camWrap) camWrap.style.display=m==='camera'?'flex':'none';
     // v:F12.12 — live-loupe: visible in camera, hidden in all other modes
     const _llEl=document.getElementById('live-loupe');
     if(_llEl) _llEl.style.display=m==='camera'?'block':'none';
@@ -7816,8 +7825,7 @@ const Library={
 
   render(){
     // v:F12.37 — Saved Scenes removed; palette numbers replace scene capture
-   }
-
+    // v:F12.38 — stray brace removed; render body restored
     const allRaw=DS.all();
     // Filter by active folder (FolderManager may not exist yet on first load)
     const activeFolder = (typeof FolderManager !== 'undefined') ? FolderManager.active : 'Default';
@@ -8001,6 +8009,7 @@ const Library={
     return`<div class="polaroid" data-id="${c.id}" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Library.setFocus('${c.id}');Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.setFocus('${c.id}');Library.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
       <div class="pol-name">${c.name}</div>
+      ${App.showSeq && c.captureSeq ? `<div class="pol-match" style="font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:1px">№ ${c.captureSeq}</div>` : ''}
       <div class="pol-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
       <div class="pol-match">${c.pantone?.code||''}</div>
       <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
@@ -12183,6 +12192,12 @@ const PaletteBuilder = {
     const _baseHex = _baseMap[themes[0]] || this._rootHex();
     if (_baseHex && this.colours.length < this.MAX && !this._isDuplicate(_baseHex)) {
       this.addColour(_baseHex);
+    }
+    // v:v13.0 — Surface theme identity in palette header label
+    const _moodLbl = document.getElementById('pb-mood-label');
+    if (_moodLbl) {
+      _moodLbl.textContent = '✦ ' + (themes[0] || 'harmony').replace(/_/g, ' ').toUpperCase();
+      _moodLbl.style.display = 'block';
     }
     // Show the full 2-sentence design narrative
     App.toast('✦ ' + narrative, 5000);
