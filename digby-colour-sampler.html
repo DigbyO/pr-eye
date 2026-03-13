@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.31 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.32 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.31</title>
+<title>Digby v12.32</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.31';
+  const APP_VERSION = 'F12.32';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1176,12 +1176,15 @@ body.design-pro-on .pb-pro-btn{display:revert!important}
 body.design-pro-on .colour-blind-tool{display:revert!important}
 
 /* v:F12.31 — Sampler Bottom Dock: labelled action bar above tabs */
+/* v:F12.32 - dock safe-area + space-evenly */
 #sampler-bottom-dock {
   display: none;
   position: fixed;
-  bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+  bottom: 0;
   left: 0; right: 0;
-  height: 58px;
+  /* height expands to include safe-area; content sits in upper 58px */
+  min-height: 58px;
+  padding-bottom: env(safe-area-inset-bottom, 12px);
   background: rgba(10,10,10,0.93);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
@@ -1189,8 +1192,8 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
   z-index: calc(var(--z-tabs) - 1);
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
-  padding: 0 4px;
+  justify-content: space-evenly;
+  padding-left: 4px; padding-right: 4px;
 }
 body.active-tab-sampler #sampler-bottom-dock { display: flex; }
 /* sbd-btn: icon + label stacked vertically */
@@ -1214,15 +1217,18 @@ body.active-tab-sampler #sampler-bottom-dock { display: flex; }
 .sbd-btn.pro-only { display: none !important; }
 body.pro-mode .sbd-btn.pro-only { display: flex !important; }
 /* Live-bar resize handle (v:F12.31) */
+/* v:F12.32 - resize handle: block scroll during drag */
 #live-bar-resize {
   position: absolute; bottom: 4px; right: 6px;
-  width: 22px; height: 22px;
+  width: 28px; height: 28px;
   cursor: se-resize; z-index: 10;
   display: flex; align-items: center; justify-content: center;
   opacity: 0.45; color: rgba(255,255,255,0.7); font-size: 13px;
   -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none; -webkit-user-select: none;
 }
-#live-bar-resize:active { opacity: 1; }
+#live-bar-resize:active { opacity: 0.9; }
 
 /* ── Pro Mode toggle in header ─────────────────────────────────────────── */
 #hdr-pro-wrap{display:flex;align-items:center;gap:4px;padding:0 2px;flex-shrink:0}
@@ -1989,7 +1995,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       <!-- v:F12.31 — Upload from picker -->
       <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 0">
         <button class="btn btn-s btn-sm" style="flex-shrink:0"
-                onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';_fi.click();Sampler.setMode('upload');}">
+                onclick="var _fi=document.getElementById('up-input');if(_fi){_fi.value='';Sampler.setMode('upload');_fi.click();}">
           ↑ Upload Image
         </button>
         <button class="btn btn-s btn-sm" style="flex-shrink:0"
@@ -3095,7 +3101,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.31</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.32</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5103,7 +5109,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.31</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.32</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -5302,12 +5308,20 @@ const App={
     canvas.width  = W; canvas.height = H;
     const ctx     = canvas.getContext('2d');
     const proportional = !!window._apMosaic;  // true = mosaic → proportional heights
-    let y = 0;
+    // v:F12.32 - pixel-perfect accumulator: no rounding gaps across 12 bands
+    let yAcc = 0;  // floating-point accumulator
+    let y = 0;     // integer pixel position
     hexes.forEach((hex, i) => {
       const isLast = (i === hexes.length - 1);
-      const h = isLast ? (H - y)
-        : proportional ? Math.round(weights[i] * H)
-        : Math.round(H / hexes.length);
+      let h;
+      if (isLast) {
+        h = H - y;  // give last band all remaining pixels
+      } else {
+        const frac = proportional ? weights[i] : (1 / hexes.length);
+        yAcc += frac * H;
+        const nextY = Math.round(yAcc);
+        h = nextY - y;
+      }
       ctx.fillStyle = hex;
       ctx.fillRect(0, y, W, h);
       if (App.showStripText && h > 24) {
