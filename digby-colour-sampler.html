@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.32 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.34 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.32</title>
+<title>Digby v12.34</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.32';
+  const APP_VERSION = 'F12.34';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1180,11 +1180,10 @@ body.design-pro-on .colour-blind-tool{display:revert!important}
 #sampler-bottom-dock {
   display: none;
   position: fixed;
-  bottom: 0;
+/* v:F12.33 - dock above tabs, safe-area padding inside dock height */
+  bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
   left: 0; right: 0;
-  /* height expands to include safe-area; content sits in upper 58px */
-  min-height: 58px;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
+  height: 58px;
   background: rgba(10,10,10,0.93);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
@@ -1949,7 +1948,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
       <!-- v:F12.30 — Designer's Dock: scheme picker pill menu (replaces instant-schemes-bar) -->
-      <div id="designers-dock">
+      <div id="designers-dock" class="pro-only">
         <button class="dock-pill" id="dp-true"
           onclick="AutoPalette.applyScheme('true');document.querySelectorAll('#designers-dock .dock-pill').forEach(function(b){b.classList.remove('active')});this.classList.add('active')"
           title="Raw k-means — no LCH transform">TRUE</button>
@@ -3101,7 +3100,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.32</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.34</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5109,7 +5108,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.32</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.34</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -7185,19 +7184,17 @@ const Sampler={
         const wrap=newCanvas.parentNode;
         const cw=wrap.offsetWidth||window.innerWidth;
         const ch=wrap.offsetHeight||(window.innerHeight*0.55);
-        newCanvas.width=cw;
-        newCanvas.height=ch;
-        const ctx=newCanvas.getContext('2d');
-        this.upCtx=ctx;
-
-        // Calculate letterbox offsets so coordinate mapping is accurate
+        // v:F12.33 - canvas sized to image height; no black bars
         const scale=Math.min(cw/img.width, ch/img.height);
         const dw=img.width*scale, dh=img.height*scale;
-        const ox=(cw-dw)/2, oy=(ch-dh)/2;
+        const ox=(cw-dw)/2, oy=0;  // top-align, no vertical black bar
+        newCanvas.width=cw;
+        newCanvas.height=Math.ceil(dh);  // canvas height = image height only
+        const ctx=newCanvas.getContext('2d');
+        this.upCtx=ctx;
         this._upOffsets={ox,oy,dw,dh,iw:img.width,ih:img.height};
 
-        ctx.fillStyle='#000';
-        ctx.fillRect(0,0,cw,ch);
+        ctx.clearRect(0,0,cw,Math.ceil(dh));
         ctx.drawImage(img,ox,oy,dw,dh);
 
         const pick=(ev)=>{
@@ -10791,6 +10788,7 @@ const SwatchExport = {
   ratio: '1:1',
   layout: 'polaroids',
   includeText: true,
+  showProportions: false,  // v:F12.34 — show % of image per colour on polaroid
   bgColor: '#1a1a1a',
   selectedIds: new Set(),
   _ephemeral: [], // temp colour objects for hexes not in library
@@ -10965,6 +10963,16 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
+      <!-- v:F12.34 Show proportions toggle (only visible when _apWeights available) -->
+      ${(window._apWeights && window._apWeights.length > 0) ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px">Show proportions</div>
+          <div style="font-size:10px;color:var(--muted)">% of image per colour</div>
+        </div>
+        <div class="sw ${this.showProportions?'on':''}" onclick="SwatchExport.toggleProportions(this)"></div>
+      </div>` : ''}
+
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-size:13px">Background</div>
         <div style="display:flex;gap:8px">
@@ -11018,6 +11026,7 @@ const SwatchExport = {
   setRatio(r)  { this.ratio = r;  this.refresh(); },
   setLayout(l) { this.layout = l; this._userLayout = l; this.refresh(); },
   toggleText(el) { this.includeText = !this.includeText; el.classList.toggle('on', this.includeText); this.preview(); },
+  toggleProportions(el) { this.showProportions = !this.showProportions; el.classList.toggle('on', this.showProportions); this.preview(); },  // v:F12.34
   setBg(bg)    { this.bgColor = bg; this.refresh(); },
 
   refresh() {
@@ -11214,6 +11223,17 @@ const SwatchExport = {
       ctx.textAlign = 'right';
       ctx.fillStyle  = c.lrv > 55 ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.6)';
       ctx.fillText(lrvLabel, x + cardW - ip - 3, y + colourH - ip - 3);
+
+      // v:F12.34 — proportion % badge (bottom-left of colour block)
+      if (this.showProportions && window._apWeights && window._apWeights.length > i) {
+        const total = window._apWeights.reduce((a,b)=>a+b,0) || 1;
+        const pct = Math.round((window._apWeights[i] / total) * 100);
+        const pctSize = Math.max(7, Math.round(Math.min(11 * scale, cardW * 0.09)));
+        ctx.font = `bold ${pctSize}px 'Space Mono',monospace`;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = c.lrv > 55 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.75)';
+        ctx.fillText(pct + '%', x + ip + 3, y + colourH - ip - 3);
+      }
 
       // White info strip
       const iy = y + colourH;
@@ -14165,7 +14185,8 @@ self.onmessage = function(e) {
     const d = document.createElement('div');
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
-    d.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+    d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
+background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div id="ap-spinner">
         <div class="spinner"></div>
         <div>${title}</div>
@@ -14359,7 +14380,8 @@ self.onmessage = function(e) {
     const d = document.createElement('div');
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
-    d.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+    d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
+background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
         <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px${Sampler.mode !== 'upload' ? ';display:none' : ''}" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
