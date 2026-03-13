@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v12.9 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v12.10 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v12.9</title>
+<title>Digby v12.10</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = 'F12.9';
+  const APP_VERSION = 'F12.10';
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2908,7 +2908,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.9</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v12.10</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4803,7 +4803,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.9</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v12.10</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -7043,7 +7043,7 @@ const Library={
             ).join('');
             const dateStr = new Date(s.ts).toLocaleDateString([], { month:'short', day:'numeric' });
             return `<div style="margin-bottom:8px;cursor:pointer"
-                        onclick="App.setTab('sampler')" title="${s.label}">
+                        onclick="(function(){var _h='${s.hexes.join()}';if(typeof PaletteBuilder!=='undefined'){PaletteBuilder.colours=_h.split(',').map(function(x){return PaletteBuilder._makeEntry(x)});PaletteBuilder.render();App.setTab('palette');App.toast('Scene loaded ✓');}})()" title="${s.label}">
               <div style="display:flex;height:24px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">${strip}</div>
               <div style="font-size:8px;color:var(--muted);font-family:var(--mono);
                           margin-top:3px;display:flex;justify-content:space-between">
@@ -10122,7 +10122,7 @@ const SwatchExport = {
           <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
-        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()" ${sel.length===0?'disabled':''}>↓ MJ Strip (SREF)</button>
+        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()" ${sel.length===0?'disabled':''}>↓ Palette Strip</button>
       </div>
     </div>`;
   },
@@ -13475,8 +13475,8 @@ self.onmessage = function(e) {
     d.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;z-index:9001;display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">\${title}</div>
-        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
+        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px${Sampler.mode !== 'upload' ? ';display:none' : ''}" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
       </div>
       <div id="_ap_strip" style="display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
       </div>
