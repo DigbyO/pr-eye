@@ -6857,6 +6857,7 @@ const Sampler={
         + '<div style="position:absolute;top:max(24px,env(safe-area-inset-top,24px));right:24px;'
         + 'font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--mono)">tap to exit</div>'
         + '<button id="imm-timing-btn" '
+        + 'ontouchstart="event.stopPropagation()" '
         + 'onclick="event.stopPropagation();Sampler._immersivePropTiming=!Sampler._immersivePropTiming;'
         + 'this.textContent=Sampler._immersivePropTiming?\'⏱ Prop\':\'⏱ Equal\';Sampler._immersiveIdx=0;" '
         + 'style="position:absolute;top:max(24px,env(safe-area-inset-top,24px));left:24px;'
@@ -6866,6 +6867,7 @@ const Sampler={
         + '-webkit-tap-highlight-color:transparent">⏱ Prop</button>'
         // v:v13.19 Rave mode toggle button
         + '<button id="imm-rave-btn" '
+        + 'ontouchstart="event.stopPropagation()" '
         + 'onclick="event.stopPropagation();Sampler._toggleRave(this);" '
         + 'style="position:absolute;top:max(24px,env(safe-area-inset-top,24px));left:104px;'
         + 'font-size:11px;color:rgba(255,255,255,0.55);font-family:var(--mono);'
@@ -6876,12 +6878,14 @@ const Sampler={
       // onclick catches mouse-click on desktop; _touchHandled flag prevents double-fire
       let _ovTouchHandled = false;
       ov.addEventListener('touchend', (e) => {
+        if (e.target !== ov) return;  // v:v13.24 — only background taps dismiss; button taps stay on buttons
         e.preventDefault();  // block synthesised click from firing on overlay
         _ovTouchHandled = true;
         if (Date.now() - (this._immersiveOpenTime || 0) < 400) return;
         this.toggleImmersiveMode();
       }, { passive: false });
-      ov.onclick = () => {
+      ov.onclick = (e) => {
+        if (e && e.target !== ov) return;  // v:v13.24 — ignore clicks bubbled from child buttons
         if (_ovTouchHandled) { _ovTouchHandled = false; return; }  // already handled by touchend
         if (Date.now() - (this._immersiveOpenTime || 0) < 400) return;
         this.toggleImmersiveMode();
