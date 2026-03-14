@@ -6836,6 +6836,11 @@ const Sampler={
   _immersiveRaveRAF:   null,
 
   toggleImmersiveMode() {
+    // v:v13.21 — guard: refuse to activate when queue is empty
+    if (!this._immersiveActive) {
+      const _iq = this.pickQueue || [];
+      if (!_iq.length) { App.toast('Capture some colours first — then tap Immersive'); return; }
+    }
     this._immersiveActive = !this._immersiveActive;
     let ov = document.getElementById('immersive-overlay');
     if (!ov) {
@@ -6870,10 +6875,14 @@ const Sampler={
         + 'background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);'
         + 'border-radius:8px;padding:5px 10px;cursor:pointer;touch-action:manipulation;'
         + '-webkit-tap-highlight-color:transparent">🎵 Rave</button>';
-      ov.onclick = () => this.toggleImmersiveMode();
+      ov.onclick = () => {
+        if (Date.now() - (this._immersiveOpenTime || 0) < 500) return;  // v:v13.21 — ghost-tap guard
+        this.toggleImmersiveMode();
+      };
       document.body.appendChild(ov);
     }
     if (this._immersiveActive) {
+      this._immersiveOpenTime = Date.now();  // v:v13.21 — ghost-tap guard
       ov.style.display = 'flex';
       this._runImmersive(ov);
       App.toast('Immersive mode · tap to exit');
