@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.17 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.19 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
 <title>Digby v13.13</title>
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.17';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.19';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1742,7 +1742,8 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
 
       <!-- Count toggle — v110: moved inside camera, bottom-right above capture row -->
-      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:210px;left:50%;transform:translateX(-50%);z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
+      <!-- v:v13.18 count selector moved below 2x button -->
+      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:78px;left:50%;transform:translateX(-50%);z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
         <button class="tog-btn on" onclick="Sampler.setCamCount(3)"  id="ct3">3</button>
         <button class="tog-btn"    onclick="Sampler.setCamCount(6)"  id="ct6">6</button>
         <button class="tog-btn"    onclick="Sampler.setCamCount(9)"  id="ct9">9</button>
@@ -2817,6 +2818,13 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
     <div class="mod-scroll">
       <div id="palette-builder-panel">
         <div id="pb-mood-label" style="display:none;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:0 0 8px;text-align:center"></div>
+        <!-- v:v13.18 palette grid zoom toggle -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+          <div class="tog-group">
+            <button class="tog-btn" id="pbz2" onclick="PaletteBuilder.setZoom(2)" title="2 columns">2</button>
+            <button class="tog-btn on" id="pbz3" onclick="PaletteBuilder.setZoom(3)" title="3 columns">3</button>
+          </div>
+        </div>
         <div id="pb-grid"></div>
         <div id="pb-actions">
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleWheelPicker()">+ Wheel</button>
@@ -3089,6 +3097,12 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           onclick="Sampler.toggleWBDropdown()">
     <span class="sbd-icon" style="font-size:11px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono)">WB</span>
     <span class="sbd-label">Balance</span>
+  </button>
+  <!-- v:v13.18 Immersive Mode — Design Pro only -->
+  <button class="sbd-btn pro-only" id="live-imm-btn" title="Immersive Presentation Mode"
+          onclick="Sampler.toggleImmersiveMode()">
+    <span class="sbd-icon" style="font-size:16px">🎬</span>
+    <span class="sbd-label">Immersive</span>
   </button>
 </div>
 
@@ -6816,6 +6830,10 @@ const Sampler={
   _immersiveTimer:     null,
   _immersiveIdx:       0,
   _immersivePropTiming: true,  // v:F12.21 — true=proportional, false=equal 3s
+  // v:v13.19 Rave mode — beat-driven colour advance via Web Audio API
+  _immersiveRave:      false,
+  _immersiveRaveAudio: null,   // { ctx, analyser, source, stream }
+  _immersiveRaveRAF:   null,
 
   toggleImmersiveMode() {
     this._immersiveActive = !this._immersiveActive;
@@ -6843,7 +6861,15 @@ const Sampler={
         + 'font-size:11px;color:rgba(255,255,255,0.55);font-family:var(--mono);'
         + 'background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);'
         + 'border-radius:8px;padding:5px 10px;cursor:pointer;touch-action:manipulation;'
-        + '-webkit-tap-highlight-color:transparent">⏱ Prop</button>';
+        + '-webkit-tap-highlight-color:transparent">⏱ Prop</button>'
+        // v:v13.19 Rave mode toggle button
+        + '<button id="imm-rave-btn" '
+        + 'onclick="event.stopPropagation();Sampler._toggleRave(this);" '
+        + 'style="position:absolute;top:max(24px,env(safe-area-inset-top,24px));left:104px;'
+        + 'font-size:11px;color:rgba(255,255,255,0.55);font-family:var(--mono);'
+        + 'background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);'
+        + 'border-radius:8px;padding:5px 10px;cursor:pointer;touch-action:manipulation;'
+        + '-webkit-tap-highlight-color:transparent">🎵 Rave</button>';
       ov.onclick = () => this.toggleImmersiveMode();
       document.body.appendChild(ov);
     }
@@ -6855,6 +6881,7 @@ const Sampler={
     } else {
       ov.style.display = 'none';
       if (this._immersiveTimer) { clearTimeout(this._immersiveTimer); this._immersiveTimer = null; }
+      this._stopRave(); // v:v13.19 — clean up mic + RAF on exit
       App.toast('Immersive mode off');
     }
   },
@@ -6898,10 +6925,129 @@ const Sampler={
       ).join('');
     }
     this._immersiveIdx++;
+    // v:v13.19 — in rave mode, beat detection drives advance; no timer needed
+    if (this._immersiveRave) return;
     const dur = propMode
       ? Math.max(2000, q.filter(h => h === hex).length * 4000)
       : 3000;
     this._immersiveTimer = setTimeout(() => this._runImmersive(ov), dur);
+  },
+
+  // v:v13.19 ── Rave Mode ───────────────────────────────────────────────
+  _toggleRave(btn) {
+    const ov = document.getElementById('immersive-overlay');
+    if (!ov) return;
+    if (this._immersiveRave) {
+      // Turn off — restore timer-based loop
+      this._stopRave();
+      if (btn) { btn.style.background = 'rgba(255,255,255,0.1)';
+                 btn.style.color = 'rgba(255,255,255,0.55)';
+                 btn.style.borderColor = 'rgba(255,255,255,0.2)'; }
+      ov.style.transition = 'background 1.2s ease';
+      this._runImmersive(ov); // restart timer loop
+      App.toast('Rave mode off — back to timed');
+    } else {
+      // Turn on
+      if (this._immersiveTimer) { clearTimeout(this._immersiveTimer); this._immersiveTimer = null; }
+      if (btn) { btn.style.background = 'rgba(255,40,120,0.4)';
+                 btn.style.color = '#fff';
+                 btn.style.borderColor = 'rgba(255,80,160,0.7)'; }
+      ov.style.transition = 'background 0.08s ease';
+      this._startRave(ov);
+    }
+  },
+
+  _raveNextColour(ov) {
+    const q = this.pickQueue || [];
+    if (!q.length) return;
+    const propMode = this._immersivePropTiming !== false;
+    let items;
+    if (propMode) {
+      const seen = new Set(); items = [];
+      q.forEach(h => { if (!seen.has(h)) { seen.add(h); items.push(h); } });
+    } else { items = q.slice(); }
+    if (!items.length) return;
+    this._immersiveIdx = (this._immersiveIdx || 0) % items.length;
+    const hex = items[this._immersiveIdx];
+    ov.style.background = hex;
+    const hexEl  = document.getElementById('imm-hex');
+    const nameEl = document.getElementById('imm-name');
+    const dotRow = document.getElementById('imm-dot-row');
+    if (hexEl)  hexEl.textContent  = hex.toUpperCase();
+    if (nameEl) nameEl.textContent = (typeof CS !== 'undefined' && CS.pantoneFirst)
+      ? CS.pantoneFirst(hex) : '';
+    if (dotRow) {
+      dotRow.innerHTML = items.map((h, i) =>
+        '<div style="width:' + (i === this._immersiveIdx ? '10px' : '6px') + ';height:'
+        + (i === this._immersiveIdx ? '10px' : '6px')
+        + ';border-radius:50%;background:' + (i === this._immersiveIdx
+          ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)')
+        + ';transition:all .3s"></div>'
+      ).join('');
+    }
+    this._immersiveIdx++;
+  },
+
+  _startRave(ov) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!navigator.mediaDevices || !AC) {
+      App.toast('Audio API not available on this device'); return;
+    }
+    this._immersiveRave = true;
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(stream => {
+        const ctx      = new AC();
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.75;
+        const source = ctx.createMediaStreamSource(stream);
+        source.connect(analyser);
+        this._immersiveRaveAudio = { ctx, analyser, source, stream };
+        const buf = new Uint8Array(analyser.frequencyBinCount);
+        let avgEnergy = 60, lastBeat = 0;
+        const COOLDOWN = 250; // min ms between beats — prevents double-fire
+        const tick = () => {
+          if (!this._immersiveRave || !this._immersiveActive) { this._stopRave(); return; }
+          analyser.getByteFrequencyData(buf);
+          // Bass band: bins 0-10 (~0-430Hz at 44100Hz/1024 bins)
+          let energy = 0;
+          for (let i = 1; i < 10; i++) energy += buf[i];
+          energy /= 9;
+          avgEnergy = avgEnergy * 0.92 + energy * 0.08; // slow-moving baseline
+          const now = performance.now();
+          if (energy > avgEnergy * 1.45 && energy > 28 && now - lastBeat > COOLDOWN) {
+            lastBeat = now;
+            this._raveNextColour(ov);
+            // Flash pulse: inset white glow on beat, fades quickly
+            ov.style.boxShadow = 'inset 0 0 0 9999px rgba(255,255,255,0.15)';
+            setTimeout(() => { if (ov) ov.style.boxShadow = ''; }, 90);
+            if (navigator.vibrate) navigator.vibrate(12);
+          }
+          this._immersiveRaveRAF = requestAnimationFrame(tick);
+        };
+        this._immersiveRaveRAF = requestAnimationFrame(tick);
+        App.toast('🎵 Rave mode — beat drives colour');
+      })
+      .catch(() => {
+        App.toast('Microphone access needed for Rave mode');
+        this._immersiveRave = false;
+        const b = document.getElementById('imm-rave-btn');
+        if (b) { b.style.background = 'rgba(255,255,255,0.1)';
+                 b.style.color = 'rgba(255,255,255,0.55)';
+                 b.style.borderColor = 'rgba(255,255,255,0.2)'; }
+      });
+  },
+
+  _stopRave() {
+    this._immersiveRave = false;
+    if (this._immersiveRaveRAF) { cancelAnimationFrame(this._immersiveRaveRAF); this._immersiveRaveRAF = null; }
+    if (this._immersiveRaveAudio) {
+      try { this._immersiveRaveAudio.stream.getTracks().forEach(t => t.stop()); } catch(e) {}
+      try { this._immersiveRaveAudio.ctx.close(); } catch(e) {}
+      this._immersiveRaveAudio = null;
+    }
+    const ov = document.getElementById('immersive-overlay');
+    if (ov) { ov.style.boxShadow = ''; ov.style.transition = 'background 1.2s ease'; }
   },
 
   setMode(m){
@@ -7754,6 +7900,40 @@ const Library={
       return;
     }
     const sorted = this._sortedEntries(entries);
+
+    // v:v13.18 — palette row view: group by captureSeq when sort==='palette'
+    if (this.sort === 'palette') {
+      const groups = {};
+      sorted.forEach(c => {
+        const key = c.captureSeq || 0;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(c);
+      });
+      grid.style.display = 'flex';
+      grid.style.flexDirection = 'column';
+      grid.style.gap = '8px';
+      grid.style.padding = '12px';
+      const seqKeys = Object.keys(groups).map(Number).sort((a,b) => b - a);
+      grid.innerHTML = seqKeys.map(seq => {
+        const cols = groups[seq];
+        const label = seq > 0 ? `Palette №${seq}` : 'Unsorted';
+        const swatches = cols.map(c => {
+          const tc = CS.isDark(c.hex) ? 'rgba(255,255,255,.75)' : 'rgba(0,0,0,.6)';
+          return `<div onclick="Explorer.setRootHex('${c.hex}')" title="${c.name}" style="flex:1;min-width:0;height:48px;background:${c.hex};border-radius:4px;position:relative;cursor:pointer;transition:transform .1s" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform=''">\n            <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:${tc};letter-spacing:.03em">${c.hex.toUpperCase()}</div>\n          </div>`;
+        }).join('');
+        return `<div style="background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);padding:8px">
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">${label} &middot; ${cols.length} colour${cols.length!==1?'s':''}</div>
+          <div style="display:flex;gap:3px">${swatches}</div>
+        </div>`;
+      }).join('');
+      return;
+    }
+
+    // Default: individual polaroid cards
+    grid.style.display = 'grid';
+    grid.style.flexDirection = '';
+    grid.style.gap = '10px';
+    grid.style.padding = '12px';
     grid.innerHTML = sorted.map(c => this.polaroidHTML(c)).join('');
   },
 
@@ -9854,7 +10034,7 @@ const Prompter={
         if(pout) pout.style.color = safe;
         // v:F1.12 export sync — keep activeExportTarget in step with swatch selection
         // so the camera quick-export button always captures the intended colour
-        if(c && typeof Sampler \!== 'undefined') Sampler.activeExportTarget = c.hex;
+        if(c && typeof Sampler \!== 'undefined') { Sampler.activeExportTarget = c.hex; Sampler.lastHex = c.hex; }  // v:v13.20 — persist for Picker seed
       }catch(e){}
     }
   },
@@ -10527,6 +10707,7 @@ const ColourWheel = {
   update() {
     const hex = this.toHex();
     Sampler.currentHex = hex;
+    if (typeof ColorMath !== 'undefined') ColorMath.renderTheoryStrips(hex);  // v:v13.20 — live theory strips on every wheel change
     const preview = document.getElementById('wheel-preview');
     const hexEl = document.getElementById('wheel-hex');
     const nameEl = document.getElementById('wheel-name');
@@ -11730,6 +11911,12 @@ const PaletteBuilder = {
     App.toast(`${this.colours.length} colour${this.colours.length > 1 ? 's' : ''} saved to library ✓`);
   },
 
+  setZoom(n) {
+    const g = document.getElementById('pb-grid');
+    if (g) g.style.gridTemplateColumns = `repeat(${n},1fr)`;
+    document.getElementById('pbz2')?.classList.toggle('on', n===2);
+    document.getElementById('pbz3')?.classList.toggle('on', n===3);
+  },
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
   //  INLINE WHEEL PICKER 
@@ -14202,15 +14389,49 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       window._apMosaic = mosaic;
     };
     window._apToggleView = () => renderView(!window._apMosaic);
+    window._apSortMode = 'cov';
+    window._apSetSort = (mode) => {
+      window._apSortMode = mode;
+      // Highlight active sort btn
+      ['cov','hue','lum'].forEach(m => {
+        const b = document.getElementById('_ap_sort_'+m);
+        if (b) { b.style.background = m===mode ? 'rgba(192,152,112,.3)' : '';
+                 b.style.borderColor = m===mode ? 'var(--accent)' : ''; }
+      });
+      // Re-sort hexes + weights together then re-render
+      const hs = window._apHexes, ws = window._apWeights;
+      let idx = hs.map((_,i) => i);
+      if (mode === 'hue') {
+        idx.sort((a,b) => { const ha = CS.rgbToHsl(...Object.values(CS.hexToRgb(hs[a]))).h;
+                             const hb = CS.rgbToHsl(...Object.values(CS.hexToRgb(hs[b]))).h;
+                             return ha - hb; });
+      } else if (mode === 'lum') {
+        idx.sort((a,b) => { const la = CS.rgbToHsl(...Object.values(CS.hexToRgb(hs[a]))).l;
+                             const lb = CS.rgbToHsl(...Object.values(CS.hexToRgb(hs[b]))).l;
+                             return lb - la; }); // brightest first
+      } else { // cov: sort by weight descending (default)
+        idx.sort((a,b) => ws[b] - ws[a]);
+      }
+      window._apHexes   = idx.map(i => hs[i]);
+      window._apWeights = idx.map(i => ws[i]);
+      renderView(window._apMosaic);
+    };
 
     const d = document.createElement('div');
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
 background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
         <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView&&window._apToggleView()">⊟ Mosaic 60-30-10</button>
+      </div>
+      <!-- v:v13.18 sort controls -->
+      <div id="_ap_sort_row" style="display:flex;gap:4px;margin-bottom:8px">
+        <span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);align-self:center;flex-shrink:0">Sort</span>
+        <button class="btn btn-s btn-sm" id="_ap_sort_cov" style="font-size:8px;padding:2px 7px;background:rgba(192,152,112,.3);border-color:var(--accent)" onclick="window._apSetSort&&window._apSetSort('cov')">% Cover</button>
+        <button class="btn btn-s btn-sm" id="_ap_sort_hue" style="font-size:8px;padding:2px 7px" onclick="window._apSetSort&&window._apSetSort('hue')">Hue</button>
+        <button class="btn btn-s btn-sm" id="_ap_sort_lum" style="font-size:8px;padding:2px 7px" onclick="window._apSetSort&&window._apSetSort('lum')">Light</button>
       </div>
       <div id="_ap_strip" style="display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
       </div>
@@ -14344,6 +14565,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     // v:F1.11 — Track as activeExportTarget so the export button uses this exact swatch
     Sampler.activeExportTarget = hex;
     Sampler.currentHex = hex;  // v:v13.8 — seed Picker with the tapped swatch colour
+    Sampler.lastHex = hex;     // v:v13.20 — persist for Picker seed on mode switch
     const e = DS.makeEntry(hex, 'autopick');
     // v:F12.9 — attach proportional weight from k-means extraction
     const _widx = (window._apHexes || []).indexOf(hex);
