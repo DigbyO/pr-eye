@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.13 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.14 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
 <title>Digby v13.13</title>
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.13';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.14';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -10727,6 +10727,14 @@ const SwatchExport = {
       <div class="sw-ratio-grid">${ratioHTML}</div>
 
       <!-- OPTIONS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px">Include labels</div>
+          <div style="font-size:10px;color:var(--muted)">Name, hex, Pantone</div>
+        </div>
+        <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
+      </div>
+
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-size:13px">Background</div>
         <div style="display:flex;gap:8px">
