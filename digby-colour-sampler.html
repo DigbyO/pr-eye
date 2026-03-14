@@ -10,7 +10,7 @@
 <meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.6</title>
+<title>Digby v13.7</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.6';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.7';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1168,6 +1168,8 @@ body:not(.design-pro-on) .pb-pro-btn{display:none!important}
 /* v84: Pro-only gating for LUT Generator + Capture One sections */
 body.simple-mode .pro-only{display:none!important}
 /* v137: design-pro-on gates Design Pro features — decoupled from simple/pro tab mode */
+#lab-hud-set-row{display:none}
+body.pro-mode #lab-hud-set-row{display:flex}
 body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
@@ -4764,7 +4766,7 @@ const App={
           </div>
         </div>
       </div>
-      <div class="set-row" style="align-items:center;gap:6px">
+      <div class="set-row" id="lab-hud-set-row" style="align-items:center;gap:6px">
         <div style="flex:1;min-width:0"><div class="set-l">Lab HUD</div><div class="set-sub">Show LCH, GPS and temperature overlay on camera</div></div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="hud-toggle-lbl">Off</span>
@@ -7459,6 +7461,7 @@ const ColorMath = {
   renderTheoryStrips(hex) {
     const el = document.getElementById('theory-strips');
     if (!el) return;
+    el.style.display = 'flex';  // v:v13.7 — was display:none in HTML, never toggled
     const schemes = this.generateProSchemes(hex);
     const labels  = {
       splitComplementary: 'Split-Comp',
@@ -8538,7 +8541,7 @@ const Library={
 
     const ROW_H    = 20;
     const NAME_H   = 36;
-    const FOOTER_H = 18 + NAME_H + Math.max(paintRows.length, 1) * ROW_H + 32;
+    const FOOTER_H = 18 + NAME_H + Math.max(paintRows.length, 1) * ROW_H + 52  // v:v13.7 +20px buffer for LRV badge;
     const PAD      = SAFE_ZONE;
     const CW       = BASE_W - PAD * 2;
     const SWATCH_H = 320;
@@ -14121,7 +14124,7 @@ self.onmessage = function(e) {
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
-background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div id="ap-spinner">
         <div class="spinner"></div>
         <div>${title}</div>
@@ -14316,10 +14319,10 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
-background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
-        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
+        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView&&window._apToggleView()">⊟ Mosaic 60-30-10</button>
       </div>
       <div id="_ap_strip" style="display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
       </div>
@@ -14328,7 +14331,7 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
         <button class="btn btn-s btn-sm" onclick="AutoPalette._loadToPalette(window._apHexes)">🎨 Auto Palettes</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette._resample()">🔄 Resample</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette.exportPolaroid(window._apHexes)">📷 Polaroid</button>
-        <button class="btn btn-s btn-sm" style="grid-column:1/-1" onclick="App.exportPaletteStrip()">🎞 Film Strip</button>
+        <button class="btn btn-s btn-sm" style="grid-column:1/-1" onclick="if(!State.proMode){App.toast('Film Strip is a Pro feature');return;}App.exportPaletteStrip()">🎞 Film Strip</button>
       </div>
       <button class="btn btn-s btn-sm" style="width:100%" onclick="document.getElementById('_ap_panel').remove()">Close</button>
     </div>`;
