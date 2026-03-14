@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.14 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.15 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
 <title>Digby v13.13</title>
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.14';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.15';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1153,8 +1153,10 @@ body.simple-mode #manual-picker-section{display:none!important}
 body.simple-mode #btn-mode-up{display:none!important}
 /* Sampler: hide White Balance button */
 body.simple-mode #wb-btn{display:none!important}
-/* v:v13.13 Film Strip sidebar button — hidden unless pro-mode active */
+/* v:v13.15 Film Strip — ALL instances hidden unless pro-mode active */
 body:not(.pro-mode) #live-strip-btn{display:none!important}
+body:not(.pro-mode) .pro-strip-btn{display:none!important}
+body:not(.pro-mode) #film-strip-labels-row{display:none!important}
 /* v77: LUT/Visual Filters — Pro only */
 body.simple-mode #lut-badge{display:none!important}
 body.simple-mode #lut-none-btn{display:none!important}
@@ -1836,7 +1838,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()" title="Export picked colours as polaroid with photo">📷 Export Polaroid</button>
-        <button class="btn btn-s btn-sm" onclick="if(!State.proMode){App.toast('Film Strip is a Pro feature');return;}App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
+        <button class="btn btn-s btn-sm pro-strip-btn" onclick="App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
       <!-- v:F12.30 — Designer's Dock: scheme picker pill menu (replaces instant-schemes-bar) -->
@@ -2976,7 +2978,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
             <div class="seg-btn" id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
           </div>
         </div>
-        <div class="set-row" style="align-items:center;gap:8px">
+        <div class="set-row" id="film-strip-labels-row" style="align-items:center;gap:8px">
           <div style="flex:1"><div class="set-l">Film Strip Labels</div><div class="set-sub">Show % proportions on exported strip</div></div>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0">
             <input type="checkbox" id="toggle-strip-text"
@@ -14153,7 +14155,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
         <button class="btn btn-s btn-sm" onclick="AutoPalette._loadToPalette(window._apHexes)">🎨 Auto Palettes</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette._resample()">🔄 Resample</button>
         <button class="btn btn-s btn-sm" onclick="AutoPalette.exportPolaroid(window._apHexes)">📷 Polaroid</button>
-        <button class="btn btn-s btn-sm" style="grid-column:1/-1" onclick="if(!State.proMode){App.toast('Film Strip is a Pro feature');return;}App.exportPaletteStrip()">🎞 Film Strip</button>
+        <button class="btn btn-s btn-sm pro-strip-btn" style="grid-column:1/-1" onclick="App.exportPaletteStrip()">🎞 Film Strip</button>
       </div>
       <button class="btn btn-s btn-sm" style="width:100%" onclick="document.getElementById('_ap_panel').remove()">Close</button>
     </div>`;
