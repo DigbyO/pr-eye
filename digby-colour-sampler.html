@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.11 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.13 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.11</title>
+<title>Digby v13.13</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.11';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.13';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -350,9 +350,9 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 }
 .live-act-btn:active { background: var(--accent); border-color: var(--accent); color: #000; }
 .live-act-btn.on { background: rgba(255,180,0,.22); border-color: rgba(255,180,0,.6); color: #ffb400; }
-/* v:F1 D65 WB button — pro-mode only visibility */
-#live-wb-btn { opacity: 0.6; pointer-events: auto; }
-body.pro-mode #live-wb-btn { opacity: 1; pointer-events: auto; }
+/* v:v13.13 WB button — hidden unless pro-mode is active */
+#live-wb-btn { display: none !important; }
+body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-events: auto; }
 
 /* v449: WB Preset Panel — floats above live-bar */
 #wb-panel {
@@ -1153,6 +1153,8 @@ body.simple-mode #manual-picker-section{display:none!important}
 body.simple-mode #btn-mode-up{display:none!important}
 /* Sampler: hide White Balance button */
 body.simple-mode #wb-btn{display:none!important}
+/* v:v13.13 Film Strip sidebar button — hidden unless pro-mode active */
+body:not(.pro-mode) #live-strip-btn{display:none!important}
 /* v77: LUT/Visual Filters — Pro only */
 body.simple-mode #lut-badge{display:none!important}
 body.simple-mode #lut-none-btn{display:none!important}
@@ -1834,7 +1836,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualSwatches()" title="Export picked colours as swatch card">🎨 Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Sampler.exportManualPolaroid()" title="Export picked colours as polaroid with photo">📷 Export Polaroid</button>
-        <button class="btn btn-s btn-sm" onclick="App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
+        <button class="btn btn-s btn-sm" onclick="if(!State.proMode){App.toast('Film Strip is a Pro feature');return;}App.exportPaletteStrip()" title="Export extracted palette as a proportional film strip">🎞 Film Strip</button>
         <button class="btn btn-s btn-sm" id="up-lut-btn" onclick="Sampler.toggleUploadLut()" title="Apply active LUT grade to uploaded image" style="display:none">Grade OFF</button>
       </div>
       <!-- v:F12.30 — Designer's Dock: scheme picker pill menu (replaces instant-schemes-bar) -->
