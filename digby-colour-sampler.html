@@ -7021,34 +7021,47 @@ const Sampler={
       App.toast('Audio API not available on this device'); return;
     }
     this._immersiveRave = true;
+    // v:v13.25 — inject flash div for dramatic white-pulse effect
+    let flashEl = document.getElementById('rave-flash');
+    if (!flashEl) {
+      flashEl = document.createElement('div');
+      flashEl.id = 'rave-flash';
+      flashEl.style.cssText = 'position:absolute;inset:0;background:#fff;opacity:0;'
+        + 'pointer-events:none;will-change:opacity;';
+      ov.appendChild(flashEl);
+    }
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then(stream => {
         const ctx      = new AC();
+        ctx.resume();  // v:v13.25 — iOS suspends AudioContext by default
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 1024;
-        analyser.smoothingTimeConstant = 0.75;
+        analyser.smoothingTimeConstant = 0.5;  // v:v13.25 — sharper transient response (was 0.75)
         const source = ctx.createMediaStreamSource(stream);
         source.connect(analyser);
         this._immersiveRaveAudio = { ctx, analyser, source, stream };
         const buf = new Uint8Array(analyser.frequencyBinCount);
-        let avgEnergy = 60, lastBeat = 0;
-        const COOLDOWN = 250; // min ms between beats — prevents double-fire
+        let avgEnergy = 0, lastBeat = 0;  // v:v13.25 — start at 0 so baseline calibrates instantly
+        const COOLDOWN = 180;  // v:v13.25 — tighter window (was 250ms)
         const tick = () => {
           if (!this._immersiveRave || !this._immersiveActive) { this._stopRave(); return; }
           analyser.getByteFrequencyData(buf);
-          // Bass band: bins 0-10 (~0-430Hz at 44100Hz/1024 bins)
+          // v:v13.25 — wider bass band: bins 1-15 (~43-645Hz) for more signal
           let energy = 0;
-          for (let i = 1; i < 10; i++) energy += buf[i];
-          energy /= 9;
-          avgEnergy = avgEnergy * 0.92 + energy * 0.08; // slow-moving baseline
+          for (let i = 1; i <= 15; i++) energy += buf[i];
+          energy /= 15;
+          avgEnergy = avgEnergy * 0.88 + energy * 0.12;  // v:v13.25 — faster-tracking baseline (was 0.92/0.08)
           const now = performance.now();
-          if (energy > avgEnergy * 1.45 && energy > 28 && now - lastBeat > COOLDOWN) {
+          if (energy > avgEnergy * 1.35 && energy > 15 && now - lastBeat > COOLDOWN) {  // v:v13.25 — lower threshold
             lastBeat = now;
             this._raveNextColour(ov);
-            // Flash pulse: inset white glow on beat, fades quickly
-            ov.style.boxShadow = 'inset 0 0 0 9999px rgba(255,255,255,0.15)';
-            setTimeout(() => { if (ov) ov.style.boxShadow = ''; }, 90);
-            if (navigator.vibrate) navigator.vibrate(12);
+            // v:v13.25 — hard white flash: snap opacity to 0.9, fade to 0 over 280ms
+            flashEl.style.transition = 'none';
+            flashEl.style.opacity = '0.9';
+            void flashEl.offsetWidth;  // force reflow so snap is painted
+            flashEl.style.transition = 'opacity 0.28s ease-out';
+            flashEl.style.opacity = '0';
+            if (navigator.vibrate) navigator.vibrate([25, 30, 25]);  // v:v13.25 — stronger haptic
           }
           this._immersiveRaveRAF = requestAnimationFrame(tick);
         };
@@ -7074,7 +7087,9 @@ const Sampler={
       this._immersiveRaveAudio = null;
     }
     const ov = document.getElementById('immersive-overlay');
-    if (ov) { ov.style.boxShadow = ''; ov.style.transition = 'background 1.2s ease'; }
+    if (ov) { ov.style.transition = 'background 1.2s ease'; }
+    const fe = document.getElementById('rave-flash');
+    if (fe) { fe.style.transition = 'none'; fe.style.opacity = '0'; }  // v:v13.25 — reset flash div
   },
 
   setMode(m){
