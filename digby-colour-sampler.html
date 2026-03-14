@@ -10,7 +10,7 @@
 <meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.7</title>
+<title>Digby v13.8</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.7';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.8';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1975,6 +1975,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         </div>
         <button class="btn btn-p btn-sm" style="flex-shrink:0;font-size:15px;padding:10px 16px" onclick="Sampler.captureFromWheel()"></button>
         <button class="btn btn-s btn-sm" style="flex-shrink:0;font-size:13px;padding:10px 14px" onclick="Sampler._exportCurrentWheelColour()" title="Export this colour as polaroid">📷</button>
+        <button class="btn btn-s btn-sm" style="flex-shrink:0;font-size:11px;padding:8px 10px" onclick="PaletteBuilder.addColour(ColourWheel.getCurrentHex())" title="Add current colour to Palette">→ Palette</button>
       </div>
 
       <!--  WHEEL + SLIDERS side by side on wider screens, stacked on narrow -->
@@ -2046,8 +2047,9 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <div id="wheel-queue-bar" style="display:none;width:100%;max-width:300px;background:var(--surface2);border-radius:var(--rs);padding:10px 12px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em">Queued colours</div>
           <div id="wheel-queue-swatches" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px"></div>
-          <div style="display:flex;gap:7px">
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
             <button class="btn btn-p btn-sm" style="flex:1" onclick="Sampler.saveQueue()">Save All</button>
+            <button class="btn btn-s btn-sm" onclick="(function(){var q=Sampler.pickQueue||[];if(!q.length){App.toast('No colours queued');return;}q.forEach(function(h){PaletteBuilder.addColour(h);});App.setTab('palette');App.toast(q.length+' colour'+(q.length>1?'s':'')+' loaded to Palette');})()" title="Load queued colours to Palette">→ Palette</button>
             <button class="btn btn-s btn-sm" onclick="Sampler._exportWheelPolaroid()">📷 Export</button>
             <button class="btn btn-s btn-sm" onclick="Sampler.clearQueue()">Clear</button>
           </div>
@@ -7056,7 +7058,7 @@ const Sampler={
         try{ document.getElementById('up-input').click(); } catch(e){}
       }
     }
-    if(m==='wheel'){setTimeout(()=>ColourWheel.init(),50);var _wHex=(this.currentHex&&/^#[0-9a-fA-F]{6}$/.test(this.currentHex))?this.currentHex:(this.lastHex||'#3a7bd5');this._seedWheel(_wHex,8);}
+    if(m==='wheel'){setTimeout(()=>ColourWheel.init(),50);var _wHex=(this.activeExportTarget&&/^#[0-9a-fA-F]{6}$/.test(this.activeExportTarget))?this.activeExportTarget:((this.currentHex&&this.currentHex!=='#888888'&&/^#[0-9a-fA-F]{6}$/.test(this.currentHex))?this.currentHex:(this.lastHex||'#3a7bd5'));this._seedWheel(_wHex,8);}  // v:v13.8 — activeExportTarget > currentHex > lastHex
     // v:F1.13 — Clean stream lifecycle on mode switch.
     // Stop the stream immediately when leaving camera — avoids iOS zombie-track bug
     // where stream.active stays true but the video track is silently dead.
@@ -7067,6 +7069,7 @@ const Sampler={
 
   captureFromWheel(){
     const hex=ColourWheel.getCurrentHex();
+    this.lastHex = hex;  // v:v13.8 — persist last manual wheel pick
     this.addToQueue(hex);
     App.toast(`${CS.pantoneFirst(hex)} added  ${this.pickQueue.length}/${this.camCount}`);
   },
@@ -14455,6 +14458,7 @@ background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%)
     if (!hex || !hex.startsWith('#')) { App.toast('Invalid colour'); return; }
     // v:F1.11 — Track as activeExportTarget so the export button uses this exact swatch
     Sampler.activeExportTarget = hex;
+    Sampler.currentHex = hex;  // v:v13.8 — seed Picker with the tapped swatch colour
     const e = DS.makeEntry(hex, 'autopick');
     // v:F12.9 — attach proportional weight from k-means extraction
     const _widx = (window._apHexes || []).indexOf(hex);
