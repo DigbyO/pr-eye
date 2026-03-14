@@ -6836,11 +6836,8 @@ const Sampler={
   _immersiveRaveRAF:   null,
 
   toggleImmersiveMode() {
-    // v:v13.21 — guard: refuse to activate when queue is empty
-    if (!this._immersiveActive) {
-      const _iq = this.pickQueue || [];
-      if (!_iq.length) { App.toast('Capture some colours first — then tap Immersive'); return; }
-    }
+    // v:v13.23 — haptic fires immediately so button always feels responsive
+    if (navigator.vibrate) navigator.vibrate(12);
     this._immersiveActive = !this._immersiveActive;
     let ov = document.getElementById('immersive-overlay');
     if (!ov) {
@@ -6899,7 +6896,6 @@ const Sampler={
       ov.style.display = 'flex';
       this._runImmersive(ov);
       App.toast('Immersive mode · tap to exit');
-      if (navigator.vibrate) navigator.vibrate([8, 40, 8]);
     } else {
       ov.style.display = 'none';
       if (this._immersiveTimer) { clearTimeout(this._immersiveTimer); this._immersiveTimer = null; }
@@ -6910,8 +6906,13 @@ const Sampler={
 
   _runImmersive(ov) {  // v:F12.21 — unique-iterate fix + prop/equal mode
     if (!this._immersiveActive) return;
-    const q = this.pickQueue || [];
-    if (!q.length) { this.toggleImmersiveMode(); return; }
+    // v:v13.23 — smart fallback: pickQueue → _apHexes → DS library
+    let q = (this.pickQueue || []).slice();
+    if (!q.length && window._apHexes && window._apHexes.length)
+      q = window._apHexes.slice();
+    if (!q.length && typeof DS !== 'undefined')
+      q = DS.all().slice(0, 12).map(function(e){ return e.hex; });
+    if (!q.length) { App.toast('No colours yet — capture or extract a palette first'); this.toggleImmersiveMode(); return; }
     // Prop mode: deduplicate so 3× Hague Blue = 3× duration, NOT shown 3 times
     //            each at 3× duration (which would give 9× total screen time)
     // Equal mode: iterate every slot with a flat 3s per slot
