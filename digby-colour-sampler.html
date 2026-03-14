@@ -6875,14 +6875,27 @@ const Sampler={
         + 'background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);'
         + 'border-radius:8px;padding:5px 10px;cursor:pointer;touch-action:manipulation;'
         + '-webkit-tap-highlight-color:transparent">🎵 Rave</button>';
+      // v:v13.22 — touch-first dismiss: touchend + preventDefault blocks ghost click;
+      // onclick catches mouse-click on desktop; _touchHandled flag prevents double-fire
+      let _ovTouchHandled = false;
+      ov.addEventListener('touchend', (e) => {
+        e.preventDefault();  // block synthesised click from firing on overlay
+        _ovTouchHandled = true;
+        if (Date.now() - (this._immersiveOpenTime || 0) < 400) return;
+        this.toggleImmersiveMode();
+      }, { passive: false });
       ov.onclick = () => {
-        if (Date.now() - (this._immersiveOpenTime || 0) < 500) return;  // v:v13.21 — ghost-tap guard
+        if (_ovTouchHandled) { _ovTouchHandled = false; return; }  // already handled by touchend
+        if (Date.now() - (this._immersiveOpenTime || 0) < 400) return;
         this.toggleImmersiveMode();
       };
       document.body.appendChild(ov);
     }
     if (this._immersiveActive) {
       this._immersiveOpenTime = Date.now();  // v:v13.21 — ghost-tap guard
+      // v:v13.22 — pre-set background while hidden so overlay snaps to colour (no 1.2s transparent fade)
+      const _preHex = (this.pickQueue || [])[0];
+      if (_preHex) ov.style.background = _preHex;  // transition doesn't fire on display:none element
       ov.style.display = 'flex';
       this._runImmersive(ov);
       App.toast('Immersive mode · tap to exit');
