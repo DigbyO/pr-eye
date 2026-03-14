@@ -10,7 +10,7 @@
 <meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.5</title>
+<title>Digby v13.6</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.4';  // v:v13.5 — was 'v13.2' (stale); fixed to '13.4' so display shows 'Digby v13.4' not 'Digby vv13.2'
+  const APP_VERSION = '13.6';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -14319,7 +14319,7 @@ background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%)
 background:rgba(15,15,15,0.82);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
-        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px${Sampler.mode !== 'upload' ? ';display:none' : ''}" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
+        <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView()">⊟ Mosaic 60-30-10</button>
       </div>
       <div id="_ap_strip" style="display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
       </div>
