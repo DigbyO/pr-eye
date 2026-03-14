@@ -10,7 +10,7 @@
 <meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.8</title>
+<title>Digby v13.9</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.8';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.9';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3027,11 +3027,11 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
         <div class="set-row">
           <div style="flex:1"><div class="set-l">Polaroid Export Labels</div><div class="set-sub">Text shown on polaroid swatches</div></div>
           <div class="seg-ctrl" style="margin-left:8px">
-            <div class="seg-btn on" id="sl-both"     data-mode="both"     onclick="App.setSwatchLabel('both')">Both</div>
-            <div class="seg-btn"   id="sl-name"     data-mode="name"     onclick="App.setSwatchLabel('name')">Name</div>
-            <div class="seg-btn"   id="sl-hex"      data-mode="hex"      onclick="App.setSwatchLabel('hex')">HEX</div>
-            <div class="seg-btn"   id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">📍 GPS</div>
-            <div class="seg-btn"   id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
+            <div class="seg-btn" id="sl-both"     data-mode="both"     onclick="App.setSwatchLabel('both')">Both</div>
+            <div class="seg-btn" id="sl-name"     data-mode="name"     onclick="App.setSwatchLabel('name')">Name</div>
+            <div class="seg-btn" id="sl-hex"      data-mode="hex"      onclick="App.setSwatchLabel('hex')">HEX</div>
+            <div class="seg-btn" id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">📍 GPS</div>
+            <div class="seg-btn" id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
           </div>
         </div>
         <div class="set-row" style="align-items:center;gap:8px">
@@ -4557,10 +4557,9 @@ const App={
     // Sync theme button
     const tb=document.getElementById('settings-theme-btn');
     if(tb) tb.textContent = document.body.classList.contains('light-mode') ? '🌙 Dark' : '☀ Light';
-    // Sync swatch label seg-ctrl
-    ['both','name','hex','none','location'].forEach(m=>{
-      const btn=document.getElementById('sl-'+m);
-      if(btn) btn.classList.toggle('on', State.swatchLabel===m);
+    // Sync swatch label seg-ctrl — v:v13.9 querySelectorAll for all instances
+    document.querySelectorAll('.seg-btn[data-mode]').forEach(el=>{
+      el.classList.toggle('on', el.dataset.mode === State.swatchLabel);
     });
   },
 
@@ -5372,10 +5371,11 @@ const App={
   setSwatchLabel(mode) {
     State.swatchLabel = mode;
     State.save();
-    ['sl-both','sl-name','sl-hex','sl-none','sl-location'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('on', el.dataset.mode === mode);
+    // v:v13.9 — querySelectorAll hits ALL instances (fixes duplicate-ID clash)
+    document.querySelectorAll('.seg-btn[data-mode]').forEach(el => {
+      el.classList.toggle('on', el.dataset.mode === mode);
     });
+    if (navigator.vibrate) navigator.vibrate(8);  // v:v13.9 haptic
     const L={both:'Name + HEX',name:'Name only',hex:'HEX only',none:'No labels',location:'GPS location'};
     App.toast((L[mode]||mode)+' on exports');
     if(mode==='location'&&!GeoCapture.last)GeoCapture.request();
