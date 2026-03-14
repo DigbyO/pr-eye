@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.15 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.16 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
 <title>Digby v13.13</title>
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.15';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.16';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -883,12 +883,16 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .exp-chip-seed{ border:2px dashed rgba(255,255,255,.25)!important }
 
 /*  SAMPLE LUT GENERATOR  */
-#slut-zones{display:flex;gap:8px}
-.slut-zone{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.slut-zone-label{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.slut-swatch{width:100%;height:52px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
-.slut-swatch:active{transform:scale(.95)}
-.slut-zone.active .slut-swatch{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.35)}
+#slut-zones{display:flex;gap:10px}
+.slut-zone{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.slut-zone-label{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;text-align:center}
+.slut-swatch{width:100%;min-height:80px;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;overflow:hidden}
+.slut-swatch:active{transform:scale(.96)}
+.slut-zone.active .slut-swatch{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,152,112,.4)}
+/* v:v13.16 harm-add-btn hover/active without needing .harm-sw parent */
+.slut-swatch:hover .harm-add-btn,.slut-swatch:active .harm-add-btn{opacity:1}
+/* v:v13.16 hex pill inside lut swatch — override tiny 7px harm-hex */
+.slut-swatch .harm-hex{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;font-family:var(--mono);padding:2px 4px;background:rgba(0,0,0,.28);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .slut-hex{font-size:11px;font-family:var(--mono);color:var(--muted)}
 .slut-pick-btn{width:100%;font-size:10px !important;padding:5px 4px !important}
 /* keep lut-grad for split tone */
@@ -2346,19 +2350,22 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <button class="btn btn-s btn-sm" style="font-size:10px;padding:3px 8px" title="Share" onclick="Explorer.shareSlut()">Share</button>
         </div>
       </div>
-      <div class="card pro-only" id="sample-lut-card" style="padding:12px">
-        <div style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px">
-          Assign sampled colours to tonal zones. The app builds a real .cube LUT that pushes your image toward those colours  shadows, midtones and highlights independently.
+      <div class="card pro-only" id="sample-lut-card" style="padding:16px">
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+          Assign sampled colours to Shadows, Midtones and Highlights. The app builds a real <strong style="color:var(--text)">.cube LUT</strong> that grades your image toward your chosen palette.
         </div>
 
+        <!-- v:v13.16 tonal gradient indicator -->
+        <div style="height:6px;border-radius:3px;background:linear-gradient(to right,#1a1a2e,#888,#f0e8d8);margin-bottom:12px;opacity:.55"></div>
+
         <!-- Zone pickers -->
-        <div id="slut-zones" style="display:flex;gap:8px;margin-bottom:10px">
+        <div id="slut-zones" style="display:flex;gap:10px;margin-bottom:14px">
           <!-- Shadow -->
           <div class="slut-zone" id="slut-zone-shadow">
             <div class="slut-zone-label">Shadows</div>
-            <div class="harm-sw slut-swatch" id="slut-sw-shadow"
+            <div class="slut-swatch" id="slut-sw-shadow"
                  onclick="Explorer.slutPickZone('shadow')"
-                 style="background:#1a1a2e;height:52px;border-radius:8px;border:2px solid var(--border)">
+                 style="background:#1a1a2e">
               <div class="harm-hex" id="slut-hex-shadow" style="color:#fff">#1A1A2E</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('shadow')">+</button>
@@ -2367,9 +2374,9 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <!-- Midtone -->
           <div class="slut-zone" id="slut-zone-mid">
             <div class="slut-zone-label">Midtones</div>
-            <div class="harm-sw slut-swatch" id="slut-sw-mid"
+            <div class="slut-swatch" id="slut-sw-mid"
                  onclick="Explorer.slutPickZone('mid')"
-                 style="background:#C09870;height:52px;border-radius:8px;border:2px solid var(--border)">
+                 style="background:#C09870">
               <div class="harm-hex" id="slut-hex-mid" style="color:#111">#C09870</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('mid')">+</button>
@@ -2378,9 +2385,9 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <!-- Highlight -->
           <div class="slut-zone" id="slut-zone-high">
             <div class="slut-zone-label">Highlights</div>
-            <div class="harm-sw slut-swatch" id="slut-sw-high"
+            <div class="slut-swatch" id="slut-sw-high"
                  onclick="Explorer.slutPickZone('high')"
-                 style="background:#f0e8d8;height:52px;border-radius:8px;border:2px solid var(--border)">
+                 style="background:#f0e8d8">
               <div class="harm-hex" id="slut-hex-high" style="color:#111">#F0E8D8</div>
               <button class="harm-add-btn" title="Save to library"
                       onclick="event.stopPropagation();Explorer.slutSaveZone('high')">+</button>
@@ -2389,7 +2396,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         </div>
 
         <!-- Strength slider -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);flex-shrink:0">Strength</span>
           <input type="range" id="slut-strength" min="10" max="100" value="72"
             oninput="Explorer.slutUpdateStrength(this.value)"
@@ -2397,29 +2404,29 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <span id="slut-strength-val" style="font-size:10px;color:var(--accent);font-family:var(--mono);min-width:28px;text-align:right">72%</span>
         </div>
 
-        <!-- Preview gradient: shows neutral ramp  graded ramp -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <!-- Preview gradient: shows neutral ramp → graded ramp -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)">Preview</span>
           <button id="slut-preview-toggle" class="btn btn-s btn-sm" onclick="Explorer.slutTogglePreview()" style="font-size:9px;padding:2px 8px"> Hide</button>
         </div>
-        <div id="slut-preview" style="margin-bottom:10px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
-          <div id="slut-preview-before" style="display:flex;height:18px"></div>
-          <div id="slut-preview-after"  style="display:flex;height:18px"></div>
+        <div id="slut-preview" style="margin-bottom:14px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
+          <div id="slut-preview-before" style="display:flex;height:24px"></div>
+          <div id="slut-preview-after"  style="display:flex;height:24px"></div>
         </div>
 
-          <!-- Actions -->
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn btn-p btn-sm" onclick="Explorer.slutGenerate()"> Generate LUT</button>
-            <button class="btn btn-s btn-sm" id="slut-live-btn"   onclick="Explorer.slutLive()"            disabled> Live</button>
-            <button class="btn btn-s btn-sm" id="slut-dl-btn"     onclick="Explorer.slutDownload()"        disabled> .cube</button>
-            <button class="btn btn-s btn-sm" id="slut-swatch-btn" onclick="Explorer.slutSwatch()"          disabled> Swatch</button>
-            <button class="btn btn-s btn-sm" id="slut-export-btn" onclick="Explorer.slutExportPolaroid()"  disabled>📷 Polaroid</button>
-          </div>
+        <!-- Actions -->
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" style="flex:1;font-weight:700" onclick="Explorer.slutGenerate()">⚡ Generate LUT</button>
+          <button class="btn btn-s btn-sm" id="slut-live-btn"   onclick="Explorer.slutLive()"            disabled> Live</button>
+          <button class="btn btn-s btn-sm" id="slut-dl-btn"     onclick="Explorer.slutDownload()"        disabled> .cube</button>
+          <button class="btn btn-s btn-sm" id="slut-swatch-btn" onclick="Explorer.slutSwatch()"          disabled> Swatch</button>
+          <button class="btn btn-s btn-sm" id="slut-export-btn" onclick="Explorer.slutExportPolaroid()"  disabled>📷 Polaroid</button>
+        </div>
 
         <!-- Library picker overlay (hidden) -->
-        <div id="slut-picker-overlay" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+        <div id="slut-picker-overlay" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:7px">
-            Tap a saved colour to assign it  or use the root colour above
+            Tap a saved colour to assign it — or use the root colour above
           </div>
           <div id="slut-picker-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
           <div style="display:flex;gap:6px;margin-top:8px">
