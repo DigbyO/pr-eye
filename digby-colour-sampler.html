@@ -10,7 +10,7 @@
 <meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.9</title>
+<title>Digby v13.10</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.9';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.10';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -147,7 +147,7 @@ a{color:var(--accent);text-decoration:none}
 /*  OVERLAY  */
 #ov{position:fixed;inset:0;background:rgba(0,0,0,.84);z-index:var(--z-overlay);display:none;align-items:flex-end}
 #ov.open{display:flex}
-#ov-panel{width:100%;max-height:88dvh;background:var(--surface);border-radius:var(--r) var(--r) 0 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:su .28s cubic-bezier(.4,0,.2,1)}
+#ov-panel{width:100%;max-height:88dvh;background:var(--surface);border-radius:var(--r) var(--r) 0 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:su .28s cubic-bezier(.4,0,.2,1);padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 16px)}
 @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .ov-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 14px}
 .ov-title{font-family:var(--sharpie);font-size:clamp(1.25rem,4vw,1.5rem);padding:0 24px 14px}
@@ -10895,15 +10895,6 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
-      <!-- v:F12.34 Show proportions toggle (only visible when _apWeights available) -->
-      ${(window._apWeights && window._apWeights.length > 0) ? `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div>
-          <div style="font-size:13px">Show proportions</div>
-          <div style="font-size:10px;color:var(--muted)">% of image per colour</div>
-        </div>
-        <div class="sw ${this.showProportions?'on':''}" onclick="SwatchExport.toggleProportions(this)"></div>
-      </div>` : ''}
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-size:13px">Background</div>
@@ -11156,18 +11147,7 @@ const SwatchExport = {
       ctx.fillStyle  = c.lrv > 55 ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.6)';
       ctx.fillText(lrvLabel, x + cardW - ip - 3, y + colourH - ip - 3);
 
-      // v:F12.34 — proportion % badge (bottom-left of colour block)
-      if (this.showProportions && window._apWeights && window._apWeights.length > i) {
-        const total = window._apWeights.reduce((a,b)=>a+b,0) || 1;
-        const pct = Math.round((window._apWeights[i] / total) * 100);
-        const pctSize = Math.max(7, Math.round(Math.min(11 * scale, cardW * 0.09)));
-        ctx.font = `bold ${pctSize}px 'Space Mono',monospace`;
-        ctx.textAlign = 'left';
-        ctx.fillStyle = c.lrv > 55 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.75)';
-        ctx.fillText(pct + '%', x + ip + 3, y + colourH - ip - 3);
-      }
-
-      // White info strip
+      // White info strip  // v:v13.10 — showProportions % badge removed
       const iy = y + colourH;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(x, iy, cardW, stripH);
@@ -14677,17 +14657,7 @@ background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%)
       ctx.clip();
       ctx.fillStyle = hex;
       ctx.fillRect(x, swColorY, w, SW_COLOR_H);
-      // v:F12.36 — % overlay on mosaic-mode swatches (band must be ≥26px wide)
-      if (_proportional && w >= 26) {
-        const pct = Math.round(_weights[i] * 100);
-        const isDk = (typeof CS !== 'undefined' && CS.isDark) ? CS.isDark(hex) : true;
-        ctx.fillStyle = isDk ? 'rgba(255,255,255,.82)' : 'rgba(0,0,0,.62)';
-        const ps = Math.max(6, Math.min(11, Math.floor(w * 0.22)));
-        ctx.font = `bold ${ps}px 'Space Mono',monospace`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        ctx.fillText(pct + '%', x + w / 2, swColorY + SW_COLOR_H - 3, w - 4);
-      }
-      ctx.restore();
+      ctx.restore();  // v:v13.10 — % overlay removed from polaroid export
 
       // ── White label strip below the colour block ──────────────────────────
       // (card background is already white — no fill needed)
