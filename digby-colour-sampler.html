@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.5 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.11 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.10</title>
+<title>Digby v13.11</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.10';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.11';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1168,8 +1168,6 @@ body:not(.design-pro-on) .pb-pro-btn{display:none!important}
 /* v84: Pro-only gating for LUT Generator + Capture One sections */
 body.simple-mode .pro-only{display:none!important}
 /* v137: design-pro-on gates Design Pro features — decoupled from simple/pro tab mode */
-#lab-hud-set-row{display:none}
-body.pro-mode #lab-hud-set-row{display:flex}
 body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
@@ -1316,41 +1314,6 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
 .st-wall-btn.active{background:#7c9885;border-color:#7c9885;color:#fff;font-weight:700}
 .st-trim-btn.active{background:#8a7a6e;border-color:#8a7a6e;color:#fff;font-weight:700}
 
-/* v:F1.1 Laboratory HUD overlay */
-#lab-hud {
-  display: none; /* v:F1.12 hidden by default — toggled via Lab HUD setting */
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  left: 15px;
-  padding: 10px 12px;
-  background: rgba(0,0,0,0.60);
-  color: #00ff00;
-  font-family: 'SF Mono','Space Mono','Fira Code',monospace;
-  font-size: 10px;
-  line-height: 1.8;
-  border-left: 2px solid #00ff00;
-  pointer-events: auto;
-  z-index: 500;
-  letter-spacing: .04em;
-  border-radius: 0 4px 4px 0;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  white-space: nowrap;
-}
-body.hud-on #lab-hud { display: block; } /* v:F1.12 Lab HUD on */
-/* v:v13.0 — Telemetry hidden by default; Pro Mode + HUD = full telemetry */
-#lab-hud .hud-telemetry,
-#hud-gps-row,
-#hud-wbcal-row { display: none !important; }
-body.pro-mode.hud-on #lab-hud .hud-telemetry,
-body.pro-mode.hud-on #hud-gps-row,
-body.pro-mode.hud-on #hud-wbcal-row { display: flex !important; }
-/* v:F1.15 — Large clean COLOUR identity */
-body.hud-on #lab-hud { padding: 10px 14px 12px; }
-body.hud-on #lab-hud .hud-static:first-child .hud-dim { font-size: 9px; letter-spacing: .18em; opacity: .6; }
-body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .04em; line-height: 1.3; }
-#lab-hud .hud-dim { color: rgba(0,255,0,0.55); }
-#lab-hud .hud-val { color: #7fff7f; }
 
 /* v:F1.1 swatch outer glow */
 #live-swatch {
@@ -1453,16 +1416,6 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
 }
 .wb-dd-item.active .wbd-k { color: rgba(0,255,0,.45); }
 
-/* v:F1.2 GPS row in lab-hud */
-#hud-gps-row {
-  cursor: pointer;
-  transition: opacity .15s;
-}
-#hud-gps-row:hover { opacity: 0.8; }
-#hud-gps-row.denied { color: #ff6b6b; }
-#hud-gps-row.denied .hud-val { color: #ff4444; }
-/* Keep non-GPS rows non-interactive */
-#lab-hud .hud-static { pointer-events: none; }
 
 /* v:F1.3 Extraction density control */
 .density-btn {
@@ -1738,19 +1691,6 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
     <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; overflow: hidden; z-index: 1;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
-      <!-- v:F1.12 Laboratory HUD -->
-      <div id="lab-hud" aria-hidden="true">
-        <!-- Always visible: one-piece colour identity -->
-        <div class="hud-static"><span class="hud-dim">COLOUR      </span><span class="hud-val" id="hud-one-info">—</span></div>
-        <!-- Telemetry: Design Pro only (gated via CSS) -->
-        <div class="hud-static hud-telemetry"><span class="hud-dim">MODE.LAB    </span><span class="hud-val" id="hud-profile">D65</span></div>
-        <div class="hud-static hud-telemetry"><span class="hud-dim">LCH.VAL     </span><span class="hud-val" id="hud-lch">L:— C:— H:—°</span></div>
-        <div class="hud-static hud-telemetry"><span class="hud-dim">LRV.PCT     </span><span class="hud-val" id="hud-lrv">—%</span></div>
-        <div class="hud-static hud-telemetry"><span class="hud-dim">TEMP.C      </span><span class="hud-val" id="hud-kelvin">5500K</span></div>
-        <div id="hud-gps-row" title="Tap to re-request GPS" onclick="GeoCapture.request();Sampler._updateLabHUD(0,0,0)"><span class="hud-dim">LOC.GPS     </span><span class="hud-val" id="hud-gps">Locating…</span></div>
-        <div id="hud-wbcal-row" title="Tap to open White Balance calibration" onclick="Sampler.toggleWhiteBalance()" style="cursor:pointer"><span class="hud-dim">WB_CAL      </span><span class="hud-val" id="hud-wb">TAP</span></div>
-        <div class="hud-static"><span class="hud-dim">SEASON      </span><span class="hud-val" id="hud-season">—</span></div>
-      </div>
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
       <canvas id="cam-canvas"></canvas>
 
@@ -4319,7 +4259,6 @@ const State = {
   proMode:       false,  // FIX 7: Pro Mode — when false, hides Prompter tab + Advanced Technical Data
   showWelcome:  true,   // v:F1.12.5 — show welcome screen on launch (persisted via localStorage)
   swatchLabel:   'both',  // v89/v443: 'both'|'name'|'hex'|'none'|'location'
-  hudOn:         false,   // v:F1.12 Lab HUD overlay — off by default
   liveDisplay:   'pantone', // v433: 'pantone'|'hex'|'rgb'|'hsl'|'kelvin'|'lrv'|'paint'
   wbPresetId:    'awb',    // v449: WB preset id
   wbCustomK:     5500,     // v449: custom Kelvin for manual WB
@@ -4342,7 +4281,6 @@ const State = {
         wbCustomK:     this.wbCustomK,
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
-        hudOn:         this.hudOn,      // v:F1.12 Lab HUD toggle
       }));
     } catch(e) { /* non-fatal — localStorage may be unavailable */ }
   },
@@ -4363,7 +4301,6 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
-      if (data.hudOn !== undefined)     this.hudOn    = data.hudOn;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
     try {
@@ -4373,19 +4310,6 @@ const State = {
   },
 
   // v74: Apply/remove simple-mode class + persist key + sync BOTH header and settings toggles
-  applyHUD() {
-    document.body.classList.toggle('hud-on', this.hudOn);
-    const sw  = document.getElementById('hud-toggle-sw');
-    const lbl = document.getElementById('hud-toggle-lbl');
-    if (sw)  sw.classList.toggle('on', this.hudOn);
-    if (lbl) lbl.textContent = this.hudOn ? 'On' : 'Off';
-  },
-  toggleHUD() {
-    this.hudOn = !this.hudOn;
-    this.applyHUD();
-    this.save();
-    App.toast(this.hudOn ? 'Lab HUD on' : 'Lab HUD off');
-  },
   applyProMode() {
     if (this.proMode) {
       document.body.classList.remove('simple-mode');
@@ -4435,7 +4359,6 @@ const App={
     // MASTER-FIX-V52: load persisted State before modules initialise
     State.load();
     State.applyProMode(); // FIX 7: apply simple-mode class based on saved proMode state
-    State.applyHUD();     // v:F1.12 apply Lab HUD visibility
     FolderManager.init(); // Init folders + migrate old entries after DS is ready
     // Apply persisted white balance to Sampler (including v449 preset state)
     Sampler.wb = { ...State.wb };
@@ -4765,13 +4688,6 @@ const App={
               onclick="var cb=document.getElementById('pro-mode-toggle');cb.checked=!cb.checked;toggleProMode(cb);"
               style="width:44px;height:24px;border-radius:12px;cursor:pointer;pointer-events:auto"></div>
           </div>
-        </div>
-      </div>
-      <div class="set-row" id="lab-hud-set-row" style="align-items:center;gap:6px">
-        <div style="flex:1;min-width:0"><div class="set-l">Lab HUD</div><div class="set-sub">Show LCH, GPS and temperature overlay on camera</div></div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="hud-toggle-lbl">Off</span>
-          <div class="sw" id="hud-toggle-sw" onclick="State.toggleHUD()"></div>
         </div>
       </div>
       <div class="set-row set-row-cvd colour-blind-tool"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
@@ -6189,8 +6105,6 @@ const Sampler={
     const sEl=document.getElementById('live-secondary');
     if(pEl) pEl.textContent=primary;
     if(sEl) sEl.textContent=secondary;
-    // v:F1.1 update Laboratory HUD
-    this._updateLabHUD(r,g,b);
     // v:F1.1 swatch outer glow matching sampled colour
     const swEl=document.getElementById('live-swatch');
     if(swEl) swEl.style.boxShadow='0 0 14px 4px '+hex+',0 4px 18px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.12)';
@@ -6202,82 +6116,6 @@ const Sampler={
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
   },
-
-  _updateLabHUD(r,g,b){
-    const hProfile=document.getElementById('hud-profile');
-    const hKelvin=document.getElementById('hud-kelvin');
-    if(!hProfile)return;
-    // v:F1.13 — COLOUR row: Pantone + HEX + contrast badge + seasonal DNA
-    if(r||g||b){
-      const hex='#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
-      const pantone=typeof CS!=='undefined'&&CS.pantoneFirst?CS.pantoneFirst(hex):'';
-      // Contrast pass: W = white text safe (dark bg), B = black text safe (light bg)
-      const lrvVal = (typeof CS!=='undefined'&&CS.lrv&&CS.rgbToLab) ? CS.lrv(CS.rgbToLab(r,g,b)) : 50;
-      const contrastBadge = lrvVal < 50 ? ' [W]' : ' [B]';
-      const oneEl=document.getElementById('hud-one-info');
-      if(oneEl) oneEl.textContent=((pantone&&pantone!==hex)?pantone+'  ':'')+hex.toUpperCase()+contrastBadge;
-      // v:F1.12 Seasonal DNA throttle — recalculate at ~1 Hz (every 10 calls) to
-      // save CPU on mobile; season name changes slowly so 1 Hz is plenty.
-      this._hudSeasonTick = ((this._hudSeasonTick || 0) + 1) % 10;
-      if (this._hudSeasonTick === 0) {
-        const _hsl = (typeof CS!=='undefined'&&CS.rgbToHsl) ? CS.rgbToHsl(r,g,b) : {h:0,s:50,l:50};
-        const _warm   = _hsl.h < 90 || _hsl.h > 270;
-        const _light  = _hsl.l >= 50;
-        const _bright = _hsl.s >= 55;
-        const _season = _warm  &&  _light &&  _bright ? 'Bright Spring'
-                      : _warm  &&  _light             ? 'True Spring'
-                      : !_warm &&  _light &&  _bright ? 'Light Summer'
-                      : !_warm &&  _light             ? 'Soft Summer'
-                      : _warm  && !_light &&  _bright ? 'True Autumn'
-                      : _warm  && !_light             ? 'Deep Autumn'
-                      : !_warm && !_light &&  _bright ? 'True Winter'
-                      :                                 'Deep Winter';
-        const seasonEl = document.getElementById('hud-season');
-        if(seasonEl) seasonEl.textContent = _season;
-      }
-    }
-    // Profile label from current preset
-    const presetLabels={awb:'AWB',day:'D65',tung_d65:'TUNGSTEN',cloud_d65:'CLOUDY',
-                        sun:'SUN 5500K',shade:'SHADE 7500K',tung:'BULB 3200K',
-                        fluor:'FLUOR 4000K',cust:'MANUAL K'};
-    hProfile.textContent=presetLabels[this._wbPresetId]||this._wbPresetId.toUpperCase();
-    // v:F1.8 — LCH and LRV live values (replace raw WB matrix readout)
-    if(r||g||b){
-      const lch=CS.rgbToLch(r,g,b);
-      const lrvVal=CS.lrvLinear(r,g,b);
-      const hLch=document.getElementById('hud-lch');
-      const hLrv=document.getElementById('hud-lrv');
-      if(hLch) hLch.textContent='L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
-      if(hLrv) hLrv.textContent=lrvVal+'%';
-    }
-    // Estimate colour temperature from sampled RGB
-    const k=typeof CS!=='undefined'&&CS.kelvin?CS.kelvin({r,g,b}):5500;
-    // v:F1.7 — display temperature in °C per spec
-    const kC = Math.round(k - 273.15);
-    hKelvin.textContent = kC.toLocaleString() + '°C';
-    // v:F1.2 GPS row
-    const gpsRow = document.getElementById('hud-gps-row');
-    const gpsEl  = document.getElementById('hud-gps');
-    if (gpsEl) {
-      if (!navigator.geolocation) {
-        gpsEl.textContent = 'N/A';
-        if (gpsRow) gpsRow.classList.remove('denied');
-      } else if (GeoCapture.last) {
-        // Got a fix — show coordinates
-        gpsEl.textContent = GeoCapture.label(GeoCapture.last);
-        if (gpsRow) gpsRow.classList.remove('denied');
-      } else if (GeoCapture.denied) {
-        // Permission explicitly denied (error callback fired)
-        gpsEl.textContent = '⚠ DENIED';
-        if (gpsRow) gpsRow.classList.add('denied');
-      } else {
-        // Still waiting for first fix — do NOT show DENIED, just show loading
-        gpsEl.textContent = 'Locating…';
-        if (gpsRow) gpsRow.classList.remove('denied');
-      }
-    }
-  },
-
 
   toggleWBDropdown() {
     // WB dropdown available in all modes
@@ -10887,15 +10725,6 @@ const SwatchExport = {
       <div class="sw-ratio-grid">${ratioHTML}</div>
 
       <!-- OPTIONS -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div>
-          <div style="font-size:13px">Include labels</div>
-          <div style="font-size:10px;color:var(--muted)">Name, hex, Pantone</div>
-        </div>
-        <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
-      </div>
-
-
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-size:13px">Background</div>
         <div style="display:flex;gap:8px">
@@ -14107,7 +13936,7 @@ self.onmessage = function(e) {
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
-background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div id="ap-spinner">
         <div class="spinner"></div>
         <div>${title}</div>
@@ -14302,7 +14131,7 @@ background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%)
     d.id = '_ap_panel';
     d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
-background:rgba(15,15,15,0.60);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
+background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${title}</div>
         <button id="_ap_view_btn" class="btn btn-s btn-sm" style="font-size:9px;padding:3px 8px" onclick="window._apToggleView&&window._apToggleView()">⊟ Mosaic 60-30-10</button>
