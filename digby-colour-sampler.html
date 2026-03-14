@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.2 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.4 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.2</title>
+<title>Digby v13.4</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -1783,7 +1783,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       <button id="lut-none-btn" class="cap-side-btn" onclick="Sampler.clearLut()" title="Remove LUT grade and restore natural feed" style="display:none;position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;z-index:12">✕ None</button>
 
       <!-- Count toggle — v110: moved inside camera, bottom-right above capture row -->
-      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
+      <div id="gal-tog-wrap" class="tog-group" style="position:absolute;bottom:210px;left:50%;transform:translateX(-50%);z-index:6;width:auto;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.15)">
         <button class="tog-btn on" onclick="Sampler.setCamCount(3)"  id="ct3">3</button>
         <button class="tog-btn"    onclick="Sampler.setCamCount(6)"  id="ct6">6</button>
         <button class="tog-btn"    onclick="Sampler.setCamCount(9)"  id="ct9">9</button>
@@ -3051,7 +3051,7 @@ body.hud-on #hud-one-info { font-size: 16px; font-weight: 700; letter-spacing: .
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.2</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.4</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5072,7 +5072,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.2</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.4</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -8613,6 +8613,25 @@ const Library={
     ctx.textBaseline = 'middle';
     ctx.fillText(c.hex.toUpperCase(), bX + bW/2, bY + bH/2);
 
+    // v:v13.4 — LRV badge (top-right of footer, above paint rows)
+    if (App.showPolaroidLrv !== false) {
+      const lrvVal = Math.round(lrv);
+      const lbW = 72, lbH = 20;
+      const lbX = PAD + CW - lbW - 10;
+      const lbY = PAD + SWATCH_H + 12;
+      ctx.fillStyle = 'rgba(0,0,0,0.07)';
+      rr(lbX, lbY, lbW, lbH, 4); ctx.fill();
+      ctx.fillStyle = '#888888';
+      ctx.font = '7px "Space Mono",monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('LRV', lbX + 22, lbY + lbH/2);
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 11px "Space Mono",monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(lrvVal + '%', lbX + 26, lbY + lbH/2);
+    }
+
     // ── Footer layout ─────────────────────────────────────────────────────────
     const FX   = PAD + 14;
     const FY   = PAD + SWATCH_H;
@@ -10606,8 +10625,7 @@ const ColourWheel = {
     if (nEl) nEl.value = hex;
     this.currentHex = hex;
     if (typeof Sampler !== 'undefined') Sampler.currentHex = hex;  // v:v13.2 — keep Sampler in sync
-    this._updatePreview(hex);
-    this._drawWheel();
+    this._drawWheel();  // v:v13.3 — removed undefined _updatePreview call that silently threw TypeError
     this._drawHueStrip();
     if (typeof ColorMath !== 'undefined') ColorMath.renderTheoryStrips(hex);  // v:v13.2 — live strip update
   },
