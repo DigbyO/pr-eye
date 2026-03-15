@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.52 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.54 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.52</title>
+<title>Digby v13.54</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.53';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.54';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -40,11 +40,16 @@
     // Safari Private Mode — localStorage throws; skip version check silently
   }
   // v:F1.11 — Sync version strings to APP_VERSION so they never drift
+  // v:v13.54 — also sync <title> and <meta description> so they never lag behind
   document.addEventListener('DOMContentLoaded', function() {
+    var vStr = 'Digby v' + APP_VERSION.replace('F','');
     ['settings-ver-a','settings-ver-b'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.textContent = 'Digby v' + APP_VERSION.replace('F','');
+      if (el) el.textContent = vStr;
     });
+    document.title = vStr;
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', vStr + ' — Colour Sampler by Digby Oldridge');
   });
 })();
 </script>
@@ -3218,7 +3223,7 @@ body.landscape-phone.active-tab-sampler #live-bar {
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.52</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.54</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5223,7 +5228,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.52</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.54</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -13517,9 +13522,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v2';
+    const SW_CACHE = 'spectrum-v3';
     const swSrc = `
-const CACHE='spectrum-v2';
+const CACHE='spectrum-v3';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -13539,7 +13544,12 @@ self.addEventListener('fetch',e=>{
       const net=fetch(e.request).then(res=>{
         if(res&&res.status===200&&res.type!=='opaque'){
           const cl=res.clone();
-          caches.open(CACHE).then(c=>c.put(e.request,cl));
+          caches.open(CACHE).then(c=>{
+            c.put(e.request,cl);
+            // v:v13.54 — notify open tabs that fresher content is now cached
+            self.clients.matchAll({includeUncontrolled:true,type:'window'})
+              .then(cls=>cls.forEach(c=>c.postMessage('sw-updated')));
+          });
         }
         return res;
       }).catch(()=>cached);
@@ -13556,6 +13566,18 @@ self.addEventListener('fetch',e=>{
         .then(r=>{console.log('[Digby SW] registered, scope:',r.scope);URL.revokeObjectURL(swUrl);})
         .catch(e=>{console.warn('[Digby SW] Blob SW failed (OK on file://):', e.message);URL.revokeObjectURL(swUrl);});
     } catch(e){console.warn('[Digby SW]',e.message);}
+    // v:v13.54 — listen for 'sw-updated' from the SW fetch handler
+    // Shows a tappable toast so the user can reload to get the new version immediately
+    navigator.serviceWorker.addEventListener('message', function(ev) {
+      if (ev.data !== 'sw-updated') return;
+      var t = document.getElementById('toast');
+      if (!t || t.classList.contains('show')) return; // don't interrupt an existing toast
+      t.innerHTML = '&#10003; Digby updated &nbsp;<span onclick="location.reload()" ' +
+        'style="text-decoration:underline;cursor:pointer;font-weight:700">Reload</span>';
+      t.classList.add('show');
+      clearTimeout(App && App._toastT);
+      if (App) App._toastT = setTimeout(function(){ t.classList.remove('show'); t.innerHTML=''; }, 9000);
+    });
   }
 });
 </script>
@@ -15567,7 +15589,7 @@ const AIColourName = {
 </script>
 
 <script>
-/* v:v13.53 — STANDALONE landscape detection — runs independently of all other
+/* v:v13.54 — STANDALONE landscape detection — runs independently of all other
    scripts, cannot be blocked by live-bar early-return or any other IIFE.
    Uses every available trigger: DOMContentLoaded, resize, orientationchange,
    matchMedia change, and screen.orientation.change (Android Chrome API). */
