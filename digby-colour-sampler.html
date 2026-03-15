@@ -6971,6 +6971,7 @@ const Sampler={
                  btn.style.color = 'rgba(255,255,255,0.55)';
                  btn.style.borderColor = 'rgba(255,255,255,0.2)'; }
       ov.style.transition = 'background 1.2s ease';
+      ov.style.filter = '';  // v:v13.26 — clear breathing filter on rave off
       this._runImmersive(ov); // restart timer loop
       App.toast('Rave mode off — back to timed');
     } else {
@@ -7046,22 +7047,33 @@ const Sampler={
         const tick = () => {
           if (!this._immersiveRave || !this._immersiveActive) { this._stopRave(); return; }
           analyser.getByteFrequencyData(buf);
-          // v:v13.25 — wider bass band: bins 1-15 (~43-645Hz) for more signal
+          // Bass band: bins 1-15 (~43-645Hz)
           let energy = 0;
           for (let i = 1; i <= 15; i++) energy += buf[i];
           energy /= 15;
-          avgEnergy = avgEnergy * 0.88 + energy * 0.12;  // v:v13.25 — faster-tracking baseline (was 0.92/0.08)
+          avgEnergy = avgEnergy * 0.88 + energy * 0.12;
+
+          // v:v13.26 — CONTINUOUS BREATHING: brightness tracks audio level every frame
+          // ratio 0=silence → 2=double average; maps to brightness 0.72–1.28
+          const ratio = avgEnergy > 8 ? energy / avgEnergy : 0.8;
+          const bri = Math.max(0.72, Math.min(1.28, 0.72 + ratio * 0.28)).toFixed(3);
+          ov.style.filter = 'brightness(' + bri + ')';
+
           const now = performance.now();
-          if (energy > avgEnergy * 1.35 && energy > 15 && now - lastBeat > COOLDOWN) {  // v:v13.25 — lower threshold
+          if (energy > avgEnergy * 1.35 && energy > 15 && now - lastBeat > COOLDOWN) {
             lastBeat = now;
-            this._raveNextColour(ov);
-            // v:v13.25 — hard white flash: snap opacity to 0.9, fade to 0 over 280ms
+            // v:v13.26 — BEAT: flash white FIRST, snap colour while hidden, fade to reveal
+            // Step 1: instant white flash
             flashEl.style.transition = 'none';
-            flashEl.style.opacity = '0.9';
-            void flashEl.offsetWidth;  // force reflow so snap is painted
-            flashEl.style.transition = 'opacity 0.28s ease-out';
+            flashEl.style.opacity = '0.95';
+            void flashEl.offsetWidth;  // force reflow — flash is now painted
+            // Step 2: change colour instantly while hidden behind flash
+            ov.style.transition = 'none';
+            this._raveNextColour(ov);
+            // Step 3: fade flash out — new colour is revealed as white dissolves
+            flashEl.style.transition = 'opacity 0.38s ease-out';
             flashEl.style.opacity = '0';
-            if (navigator.vibrate) navigator.vibrate([25, 30, 25]);  // v:v13.25 — stronger haptic
+            if (navigator.vibrate) navigator.vibrate([25, 30, 25]);
           }
           this._immersiveRaveRAF = requestAnimationFrame(tick);
         };
@@ -7087,9 +7099,9 @@ const Sampler={
       this._immersiveRaveAudio = null;
     }
     const ov = document.getElementById('immersive-overlay');
-    if (ov) { ov.style.transition = 'background 1.2s ease'; }
+    if (ov) { ov.style.transition = 'background 1.2s ease'; ov.style.filter = ''; }  // v:v13.26 — clear breathing filter
     const fe = document.getElementById('rave-flash');
-    if (fe) { fe.style.transition = 'none'; fe.style.opacity = '0'; }  // v:v13.25 — reset flash div
+    if (fe) { fe.style.transition = 'none'; fe.style.opacity = '0'; }
   },
 
   setMode(m){
