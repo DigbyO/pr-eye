@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.48 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.50 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.48</title>
+<title>Digby v13.50</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.48';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.50';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1363,6 +1363,120 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
 
   /* fixed bottom panels: lose tab-bar offset */
   #pb-cvd-panel { bottom: 0; }
+
+  /* dock: shift right of the icon rail */
+  #sampler-bottom-dock { left: var(--landscape-rail); }
+
+  /* live-bar: centre in the content area (right of rail), not full viewport */
+  body.active-tab-sampler #live-bar {
+    left: calc(var(--landscape-rail) + (100vw - var(--landscape-rail)) / 2) !important;
+    width: 210px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v13.50 — TABLET / DESKTOP LAYOUT  (min-width:768px AND min-height:501px)
+   Excludes phones in landscape (they're wide but short, handled by the
+   max-height:500px landscape block above).
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) and (min-height: 501px) {
+  :root { --app-max-w: 540px; }
+
+  /* Outer page: rich dark gradient with a subtle vignette */
+  html {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%,  #1d1628 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, #0f1a24 0%, transparent 70%),
+      #09080d;
+  }
+  body { background: transparent; }
+
+  /* App shell: centred card, soft edge glow */
+  #app {
+    max-width: var(--app-max-w);
+    margin: 0 auto;
+    box-shadow:
+      -1px 0 0 rgba(255,255,255,0.07),
+       1px 0 0 rgba(255,255,255,0.07),
+       0  0 80px rgba(0,0,0,0.7);
+    position: relative;
+  }
+
+  /* ── Fixed panels: constrain to app shell, centred ── */
+  /* sampler bottom dock */
+  #sampler-bottom-dock {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: var(--app-max-w);
+    border-radius: 0;
+  }
+  /* CVD / colour-blind panel */
+  #pb-cvd-panel {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: var(--app-max-w);
+    border-radius: 20px 20px 0 0;
+  }
+  /* Colour tray handle & tray */
+  #colour-tray-handle {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: var(--app-max-w);
+  }
+  #colour-tray {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(100%);
+    width: var(--app-max-w);
+  }
+  #colour-tray.open {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* live-bar: cap width so it doesn't exceed the shell */
+  body.active-tab-sampler #live-bar {
+    width: min(300px, calc(var(--app-max-w) - 24px)) !important;
+  }
+
+  /* Toast: keep inside the shell */
+  #toast {
+    max-width: calc(var(--app-max-w) - 48px);
+  }
+
+  /* Bottom overlay sheet: match shell width */
+  #ov-panel {
+    max-width: var(--app-max-w);
+    margin: 0 auto;
+  }
+
+  /* Library grid: 4 columns on wider app */
+  #library-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Mod-scroll: scrollbars visible on desktop (styled subtle) */
+  .mod-scroll::-webkit-scrollbar { width: 5px; }
+  .mod-scroll::-webkit-scrollbar-track { background: transparent; }
+  .mod-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+  .mod-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+  /* Cursor: pointer on all interactive elements (mouse users) */
+  .tab, .sbd-btn, .btn, .tog-btn, .cap-side-btn,
+  #cap-btn, .polaroid, .lib-swatch, .tray-swatch { cursor: pointer; }
+
+  /* Wheel picker canvas: more room on desktop */
+  #wheel-canvas { max-width: 300px; }
+
+  /* Top-bar: slightly taller on desktop */
+  #top { padding: 0 20px; }
+}
+
+/* Larger desktop (1200px+): slightly wider shell */
+@media (min-width: 1200px) and (min-height: 501px) {
+  :root { --app-max-w: 560px; }
 }
 
 /* v447: live-bar upload/picker button */
@@ -3112,7 +3226,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.48</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.50</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5117,7 +5231,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.48</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.50</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -7230,7 +7344,10 @@ const Sampler={
     const hex=ColourWheel.getCurrentHex();
     this.lastHex = hex;  // v:v13.8 — persist last manual wheel pick
     this.addToQueue(hex);
-    App.toast(`${CS.pantoneFirst(hex)} added  ${this.pickQueue.length}/${this.camCount}`);
+    // v:v13.49 — also save directly to library (consistent with camera capture)
+    const _e=DS.makeEntry(hex,'wheel');
+    DS.add(_e); App.refresh();
+    App.toast(`✓ ${CS.pantoneFirst(hex)} saved`);
   },
 
   setCamCount(n){
@@ -10700,7 +10817,7 @@ const Prompter={
 <!--  COLOUR WHEEL  -->
 <script>
 const ColourWheel = {
-  hue: 0, sat: 70, lit: 50,
+  hue: 200, sat: 35, lit: 55,  // v:v13.49 — neutral blue-grey default (was red hue:0)
   dragging: false,
   ready: false,  // v:F12.13 — true after init() completes; read by Sampler._seedWheel
 
@@ -14948,9 +15065,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     if (!img) { App.toast('No image — use camera or upload a photo'); return; }
 
     // ── Constants ─────────────────────────────────────────────────────────────
-    const LOGICAL_W   = 380;
     const BORDER      = 14;          // v:v13.0.2 — tighter outer ring; less grey margin
-    const CW          = LOGICAL_W - BORDER * 2;  // 352px inner width
     // v:v13.0.2 — rebalanced: shorter margins, taller swatches, tighter gaps
     const SW_PAD      = 5;           // inner strip top/bottom padding
     const SW_GAP      = 5;           // gap between individual swatches
@@ -14959,9 +15074,12 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 96px
     const BYLINE_PAD  = 2;           // tight byline clearance
 
-    // ── Scale photo to fill CW naturally, capped at 2× width ─────────────────
+    // ── Scale photo to fill canvas naturally, capped at 2× width ─────────────
     const srcW = img.naturalWidth  || img.width  || 1;
     const srcH = img.naturalHeight || img.height || 1;
+    // v:v13.49 — landscape-aware canvas: wider card for landscape source images
+    const LOGICAL_W   = (srcW > srcH) ? 520 : 380;
+    const CW          = LOGICAL_W - BORDER * 2;
     const MAX_PHOTO_H = LOGICAL_W * 2;
     const naturalH    = Math.round(CW / (srcW / srcH));
     const photoH      = Math.min(naturalH, MAX_PHOTO_H);
@@ -15367,8 +15485,11 @@ const AIColourName = {
 
   // ── Orientation / resize — re-centre ─────────────────────────────────────
   window.addEventListener('orientationchange', function() {
-    // v:v13.48 — force visual-viewport reflow (iOS PWA rotation bug)
+    // v:v13.49 — force visual-viewport reflow (iOS PWA rotation bug)
     setTimeout(function() {
+      // Force #app to re-measure its 100dvh height
+      var _app = document.getElementById('app');
+      if (_app) { _app.style.height = '100dvh'; void _app.offsetHeight; _app.style.height = ''; }
       document.body.style.height = '100dvh';
       void document.body.offsetHeight; // force reflow
       document.body.style.height = '';
@@ -15376,6 +15497,14 @@ const AIColourName = {
       resetBarPos();
       window.dispatchEvent(new Event('resize'));
     }, 200);
+    // v:v13.49 — restart camera after rotation so stream gets updated dimensions
+    setTimeout(function() {
+      try {
+        if (typeof Sampler !== 'undefined' && Sampler.mode === 'camera' && !Sampler.frozen) {
+          Sampler.startCamera();
+        }
+      } catch(e) {}
+    }, 600);
   });
   window.addEventListener('resize',            function() { setTimeout(resetBarPos, 100); setTimeout(measureSafeAreas, 120); });
 
