@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.45 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.46 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.45</title>
+<title>Digby v13.46</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.45';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.46';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1298,6 +1298,61 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
     width: 216px !important;
   }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   v13.46 — LANDSCAPE LAYOUT
+   On phones in landscape (height ≤ 500px) the bottom tab bar becomes a
+   left-side icon rail so the content area gets its full height back.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --tab-h: 0px; --landscape-rail: 56px; }
+
+  /* shift app content right by rail width */
+  #app { padding-left: var(--landscape-rail); box-sizing: border-box; }
+
+  /* tabs become a vertical icon rail on the left */
+  #tabs {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: var(--landscape-rail);
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    border-top: none;
+    border-right: 1px solid var(--border);
+    padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
+    z-index: var(--z-tabs);
+  }
+
+  /* compact icon-only tabs */
+  .tab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    min-width: var(--landscape-rail);
+    padding: 8px 0;
+    font-size: 0;           /* hide labels */
+    letter-spacing: 0;
+  }
+  .tab svg { width: 22px; height: 22px; }
+
+  /* indicator: vertical bar on right edge instead of horizontal on bottom */
+  .tab::after {
+    bottom: unset; top: 15%; left: auto;
+    right: 0; width: 2px; height: 70%;
+    transform: scaleX(0);
+  }
+  .tab.on::after { transform: scaleX(1); }
+
+  /* toast above safe area only (no tab bar below) */
+  #toast { bottom: calc(20px + var(--safe-bottom)); }
+
+  /* overlay panel: use available height */
+  #ov-panel { max-height: 92dvh; }
+
+  /* fixed bottom panels: lose tab-bar offset */
+  #pb-cvd-panel { bottom: 0; }
+}
+
 /* v447: live-bar upload/picker button */
 #bar-picker-btn {
   width: 50px; height: 50px;
@@ -3045,7 +3100,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.45</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.46</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5050,7 +5105,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.45</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.46</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
