@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.42 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.43 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.42</title>
+<title>Digby v13.43</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.42';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.43';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -128,6 +128,7 @@ a{color:var(--accent);text-decoration:none}
 .btn-g{color:var(--muted)}
 .btn-d{background:var(--danger);color:#fff}
 .btn-sm{padding:7px 12px;font-size:.75rem}
+.btn:disabled{opacity:0.35;pointer-events:none;cursor:not-allowed}
 .tog-group{display:flex;background:var(--surface2);border-radius:var(--rs);padding:3px;gap:2px}
 .tog-btn{flex:1;padding:6px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--muted);transition:all var(--tr)}
 .tog-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.4)}
@@ -3044,7 +3045,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.42</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.43</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5049,7 +5050,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.42</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.43</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -11114,7 +11115,7 @@ const SwatchExport = {
           <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
-        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()" ${sel.length===0?'disabled':''}>↓ Palette Strip</button>
+        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()">↓ Palette Strip</button>
       </div>
     </div>`;
   },
@@ -11734,15 +11735,19 @@ const ColourGenerator = {
 
   // Palette Strip — wide landscape strip of vertical colour columns, no labels.
   // Proportional widths if colours carry .weight (k-means), equal otherwise.
-  async downloadSREF() {
+  downloadSREF() {
+    // v:v13.43 — bulletproof: toast at line 1 confirms tap registered;
+    // blob URL download (not data: URL) for Android reliability;
+    // Web Share for iOS PWA called synchronously within gesture.
+    App.toast('Building palette strip…');
     const sel = this.selectedColours();
-    if (!sel.length) { App.toast('Select colours to export'); return; }
-    if (navigator.vibrate) navigator.vibrate([10, 6, 35]);  // v:v13.38 haptic
+    if (!sel.length) { App.toast('Select at least one colour'); return; }
+    if (navigator.vibrate) navigator.vibrate([10, 6, 35]);
     const W = 1200, H = 180;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-    // Normalize weights → proportional column widths
+    // Proportional column widths from colour weights
     const raw     = sel.map(function(c){ return (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1; });
     const total   = raw.reduce(function(a, b){ return a + b; }, 0);
     const weights = raw.map(function(w){ return w / total; });
@@ -11750,40 +11755,45 @@ const ColourGenerator = {
     sel.forEach(function(c, i) {
       const isLast = (i === sel.length - 1);
       const bw = isLast ? (W - x) : Math.round(weights[i] * W);
-      ctx.fillStyle = c.hex;
+      ctx.fillStyle = c.hex || '#888';
       ctx.fillRect(x, 0, bw, H);
       x += bw;
     });
     const _ts2 = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
     const filename = 'digby-strip-' + _ts2 + '.png';
-    // v:v13.42 — sync base64→blob preserves user-gesture activation context
-    // so navigator.share() is reached before the gesture expires on Chrome/Safari.
-    // (await fetch(dataUrl) was breaking the activation window on Android & iOS.)
+    // Sync decode: avoids await which would expire the user-gesture context
     let pngDataUrl;
     try { pngDataUrl = canvas.toDataURL('image/png'); }
-    catch(e) { App.toast('Export failed — canvas error'); return; }
-    const _doAnchor = () => {
-      const a = document.createElement('a');
-      a.href = pngDataUrl; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      App.toast('Palette strip downloaded ✓');
-    };
+    catch(e) { App.toast('Canvas error — try again'); return; }
+    const _b64 = pngDataUrl.split(',')[1];
+    const _bin = atob(_b64);
+    const _u8  = new Uint8Array(_bin.length);
+    for (let _i = 0; _i < _bin.length; _i++) _u8[_i] = _bin.charCodeAt(_i);
+    const blob = new Blob([_u8], { type: 'image/png' });
+    // 1️⃣ Try Web Share (iOS PWA + Android Chrome — called synchronously in gesture)
     try {
-      // Sync conversion — no await, no broken gesture context
-      const _b64 = pngDataUrl.split(',')[1];
-      const _bin = atob(_b64);
-      const _u8  = new Uint8Array(_bin.length);
-      for (let _i = 0; _i < _bin.length; _i++) _u8[_i] = _bin.charCodeAt(_i);
-      const blob = new Blob([_u8], { type: 'image/png' });
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Digby Palette Strip' });
-        App.toast('Palette strip exported ✓');
-      } else {
-        _doAnchor();
+        navigator.share({ files: [file], title: 'Digby Palette Strip' })
+          .then(function() { App.toast('Palette strip shared ✓'); })
+          .catch(function(e) { if (e.name !== 'AbortError') SwatchExport._srefDownload(blob, filename); });
+        return;
       }
+    } catch(e) {}
+    // 2️⃣ Blob URL download fallback (Android, desktop)
+    SwatchExport._srefDownload(blob, filename);
+  },
+
+  _srefDownload(blob, filename) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 30000);
+      App.toast('Palette strip saved ✓');
     } catch(e) {
-      _doAnchor();
+      App.toast('Download failed: ' + e.message);
     }
   },
 
