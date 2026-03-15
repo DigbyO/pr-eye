@@ -6986,7 +6986,7 @@ const Sampler={
   },
 
   _raveNextColour(ov) {
-    const q = this.pickQueue || [];
+    const q = this._raveSourceHexes || this.pickQueue || [];  // v:v13.27 — use resolved source
     if (!q.length) return;
     const propMode = this._immersivePropTiming !== false;
     let items;
@@ -7022,6 +7022,15 @@ const Sampler={
       App.toast('Audio API not available on this device'); return;
     }
     this._immersiveRave = true;
+    // v:v13.27 — resolve colour source (same chain as _runImmersive) so rave works
+    // even when pickQueue is empty (e.g. launched from auto-palette or library)
+    (function(self) {
+      var sq = (self.pickQueue || []).slice();
+      if (!sq.length && window._apHexes && window._apHexes.length) sq = window._apHexes.slice();
+      if (!sq.length && typeof DS !== 'undefined') sq = DS.all().slice(0,12).map(function(e){return e.hex;});
+      self._raveSourceHexes = sq;
+      self._immersiveIdx = 0;  // restart colour cycling from first colour
+    })(this);
     // v:v13.25 — inject flash div for dramatic white-pulse effect
     let flashEl = document.getElementById('rave-flash');
     if (!flashEl) {
@@ -7060,7 +7069,7 @@ const Sampler={
           ov.style.filter = 'brightness(' + bri + ')';
 
           const now = performance.now();
-          if (energy > avgEnergy * 1.35 && energy > 15 && now - lastBeat > COOLDOWN) {
+          if (energy > avgEnergy * 1.35 && energy > 6 && now - lastBeat > COOLDOWN) {  // v:v13.27 — lower floor
             lastBeat = now;
             // v:v13.26 — BEAT: flash white FIRST, snap colour while hidden, fade to reveal
             // Step 1: instant white flash
@@ -7975,8 +7984,12 @@ const Library={
           const tc = CS.isDark(c.hex) ? 'rgba(255,255,255,.75)' : 'rgba(0,0,0,.6)';
           return `<div onclick="Explorer.setRootHex('${c.hex}')" title="${c.name}" style="flex:1;min-width:0;height:48px;background:${c.hex};border-radius:4px;position:relative;cursor:pointer;transition:transform .1s" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform=''">\n            <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-family:var(--mono);color:${tc};letter-spacing:.03em">${c.hex.toUpperCase()}</div>\n          </div>`;
         }).join('');
+        const _exportHexes = JSON.stringify(cols.map(function(c){return c.hex;}));
         return `<div style="background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);padding:8px">
-          <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">${label} &middot; ${cols.length} colour${cols.length!==1?'s':''}</div>
+          <div style="display:flex;align-items:center;margin-bottom:6px">
+            <div style="flex:1;font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase">${label} &middot; ${cols.length} colour${cols.length!==1?'s':''}</div>
+            <button data-hexes='${_exportHexes}' onclick="event.stopPropagation();SwatchExport.openFromHexes(JSON.parse(this.dataset.hexes))" style="font-size:9px;padding:3px 9px;border-radius:4px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:var(--mono);letter-spacing:.04em;flex-shrink:0">Export</button>
+          </div>
           <div style="display:flex;gap:3px">${swatches}</div>
         </div>`;
       }).join('');
@@ -10865,7 +10878,7 @@ const SwatchExport = {
     {id:'ratio701020',label:'701020',  note:'Inverted accent  large dominant, bold pop, small bridge.',  bands:[.70,.10,.20], minC:2},
     {id:'ratio40305', label:'40302010',note:'4-colour hierarchy. Layered complexity for pattern & surface design.', bands:[.40,.30,.20,.10], minC:3},
     {id:'ratio333010',label:'33332410',note:'Near-equal trio with sharp accent. Print, packaging.',      bands:[.33,.33,.24,.10], minC:3},
-    {id:'filmstrip',  label:'Film Strip', note:'Equal narrow columns  6 colours side by side. Contact sheet aesthetic.', bands:[1/6,1/6,1/6,1/6,1/6,1/6], minC:6},
+    {id:'filmstrip',  label:'Film Strip', note:'Equal narrow columns  up to 12 colours side by side. Contact sheet aesthetic.', bands:[1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12], minC:2},
     // Structural layouts
     {id:'polaroids',  label:'Polaroids', note:'Photo-style cards with colour info', bands:null},
     {id:'blocks',     label:'Named Blocks', note:'Swatch bar with name and codes', bands:null},
@@ -11120,16 +11133,19 @@ const SwatchExport = {
     const bands    = lay.bands;
     const nBands   = bands.length;
     const usedC    = colours.slice(0, nBands); // cap to number of bands
+    const renderN  = Math.max(usedC.length, 1);  // v:v13.27 — actual bands to draw
+    // v:v13.27 — renorm fractions if fewer colours than layout bands (equal-weight fallback)
+    const effBands = renderN === nBands ? bands : usedC.map(function(){ return 1 / renderN; });
     const PAD      = Math.round(18 * scale);
     const GAP      = Math.round(6  * scale);
-    const inner    = H - PAD * 2 - GAP * (nBands - 1);
+    const inner    = H - PAD * 2 - GAP * (renderN - 1);  // v:v13.27 — gap uses actual count
     const x        = PAD, w = W - PAD * 2;
 
     // Determine if we render vertically (portrait/square) or horizontally (landscape strips)
     const useVert = H >= W * 0.7; // portrait-ish = horizontal bands stacked vertically
     
     let cursor = PAD;
-    bands.forEach((frac, i) => {
+    effBands.forEach((frac, i) => {  // v:v13.27
       const c = usedC[i];
       if (!c) return;
       const bandSize = Math.round(inner * frac);
