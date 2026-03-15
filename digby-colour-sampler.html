@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.40 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.41 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.40</title>
+<title>Digby v13.41</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.40';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.41';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -14381,7 +14381,7 @@ self.onmessage = function(e) {
     if (existing) existing.remove();
     const d = document.createElement('div');
     d.id = '_ap_panel';
-    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
+    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px + env(safe-area-inset-bottom, 0px));left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
 background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div id="ap-spinner">
@@ -14603,7 +14603,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
 
     const d = document.createElement('div');
     d.id = '_ap_panel';
-    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px);left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
+    d.style.cssText = 'position:fixed;bottom:calc(var(--tab-h) + 66px + env(safe-area-inset-bottom, 0px));left:0;right:0;z-index:var(--z-modal);display:flex;justify-content:center;padding:0 12px';
     d.innerHTML = `<div style="/* v:F12.33 - translucent so photo shows through */
 background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.7)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
