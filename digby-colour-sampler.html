@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.52';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.53';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -13517,9 +13517,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v1';
+    const SW_CACHE = 'spectrum-v2';
     const swSrc = `
-const CACHE='spectrum-v1';
+const CACHE='spectrum-v2';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15567,7 +15567,7 @@ const AIColourName = {
 </script>
 
 <script>
-/* v:v13.52 — STANDALONE landscape detection — runs independently of all other
+/* v:v13.53 — STANDALONE landscape detection — runs independently of all other
    scripts, cannot be blocked by live-bar early-return or any other IIFE.
    Uses every available trigger: DOMContentLoaded, resize, orientationchange,
    matchMedia change, and screen.orientation.change (Android Chrome API). */
