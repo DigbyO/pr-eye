@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.37 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.40 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.37</title>
+<title>Digby v13.40</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.37';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.40';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -8282,7 +8282,10 @@ const Library={
               <div class="insp-match-brand">${brand}</div>
               <div class="insp-match-name" style="overflow-wrap:anywhere">${paint.name}</div>
               <div class="insp-match-sub">${paint.code} · ΔE ${paint.de}</div>
-              <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
+              <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+                <a href="${paint.url}" target="_blank" rel="noopener" class="insp-match-link">View ↗</a>
+                ${copyBtn(paint.name)}
+              </div>
             </div>
           </div>`:''
         const pantoneCell=pan?`
@@ -10864,7 +10867,8 @@ const SwatchExport = {
   ratio: '1:1',
   layout: 'polaroids',
   includeText: true,
-  includePaintNames: false,
+  includeLG: false,
+  includeFB: false,
   showProportions: false,  // v:F12.34 — show % of image per colour on polaroid
   bgColor: '#1a1a1a',
   selectedIds: new Set(),
@@ -11040,12 +11044,19 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:13px">Little Greene</div>
+          <div style="font-size:10px;color:var(--muted)">LG paint names on swatches</div>
+        </div>
+        <div class="sw ${this.includeLG?'on':''}" onclick="SwatchExport.toggleLG(this)"></div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
-          <div style="font-size:13px">F&amp;B &amp; Little Greene</div>
-          <div style="font-size:10px;color:var(--muted)">Paint match names on swatches</div>
+          <div style="font-size:13px">Farrow &amp; Ball</div>
+          <div style="font-size:10px;color:var(--muted)">F&amp;B paint names on swatches</div>
         </div>
-        <div class="sw ${this.includePaintNames?'on':''}" onclick="SwatchExport.togglePaintNames(this)"></div>
+        <div class="sw ${this.includeFB?'on':''}" onclick="SwatchExport.toggleFB(this)"></div>
       </div>
 
       <div style="margin-bottom:16px">
@@ -11124,7 +11135,8 @@ const SwatchExport = {
   setRatio(r)  { this.ratio = r;  this.refresh(); },
   setLayout(l) { this.layout = l; this._userLayout = l; this.refresh(); },
   toggleText(el) { this.includeText = !this.includeText; el.classList.toggle('on', this.includeText); this.preview(); },
-  togglePaintNames(el) { this.includePaintNames = !this.includePaintNames; el.classList.toggle('on', this.includePaintNames); this.preview(); },
+  toggleLG(el) { this.includeLG = !this.includeLG; el.classList.toggle('on', this.includeLG); this.preview(); },
+  toggleFB(el) { this.includeFB = !this.includeFB; el.classList.toggle('on', this.includeFB); this.preview(); },
   toggleProportions(el) { this.showProportions = !this.showProportions; el.classList.toggle('on', this.showProportions); this.preview(); },  // v:F12.34
   setBg(bg)    { this.bgColor = bg; this.refresh(); },
 
@@ -11289,7 +11301,7 @@ const SwatchExport = {
     const cardW  = Math.floor(availW / cols);
 
     // v437: 3-colour trio gets taller info strip for richer labels
-    const _paintBonus = (this.includePaintNames && this.includeText) ? Math.round(12 * scale) : 0;
+    const _paintBonus = ((this.includeLG || this.includeFB) && this.includeText) ? Math.round(12 * scale) : 0;
     const stripH = (n === 3)
       ? Math.max(Math.round(58 * scale), Math.round(cardW * 0.30)) + _paintBonus
       : Math.max(Math.round(44 * scale), Math.round(cardW * 0.22)) + _paintBonus;
@@ -11301,17 +11313,17 @@ const SwatchExport = {
     );
     const cardH    = colourH + stripH;
 
-    // Theme colours derived from bgColor — info strip matches background
-    const _bgRgb     = CS.hexToRgb(this.bgColor || '#1a1a1a');
-    const _bgLum     = _bgRgb ? (0.299 * _bgRgb.r + 0.587 * _bgRgb.g + 0.114 * _bgRgb.b) : 30;
-    const _bgIsLight = _bgLum >= 140;
-    const _stripBg   = _bgIsLight ? '#ffffff' : (this.bgColor || '#1a1a1a');
-    const _nameCol   = _bgIsLight ? '#1a1a1a' : 'rgba(255,255,255,0.92)';
-    const _metaCol   = _bgIsLight ? '#555555' : 'rgba(255,255,255,0.55)';
-    const _dimCol    = _bgIsLight ? '#aaaaaa' : 'rgba(255,255,255,0.35)';
-    const _paintCol  = _bgIsLight ? '#bbbbbb' : 'rgba(255,255,255,0.42)';
-    const _divCol    = _bgIsLight ? '#e0e0e0' : 'rgba(255,255,255,0.07)';
-    const _geoCol    = _bgIsLight ? '#333333' : 'rgba(255,255,255,0.7)';
+    // v:v13.39 — info strip is ALWAYS white regardless of background colour.
+    // The background fills the outer margin between cards; the card itself
+    // is a polaroid (white frame + white footer). Mid-grey backgrounds like
+    // Stone were leaking into the strip, making text unreadable.
+    const _stripBg  = '#ffffff';
+    const _nameCol  = '#1a1a1a';
+    const _metaCol  = '#555555';
+    const _dimCol   = '#aaaaaa';
+    const _paintCol = '#bbbbbb';
+    const _divCol   = '#e0e0e0';
+    const _geoCol   = '#333333';
 
     colours.forEach((c, i) => {
       const col = i % cols, row = Math.floor(i / cols);
@@ -11379,10 +11391,10 @@ const SwatchExport = {
             ctx.font = `${Math.max(4, Math.round(5.5 * scale))}px 'Space Mono',monospace`;
             ctx.fillText(c.pantone.code, x + cardW / 2, pantoneY);
           }
-          if (this.includePaintNames) {
+          if (this.includeLG || this.includeFB) {
             if (!c.lab) { const _rgb = CS.hexToRgb(c.hex); c.lab = CS.rgbToLab(_rgb.r, _rgb.g, _rgb.b); }
-            const _fb = c.farrowBall || CS.nearestFB(c.lab);
-            const _lg = c.littleGreene || CS.nearestLG(c.lab);
+            const _fb = this.includeFB ? (c.farrowBall || CS.nearestFB(c.lab)) : null;
+            const _lg = this.includeLG ? (c.littleGreene || CS.nearestLG(c.lab)) : null;
             const _parts = [_lg?.name ? 'LG: ' + _lg.name : null, _fb?.name ? 'F&B: ' + _fb.name : null].filter(Boolean);
             if (_parts.length) {
               const _paintSize = Math.max(4, Math.round(4.5 * scale));
@@ -11416,10 +11428,10 @@ const SwatchExport = {
       ctx.font=`${Math.max(7,Math.round(9*scale))}px 'Space Mono',monospace`;
       ctx.fillStyle=this.bgColor==='#1a1a1a'?'#888':'#666';
       ctx.fillText(`${c.hex.toUpperCase()} · ${c.pantone?.code||''}`,tx,y+Math.round(rowH*0.45)+Math.round(16*scale));
-      if(this.includePaintNames){
+      if(this.includeLG||this.includeFB){
         if(!c.lab){const _rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(_rgb.r,_rgb.g,_rgb.b);}
-        const _lg=c.littleGreene||CS.nearestLG(c.lab);
-        const _fb=c.farrowBall||CS.nearestFB(c.lab);
+        const _lg=this.includeLG?(c.littleGreene||CS.nearestLG(c.lab)):null;
+        const _fb=this.includeFB?(c.farrowBall||CS.nearestFB(c.lab)):null;
         const _paintParts=[_lg?.name?'LG: '+_lg.name:null,_fb?.name?'F&B: '+_fb.name:null].filter(Boolean);
         if(_paintParts.length){
           ctx.font=`${Math.max(6,Math.round(8*scale))}px 'Space Mono',monospace`;
@@ -11716,9 +11728,10 @@ const ColourGenerator = {
 
   // Palette Strip — wide landscape strip of vertical colour columns, no labels.
   // Proportional widths if colours carry .weight (k-means), equal otherwise.
-  downloadSREF() {
+  async downloadSREF() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select colours to export'); return; }
+    if (navigator.vibrate) navigator.vibrate([10, 6, 35]);  // v:v13.38 haptic
     const W = 1200, H = 180;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
@@ -11735,12 +11748,33 @@ const ColourGenerator = {
       ctx.fillRect(x, 0, bw, H);
       x += bw;
     });
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
     const _ts2 = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-    a.download = 'digby-strip-' + _ts2 + '.png';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    App.toast('Palette strip downloaded');
+    const filename = 'digby-strip-' + _ts2 + '.png';
+    // v:v13.38 — Web Share API (iOS PWA) → anchor fallback (desktop)
+    // Mirrors exportPolaroid() pattern. Plain a.click() is silently
+    // blocked in iOS Safari PWA; fetch→blob→File→navigator.share works.
+    let pngDataUrl;
+    try { pngDataUrl = canvas.toDataURL('image/png'); }
+    catch(e) { App.toast('Export failed — canvas error'); return; }
+    const _doAnchor = () => {
+      const a = document.createElement('a');
+      a.href = pngDataUrl; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      App.toast('Palette strip downloaded ✓');
+    };
+    try {
+      const res  = await fetch(pngDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Digby Palette Strip' });
+        App.toast('Palette strip exported ✓');
+      } else {
+        _doAnchor();
+      }
+    } catch(e) {
+      _doAnchor();
+    }
   },
 
   currentPalette: null,
