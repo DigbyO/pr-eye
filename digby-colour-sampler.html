@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.51 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.52 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.51</title>
+<title>Digby v13.52</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.51';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.52';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3218,7 +3218,7 @@ body.landscape-phone.active-tab-sampler #live-bar {
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.51</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.52</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5223,7 +5223,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.51</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.52</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -15476,43 +15476,6 @@ const AIColourName = {
   window.addEventListener('mouseup', endDrag);
 
   // ── Orientation / resize — re-centre ─────────────────────────────────────
-  // v:v13.51 — Landscape phone detection: JS class is more reliable than CSS
-  // media queries on Android Chrome (where orientationchange can be unreliable).
-  // Sets body.landscape-phone + CSS variables on every resize/rotation.
-  (function() {
-    var _root = document.documentElement;
-    function _applyLandscape() {
-      var w = window.innerWidth, h = window.innerHeight;
-      var on = w > h && h <= 600;  // phone in landscape: tall-side ≤ 600px
-      document.body.classList.toggle('landscape-phone', on);
-      _root.style.setProperty('--tab-h',         on ? '0px'  : '62px');
-      _root.style.setProperty('--landscape-rail', on ? '56px' : '0px');
-      // Restart camera so it picks up new orientation dimensions
-      if (on !== _applyLandscape._wasOn) {
-        _applyLandscape._wasOn = on;
-        setTimeout(function() {
-          try {
-            if (typeof Sampler !== 'undefined' && Sampler.mode === 'camera' && !Sampler.frozen) {
-              Sampler.startCamera();
-            }
-          } catch(e) {}
-        }, 400);
-      }
-    }
-    _applyLandscape._wasOn = false;
-    _applyLandscape();  // run immediately on page load
-    window.addEventListener('resize', _applyLandscape);
-    window.addEventListener('orientationchange', function() {
-      setTimeout(_applyLandscape, 100);
-      setTimeout(_applyLandscape, 350);  // second pass for slow Android
-    });
-    if (window.screen && window.screen.orientation) {
-      screen.orientation.addEventListener('change', function() {
-        setTimeout(_applyLandscape, 100);
-      });
-    }
-  })();
-
   window.addEventListener('orientationchange', function() {
     // v:v13.49 — force visual-viewport reflow (iOS PWA rotation bug)
     setTimeout(function() {
@@ -15600,6 +15563,71 @@ const AIColourName = {
     e.stopPropagation();
     Sampler.openInPicker();
   });
+})();
+</script>
+
+<script>
+/* v:v13.52 — STANDALONE landscape detection — runs independently of all other
+   scripts, cannot be blocked by live-bar early-return or any other IIFE.
+   Uses every available trigger: DOMContentLoaded, resize, orientationchange,
+   matchMedia change, and screen.orientation.change (Android Chrome API). */
+(function() {
+  var _r = document.documentElement;
+  var _wasOn = false;
+
+  function _applyLandscape() {
+    var w = window.innerWidth, h = window.innerHeight;
+    var on = (w > h) && (h <= 600);
+    document.body.classList.toggle('landscape-phone', on);
+    _r.style.setProperty('--tab-h',          on ? '0px'  : '62px');
+    _r.style.setProperty('--landscape-rail',  on ? '56px' : '0px');
+    if (on !== _wasOn) {
+      _wasOn = on;
+      // Restart camera so stream gets updated orientation dimensions
+      setTimeout(function() {
+        try {
+          if (typeof Sampler !== 'undefined' &&
+              Sampler.mode === 'camera' && !Sampler.frozen) {
+            Sampler.startCamera();
+          }
+        } catch(e) {}
+      }, 500);
+    }
+  }
+
+  // Run immediately (script is at bottom of body so DOM is ready)
+  _applyLandscape();
+
+  // Resize: fires reliably on Android Chrome when viewport changes
+  window.addEventListener('resize', _applyLandscape);
+
+  // orientationchange: iOS Safari primary trigger
+  window.addEventListener('orientationchange', function() {
+    setTimeout(_applyLandscape, 80);
+    setTimeout(_applyLandscape, 300);
+    setTimeout(_applyLandscape, 600);  // triple-fire for slow devices
+  });
+
+  // matchMedia: fires when CSS orientation media query changes — most
+  // reliable cross-browser trigger that is tied directly to the CSS engine
+  var _mql = window.matchMedia('(orientation: landscape)');
+  function _onMQL() {
+    setTimeout(_applyLandscape, 50);
+    setTimeout(_applyLandscape, 250);
+  }
+  if (_mql.addEventListener) {
+    _mql.addEventListener('change', _onMQL);
+  } else if (_mql.addListener) {
+    _mql.addListener(_onMQL);  // legacy Safari
+  }
+
+  // screen.orientation API: Android Chrome modern standard
+  if (window.screen && window.screen.orientation) {
+    screen.orientation.addEventListener('change', function() {
+      setTimeout(_applyLandscape, 80);
+      setTimeout(_applyLandscape, 300);
+    });
+  }
 })();
 </script>
 
