@@ -10846,6 +10846,7 @@ const SwatchExport = {
   ratio: '1:1',
   layout: 'polaroids',
   includeText: true,
+  includePaintNames: false,
   showProportions: false,  // v:F12.34 — show % of image per colour on polaroid
   bgColor: '#1a1a1a',
   selectedIds: new Set(),
@@ -11021,15 +11022,46 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:13px">Background</div>
-        <div style="display:flex;gap:8px">
-          ${['#1a1a1a','#ffffff','#f5f2ed','transparent'].map(bg=>
-            `<div onclick="SwatchExport.setBg('${bg}')"
-                  style="width:28px;height:28px;border-radius:4px;
-                         background:${bg==='transparent'?'repeating-conic-gradient(#ccc 0% 25%,white 0% 50%) 0/8px 8px':bg};
-                         border:2px solid ${bg===this.bgColor?'var(--accent)':'var(--border)'};
-                         cursor:pointer"></div>`).join('')}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px">F&amp;B &amp; Little Greene</div>
+          <div style="font-size:10px;color:var(--muted)">Paint match names on swatches</div>
+        </div>
+        <div class="sw ${this.includePaintNames?'on':''}" onclick="SwatchExport.togglePaintNames(this)"></div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;margin-bottom:8px">Background</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          ${[
+            {v:'#1a1a1a', label:'Dark'},
+            {v:'#ffffff',  label:'White'},
+            {v:'#f5f2ed',  label:'Parchment'},
+            {v:'#8c8680',  label:'Stone'},
+            {v:'#2e2e2e',  label:'Charcoal'},
+          ].map(opt => {
+            const on = this.bgColor === opt.v;
+            const dotBorder = opt.v === '#ffffff' ? '1px solid #ddd' : 'none';
+            return `<button onclick="SwatchExport.setBg('${opt.v}')"
+                      style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;
+                             border:1.5px solid ${on ? 'var(--accent)' : 'var(--border)'};
+                             background:${on ? 'var(--accent-subtle, rgba(100,100,255,0.08))' : 'transparent'};
+                             cursor:pointer;font-size:11px;color:${on ? 'var(--accent)' : 'var(--muted)'};
+                             font-weight:${on ? '600' : '400'};white-space:nowrap">
+                      <span style="width:12px;height:12px;border-radius:50%;background:${opt.v};
+                                   border:${dotBorder};flex-shrink:0;display:inline-block"></span>
+                      ${opt.label}
+                    </button>`;
+          }).join('')}
+          <label title="Custom colour" style="display:flex;align-items:center;gap:5px;padding:5px 10px;
+                  border-radius:20px;border:1.5px solid var(--border);cursor:pointer;font-size:11px;
+                  color:var(--muted);white-space:nowrap">
+            <input type="color" value="${this.bgColor.startsWith('#') ? this.bgColor : '#1a1a1a'}"
+                   style="width:12px;height:12px;border:none;padding:0;border-radius:50%;cursor:pointer;background:none"
+                   oninput="SwatchExport.setBg(this.value)"
+                   onchange="SwatchExport.setBg(this.value)">
+            Custom
+          </label>
         </div>
       </div>
 
@@ -11074,6 +11106,7 @@ const SwatchExport = {
   setRatio(r)  { this.ratio = r;  this.refresh(); },
   setLayout(l) { this.layout = l; this._userLayout = l; this.refresh(); },
   toggleText(el) { this.includeText = !this.includeText; el.classList.toggle('on', this.includeText); this.preview(); },
+  togglePaintNames(el) { this.includePaintNames = !this.includePaintNames; el.classList.toggle('on', this.includePaintNames); this.preview(); },
   toggleProportions(el) { this.showProportions = !this.showProportions; el.classList.toggle('on', this.showProportions); this.preview(); },  // v:F12.34
   setBg(bg)    { this.bgColor = bg; this.refresh(); },
 
@@ -11109,7 +11142,7 @@ const SwatchExport = {
   renderToCanvas(ctx, W, H) {
     const colours = this.selectedColours();
     const scale = W / 900;
-    if (this.bgColor === 'transparent') ctx.clearRect(0,0,W,H);
+    if (!this.bgColor || this.bgColor === 'transparent') ctx.clearRect(0,0,W,H);
     else { ctx.fillStyle = this.bgColor; ctx.fillRect(0,0,W,H); }
     if (!colours.length) return;
 
@@ -11238,9 +11271,10 @@ const SwatchExport = {
     const cardW  = Math.floor(availW / cols);
 
     // v437: 3-colour trio gets taller info strip for richer labels
+    const _paintBonus = (this.includePaintNames && this.includeText) ? Math.round(12 * scale) : 0;
     const stripH = (n === 3)
-      ? Math.max(Math.round(58 * scale), Math.round(cardW * 0.30))
-      : Math.max(Math.round(44 * scale), Math.round(cardW * 0.22));
+      ? Math.max(Math.round(58 * scale), Math.round(cardW * 0.30)) + _paintBonus
+      : Math.max(Math.round(44 * scale), Math.round(cardW * 0.22)) + _paintBonus;
 
     const maxCardH = Math.floor(availH / rows);
     const colourH  = Math.min(
@@ -11316,6 +11350,22 @@ const SwatchExport = {
             ctx.font = `${Math.max(4, Math.round(5.5 * scale))}px 'Space Mono',monospace`;
             ctx.fillText(c.pantone.code, x + cardW / 2, pantoneY);
           }
+          if (this.includePaintNames) {
+            if (!c.lab) { const _rgb = CS.hexToRgb(c.hex); c.lab = CS.rgbToLab(_rgb.r, _rgb.g, _rgb.b); }
+            const _fb = c.farrowBall || CS.nearestFB(c.lab);
+            const _lg = c.littleGreene || CS.nearestLG(c.lab);
+            const _parts = [_lg?.name ? 'LG: ' + _lg.name : null, _fb?.name ? 'F&B: ' + _fb.name : null].filter(Boolean);
+            if (_parts.length) {
+              const _paintSize = Math.max(4, Math.round(4.5 * scale));
+              ctx.fillStyle = '#bbb';
+              ctx.font = `${_paintSize}px 'Space Mono',monospace`;
+              ctx.textAlign = 'center';
+              _parts.forEach(function(_line, _li) {
+                const _paintY = pantoneY + Math.round((_li + 1) * (_paintSize + 2) * scale + 6 * scale);
+                if (_paintY < iy + stripH - 2) ctx.fillText(_line, x + cardW / 2, _paintY);
+              });
+            }
+          }
         }
       }
     });
@@ -11337,10 +11387,16 @@ const SwatchExport = {
       ctx.font=`${Math.max(7,Math.round(9*scale))}px 'Space Mono',monospace`;
       ctx.fillStyle=this.bgColor==='#1a1a1a'?'#888':'#666';
       ctx.fillText(`${c.hex.toUpperCase()} · ${c.pantone?.code||''}`,tx,y+Math.round(rowH*0.45)+Math.round(16*scale));
-      if(c.littleGreene?.name){
-        ctx.font=`${Math.max(6,Math.round(8*scale))}px 'Space Mono',monospace`;
-        ctx.fillStyle='#aaa';
-        ctx.fillText(`LG: ${c.littleGreene.name}`,tx,y+Math.round(rowH*0.45)+Math.round(30*scale));
+      if(this.includePaintNames){
+        if(!c.lab){const _rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(_rgb.r,_rgb.g,_rgb.b);}
+        const _lg=c.littleGreene||CS.nearestLG(c.lab);
+        const _fb=c.farrowBall||CS.nearestFB(c.lab);
+        const _paintParts=[_lg?.name?'LG: '+_lg.name:null,_fb?.name?'F&B: '+_fb.name:null].filter(Boolean);
+        if(_paintParts.length){
+          ctx.font=`${Math.max(6,Math.round(8*scale))}px 'Space Mono',monospace`;
+          ctx.fillStyle=this.bgColor==='#1a1a1a'?'#999':'#777';
+          ctx.fillText(_paintParts.join(' · '),tx,y+Math.round(rowH*0.45)+Math.round(30*scale));
+        }
       }
     });
     this._watermark(ctx,W,H,scale);
