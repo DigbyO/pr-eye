@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.32 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.37 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.32</title>
+<title>Digby v13.37</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.32';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.37';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -7265,8 +7265,14 @@ const Sampler={
             this._offCanvas.getContext('2d').drawImage(img,0,0);
           }
           const r2=4;
-          const data=this._offCanvas.getContext('2d')
-            .getImageData(Math.max(0,ix-r2),Math.max(0,iy-r2),r2*2,r2*2).data;
+          let data;
+          try {
+            data = this._offCanvas.getContext('2d')
+              .getImageData(Math.max(0,ix-r2),Math.max(0,iy-r2),r2*2,r2*2).data;
+          } catch(e) {
+            App.toast('Cannot sample image due to cross-origin restrictions.');
+            return;
+          }
           let R=0,G=0,B=0,n=0;
           for(let i=0;i<data.length;i+=4){R+=data[i];G+=data[i+1];B+=data[i+2];n++}
           if(!n)return;
