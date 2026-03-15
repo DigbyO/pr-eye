@@ -1450,9 +1450,10 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
 }
 .density-btn.on,
 .density-btn.active {
-  border: 2px solid var(--accent);   /* v:v13.0.3 — outlined ring replaces filled bg */
-  background: rgba(var(--accent-rgb, 0,120,255), 0.12);
-  color: var(--fg);
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
 }
 .density-btn:active { opacity: 0.7; }
 
@@ -10769,7 +10770,7 @@ const ColourWheel = {
     this._drawWheel();  // v:v13.3 — removed undefined _updatePreview call that silently threw TypeError
     this._drawHueStrip();
     if (typeof ColorMath !== 'undefined') ColorMath.renderTheoryStrips(hex);  // v:v13.2 — live strip update
-    setTimeout(function(){ if(typeof ColorMath!=='undefined') ColorMath.renderTheoryStrips(hex); }, 0);  // v:v13.34 — deferred safety pass
+    setTimeout(function(){ if(typeof ColorMath!=='undefined') ColorMath.renderTheoryStrips(hex); }, 50); // v:v13.36 — 50ms reflow headroom on slow devices
   },
 
   fromHex(hex) {
@@ -12433,7 +12434,18 @@ const PaletteBuilder = {
       _moodLbl.style.display = 'block';
     }
     // Show the full 2-sentence design narrative
-    App.toast('✦ ' + narrative, 5000);
+    App.toast('❆ ' + narrative, 5000);
+    // v:v13.35 — persistent narrative panel (survives multi-toast queue)
+    var _nt = document.getElementById('ai-narrative-toast');
+    if (!_nt) {
+      _nt = document.createElement('div');
+      _nt.id = 'ai-narrative-toast';
+      _nt.style.cssText = 'position:fixed;bottom:calc(var(--tab-h,60px) + 80px);left:50%;transform:translateX(-50%);max-width:320px;width:calc(100% - 40px);background:rgba(20,20,20,0.96);color:rgba(255,255,255,0.9);font-size:12px;line-height:1.6;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.7);z-index:var(--z-overlay);display:none;text-align:center;font-family:var(--sans)';
+      document.body.appendChild(_nt);
+    }
+    _nt.textContent = narrative;
+    _nt.style.display = 'block';
+    setTimeout(function() { if (_nt) _nt.style.display = 'none'; }, 5000);
   },
   
   closeSuggest() {
@@ -14813,7 +14825,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     const MAX_PHOTO_H = LOGICAL_W * 2;
     const naturalH    = Math.round(CW / (srcW / srcH));
     const photoH      = Math.min(naturalH, MAX_PHOTO_H);
-    const LOGICAL_H   = BORDER + photoH + SWATCH_H + BYLINE_PAD + 8; // v:F1.11 tight bottom
+    const LOGICAL_H   = BORDER + photoH + SWATCH_H + BYLINE_PAD;     // v:v13.35 zero-gap bottom
 
     // ── Canvas setup ──────────────────────────────────────────────────────────
     const canvas = document.createElement('canvas');
@@ -14983,7 +14995,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     });
 
     // ── digby.shop byline ────────────────────────────────────────────────────
-    const bylineY = BORDER + photoH + SWATCH_H + Math.round((BYLINE_PAD + 8) / 2);
+    const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);   // v:v13.35 match LOGICAL_H
     ctx.fillStyle    = '#999999';
     ctx.font         = "7px 'SF Mono','Space Mono',monospace";
     ctx.textAlign    = 'right';
@@ -15210,8 +15222,8 @@ const AIColourName = {
   window.addEventListener('mouseup', endDrag);
 
   // ── Orientation / resize — re-centre ─────────────────────────────────────
-  window.addEventListener('orientationchange', function() { setTimeout(resetBarPos, 200); });
-  window.addEventListener('resize',            function() { setTimeout(resetBarPos, 100); });
+  window.addEventListener('orientationchange', function() { setTimeout(resetBarPos, 200); setTimeout(measureSafeAreas, 250); });
+  window.addEventListener('resize',            function() { setTimeout(resetBarPos, 100); setTimeout(measureSafeAreas, 120); });
 
   // ── Double-tap to snap back ───────────────────────────────────────────────
   let lastTap = 0;
