@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.54 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.55 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.54</title>
+<title>Digby v13.55</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.54';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.55';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1790,6 +1790,75 @@ body.landscape-phone.active-tab-sampler #live-bar {
   position:relative;z-index:1;}
 .ws-skip:hover{color:rgba(255,255,255,.5);}
 
+/* ── v:v13.55 MICRO-ANIMATIONS — physical button press feel ─────────────────
+   transform: scale(0.96) gives tactile depression. Spring cubic-bezier
+   ensures instant response (0.1s) so taps never feel laggy.              */
+.btn {
+  transform: scale(1);
+  transition: background var(--tr), color var(--tr), opacity var(--tr),
+              transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+.btn-p:active { background: #d4b87a; transform: scale(0.96); }
+.btn-s:active { background: var(--surface3); transform: scale(0.96); }
+.btn-d:active { background: #9b1f1a; transform: scale(0.96); }
+.btn-g:active { opacity: 0.6; transform: scale(0.96); }
+
+.cap-side-btn {
+  transform: scale(1);
+  transition: background var(--tr), color var(--tr), border-color var(--tr),
+              transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.cap-side-btn:active { background: rgba(255,255,255,.18); transform: scale(0.94); }
+
+.quiz-opt {
+  transform: scale(1);
+  transition: background .14s, border-color .14s, color .14s,
+              transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.quiz-opt:active { transform: scale(0.94); }
+#ai-quiz-submit {
+  transform: scale(1);
+  transition: background .15s, transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+#ai-quiz-submit:active { transform: scale(0.97); }
+
+.tog-btn {
+  transform: scale(1);
+  transition: all var(--tr), transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.tog-btn:active { opacity: 0.7; transform: scale(0.95); }
+
+.seg-btn {
+  transform: scale(1);
+  transition: background .14s, color .14s, transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.seg-btn:active { transform: scale(0.94); }
+
+.tab {
+  transform: scale(1);
+  transition: color var(--tr), transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.tab:active { transform: scale(0.92); }
+
+.share-opt-btn {
+  transform: scale(1);
+  transition: background .15s, transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.share-opt-btn:active { background: rgba(200,169,110,.15); transform: scale(0.98); }
+
+/* ── v:v13.55 MODAL TRANSITIONS — overlays breathe instead of snap ──────────
+   #ov backdrop fades in over 200ms. #ov-panel already has the su slide-up.
+   #save-wrap gets its own slide-up so colour-save panel animates open.    */
+@keyframes ovFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes suFast    { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+#ov.open {
+  animation: ovFadeIn 0.2s ease-out both;
+}
+#save-wrap.show {
+  animation: suFast 0.22s cubic-bezier(0.4, 0.0, 0.2, 1) both;
+}
+
 </style>
 </head>
 <body>
@@ -3223,7 +3292,7 @@ body.landscape-phone.active-tab-sampler #live-bar {
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.54</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.55</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4335,7 +4404,7 @@ const DS = {
     this._cache.unshift(e);
     this._idbPut(e);
     if (!this._db) this._lsSave(this._cache);
-    if (navigator.vibrate) navigator.vibrate(10); // v:F1.8 palette save 10ms pulse
+    Haptics.success(); // v:v13.55 palette save
     return e;
   },
 
@@ -4739,6 +4808,7 @@ const App={
   },
 
   openOv(html){
+    Haptics.light(); // v:v13.55 modal open
     document.getElementById('ov-content').innerHTML=html;
     document.getElementById('ov').classList.add('open');
   },
@@ -4835,7 +4905,7 @@ const App={
   },
 
   share(title, text, url){
-    if(navigator.vibrate) navigator.vibrate([12,8,22]); // C: share triggered
+    Haptics.success(); // v:v13.55 share
     const sheet = document.getElementById('share-sheet');
     const opts  = document.getElementById('share-options');
     const tEl   = document.getElementById('share-title');
@@ -5228,7 +5298,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.54</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.55</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -5528,7 +5598,7 @@ const App={
     document.querySelectorAll('.seg-btn[data-mode]').forEach(el => {
       el.classList.toggle('on', el.dataset.mode === mode);
     });
-    if (navigator.vibrate) navigator.vibrate(8);  // v:v13.9 haptic
+    Haptics.light(); // v:v13.55 label mode toggle
     const L={both:'Name + HEX',name:'Name only',hex:'HEX only',none:'No labels',location:'GPS location'};
     App.toast((L[mode]||mode)+' on exports');
     if(mode==='location'&&!GeoCapture.last)GeoCapture.request();
@@ -5962,6 +6032,7 @@ const Sampler={
   },
 
   flipCamera(){
+    Haptics.light(); // v:v13.55 flip camera
     this.camFront = !this.camFront;
     const label = this.camFront ? '🤳 Front' : '📷 Rear';
     try { this.stopStream(); } catch(e){}
@@ -6598,7 +6669,7 @@ const Sampler={
     if(!v||!v.videoWidth||v.paused){App.toast('Camera warming up…');return;}
     const hex=this.currentHex;
     if(!hex||hex==='#888888')return;
-    if(navigator.vibrate) navigator.vibrate(12); // v:F1.8 Leica 12ms precision pulse
+    Haptics.medium(); // v:v13.55 shutter — replaces raw 12ms pulse
     this._shutterClick(); // v:F1.8 mechanical shutter audio
     // v406: direct-save to library immediately (restores v117 behaviour)
     const e=DS.makeEntry(hex,this.mode);
@@ -6681,7 +6752,7 @@ const Sampler={
       App.toast(`Queue full (${max}) — save or clear first`);
       return;
     }
-    if (navigator.vibrate) navigator.vibrate(10);  // v:F12.20 haptic
+    Haptics.light(); // v:v13.55 queue add
     this.pickQueue.push(hex);
     this.renderQueue();
     // v:F12.20 — start accent breathing once palette has ≥ 2 colours
@@ -7020,7 +7091,7 @@ const Sampler={
 
   toggleImmersiveMode() {
     // v:v13.23 — haptic fires immediately so button always feels responsive
-    if (navigator.vibrate) navigator.vibrate(12);
+    Haptics.light(); // v:v13.55 immersive toggle
     this._immersiveActive = !this._immersiveActive;
     let ov = document.getElementById('immersive-overlay');
     if (!ov) {
@@ -7265,7 +7336,7 @@ const Sampler={
             // Step 3: fade flash out — new colour is revealed as white dissolves
             flashEl.style.transition = 'opacity 0.38s ease-out';
             flashEl.style.opacity = '0';
-            if (navigator.vibrate) navigator.vibrate([25, 30, 25]);
+            Haptics.light(); // v:v13.55 rave colour flash
           }
           this._immersiveRaveRAF = requestAnimationFrame(tick);
         };
@@ -7889,7 +7960,7 @@ const ColorMath = {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
     if (typeof App !== 'undefined') App.toast('✓ ASE exported · open in Photoshop or InDesign');
-    if (navigator.vibrate) navigator.vibrate([8, 30, 8]);
+    Haptics.success(); // v:v13.55 ASE export
   },
 
 };
@@ -7993,6 +8064,16 @@ const FolderManager = {
 // ── v90: shared micro-haptic pulse on every copy action ───────────────────
 function _haptic() { try { navigator.vibrate && navigator.vibrate(10); } catch(e) {} }
 
+// v:v13.55 — Tiered Haptics Engine
+// Four semantic levels replace ad-hoc navigator.vibrate() calls throughout the app.
+// All methods guard navigator.vibrate for safety on non-vibrating devices.
+const Haptics = {
+  light()   { try { if(navigator.vibrate) navigator.vibrate(15); }           catch(e){} },
+  medium()  { try { if(navigator.vibrate) navigator.vibrate(40); }           catch(e){} },
+  success() { try { if(navigator.vibrate) navigator.vibrate([30, 60, 30]); } catch(e){} },
+  warning() { try { if(navigator.vibrate) navigator.vibrate([50, 50, 50]); } catch(e){} },
+};
+
 function _pCopy(btn) {
   // Pill copy: reads data-copy, shows ✓ feedback, haptic on success
   const val = btn.getAttribute('data-copy');
@@ -8010,7 +8091,7 @@ function _bCopy(btn) {
   const val = btn.getAttribute('data-copy');
   if (!val) return;
   navigator.clipboard?.writeText(val).then(() => {
-    _haptic();
+    Haptics.success(); // v:v13.55 copy hex
     btn.classList.add('copied');
     const orig = btn.textContent;
     btn.textContent = '✓';
@@ -8027,7 +8108,7 @@ function _cvRow(row) {
   const origText = valEl.innerHTML;
   const origIcon = iconEl.innerHTML;
   navigator.clipboard?.writeText(val).then(() => {
-    _haptic();
+    Haptics.success(); // v:v13.55 copy value row
     row.classList.add('cv-ok');
     valEl.innerHTML  = '<span style="color:var(--ok);font-weight:700">Copied ✓</span>';
     iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -8697,6 +8778,7 @@ const Library={
   del(id){
     // v:F1.12 iOS-safe confirm — two-tap replaces native confirm() which silently fails in PWA standalone
     App._confirm('Delete this colour?', () => {
+      Haptics.warning(); // v:v13.55 destructive action
       DS.remove(id);
       App.forceCloseOv();
       App.refresh();
@@ -8732,7 +8814,7 @@ const Library={
   async exportOne(id){
     // Web Share Level 2 (image file) → falls back to anchor download on desktop.
     const c=DS.get(id);if(!c)return;
-    if(navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
     if(!c.lab){const rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);}
     if(!c.hsl){const rgb=CS.hexToRgb(c.hex);c.hsl=CS.rgbToHsl(rgb.r,rgb.g,rgb.b);}
     if(!c.lrv&&c.lrv!==0){c.lrv=CS.lrv(c.lab);}
@@ -10740,7 +10822,7 @@ const Prompter={
     if(!t||t.startsWith('Select')){App.toast('Generate a prompt first');return}
     // Priority: native share with text as primary payload (works for Discord/MJ)
     if(navigator.share){
-      if(navigator.vibrate) navigator.vibrate([12,8,22]); // C: share triggered
+      Haptics.success(); // v:v13.55 share
       navigator.share({ title:'Midjourney Fabric & Wallpaper Prompt', text:t })
         .catch(err=>{
           // User cancelled or share failed  fall back to clipboard
@@ -11700,7 +11782,7 @@ const SwatchExport = {
   share() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select at least one colour'); return; }
-    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
     const hexes = sel.map(c => c.hex);
     const title = `${sel.length} Colour${sel.length>1?'s':''} Palette`;
     App._downloadPolaroidPalette(hexes, title);
@@ -11757,7 +11839,7 @@ const SwatchExport = {
     a.href = url; a.download = 'fraggle-palette.ase'; a.click();
     URL.revokeObjectURL(url);
     App.toast(`↓ ASE — ${sel.length} colour${sel.length>1?'s':''} · opens in Illustrator, Photoshop, InDesign`);
-    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
   },
 
   // v:F1.12 — Apple Color List (.clr) — macOS/iOS color picker export
@@ -11790,7 +11872,7 @@ const SwatchExport = {
     a.href = url; a.download = 'fraggle-palette.clr.json'; a.click();
     URL.revokeObjectURL(url);
     App.toast('↓ CLR JSON — importable in Sketch, Xcode, Figma tokens');
-    if (navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
   }
 };
 
@@ -12092,7 +12174,7 @@ const ColourGenerator = {
 
   exportCard() {
     if (!this.currentPalette) return;
-    if(navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
     // Rerouted to shared Polaroid palette layout for visual consistency.
     const aes = this.AESTHETICS[this.aesthetic];
     App._downloadPolaroidPalette(this.currentPalette, aes.name + ' Palette');
@@ -13445,7 +13527,7 @@ const PaletteBuilder = {
 
   exportPNG() {
     if (!this.colours.length) { App.toast('Add colours first'); return; }
-    if(navigator.vibrate) navigator.vibrate([10,6,35]);
+    Haptics.success(); // v:v13.55
     // Rerouted to shared Polaroid palette layout for visual consistency.
     App._downloadPolaroidPalette(this.colours.map(c => c.hex), 'Palette');
   },
@@ -13522,9 +13604,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v3';
+    const SW_CACHE = 'spectrum-v4';
     const swSrc = `
-const CACHE='spectrum-v3';
+const CACHE='spectrum-v4';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15589,7 +15671,7 @@ const AIColourName = {
 </script>
 
 <script>
-/* v:v13.54 — STANDALONE landscape detection — runs independently of all other
+/* v:v13.55 — STANDALONE landscape detection — runs independently of all other
    scripts, cannot be blocked by live-bar early-return or any other IIFE.
    Uses every available trigger: DOMContentLoaded, resize, orientationchange,
    matchMedia change, and screen.orientation.change (Android Chrome API). */
