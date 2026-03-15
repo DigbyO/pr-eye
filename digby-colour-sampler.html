@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.43 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.44 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.43</title>
+<title>Digby v13.44</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.43';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.44';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -120,7 +120,7 @@ a{color:var(--accent);text-decoration:none}
 /*  COMMON  */
 .card{margin:0 12px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .sec{padding:14px 16px 6px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;border-radius:var(--rs);font-family:var(--mono);font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:.07em;transition:all var(--tr);white-space:nowrap;min-height:36px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;border-radius:var(--rs);font-family:var(--mono);font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:.07em;transition:all var(--tr);white-space:nowrap;min-height:36px;touch-action:manipulation}
 .btn-p{background:var(--accent);color:#0c0c0c;font-weight:700}
 .btn-p:active{background:#d4b87a}
 .btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
@@ -3045,7 +3045,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.43</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.44</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5050,7 +5050,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.43</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.44</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -11115,7 +11115,7 @@ const SwatchExport = {
           <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
-        <button class="btn btn-s" style="width:100%;margin-top:2px" onclick="SwatchExport.downloadSREF()">↓ Palette Strip</button>
+        <button class="btn btn-s" style="width:100%;margin-top:2px;margin-bottom:8px" onclick="SwatchExport.downloadSREF()">↓ Palette Strip</button>
       </div>
     </div>`;
   },
@@ -11742,7 +11742,6 @@ const ColourGenerator = {
     App.toast('Building palette strip…');
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select at least one colour'); return; }
-    if (navigator.vibrate) navigator.vibrate([10, 6, 35]);
     const W = 1200, H = 180;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
