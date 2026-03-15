@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.59';  // v:v13.59 — premium settings + theme fix
+  const APP_VERSION = '13.61';  // v:v13.61 — premium dock SVG icons
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1264,6 +1264,22 @@ body.simple-mode .set-row-cvd{display:none!important}
 body.simple-mode .cvd-feature{display:none!important}
 /* Colour-blind simulation tool — Pro only */
 body.simple-mode .colour-blind-tool{display:none!important}
+/* v:v13.60 Camera: hide Freeze / 2× / Flip in standard mode — Pro only */
+body.simple-mode #freeze-btn,
+body.simple-mode #zoom2x-btn,
+body.simple-mode #flip-btn { display:none!important }
+/* v:v13.60 Auto Palette rainbow — draws attention in standard mode */
+body.simple-mode #auto-pal-btn {
+  background: linear-gradient(135deg,
+    #e03535 0%, #e07a20 20%, #d4c020 38%,
+    #3aaa48 55%, #2070d4 72%, #8030c8 100%);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55);
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+body.simple-mode #auto-pal-btn:active { opacity: .82; transform: scale(0.94); }
 /* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
 body:not(.design-pro-on) .pb-pro-btn{display:none!important}
@@ -1274,7 +1290,7 @@ body:not(.design-pro-on) .pro-only{display:none!important}
 body.design-pro-on .pro-only{display:revert!important}
 /* Pro Mode body class — ensures pro features are always shown when active */
 /* v438: .pb-pro-btn and .colour-blind-tool removed — gated by design-pro-on only */
-body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only{display:revert!important}
+body.pro-mode #btn-mode-wheel,body.pro-mode #btn-mode-up,body.pro-mode #wb-btn,body.pro-mode .set-row-cvd,body.pro-mode .cvd-feature,body.pro-mode .insp-advanced,body.pro-mode #manual-picker-section,body.pro-mode #lut-badge,body.pro-mode #lut-none-btn,body.pro-mode .pro-only,body.design-pro-on .pro-only,body.pro-mode #freeze-btn,body.pro-mode #zoom2x-btn,body.pro-mode #flip-btn{display:revert!important}
 /* design-pro-on exclusively controls Tailwind + CVD palette buttons */
 body.design-pro-on .pb-pro-btn{display:revert!important}
 body.design-pro-on .colour-blind-tool{display:revert!important}
@@ -1314,7 +1330,7 @@ body.active-tab-sampler #sampler-bottom-dock { display: flex; }
 }
 .sbd-btn:active { color: var(--accent); background: rgba(255,255,255,0.07); }
 .sbd-btn.on { color: var(--accent); }
-.sbd-icon { font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.sbd-icon { font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; }
 .sbd-label { font-size: 8px; text-transform: uppercase; letter-spacing: .055em; white-space: nowrap; }
 /* Pro-only dock items hidden until pro mode */
 .sbd-btn.pro-only { display: none !important; }
@@ -3425,46 +3441,97 @@ body.landscape-phone.active-tab-sampler #live-bar {
   <button class="sbd-btn" id="bar-upload-trigger" title="Upload photo"
           onclick="document.getElementById('bar-image-upload').click()" aria-label="Upload image">
     <span class="sbd-icon">
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-        <path d="M8 10V2M8 2L5 5M8 2L11 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12v1.5A1.5 1.5 0 003.5 15h9A1.5 1.5 0 0014 13.5V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- v:v13.61 Upload — photo frame + rising arrow -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="16" height="11" rx="2.5"/>
+        <path d="M2 14.5l4.5-5 3.5 3.5 3-3.5 5 5"/>
+        <circle cx="14.5" cy="10" r="1.2" fill="currentColor" stroke="none"/>
+        <line x1="10" y1="7" x2="10" y2="2"/>
+        <path d="M8 4l2-2 2 2"/>
       </svg>
     </span>
     <span class="sbd-label">Upload</span>
   </button>
   <button class="sbd-btn" id="live-export-btn" title="Quick Polaroid Export"
     onclick="(function(){const v=document.getElementById('cam-video');if(v&&v.videoWidth){const s=document.createElement('canvas');s.width=v.videoWidth;s.height=v.videoHeight;s.getContext('2d').drawImage(v,0,0);AutoPalette._camSnap=s;}const _t=Sampler.activeExportTarget;const _q=Sampler.pickQueue&&Sampler.pickQueue.length?Sampler.pickQueue:null;const _hexes=_t?[_t,...(_q||[]).filter(h=>h!==_t)]:_q||[Sampler.currentHex];if(_hexes[0]){AutoPalette.exportPolaroid(_hexes)}else{App.toast('Tap a swatch to select export target')}})()">
-    <span class="sbd-icon">📸</span>
+    <span class="sbd-icon">
+      <!-- v:v13.61 Polaroid — instant camera body, lens, viewfinder -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1.5" y="6.5" width="17" height="11.5" rx="2.5"/>
+        <path d="M7.5 6.5V5a2 2 0 012-2h1a2 2 0 012 2v1.5"/>
+        <circle cx="10" cy="12.25" r="3.5"/>
+        <circle cx="10" cy="12.25" r="1.5"/>
+        <rect x="13.5" y="8" width="2.5" height="2" rx="0.6" fill="currentColor" stroke="none" opacity=".6"/>
+      </svg>
+    </span>
     <span class="sbd-label">Polaroid</span>
   </button>
   <button class="sbd-btn pro-only" id="live-strip-btn" title="Film Strip export"
           onclick="App.exportPaletteStrip()">
-    <span class="sbd-icon">🎞</span>
+    <span class="sbd-icon">
+      <!-- v:v13.61 Strip — film strip with sprocket holes -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="6" width="18" height="8" rx="1.5"/>
+        <rect x="2.5" y="3.5" width="2.5" height="3" rx="0.6"/>
+        <rect x="7.5" y="3.5" width="2.5" height="3" rx="0.6"/>
+        <rect x="12.5" y="3.5" width="2.5" height="3" rx="0.6"/>
+        <rect x="2.5" y="13.5" width="2.5" height="3" rx="0.6"/>
+        <rect x="7.5" y="13.5" width="2.5" height="3" rx="0.6"/>
+        <rect x="12.5" y="13.5" width="2.5" height="3" rx="0.6"/>
+        <line x1="7.5" y1="6" x2="7.5" y2="14"/>
+        <line x1="12.5" y1="6" x2="12.5" y2="14"/>
+      </svg>
+    </span>
     <span class="sbd-label">Strip</span>
   </button>
   <!-- v:F12.37 Scene button removed — palette numbering replaces scene capture -->
   <button class="sbd-btn" id="bar-picker-btn" title="Open in Colour Picker"
           onclick="Sampler.openInPicker()" aria-label="Open in Colour Picker">
-    <span class="sbd-icon"><!-- v:F12.36 premium picker icon -->
+    <span class="sbd-icon">
+      <!-- v:v13.61 Picker — precision target reticle with colour dot -->
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <circle cx="10" cy="10" r="3.5"/>
+        <circle cx="10" cy="10" r="7.5"/>
+        <circle cx="10" cy="10" r="3"/>
         <line x1="10" y1="1" x2="10" y2="5.5"/>
         <line x1="10" y1="14.5" x2="10" y2="19"/>
         <line x1="1" y1="10" x2="5.5" y2="10"/>
         <line x1="14.5" y1="10" x2="19" y2="10"/>
+        <circle cx="10" cy="10" r="1.2" fill="currentColor" stroke="none"/>
       </svg>
     </span>
     <span class="sbd-label">Picker</span>
   </button>
   <button class="sbd-btn" id="live-wb-btn" title="White Balance"
           onclick="Sampler.toggleWBDropdown()">
-    <span class="sbd-icon" style="font-size:11px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono)">WB</span>
+    <span class="sbd-icon">
+      <!-- v:v13.61 WB — colour temperature sun with rays -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="10" cy="10" r="3.5"/>
+        <line x1="10" y1="1.5" x2="10" y2="4"/>
+        <line x1="10" y1="16" x2="10" y2="18.5"/>
+        <line x1="1.5" y1="10" x2="4" y2="10"/>
+        <line x1="16" y1="10" x2="18.5" y2="10"/>
+        <line x1="4.1" y1="4.1" x2="5.9" y2="5.9"/>
+        <line x1="14.1" y1="14.1" x2="15.9" y2="15.9"/>
+        <line x1="15.9" y1="4.1" x2="14.1" y2="5.9"/>
+        <line x1="5.9" y1="14.1" x2="4.1" y2="15.9"/>
+      </svg>
+    </span>
     <span class="sbd-label">Balance</span>
   </button>
   <!-- v:v13.18 Immersive Mode — Design Pro only -->
   <button class="sbd-btn pro-only" id="live-imm-btn" title="Immersive Presentation Mode"
           onclick="Sampler.toggleImmersiveMode()">
-    <span class="sbd-icon" style="font-size:16px">🎬</span>
+    <span class="sbd-icon">
+      <!-- v:v13.61 Immersive — widescreen cinema frame with expand corners -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1.5" y="5" width="17" height="10" rx="2"/>
+        <path d="M5.5 9V7H7.5"/>
+        <path d="M14.5 9V7H12.5"/>
+        <path d="M5.5 11v2h2"/>
+        <path d="M14.5 11v2h-2"/>
+      </svg>
+    </span>
     <span class="sbd-label">Immersive</span>
   </button>
 </div>
@@ -13755,9 +13822,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v7';
+    const SW_CACHE = 'spectrum-v9';
     const swSrc = `
-const CACHE='spectrum-v7';
+const CACHE='spectrum-v9';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
