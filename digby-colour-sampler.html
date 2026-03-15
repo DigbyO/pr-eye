@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.44 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.45 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.44</title>
+<title>Digby v13.45</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.44';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.45';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3045,7 +3045,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.44</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.45</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5050,7 +5050,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.44</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.45</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -11115,7 +11115,6 @@ const SwatchExport = {
           <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
         <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
-        <button class="btn btn-s" style="width:100%;margin-top:2px;margin-bottom:8px" onclick="SwatchExport.downloadSREF()">↓ Palette Strip</button>
       </div>
     </div>`;
   },
