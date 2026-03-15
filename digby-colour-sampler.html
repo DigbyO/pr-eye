@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.57';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.59';  // v:v13.59 — premium settings + theme fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -43,7 +43,7 @@
   // v:v13.54 — also sync <title> and <meta description> so they never lag behind
   document.addEventListener('DOMContentLoaded', function() {
     var vStr = 'Digby v' + APP_VERSION.replace('F','');
-    ['settings-ver-a','settings-ver-b'].forEach(function(id) {
+    ['settings-ver-a','settings-ver-a-badge','settings-ver-b'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.textContent = vStr;
     });
@@ -300,8 +300,8 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   height: 72%;
   background: linear-gradient(to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.22) 35%,
-    rgba(0, 0, 0, 0.62) 100%
+    rgba(0, 0, 0, 0.08) 45%,
+    rgba(0, 0, 0, 0.36) 100%
   );
   border-radius: 0 0 14px 14px;
   pointer-events: none;
@@ -871,12 +871,43 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .shop-banner a{font-family:var(--sharpie);font-size:20px;color:var(--accent)}
 .shop-banner p{font-size:10px;color:var(--muted);margin-top:4px}
 
-/* settings */
+/* v:v13.59 — PREMIUM SETTINGS ─────────────────────────── */
+/* Section header — gold bar accent */
+.sec{padding:20px 16px 8px;font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:700;font-family:var(--mono);display:flex;align-items:center;gap:8px}
+.sec::before{content:'';display:inline-block;width:3px;height:12px;background:var(--accent);border-radius:2px;flex-shrink:0}
+/* Overlay section header (same accent treatment) */
+.set-sec{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:18px 0 7px;display:flex;align-items:center;gap:7px}
+.set-sec::before{content:'';display:inline-block;width:3px;height:11px;background:var(--accent);border-radius:2px;flex-shrink:0}
+/* Settings rows */
 .set-row{display:flex;align-items:center;justify-content:space-between;padding:14px max(20px,env(safe-area-inset-right,20px)) 14px max(20px,env(safe-area-inset-left,20px));border-bottom:1px solid var(--border);gap:10px}
 .set-row:last-child{border-bottom:none}
-.set-l{font-size:13px}
-.set-sub{font-size:10px;color:var(--muted);margin-top:2px}
-.set-sec{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:14px 2px 6px}
+.set-l{font-size:13px;font-weight:600;letter-spacing:.01em}
+.set-sub{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+/* Signature header at top of settings tab */
+.settings-hero-wrap{padding:20px 16px 8px;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.settings-hero-title{font-family:var(--sharpie);font-size:30px;color:var(--text);letter-spacing:-.01em;line-height:1}
+.settings-hero-ver{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.3);padding:3px 8px;border-radius:10px;text-transform:uppercase;white-space:nowrap}
+/* Shop hero card */
+.shop-hero{margin:4px 12px 8px;border-radius:16px;overflow:hidden;border:1px solid rgba(200,169,110,.25);background:var(--bg)}
+.shop-hero-palette{display:flex;height:38px;flex-shrink:0}
+.shop-hero-palette span{flex:1;display:block}
+.shop-hero-body{padding:14px 16px 16px;background:linear-gradient(135deg,rgba(26,18,0,.0),rgba(10,8,0,.95) 50%)}
+.shop-hero-name{font-family:var(--sharpie);font-size:22px;color:var(--accent);line-height:1.1}
+.shop-hero-sub{font-size:10px;color:rgba(200,169,110,.6);margin:4px 0 12px;letter-spacing:.04em;line-height:1.5}
+.shop-hero-btn{display:block;width:100%;background:var(--accent);color:#0c0c0c;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:8px;padding:12px;text-align:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .12s,transform .1s}
+.shop-hero-btn:active{background:#d4b87a;transform:scale(.98)}
+/* Network status dot */
+.net-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;flex-shrink:0;box-shadow:0 0 6px var(--ok)}
+.net-dot.offline{background:var(--muted);box-shadow:none}
+/* Danger outlined — for irreversible destructive actions */
+.btn-d-outline{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.btn-d-outline:active{background:rgba(192,57,43,.12);transform:scale(.97)}
+/* card tighter inside settings tab */
+#mod-settings .card{margin:0 12px 4px;border-radius:14px}
+/* Brand footer in settings */
+.settings-footer{padding:24px 16px 12px;text-align:center}
+.settings-footer-name{font-family:var(--sharpie);font-size:18px;color:var(--accent);letter-spacing:.02em;margin-bottom:4px}
+.settings-footer-by{font-size:9px;color:var(--faint);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase}
 #set-body{padding:0 24px 32px}
 
 /*  COLOUR GENERATOR SWATCHES  */
@@ -3239,39 +3270,61 @@ body.landscape-phone.active-tab-sampler #live-bar {
   </div>
 
 
-  <!--  SETTINGS  -->
+  <!--  SETTINGS  v:v13.59 premium redesign -->
   <div class="module" id="mod-settings">
-    <div class="mod-scroll" style="padding:12px">
+    <div class="mod-scroll">
+
+      <!-- ── Signature header ── -->
+      <div class="settings-hero-wrap">
+        <div class="settings-hero-title">Settings</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.58</div>
+      </div>
+
+      <!-- ── Shop hero — brand moment ── -->
+      <div class="shop-hero">
+        <div class="shop-hero-palette">
+          <span style="background:#c0392b"></span>
+          <span style="background:#c8a96e"></span>
+          <span style="background:#2e7d52"></span>
+          <span style="background:#2255a4"></span>
+          <span style="background:#7b3fa0"></span>
+          <span style="background:#d4c46a"></span>
+          <span style="background:#c07040"></span>
+          <span style="background:#3a6fa0"></span>
+          <span style="background:#8a4a38"></span>
+        </div>
+        <div class="shop-hero-body">
+          <div class="shop-hero-name">digby.shop</div>
+          <div class="shop-hero-sub">Print your palette as wall art, fabric &amp; print-on-demand products</div>
+          <button class="shop-hero-btn" onclick="App.openLink('https://digby.shop')">Visit digby.shop &#8599;</button>
+        </div>
+      </div>
+
+      <!-- ── Live Scanner ── -->
       <div class="sec">Live Scanner</div>
       <div class="card" style="padding:0 12px 12px">
         <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0 10px">
-        <div><div class="set-l">Display Mode</div><div class="set-sub">Choose what the floating scanner shows</div></div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-          <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
-          <button class="live-disp-btn" data-ld="hex"     onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
-          <button class="live-disp-btn" data-ld="rgb"     onclick="App.setLiveDisplay('rgb')">&#128308;<br>RGB</button>
-          <button class="live-disp-btn" data-ld="hsl"     onclick="App.setLiveDisplay('hsl')">&#127752;<br>HSL</button>
-          <button class="live-disp-btn" data-ld="kelvin"  onclick="App.setLiveDisplay('kelvin')">&#127777;<br>Kelvin</button>
-          <button class="live-disp-btn" data-ld="lrv"     onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
-          <button class="live-disp-btn" data-ld="fb" onclick="App.setLiveDisplay('fb')" style="grid-column:span 1">&#127968;<br>F&amp;B</button>
-          <button class="live-disp-btn" data-ld="lg" onclick="App.setLiveDisplay('lg')" style="grid-column:span 2">&#127808;<br>Little Greene</button>
-        </div>
+          <div><div class="set-l">Display Mode</div><div class="set-sub">What the floating scanner shows while sampling</div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')">&#127912;<br>Pantone</button>
+            <button class="live-disp-btn" data-ld="hex"    onclick="App.setLiveDisplay('hex')">&#11043;<br>HEX+RGB</button>
+            <button class="live-disp-btn" data-ld="rgb"    onclick="App.setLiveDisplay('rgb')">&#128308;<br>RGB</button>
+            <button class="live-disp-btn" data-ld="hsl"    onclick="App.setLiveDisplay('hsl')">&#127752;<br>HSL</button>
+            <button class="live-disp-btn" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')">&#127777;<br>Kelvin</button>
+            <button class="live-disp-btn" data-ld="lrv"    onclick="App.setLiveDisplay('lrv')">&#9728;<br>LRV</button>
+            <button class="live-disp-btn" data-ld="fb"     onclick="App.setLiveDisplay('fb')">&#127968;<br>F&amp;B</button>
+            <button class="live-disp-btn" data-ld="lg"     onclick="App.setLiveDisplay('lg')">&#127808;<br>Little Greene</button>
+            <button class="live-disp-btn" disabled style="opacity:.2;pointer-events:none;border-style:dashed;cursor:default"></button>
+          </div>
         </div>
       </div>
-      <div class="sec">Library</div>
-      <div class="card" style="padding:0 12px">
-        <div class="set-row" id="set-lib-count"></div>
-        <div class="set-row"><div><div class="set-l">Backup Library</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
-        <div class="set-row"><div><div class="set-l">Restore Library</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input-st').click()">Restore JSON</button></div>
-        <input type="file" id="imp-input-st" accept=".json" style="display:none" onchange="App.importLib(this)">
-        <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub">Cannot be undone</div></div><button class="btn btn-d btn-sm" onclick="App.clearLib()">Clear</button></div>
-        <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
-      </div>
+
+      <!-- ── Display ── -->
       <div class="sec">Display</div>
       <div class="card" style="padding:0 12px">
         <div class="set-row" style="align-items:center;gap:6px">
           <div style="flex:1"><div class="set-l">Theme</div><div class="set-sub">Light or Dark appearance</div></div>
-          <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">☀ Light</button>
+          <button class="btn btn-s btn-sm" id="settings-theme-btn" onclick="Theme.toggle()">&#9728; Light</button>
         </div>
         <div class="set-row" style="align-items:center;gap:6px">
           <div style="flex:1"><div class="set-l">Pro Mode</div><div class="set-sub">Unlock Prompter tab and advanced tools</div></div>
@@ -3282,9 +3335,8 @@ body.landscape-phone.active-tab-sampler #live-bar {
           </div>
         </div>
         <div class="set-row" style="align-items:center;gap:6px">
-          <div style="flex:1"><div class="set-l">Design Pro Mode</div><div class="set-sub">Unlock Wall &amp; Trim export, technical exports, and advanced tools</div></div>
+          <div style="flex:1"><div class="set-l">Design Pro Mode</div><div class="set-sub">Wall &amp; Trim export, Tailwind, Swift, CSS Variables</div></div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Off</span>
             <div style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
               <input type="checkbox" id="settings-pro-checkbox-static"
                 style="opacity:0;width:0;height:0;position:absolute"
@@ -3293,16 +3345,15 @@ body.landscape-phone.active-tab-sampler #live-bar {
                 onclick="var cb=document.getElementById('settings-pro-checkbox-static');cb.checked=!cb.checked;toggleProMode(cb);"
                 style="width:40px;height:22px;cursor:pointer;pointer-events:auto"></div>
             </div>
-            <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Pro</span>
           </div>
         </div>
         <div class="set-row">
-          <div style="flex:1"><div class="set-l">Polaroid Export Labels</div><div class="set-sub">Text shown on polaroid swatches</div></div>
+          <div style="flex:1"><div class="set-l">Polaroid Labels</div><div class="set-sub">Text shown on exported swatches</div></div>
           <div class="seg-ctrl" style="margin-left:8px">
             <div class="seg-btn" id="sl-both"     data-mode="both"     onclick="App.setSwatchLabel('both')">Both</div>
             <div class="seg-btn" id="sl-name"     data-mode="name"     onclick="App.setSwatchLabel('name')">Name</div>
             <div class="seg-btn" id="sl-hex"      data-mode="hex"      onclick="App.setSwatchLabel('hex')">HEX</div>
-            <div class="seg-btn" id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">📍 GPS</div>
+            <div class="seg-btn" id="sl-location" data-mode="location" onclick="App.setSwatchLabel('location')">&#128205; GPS</div>
             <div class="seg-btn" id="sl-none"     data-mode="none"     onclick="App.setSwatchLabel('none')">None</div>
           </div>
         </div>
@@ -3316,25 +3367,53 @@ body.landscape-phone.active-tab-sampler #live-bar {
           </label>
         </div>
         <div class="set-row set-row-cvd"><div><div class="set-l">Colour Blindness</div><div class="set-sub">Simulate CVD conditions</div></div>
-          <button class="btn btn-s btn-sm" onclick="CVDSim.open()">👁 Simulate</button></div>
+          <button class="btn btn-s btn-sm" onclick="CVDSim.open()">&#128065; Simulate</button></div>
       </div>
 
+      <!-- ── Library ── -->
+      <div class="sec">Library</div>
+      <div class="card" style="padding:0 12px">
+        <div class="set-row" id="set-lib-count"></div>
+        <div class="set-row"><div><div class="set-l">Backup</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
+        <div class="set-row"><div><div class="set-l">Restore</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input-st').click()">Restore JSON</button></div>
+        <input type="file" id="imp-input-st" accept=".json" style="display:none" onchange="App.importLib(this)">
+        <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
+        <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub">Permanently remove all saved colours</div></div><button class="btn btn-sm btn-d-outline" onclick="App.clearLib()">Clear</button></div>
+      </div>
+
+      <!-- ── Technical Exports (Design Pro) ── -->
       <div class="sec pro-only">Technical Exports</div>
       <div class="card pro-only" style="padding:0 12px">
-        <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy all library colours as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
+        <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy library as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
         <div class="set-row"><div><div class="set-l">Swift UIColor</div><div class="set-sub">Copy as Swift UIColor extensions</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsSwift()">Copy</button></div>
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as :root CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
+
+      <!-- ── Network ── -->
+      <div class="sec">Network</div>
+      <div class="card" style="padding:0 12px">
+        <div class="set-row" style="align-items:center">
+          <div class="set-l">Status</div>
+          <div style="display:flex;align-items:center;font-size:11px;color:var(--muted);font-family:var(--mono)">
+            <span class="net-dot" id="settings-net-dot"></span>
+            <span id="settings-net-label">Checking&hellip;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.57</span></div>
-        <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.58</span></div>
+        <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
-      <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
-        <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
-        <button class="btn btn-p" style="width:100%;font-size:14px;padding:13px" onclick="App.openLink('https://digby.shop')"> Visit digby.shop</button>
+
+      <!-- ── Brand footer ── -->
+      <div class="settings-footer">
+        <div class="settings-footer-name">Digby's Colour Sampler</div>
+        <div class="settings-footer-by">Made by Digby Oldridge &middot; 2026</div>
       </div>
+
     </div>
   </div>
 
@@ -4815,9 +4894,22 @@ const App={
     if(sw){ sw.className=proVal?'sw on':'sw'; }
     const cbStatic=document.getElementById('settings-pro-checkbox-static');
     if(cbStatic) cbStatic.checked = proVal;
-    // Sync theme button
-    const tb=document.getElementById('settings-theme-btn');
-    if(tb) tb.textContent = document.body.classList.contains('light-mode') ? '🌙 Dark' : '☀ Light';
+    // Sync theme button (body.light-mode class now set by Theme.apply)
+    const isDk = !document.body.classList.contains('light-mode');
+    document.querySelectorAll('#settings-theme-btn').forEach(b => {
+      b.textContent = isDk ? '\u2600 Light' : '\u263E Dark';
+    });
+    // Sync network status dot + label
+    const nd = document.getElementById('settings-net-dot');
+    const nl = document.getElementById('settings-net-label');
+    const isOnline = App && App.online;
+    if (nd) nd.className = 'net-dot' + (isOnline ? '' : ' offline');
+    if (nl) nl.textContent = isOnline ? 'Online \u00B7 API enriched' : 'Offline \u00B7 local only';
+    // Sync version badge in settings tab
+    ['settings-ver-a','settings-ver-a-badge','settings-ver-b'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { var v = typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''; if(v) el.textContent = 'v' + v; }
+    });
     // Sync swatch label seg-ctrl — v:v13.9 querySelectorAll for all instances
     document.querySelectorAll('.seg-btn[data-mode]').forEach(el=>{
       el.classList.toggle('on', el.dataset.mode === State.swatchLabel);
@@ -4982,10 +5074,6 @@ const App={
     const ld = (State.liveDisplay==='paint') ? 'fb' : (State.liveDisplay||'pantone');
     this.openOv(`<div id="set-body">
       <div class="ov-title">Settings</div>
-      <div class="shop-banner" style="margin:0 0 12px">
-        <a href="https://digby.shop" target="_blank">digby.shop</a>
-        <p>Print your palette creations as products</p>
-      </div>
       <div class="set-sec">Live Scanner</div>
       <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0">
         <div><div class="set-l">Display Mode</div><div class="set-sub">What the floating scanner shows while sampling</div></div>
@@ -4996,8 +5084,9 @@ const App={
         <button class="live-disp-btn ${ld=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon">&#127752;</span>HSL</button>
         <button class="live-disp-btn ${ld=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon">&#127777;</span>Kelvin</button>
         <button class="live-disp-btn ${ld=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon">&#9728;</span>LRV</button>
-        <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')" style="grid-column:span 1"><span class="ld-icon">&#127968;</span>F&amp;B</button>
-        <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')" style="grid-column:span 2"><span class="ld-icon">&#127808;</span>Little Greene</button>
+        <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon">&#127968;</span>F&amp;B</button>
+        <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon">&#127808;</span>Little Greene</button>
+        <button class="live-disp-btn" disabled style="opacity:.2;pointer-events:none;border-style:dashed;cursor:default"><span class="ld-icon"></span></button>
         </div>
       </div>
       <div class="set-sec">Display</div>
@@ -5325,7 +5414,12 @@ const App={
       <div class="set-row"><div><div class="set-l" style="color:var(--danger)">Clear All</div><div class="set-sub" id="lib-size-info">Cannot be undone</div></div><button class="btn btn-d btn-sm" onclick="App.clearLib()">Clear</button></div>
       <div class="set-row"><div><div class="set-l">Undo Delete</div><div class="set-sub">Restore last deleted colour</div></div><button class="btn btn-s btn-sm" onclick="DS.undoRemove()">Undo</button></div>
       <div class="set-sec">Network</div>
-      <div class="set-row"><div class="set-l">Status</div><span style="font-size:11px;color:var(--muted)">${this.online?'Online  API enrichment active':'Offline  local data only'}</span></div>
+      <div class="set-row" style="align-items:center"><div class="set-l">Status</div>
+        <div style="display:flex;align-items:center;font-size:11px;color:var(--muted);font-family:var(--mono)">
+          <span class="net-dot${this.online?'':' offline'}"></span>
+          <span>${this.online?'Online &middot; API enriched':'Offline &middot; local only'}</span>
+        </div>
+      </div>
       <div class="set-sec" style="display:${state.isProMode?'block':'none'}" id="tech-exports-sec">Technical Exports</div>
       <div id="tech-exports-card" style="display:${state.isProMode?'block':'none'}">
         <div class="set-row"><div><div class="set-l">Tailwind CSS</div><div class="set-sub">Copy library as Tailwind theme extension</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsTailwind()">Copy</button></div>
@@ -5333,18 +5427,33 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.57</span></div>
-      <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
-      <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
-      <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
-      <div class="set-row"><div><div class="set-l">Phone</div><div class="set-sub"><a href="tel:+447879403618" style="color:var(--accent)">+44 7879 403618</a></div></div></div>
-      <div style="margin-top:12px;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
-        <div style="font-family:var(--sharpie);font-size:24px;color:var(--accent);margin-bottom:4px">digby.shop</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Print your palette creations as wall art,<br>fabric samples &amp; print-on-demand products</div>
-        <button class="btn btn-p" style="width:100%;font-size:14px;padding:13px"
-          onclick="App.openLink('https://digby.shop');App.forceCloseOv()">
-           Visit digby.shop
-        </button>
+      <div class="set-row">
+        <div class="set-l">Version</div>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.58</span>
+      </div>
+      <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
+      <!-- Shop hero at the bottom — premium brand close -->
+      <div class="shop-hero" style="margin:16px 0 0">
+        <div class="shop-hero-palette">
+          <span style="background:#c0392b"></span>
+          <span style="background:#c8a96e"></span>
+          <span style="background:#2e7d52"></span>
+          <span style="background:#2255a4"></span>
+          <span style="background:#7b3fa0"></span>
+          <span style="background:#d4c46a"></span>
+          <span style="background:#c07040"></span>
+          <span style="background:#3a6fa0"></span>
+          <span style="background:#8a4a38"></span>
+        </div>
+        <div class="shop-hero-body">
+          <div class="shop-hero-name">digby.shop</div>
+          <div class="shop-hero-sub">Print your palette as wall art, fabric &amp; print-on-demand products</div>
+          <button class="shop-hero-btn" onclick="App.openLink('https://digby.shop');App.forceCloseOv()">Visit digby.shop &#8599;</button>
+        </div>
+      </div>
+      <div style="padding:20px 0 8px;text-align:center">
+        <div style="font-family:var(--sharpie);font-size:16px;color:var(--accent);letter-spacing:.02em;margin-bottom:3px">Digby's Colour Sampler</div>
+        <div style="font-size:9px;color:var(--faint);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase">Made by Digby Oldridge &middot; 2026</div>
       </div>
     </div>`);
     setTimeout(initDesignProToggle, 0); // v132: sync Design Pro toggle state after overlay injects HTML
@@ -6450,17 +6559,17 @@ const Sampler={
     const sEl=document.getElementById('live-secondary');
     if(pEl) pEl.textContent=primary;
     if(sEl) sEl.textContent=secondary;
-    // v:v13.57 — glow on swatch + adaptive text via .live-light class
+    // v:v13.58 — declare lrvReal+lch first (fixes TDZ crash that broke LRV/LCH display)
+    const lch=CS.rgbToLch(r,g,b);
+    const lrvReal=CS.lrvLinear(r,g,b);
+    // glow on swatch + adaptive text via .live-light class
     if (_sw) {
       _sw.style.boxShadow = '0 0 14px 4px ' + hex
         + ', 0 4px 18px rgba(0,0,0,.55)'
         + ', 0 0 0 1px rgba(255,255,255,.12)';
-      // Adaptive contrast: dark text on pale colours (LRV > 60), white on dark
       _sw.classList.toggle('live-light', lrvReal > 60);
     }
     // v:F1.8 — populate LRV/LCH band and undertone on swatch
-    const lch=CS.rgbToLch(r,g,b);
-    const lrvReal=CS.lrvLinear(r,g,b);
     const lrvLchEl=document.getElementById('live-lrv-lch');
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
@@ -13646,9 +13755,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v6';
+    const SW_CACHE = 'spectrum-v7';
     const swSrc = `
-const CACHE='spectrum-v6';
+const CACHE='spectrum-v7';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -13744,12 +13853,22 @@ const Theme = {
       const [k, val] = v.split(':').map(s => s.trim());
       if (k && val) root.style.setProperty(k, val);
     });
+    // v:v13.59 — toggle body class so CSS & JS can detect current theme
+    document.body.classList.toggle('light-mode', mode === 'light');
     // Cam canvas bg
     document.querySelectorAll('#cam-canvas,#upload-canvas').forEach(c => {
       c.style.background = mode === 'light' ? '#e8e4de' : '#000';
     });
-    const btn = document.getElementById('theme-toggle-btn');
-    if (btn) { btn.textContent = mode === 'dark' ? '☀ Light' : '☾ Dark'; }
+    // Sync ALL theme buttons (top bar + both settings panels)
+    const isDark = mode === 'dark';
+    const topBtn = document.getElementById('theme-toggle-btn');
+    if (topBtn) topBtn.textContent = isDark ? '\u2600 Light' : '\u263E Dark';
+    document.querySelectorAll('#settings-theme-btn').forEach(b => {
+      b.textContent = isDark ? '\u2600 Light' : '\u263E Dark';
+    });
+    // Update settings net dot
+    const nd = document.getElementById('settings-net-dot');
+    if (nd) nd.className = 'net-dot' + (App && App.online ? '' : ' offline');
     try { localStorage.setItem('spectrum_theme', mode); } catch(e) {}
   }
 };
