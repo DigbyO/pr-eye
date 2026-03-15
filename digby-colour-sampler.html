@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.41 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.42 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.41</title>
+<title>Digby v13.42</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +18,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.41';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.42';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3044,7 +3044,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.5</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.42</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -4634,8 +4634,11 @@ const App={
       const btn = document.getElementById('share-native-img-btn');
       if(btn) btn.onclick = async()=>{
         try{
-          const res = await fetch(pngDataUrl);
-          const blob = await res.blob();
+          // v:v13.42 sync b64→blob (preserve user-gesture context)
+          const _b64s=pngDataUrl.split(',')[1], _bins=atob(_b64s);
+          const _u8s=new Uint8Array(_bins.length);
+          for(let _i=0;_i<_bins.length;_i++) _u8s[_i]=_bins.charCodeAt(_i);
+          const blob=new Blob([_u8s],{type:'image/png'});
           const file = new File([blob], `${title}.png`, {type:'image/png'});
           await navigator.share({title, text, files:[file]});
           App.closeShare();
@@ -5046,7 +5049,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.5</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.42</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -8558,8 +8561,11 @@ const Library={
 
     // Try native file share (iOS Safari 15+, Android Chrome 75+)
     const tryNativeShare = async () => {
-      const res  = await fetch(pngDataUrl);
-      const blob = await res.blob();
+      // v:v13.42 sync b64→blob (preserve user-gesture activation context)
+      const _b64e=pngDataUrl.split(',')[1], _bine=atob(_b64e);
+      const _u8e=new Uint8Array(_bine.length);
+      for(let _i=0;_i<_bine.length;_i++) _u8e[_i]=_bine.charCodeAt(_i);
+      const blob=new Blob([_u8e],{type:'image/png'});
       const file = new File([blob], filename, {type:'image/png'});
       if (navigator.canShare && navigator.canShare({files:[file]})) {
         await navigator.share({
@@ -11750,9 +11756,9 @@ const ColourGenerator = {
     });
     const _ts2 = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
     const filename = 'digby-strip-' + _ts2 + '.png';
-    // v:v13.38 — Web Share API (iOS PWA) → anchor fallback (desktop)
-    // Mirrors exportPolaroid() pattern. Plain a.click() is silently
-    // blocked in iOS Safari PWA; fetch→blob→File→navigator.share works.
+    // v:v13.42 — sync base64→blob preserves user-gesture activation context
+    // so navigator.share() is reached before the gesture expires on Chrome/Safari.
+    // (await fetch(dataUrl) was breaking the activation window on Android & iOS.)
     let pngDataUrl;
     try { pngDataUrl = canvas.toDataURL('image/png'); }
     catch(e) { App.toast('Export failed — canvas error'); return; }
@@ -11763,8 +11769,12 @@ const ColourGenerator = {
       App.toast('Palette strip downloaded ✓');
     };
     try {
-      const res  = await fetch(pngDataUrl);
-      const blob = await res.blob();
+      // Sync conversion — no await, no broken gesture context
+      const _b64 = pngDataUrl.split(',')[1];
+      const _bin = atob(_b64);
+      const _u8  = new Uint8Array(_bin.length);
+      for (let _i = 0; _i < _bin.length; _i++) _u8[_i] = _bin.charCodeAt(_i);
+      const blob = new Blob([_u8], { type: 'image/png' });
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Digby Palette Strip' });
@@ -15058,8 +15068,12 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       App.toast('Polaroid exported ✓');
     };
     try {
-      const res  = await fetch(pngDataUrl);
-      const blob = await res.blob();
+      // v:v13.42 — sync base64→blob to preserve user-gesture activation
+      const _b64 = pngDataUrl.split(',')[1];
+      const _bin = atob(_b64);
+      const _u8  = new Uint8Array(_bin.length);
+      for (let _i = 0; _i < _bin.length; _i++) _u8[_i] = _bin.charCodeAt(_i);
+      const blob = new Blob([_u8], { type: 'image/png' });
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Digby Palette' });
