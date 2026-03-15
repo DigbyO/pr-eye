@@ -3,14 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=5">
+<script>
+  // v:v13.48 — lock zoom in PWA standalone to prevent iOS rotation scale artifacts
+  (function(){
+    var sa = window.navigator.standalone || window.matchMedia('(display-mode:standalone)').matches;
+    if (sa) {
+      var vp = document.querySelector('meta[name="viewport"]');
+      if (vp) vp.content = 'width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover';
+    }
+  })();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.46 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.48 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.46</title>
+<title>Digby v13.48</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -18,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.46';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.48';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1306,8 +1316,9 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
 @media (orientation: landscape) and (max-height: 500px) {
   :root { --tab-h: 0px; --landscape-rail: 56px; }
 
-  /* shift app content right by rail width */
-  #app { padding-left: var(--landscape-rail); box-sizing: border-box; }
+  /* Shift top bar and content area right — #app stays untouched */
+  #top     { margin-left: var(--landscape-rail); }
+  #modules { margin-left: var(--landscape-rail); }
 
   /* tabs become a vertical icon rail on the left */
   #tabs {
@@ -1339,9 +1350,10 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
   .tab::after {
     bottom: unset; top: 15%; left: auto;
     right: 0; width: 2px; height: 70%;
-    transform: scaleX(0);
+    transform: scaleY(0);
+    transition: transform var(--tr);
   }
-  .tab.on::after { transform: scaleX(1); }
+  .tab.on::after { transform: scaleY(1); }
 
   /* toast above safe area only (no tab bar below) */
   #toast { bottom: calc(20px + var(--safe-bottom)); }
@@ -3100,7 +3112,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.46</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.48</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5105,7 +5117,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.46</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.48</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -11524,9 +11536,8 @@ const SwatchExport = {
   async download() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select at least one colour'); return; }
-    if (navigator.vibrate) navigator.vibrate([10,6,35]);
     const title = `${sel.length} Colour${sel.length > 1 ? 's' : ''}`;
-    // All layouts (including polaroids) go through renderToCanvas so bgColor is respected
+    App.toast('Building export…');
     await Promise.all([
       document.fonts.load('400 12px "Permanent Marker"'),
       document.fonts.load('400 10px "Space Mono"')
@@ -11534,15 +11545,42 @@ const SwatchExport = {
     await document.fonts.ready.catch(() => {});
     const { w, h } = this.getCanvasSize();
     const canvas = document.createElement('canvas');
-    canvas.width = w * 2; canvas.height = h * 2; // @2× for crisp export
+    canvas.width = w * 2; canvas.height = h * 2;
     const ctx2 = canvas.getContext('2d');
     ctx2.scale(2, 2);
     this.renderToCanvas(ctx2, w, h);
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = `swatch-${Date.now()}.png`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    App.toast(title + ' exported');
+    const filename = `swatch-${Date.now()}.png`;
+    // v:v13.47 — sync b64→blob + createObjectURL (reliable on Android & iOS)
+    let pngDataUrl;
+    try { pngDataUrl = canvas.toDataURL('image/png'); }
+    catch(e) { App.toast('Canvas error — try again'); return; }
+    const _b64 = pngDataUrl.split(',')[1];
+    const _bin = atob(_b64);
+    const _u8  = new Uint8Array(_bin.length);
+    for (let _i = 0; _i < _bin.length; _i++) _u8[_i] = _bin.charCodeAt(_i);
+    const blob = new Blob([_u8], { type: 'image/png' });
+    // Try Web Share first (iOS PWA + modern Android)
+    try {
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Digby ' + title })
+          .then(function() { App.toast(title + ' shared ✓'); })
+          .catch(function(e) { if (e.name !== 'AbortError') SwatchExport._blobDownload(blob, filename, title + ' exported'); });
+        return;
+      }
+    } catch(e) {}
+    SwatchExport._blobDownload(blob, filename, title + ' exported');
+  },
+
+  _blobDownload(blob, filename, toastMsg) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 30000);
+      App.toast(toastMsg || 'Downloaded ✓');
+    } catch(e) { App.toast('Download failed: ' + e.message); }
   },
 
   share() {
@@ -11837,18 +11875,7 @@ const ColourGenerator = {
     SwatchExport._srefDownload(blob, filename);
   },
 
-  _srefDownload(blob, filename) {
-    try {
-      const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function() { URL.revokeObjectURL(url); }, 30000);
-      App.toast('Palette strip saved ✓');
-    } catch(e) {
-      App.toast('Download failed: ' + e.message);
-    }
-  },
+  _srefDownload(blob, filename) { SwatchExport._blobDownload(blob, filename, 'Palette strip saved ✓'); },
 
   currentPalette: null,
 
@@ -15339,7 +15366,17 @@ const AIColourName = {
   window.addEventListener('mouseup', endDrag);
 
   // ── Orientation / resize — re-centre ─────────────────────────────────────
-  window.addEventListener('orientationchange', function() { setTimeout(resetBarPos, 200); setTimeout(measureSafeAreas, 250); });
+  window.addEventListener('orientationchange', function() {
+    // v:v13.48 — force visual-viewport reflow (iOS PWA rotation bug)
+    setTimeout(function() {
+      document.body.style.height = '100dvh';
+      void document.body.offsetHeight; // force reflow
+      document.body.style.height = '';
+      measureSafeAreas();
+      resetBarPos();
+      window.dispatchEvent(new Event('resize'));
+    }, 200);
+  });
   window.addEventListener('resize',            function() { setTimeout(resetBarPos, 100); setTimeout(measureSafeAreas, 120); });
 
   // ── Double-tap to snap back ───────────────────────────────────────────────
