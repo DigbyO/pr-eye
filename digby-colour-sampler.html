@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.50 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.51 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.50</title>
+<title>Digby v13.51</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.50';  // v:v13.5 — synced to match title/meta
+  const APP_VERSION = '13.51';  // v:v13.5 — synced to match title/meta
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1302,76 +1302,68 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
   opacity: 0; pointer-events: none; visibility: hidden; z-index: -1;
   overflow: hidden; transform: translateZ(0);
 }
-@media (orientation: landscape) {
-  /* v449: landscape width hint — position handled by JS resetBarPos */
-  body.active-tab-sampler #live-bar{
-    width: 216px !important;
-  }
-}
 /* ═══════════════════════════════════════════════════════════════════════════
-   v13.46 — LANDSCAPE LAYOUT
-   On phones in landscape (height ≤ 500px) the bottom tab bar becomes a
-   left-side icon rail so the content area gets its full height back.
+   v13.51 — LANDSCAPE LAYOUT  (JS-driven, works on Android Chrome + iOS PWA)
+   CSS @media queries are unreliable on Android Chrome for orientation.
+   Instead, JS sets body.landscape-phone when innerHeight <= 600 in landscape.
+   Variables --tab-h / --landscape-rail are also set via JS.
    ═══════════════════════════════════════════════════════════════════════════ */
-@media (orientation: landscape) and (max-height: 500px) {
-  :root { --tab-h: 0px; --landscape-rail: 56px; }
 
-  /* Shift top bar and content area right — #app stays untouched */
-  #top     { margin-left: var(--landscape-rail); }
-  #modules { margin-left: var(--landscape-rail); }
+/* Shift top bar and content area right of the icon rail */
+body.landscape-phone #top     { margin-left: var(--landscape-rail); }
+body.landscape-phone #modules { margin-left: var(--landscape-rail); }
 
-  /* tabs become a vertical icon rail on the left */
-  #tabs {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: var(--landscape-rail);
-    height: 100dvh;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    border-top: none;
-    border-right: 1px solid var(--border);
-    padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
-    z-index: var(--z-tabs);
-  }
+/* Tabs become a vertical icon rail on the left */
+body.landscape-phone #tabs {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--landscape-rail);
+  height: 100dvh;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  border-top: none;
+  border-right: 1px solid var(--border);
+  padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
+  z-index: var(--z-tabs);
+}
 
-  /* compact icon-only tabs */
-  .tab {
-    flex: 0 0 auto;
-    min-height: 44px;
-    min-width: var(--landscape-rail);
-    padding: 8px 0;
-    font-size: 0;           /* hide labels */
-    letter-spacing: 0;
-  }
-  .tab svg { width: 22px; height: 22px; }
+/* Compact icon-only tabs */
+body.landscape-phone .tab {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: var(--landscape-rail);
+  padding: 8px 0;
+  font-size: 0;
+  letter-spacing: 0;
+}
+body.landscape-phone .tab svg { width: 22px; height: 22px; }
 
-  /* indicator: vertical bar on right edge instead of horizontal on bottom */
-  .tab::after {
-    bottom: unset; top: 15%; left: auto;
-    right: 0; width: 2px; height: 70%;
-    transform: scaleY(0);
-    transition: transform var(--tr);
-  }
-  .tab.on::after { transform: scaleY(1); }
+/* Indicator: vertical bar on right edge */
+body.landscape-phone .tab::after {
+  bottom: unset; top: 15%; left: auto;
+  right: 0; width: 2px; height: 70%;
+  transform: scaleY(0);
+  transition: transform var(--tr);
+}
+body.landscape-phone .tab.on::after { transform: scaleY(1); }
 
-  /* toast above safe area only (no tab bar below) */
-  #toast { bottom: calc(20px + var(--safe-bottom)); }
+/* Toast above safe area (no tab bar below) */
+body.landscape-phone #toast { bottom: calc(20px + var(--safe-bottom)); }
 
-  /* overlay panel: use available height */
-  #ov-panel { max-height: 92dvh; }
+/* Overlay panel: use available height */
+body.landscape-phone #ov-panel { max-height: 92dvh; }
 
-  /* fixed bottom panels: lose tab-bar offset */
-  #pb-cvd-panel { bottom: 0; }
+/* Fixed bottom panels: lose tab-bar offset */
+body.landscape-phone #pb-cvd-panel { bottom: 0; }
 
-  /* dock: shift right of the icon rail */
-  #sampler-bottom-dock { left: var(--landscape-rail); }
+/* Dock: shift right of the icon rail */
+body.landscape-phone #sampler-bottom-dock { left: var(--landscape-rail); }
 
-  /* live-bar: centre in the content area (right of rail), not full viewport */
-  body.active-tab-sampler #live-bar {
-    left: calc(var(--landscape-rail) + (100vw - var(--landscape-rail)) / 2) !important;
-    width: 210px !important;
-  }
+/* Live-bar: centred in content area (right of rail) */
+body.landscape-phone.active-tab-sampler #live-bar {
+  left: calc(var(--landscape-rail) + (100vw - var(--landscape-rail)) / 2) !important;
+  width: 210px !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -3226,7 +3218,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.50</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a" style="font-size:11px;color:var(--muted)">Digby v13.51</span></div>
         <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       </div>
       <div style="margin:16px 0;background:linear-gradient(135deg,#1a1200,#261a00);border:1px solid var(--accent2);border-radius:var(--r);padding:16px;text-align:center">
@@ -5231,7 +5223,7 @@ const App={
         <div class="set-row"><div><div class="set-l">CSS Variables</div><div class="set-sub">Copy library as CSS custom properties</div></div><button class="btn btn-s btn-sm" onclick="TechExport.copyAsCssVars()">Copy</button></div>
       </div>
       <div class="set-sec">About</div>
-      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.50</span></div>
+      <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-b" style="font-size:11px;color:var(--muted)">Digby v13.51</span></div>
       <div class="set-row"><div><div class="set-l">Made by</div><div class="set-sub">Digby Oldridge · 2026</div></div></div>
       <div class="set-row"><div><div class="set-l">Company</div><div class="set-sub">PR Eye Ltd · Photography, Film &amp; PR</div></div></div>
       <div class="set-row"><div><div class="set-l">Email</div><div class="set-sub"><a href="mailto:digby@preye.co.uk" style="color:var(--accent)">digby@preye.co.uk</a></div></div></div>
@@ -15072,7 +15064,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     const SW_COLOR_H  = 68;          // taller colour blocks — more visual weight
     const SW_LABEL_H  = 18;          // compact label strip (7-8px mono reads in 18px)
     const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 96px
-    const BYLINE_PAD  = 2;           // tight byline clearance
+    const BYLINE_PAD  = 14;          // v:v13.51 was 2 — too tight, digby.shop text clipped
 
     // ── Scale photo to fill canvas naturally, capped at 2× width ─────────────
     const srcW = img.naturalWidth  || img.width  || 1;
@@ -15484,6 +15476,43 @@ const AIColourName = {
   window.addEventListener('mouseup', endDrag);
 
   // ── Orientation / resize — re-centre ─────────────────────────────────────
+  // v:v13.51 — Landscape phone detection: JS class is more reliable than CSS
+  // media queries on Android Chrome (where orientationchange can be unreliable).
+  // Sets body.landscape-phone + CSS variables on every resize/rotation.
+  (function() {
+    var _root = document.documentElement;
+    function _applyLandscape() {
+      var w = window.innerWidth, h = window.innerHeight;
+      var on = w > h && h <= 600;  // phone in landscape: tall-side ≤ 600px
+      document.body.classList.toggle('landscape-phone', on);
+      _root.style.setProperty('--tab-h',         on ? '0px'  : '62px');
+      _root.style.setProperty('--landscape-rail', on ? '56px' : '0px');
+      // Restart camera so it picks up new orientation dimensions
+      if (on !== _applyLandscape._wasOn) {
+        _applyLandscape._wasOn = on;
+        setTimeout(function() {
+          try {
+            if (typeof Sampler !== 'undefined' && Sampler.mode === 'camera' && !Sampler.frozen) {
+              Sampler.startCamera();
+            }
+          } catch(e) {}
+        }, 400);
+      }
+    }
+    _applyLandscape._wasOn = false;
+    _applyLandscape();  // run immediately on page load
+    window.addEventListener('resize', _applyLandscape);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(_applyLandscape, 100);
+      setTimeout(_applyLandscape, 350);  // second pass for slow Android
+    });
+    if (window.screen && window.screen.orientation) {
+      screen.orientation.addEventListener('change', function() {
+        setTimeout(_applyLandscape, 100);
+      });
+    }
+  })();
+
   window.addEventListener('orientationchange', function() {
     // v:v13.49 — force visual-viewport reflow (iOS PWA rotation bug)
     setTimeout(function() {
@@ -15497,14 +15526,6 @@ const AIColourName = {
       resetBarPos();
       window.dispatchEvent(new Event('resize'));
     }, 200);
-    // v:v13.49 — restart camera after rotation so stream gets updated dimensions
-    setTimeout(function() {
-      try {
-        if (typeof Sampler !== 'undefined' && Sampler.mode === 'camera' && !Sampler.frozen) {
-          Sampler.startCamera();
-        }
-      } catch(e) {}
-    }, 600);
   });
   window.addEventListener('resize',            function() { setTimeout(resetBarPos, 100); setTimeout(measureSafeAreas, 120); });
 
