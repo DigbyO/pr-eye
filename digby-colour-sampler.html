@@ -6638,12 +6638,12 @@ const Sampler={
     this.activeExportTarget = null; // v:F1.12 — clear after use so next export is fresh
   },
 
-  // Alias kept for any legacy call sites
+  // Colour-only polaroid from the Sampler/Picker — no photo embed
   exportManualPolaroid() {
-    if (!this.uploadImg) { App.toast('No image loaded'); return; }
-    const hexes = (this.pickQueue || []).filter(h => typeof h === 'string' && h.startsWith('#'));
-    if (!hexes.length) { App.toast('Tap colours on the image first'); return; }
-    AutoPalette.exportPolaroid(hexes);
+    const hexes = (this.pickQueue || []).filter(function(h){ return typeof h === 'string' && h.startsWith('#'); });
+    if (!hexes.length) { App.toast('Tap colours first'); return; }
+    const title = hexes.length + ' Picked Colour' + (hexes.length > 1 ? 's' : '');
+    App._downloadPolaroidPalette(hexes, title);
   },
 
   // ── Safe mobile loupe — completely separate from pick logic ──────────────
@@ -7145,7 +7145,7 @@ const Sampler={
         try{ document.getElementById('up-input').click(); } catch(e){}
       }
     }
-    if(m==='wheel'){setTimeout(()=>ColourWheel.init(),50);var _wHex=(this.activeExportTarget&&/^#[0-9a-fA-F]{6}$/.test(this.activeExportTarget))?this.activeExportTarget:((this.currentHex&&this.currentHex!=='#888888'&&/^#[0-9a-fA-F]{6}$/.test(this.currentHex))?this.currentHex:(this.lastHex||'#3a7bd5'));this._seedWheel(_wHex,8);}  // v:v13.8 — activeExportTarget > currentHex > lastHex
+    if(m==='wheel'){setTimeout(()=>ColourWheel.init(),50);var _wHex=(this.lastHex&&/^#[0-9a-fA-F]{6}$/.test(this.lastHex))?this.lastHex:((this.currentHex&&this.currentHex!=='#888888'&&/^#[0-9a-fA-F]{6}$/.test(this.currentHex))?this.currentHex:'#3a7bd5');this._seedWheel(_wHex,8);}  // v13.32 — lastHex (last intentional pick) > currentHex (camera) > fallback
     // v:F1.13 — Clean stream lifecycle on mode switch.
     // Stop the stream immediately when leaving camera — avoids iOS zombie-track bug
     // where stream.active stays true but the video track is silently dead.
@@ -11283,12 +11283,24 @@ const SwatchExport = {
     );
     const cardH    = colourH + stripH;
 
+    // Theme colours derived from bgColor — info strip matches background
+    const _bgRgb     = CS.hexToRgb(this.bgColor || '#1a1a1a');
+    const _bgLum     = _bgRgb ? (0.299 * _bgRgb.r + 0.587 * _bgRgb.g + 0.114 * _bgRgb.b) : 30;
+    const _bgIsLight = _bgLum >= 140;
+    const _stripBg   = _bgIsLight ? '#ffffff' : (this.bgColor || '#1a1a1a');
+    const _nameCol   = _bgIsLight ? '#1a1a1a' : 'rgba(255,255,255,0.92)';
+    const _metaCol   = _bgIsLight ? '#555555' : 'rgba(255,255,255,0.55)';
+    const _dimCol    = _bgIsLight ? '#aaaaaa' : 'rgba(255,255,255,0.35)';
+    const _paintCol  = _bgIsLight ? '#bbbbbb' : 'rgba(255,255,255,0.42)';
+    const _divCol    = _bgIsLight ? '#e0e0e0' : 'rgba(255,255,255,0.07)';
+    const _geoCol    = _bgIsLight ? '#333333' : 'rgba(255,255,255,0.7)';
+
     colours.forEach((c, i) => {
       const col = i % cols, row = Math.floor(i / cols);
       const x = pad + col * (cardW + gap);
       const y = pad + row * (cardH + gap);
 
-      // Card shadow + white background
+      // Card shadow + white frame (polaroid photo-print border — always white)
       ctx.shadowColor = 'rgba(0,0,0,0.30)';
       ctx.shadowBlur  = Math.round(8 * scale);
       ctx.shadowOffsetY = Math.round(4 * scale);
@@ -11296,7 +11308,7 @@ const SwatchExport = {
       this._roundRect(ctx, x, y, cardW, cardH, Math.round(3 * scale)); ctx.fill();
       ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
-      // Colour block  inset 5px on sides and top, flush at bottom of colour area
+      // Colour block  inset 5px on sides and top, flush at bottom of colour area
       const ip = Math.round(5 * scale);
       ctx.fillStyle = c.hex;
       ctx.fillRect(x + ip, y + ip, cardW - ip * 2, colourH - ip);
@@ -11309,16 +11321,15 @@ const SwatchExport = {
       ctx.fillStyle  = c.lrv > 55 ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.6)';
       ctx.fillText(lrvLabel, x + cardW - ip - 3, y + colourH - ip - 3);
 
-      // White info strip  // v:v13.10 — showProportions % badge removed
+      // Info strip — matches bgColor theme
       const iy = y + colourH;
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = _stripBg;
       ctx.fillRect(x, iy, cardW, stripH);
-      // Hairline divider
-      ctx.fillStyle = '#e0e0e0';
+      ctx.fillStyle = _divCol;
       ctx.fillRect(x + ip, iy, cardW - ip * 2, 1);
 
       // Name
-      ctx.fillStyle = '#1a1a1a';
+      ctx.fillStyle = _nameCol;
       const nameSize = Math.max(7, Math.round(Math.min(11 * scale, cardW * 0.09)));
       ctx.font = `bold ${nameSize}px 'Permanent Marker',cursive`;
       ctx.textAlign = 'center';
@@ -11333,20 +11344,20 @@ const SwatchExport = {
           const geoStr = GeoCapture.label(c.geo) || GeoCapture.label(GeoCapture.last);
           if (geoStr) {
             const gs = Math.max(4, Math.round(5 * scale));
-            ctx.fillStyle='#333'; ctx.textAlign='center';
+            ctx.fillStyle=_geoCol; ctx.textAlign='center';
             ctx.font=`bold ${gs}px 'Space Mono',monospace`;
             ctx.fillText('\uD83D\uDCCD '+geoStr, x+cardW/2, iy+Math.round(gs*1.8));
           }
         } else {
           // Hex
           const hexSize = Math.max(5, Math.round(6.5 * scale));
-          ctx.fillStyle = '#555';
+          ctx.fillStyle = _metaCol;
           ctx.font = `${hexSize}px 'Space Mono',monospace`;
           ctx.textAlign = 'center';
           ctx.fillText(c.hex.toUpperCase(), x + cardW / 2, iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 1.5));
           const pantoneY = iy + Math.round(nameSize * 1.4) + Math.round(hexSize * 3.2);
           if (c.pantone?.code && pantoneY < iy + stripH - 4) {
-            ctx.fillStyle = '#aaa';
+            ctx.fillStyle = _dimCol;
             ctx.font = `${Math.max(4, Math.round(5.5 * scale))}px 'Space Mono',monospace`;
             ctx.fillText(c.pantone.code, x + cardW / 2, pantoneY);
           }
@@ -11357,7 +11368,7 @@ const SwatchExport = {
             const _parts = [_lg?.name ? 'LG: ' + _lg.name : null, _fb?.name ? 'F&B: ' + _fb.name : null].filter(Boolean);
             if (_parts.length) {
               const _paintSize = Math.max(4, Math.round(4.5 * scale));
-              ctx.fillStyle = '#bbb';
+              ctx.fillStyle = _paintCol;
               ctx.font = `${_paintSize}px 'Space Mono',monospace`;
               ctx.textAlign = 'center';
               _parts.forEach(function(_line, _li) {
@@ -11424,12 +11435,7 @@ const SwatchExport = {
     if (!sel.length) { App.toast('Select at least one colour'); return; }
     if (navigator.vibrate) navigator.vibrate([10,6,35]);
     const title = `${sel.length} Colour${sel.length > 1 ? 's' : ''}`;
-    // polaroids layout → use the dedicated high-quality renderer
-    if (!this.layout || this.layout === 'polaroids') {
-      App._downloadPolaroidPalette(sel.map(c => c.hex), title);
-      return;
-    }
-    // All other layouts — font gate then render from the shared canvas pipeline
+    // All layouts (including polaroids) go through renderToCanvas so bgColor is respected
     await Promise.all([
       document.fonts.load('400 12px "Permanent Marker"'),
       document.fonts.load('400 10px "Space Mono"')
@@ -11438,8 +11444,9 @@ const SwatchExport = {
     const { w, h } = this.getCanvasSize();
     const canvas = document.createElement('canvas');
     canvas.width = w * 2; canvas.height = h * 2; // @2× for crisp export
-    canvas.getContext('2d').scale(2, 2);
-    this.renderToCanvas(canvas.getContext('2d'), w, h);
+    const ctx2 = canvas.getContext('2d');
+    ctx2.scale(2, 2);
+    this.renderToCanvas(ctx2, w, h);
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
     a.download = `swatch-${Date.now()}.png`;
@@ -11689,45 +11696,33 @@ const ColourGenerator = {
     },
   },
 
-  // v:F1.12.5 — MJ SREF Strip: 1000×200 clean colour band (no text/borders)
-  // If colours carry .weight (from k-means extraction), widths are proportional; else equal.
-  downloadSREF() {  // v:F12.14 — vertical bands, proportional to weights
+  // Palette Strip — wide landscape strip of vertical colour columns, no labels.
+  // Proportional widths if colours carry .weight (k-means), equal otherwise.
+  downloadSREF() {
     const sel = this.selectedColours();
     if (!sel.length) { App.toast('Select colours to export'); return; }
-    const W = 800, H = 800;
+    const W = 1200, H = 180;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-    // Normalize weights so bands fill edge-to-edge with no whitespace
-    const raw     = sel.map(c => (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1);
-    const total   = raw.reduce((a, b) => a + b, 0);
-    const weights = raw.map(w => w / total);  // normalised fractions
-    let y = 0;
-    sel.forEach((c, i) => {
+    // Normalize weights → proportional column widths
+    const raw     = sel.map(function(c){ return (typeof c.weight === 'number' && c.weight > 0) ? c.weight : 1; });
+    const total   = raw.reduce(function(a, b){ return a + b; }, 0);
+    const weights = raw.map(function(w){ return w / total; });
+    let x = 0;
+    sel.forEach(function(c, i) {
       const isLast = (i === sel.length - 1);
-      const h = isLast ? (H - y) : Math.round(weights[i] * H);
+      const bw = isLast ? (W - x) : Math.round(weights[i] * W);
       ctx.fillStyle = c.hex;
-      ctx.fillRect(0, y, W, h);
-      // v:F12.14 — optional % text overlay
-      if (App.showStripText && h > 24) {
-        const pct = Math.round(weights[i] * 100);
-        const rgb = CS.hexToRgb(c.hex);
-        const lum = rgb ? (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) : 128;
-        ctx.fillStyle = lum > 128 ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.88)';
-        const fs = Math.min(32, Math.max(10, Math.floor(h * 0.22)));
-        ctx.font = 'bold ' + fs + 'px sans-serif';
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(pct + '%', W / 2, y + h / 2);
-      }
-      y += h;
+      ctx.fillRect(x, 0, bw, H);
+      x += bw;
     });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
     const _ts2 = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
     a.download = 'digby-strip-' + _ts2 + '.png';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    App.toast('Film strip downloaded ✓');
+    App.toast('Palette strip downloaded');
   },
 
   currentPalette: null,
