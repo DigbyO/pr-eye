@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.67 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.68 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.67</title>
+<title>Digby v13.68</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.67';  // v:v13.65 — haptics + landscape freeze fix
+  const APP_VERSION = '13.68';  // v:v13.65 — haptics + landscape freeze fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1394,7 +1394,6 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
   overflow: hidden; transform: translateZ(0);
 }
 /* v:v13.67 — landscape layout removed */
-
 /* ═══════════════════════════════════════════════════════════════════════════
    v13.50 — TABLET / DESKTOP LAYOUT  (min-width:768px AND min-height:501px)
    Excludes phones in landscape (they're wide but short, handled by the
@@ -3240,7 +3239,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.67</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.68</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3367,7 +3366,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.67</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.68</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5444,7 +5443,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.67</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.68</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -5992,8 +5991,8 @@ const Sampler={
     //    Tier 2: soft facing hint (works on most phones)
     //    Tier 3: any camera (absolute last resort — also catches desktop single-cam setups)
     const _facing = this.camFront ? 'user' : 'environment';
-    const tier1 = { video: { facingMode: { exact: _facing }, width: { ideal: 720 }, height: { ideal: 1280 }, frameRate: { ideal: 15, max: 30 } } }; // v96: 720p cap
-    const tier2 = { video: { facingMode: _facing,            width: { ideal: 720 }, height: { ideal: 1280 }, frameRate: { ideal: 15, max: 30 } } }; // v96: 720p cap
+    const tier1 = { video: { facingMode: { exact: _facing }, frameRate: { ideal: 30, max: 60 } } }; // v96: 720p cap
+    const tier2 = { video: { facingMode: _facing,            frameRate: { ideal: 30, max: 60 } } }; // v96: 720p cap
     const tier3 = { video: true };
 
     const isOverconstrained = function(e) {
@@ -13775,9 +13774,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v15';
+    const SW_CACHE = 'spectrum-v16';
     const swSrc = `
-const CACHE='spectrum-v15';
+const CACHE='spectrum-v16';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
