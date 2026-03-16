@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.70 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.72 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.70</title>
+<title>Digby v13.72</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.70';  // v:v13.65 — haptics + landscape freeze fix
+  const APP_VERSION = '13.72';  // v:v13.72 — Theory Switcher + Poetic Names + Style Permutations + Liquid transition
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -234,6 +234,85 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   transition: box-shadow 0.15s, background 0.15s;
   overflow: visible !important;
 }
+
+/* v13.72 — Theory Panel: swipeable colour-theory palette strip */
+#theory-panel {
+  display: none;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  width: min(320px, calc(100vw - 16px));
+  z-index: 9000;
+  background: rgba(12,12,16,0.96);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+  padding: 10px 0 12px;
+  flex-direction: column;
+  gap: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+#theory-panel.show { display: flex; }
+#theory-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px 8px;
+  font-size: 10px; font-family: var(--mono);
+  color: rgba(255,255,255,0.5); letter-spacing: .1em; text-transform: uppercase;
+}
+#theory-panel-head span { color: rgba(255,255,255,0.8); font-weight:700; }
+#theory-panel-close {
+  background: none; border: none; color: rgba(255,255,255,0.45);
+  font-size: 16px; cursor: pointer; padding: 0 4px;
+  line-height: 1; -webkit-tap-highlight-color: transparent;
+}
+#theory-scroll {
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  display: flex; gap: 0;
+  scrollbar-width: none;
+}
+#theory-scroll::-webkit-scrollbar { display: none; }
+.theory-card {
+  flex: 0 0 100%; scroll-snap-align: start;
+  padding: 0 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.theory-label {
+  font-size: 9px; font-family: var(--mono); letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.45);
+  padding-left: 2px;
+}
+.theory-swatches {
+  display: flex; gap: 6px;
+}
+.theory-swatch {
+  flex: 1; height: 52px; border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 4px; overflow: hidden; position: relative;
+}
+.theory-swatch:active { transform: scale(0.93); }
+.theory-swatch-name {
+  font-size: 7px; font-family: var(--mono); color: rgba(255,255,255,0.7);
+  text-align: center; line-height: 1.1; position: relative; z-index:2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  max-width: 100%; overflow: hidden;
+}
+#theory-dots {
+  display: flex; justify-content: center; gap: 5px; padding-top: 6px;
+}
+.theory-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.25); transition: background 0.15s;
+  cursor: pointer;
+}
+.theory-dot.active { background: rgba(255,255,255,0.85); }
+
 #live-bar.dragging {
   cursor: grabbing;
   background: rgba(10,10,10,0.75);
@@ -281,7 +360,7 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   padding: 0 16px 13px;
   position: relative;
   overflow: hidden;
-  transition: background 0.07s ease-out,
+  transition: background 0.4s ease-in-out,
               box-shadow  0.18s ease-out,
               transform   0.1s  cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -2375,11 +2454,21 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
         <div id="live-undertone">—</div>
       </div>
+      <!-- v13.72 — Theory Switcher panel: swipeable 5-theory palette cards -->
+      <div id="theory-panel">
+        <div id="theory-panel-head">
+          <span>Theory Switcher</span>
+          <button id="theory-panel-close" onclick="Sampler.hideTheory()" ontouchstart="">✕</button>
+        </div>
+        <div id="theory-scroll"></div>
+        <div id="theory-dots"></div>
+      </div>
       <!-- v:F12.31 — live-actions emptied; buttons moved to #sampler-bottom-dock -->
       <div id="live-actions" style="display:none">
         <input type="file" id="bar-image-upload" accept="image/*" style="display:none" onchange="Sampler.loadFromBar(this)">
       </div>
       <!-- Resize handle for live-bar scaling -->
+      <button id="theory-toggle-btn" onclick="Sampler.toggleTheory()" ontouchstart="" title="Show colour theory palettes" style="position:absolute;bottom:-28px;right:8px;background:rgba(22,22,28,0.85);border:1px solid rgba(255,255,255,0.14);border-radius:20px;color:rgba(255,255,255,0.7);font-size:10px;padding:3px 9px;cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:9001;backdrop-filter:blur(8px)">🎨 Theory</button>
       <span id="live-bar-resize" title="Drag to resize">⤡</span>
     </div>
     <!-- Save card -->
@@ -3032,9 +3121,8 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <div style="font-size:12px;min-width:60px">Version</div>
           <div class="tog-group" id="ver-tog" style="flex:1;flex-wrap:wrap">
-            <button class="tog-btn" data-ver="--v 8" onclick="Prompter.setVer(this)">v8</button>
-            <button class="tog-btn" data-ver="--v 7" onclick="Prompter.setVer(this)">v7</button>
-            <button class="tog-btn on" data-ver="--v 6.1" onclick="Prompter.setVer(this)">v6.1</button>
+            <button class="tog-btn on" data-ver="--v 7" onclick="Prompter.setVer(this)">v7</button>
+            <button class="tog-btn" data-ver="--v 6.1" onclick="Prompter.setVer(this)">v6.1</button>
             <button class="tog-btn" data-ver="--v 6" onclick="Prompter.setVer(this)">v6</button>
             <button class="tog-btn" data-ver="--niji 6" onclick="Prompter.setVer(this)">niji 6</button>
             <button class="tog-btn" data-ver="--niji 5" onclick="Prompter.setVer(this)">niji 5</button>
@@ -3051,16 +3139,79 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:12px">--style raw</div>
-          <div class="sw on" id="raw-toggle" onclick="Prompter.toggleParam(this,'raw')"></div>
+          <div class="sw" id="raw-toggle" onclick="Prompter.toggleParam(this,'raw')"></div>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div>
             <div style="font-size:12px">Stylize</div>
-            <div id="stylize-val" style="font-size:10px;color:var(--accent);font-family:var(--mono)">--s 100</div>
+            <div id="stylize-val" style="font-size:10px;color:var(--accent);font-family:var(--mono)">--s 250</div>
           </div>
-          <input type="range" id="stylize-range" min="0" max="1000" step="50" value="100"
+          <input type="range" id="stylize-range" min="0" max="1000" step="50" value="250"
                  style="flex:1;max-width:160px;margin-left:12px;accent-color:var(--accent)"
                  oninput="Prompter.setStylize(this.value)">
+        </div>
+        <!-- Chaos -->
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:12px">Chaos <span style="font-size:9px;color:var(--muted)">0=consistent</span></div>
+            <div id="chaos-val" style="font-size:10px;color:var(--accent);font-family:var(--mono)">off (best for seamless tiles)</div>
+          </div>
+          <input type="range" id="chaos-range" min="0" max="50" step="5" value="0"
+                 style="flex:1;max-width:140px;margin-left:12px;accent-color:var(--accent)"
+                 oninput="Prompter.setChaos(this.value)">
+        </div>
+        <!-- Weird -->
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:12px">Weird <span style="font-size:9px;color:var(--muted)">editorial edge</span></div>
+            <div id="weird-val" style="font-size:10px;color:var(--accent);font-family:var(--mono)">--w 100 (editorial edge)</div>
+          </div>
+          <input type="range" id="weird-range" min="0" max="1000" step="50" value="100"
+                 style="flex:1;max-width:140px;margin-left:12px;accent-color:var(--accent)"
+                 oninput="Prompter.setWeird(this.value)">
+        </div>
+        <!-- Style reference -->
+        <div>
+          <div style="font-size:12px;margin-bottom:5px">Style Reference <span style="font-size:9px;color:var(--muted)">--sref</span></div>
+          <div class="tog-group" id="sref-grid" style="flex-wrap:wrap;gap:4px">
+            <button class="tog-btn on" data-sref="none"   onclick="Prompter.setSrefMode(this)">None</button>
+            <button class="tog-btn"   data-sref="random"  onclick="Prompter.setSrefMode(this)">Random 🎲</button>
+            <button class="tog-btn"   data-sref="custom"  onclick="Prompter.setSrefMode(this)">Custom</button>
+          </div>
+          <div id="sref-custom-row" style="display:none;margin-top:6px;align-items:center;gap:8px">
+            <input type="number" placeholder="sref code e.g. 12345"
+              style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:6px 8px;font-size:11px;font-family:var(--mono);color:var(--text)"
+              oninput="Prompter.setSrefCode(this.value)">
+          </div>
+        </div>
+        <!-- Motif scale -->
+        <div>
+          <div style="font-size:12px;margin-bottom:5px">Motif Scale</div>
+          <div class="tog-group" id="scale-grid" style="flex-wrap:wrap;gap:4px">
+            <button class="tog-btn" data-scale="micro"     onclick="Prompter.setScale(this)">Micro</button>
+            <button class="tog-btn" data-scale="small"     onclick="Prompter.setScale(this)">Small</button>
+            <button class="tog-btn" data-scale="medium"    onclick="Prompter.setScale(this)">Medium</button>
+            <button class="tog-btn" data-scale="large"     onclick="Prompter.setScale(this)">Large</button>
+            <button class="tog-btn" data-scale="oversized" onclick="Prompter.setScale(this)">Oversized</button>
+          </div>
+        </div>
+        <!-- Pattern density -->
+        <div>
+          <div style="font-size:12px;margin-bottom:5px">Pattern Density</div>
+          <div class="tog-group" id="density-grid" style="flex-wrap:wrap;gap:4px">
+            <button class="tog-btn" data-density="sparse"   onclick="Prompter.setDensity(this)">Sparse</button>
+            <button class="tog-btn" data-density="balanced" onclick="Prompter.setDensity(this)">Balanced</button>
+            <button class="tog-btn" data-density="dense"    onclick="Prompter.setDensity(this)">Dense</button>
+            <button class="tog-btn" data-density="allover"  onclick="Prompter.setDensity(this)">Allover</button>
+          </div>
+        </div>
+        <!-- Negative prompt -->
+        <div>
+          <div style="font-size:12px;margin-bottom:4px">Negative Prompt <span style="font-size:9px;color:var(--muted)">--no (auto-fills for --tile)</span></div>
+          <textarea id="neg-prompt-input" rows="2"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:7px 9px;font-size:11px;font-family:var(--mono);color:var(--text);resize:vertical"
+            placeholder="e.g. ugly, blurry, distorted…"
+            oninput="Prompter.setNegPrompt(this.value)"></textarea>
         </div>
       </div>
 
@@ -3073,6 +3224,8 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
       <div id="prompt-acts">
         <button class="btn btn-p btn-sm" onclick="Prompter.generate()">Generate</button>
+        <button class="btn btn-p btn-sm" onclick="Prompter.copyDiscovery()" title="Generate 4 style-reference variations for rapid discovery — paste into Discord">🎲 Discovery</button>
+        <button class="btn btn-p btn-sm" onclick="Prompter.copyStylePermutation()" title="Copy 4-way style permutation: minimalist / maximalist / avant-garde / retro-futurist — paste into Discord for 4 variations">✦ Styles</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copy()" title="Copy prompt to clipboard">📋 Copy Prompt</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.share()">Share</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.openMJ()" title="Copy prompt and open Midjourney">Open MJ ↗</button>
@@ -3238,7 +3391,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.70</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.72</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3365,7 +3518,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.70</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.72</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -3926,6 +4079,61 @@ const CS = {
     const{r,g,b}=this.hexToRgb(hex);const{h,s,l}=this.rgbToHsl(r,g,b);if(s<10)return l>85?'Near White':l>65?'Light Grey':l>45?'Grey':l>25?'Dark Grey':'Near Black';// v:F1.15 — greens override before array fallback (75-165° hue band)
 if(h>=75&&h<=165){const gfx=l>72?'Pale ':l<28?'Deep ':s<22?'Muted ':'';const gn=(s>35&&l>30&&l<68)?'Sage':'Natural Green';const _gn=gfx+gn;this._nameCache[hex]=_gn;try{if(Object.keys(this._nameCache).length<500)localStorage.setItem('spectrum-name-cache',JSON.stringify(this._nameCache));}catch(e){}return _gn;}
 const hns=['Red','Rose','Tangerine','Amber','Gold','Lime','Fern','Teal','Sky Blue','Blue','Indigo','Violet'];const hn=hns[Math.round(h/30)%12];const px=l>72?'Pale':l<28?'Deep':s<22?'Muted':s>70?'Vivid':'Warm';const _n=`${px} ${hn}`;this._nameCache[hex]=_n;try{if(Object.keys(this._nameCache).length<500)localStorage.setItem('spectrum-name-cache',JSON.stringify(this._nameCache));}catch(e){}return _n},
+
+  // v13.72 — poeticName(): autoName augmented with mood/tone modifiers
+  // Returns names like "Melancholic Cobalt", "Dusty Aegean", "Neon Midnight"
+  _poeticMoods: {
+    // [hueZone, satLow, satHigh, lightLow, lightHigh] → modifier
+    // Format: { h:[min,max], s:[min,max], l:[min,max], words:[] }
+    zones: [
+      { h:[210,270], s:[0,25],  l:[5,40],  words:['Melancholic','Midnight','Shadowed','Brooding'] },
+      { h:[210,270], s:[25,100],l:[40,70], words:['Aegean','Adriatic','Baltic','Cerulean'] },
+      { h:[210,270], s:[60,100],l:[60,90], words:['Electric','Neon','Fluorescent','Vivid'] },
+      { h:[0,30],    s:[0,30],  l:[50,85], words:['Dusty','Faded','Antique','Weathered'] },
+      { h:[0,30],    s:[30,100],l:[20,55], words:['Smouldering','Crimson','Burnished','Russet'] },
+      { h:[0,30],    s:[70,100],l:[55,85], words:['Scarlet','Vermilion','Blush','Poppy'] },
+      { h:[30,75],   s:[40,100],l:[30,60], words:['Amber','Honey','Burnished','Gilded'] },
+      { h:[30,75],   s:[20,60], l:[60,90], words:['Cream','Wheat','Parchment','Chamomile'] },
+      { h:[75,165],  s:[0,30],  l:[30,70], words:['Sage','Muted','Mossy','Fern'] },
+      { h:[75,165],  s:[40,100],l:[30,65], words:['Verdant','Botanical','Sylvan','Lush'] },
+      { h:[165,210], s:[30,100],l:[30,65], words:['Glacial','Aqueous','Lagoon','Seafoam'] },
+      { h:[270,330], s:[20,80], l:[20,55], words:['Nocturnal','Vesper','Dusky','Mauve'] },
+      { h:[270,330], s:[50,100],l:[55,85], words:['Fuchsia','Ultraviolet','Psychedelic','Ethereal'] },
+    ],
+  },
+  poeticName(hex) {
+    const {r,g,b} = this.hexToRgb(hex);
+    const {h,s,l} = this.rgbToHsl(r,g,b);
+    const base = this.autoName(hex);
+    // Pick a matching zone
+    const zones = this._poeticMoods.zones;
+    let mods = null;
+    // hue is circular — check [min,max] or wrap for reds (330-360/0-30)
+    for (let z of zones) {
+      const hOk = (z.h[1] > z.h[0])
+        ? (h >= z.h[0] && h <= z.h[1])
+        : (h >= z.h[0] || h <= z.h[1]); // wrap-around (reds)
+      if (hOk && s >= z.s[0] && s <= z.s[1] && l >= z.l[0] && l <= z.l[1]) {
+        mods = z.words; break;
+      }
+    }
+    if (!mods) {
+      // Fallback modifiers based on lightness / saturation alone
+      if (l > 80 && s < 20)  mods = ['Bleached','Chalky','Pale','Ghostly'];
+      else if (l < 15)        mods = ['Obsidian','Void','Abyss','Carbon'];
+      else if (s < 12)        mods = ['Ash','Stone','Slate','Pebble'];
+      else                    mods = ['Hazy','Washed','Tinted','Soft'];
+    }
+    const pick = mods[Math.floor((parseInt(hex.slice(1,3),16) + parseInt(hex.slice(3,5),16)) / 2 * mods.length / 256)];
+    // Avoid doubling the base word (e.g. "Dusty Dusty Blue")
+    const baseWords = base.toLowerCase().split(' ');
+    if (baseWords.some(w => pick.toLowerCase().includes(w) || w.includes(pick.toLowerCase().slice(0,4)))) {
+      return base;
+    }
+    return pick + ' ' + base;
+  },
+
+
   harmonies(hex){const{r,g,b}=this.hexToRgb(hex);const lab=this.rgbToLab(r,g,b);const{l,c,h}=this.labToLch(lab);const mk=(dh,dl=0,dc=0)=>this.lchToHex(Math.max(8,Math.min(96,l+dl)),Math.max(5,c+dc),(h+dh+360)%360);return{complementary:[hex,mk(180)],analogous:[mk(-30),hex,mk(30)],triadic:[hex,mk(120),mk(240)],tetradic:[hex,mk(90),mk(180),mk(270)],splitComp:[hex,mk(150),mk(210)],mono:[mk(0,22,-12),mk(0,10,-6),hex,mk(0,-14,4),mk(0,-28,8)],splitTone:{shadows:mk(180,-(l*.4),c*.3),highlights:mk(0,+(95-l)*.3,c*.3)}}},
 
   // Tints (lighten), Shades (darken), Tones (desaturate) — 5 steps each in LCH
@@ -5442,7 +5650,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.70</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.72</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6543,6 +6751,10 @@ const Sampler={
     // v:v13.57 — colour applied to full swatch background (full-bleed restored)
     const _sw = document.getElementById('live-swatch');
     if (_sw) _sw.style.background = hex;
+
+    // v13.72 — auto-refresh theory panel if open
+    if (this._theoryOpen) { try { this._renderTheory(hex); } catch(e) {} }
+
     const lab=CS.rgbToLab(r,g,b);
     const pan=CS.nearestPantone(lab);
     const lg=CS.nearestLG(lab);
@@ -6785,6 +6997,106 @@ const Sampler={
     }
     // Wheel not ready yet — retry after 20ms
     if (attempts > 0) setTimeout(() => Sampler._seedWheel(hex, attempts - 1), 20);
+  },
+
+
+  // v13.72 — Theory Switcher: generate 5 palette types from seed and display
+  _theoryOpen: false,
+
+  toggleTheory() {
+    this._theoryOpen ? this.hideTheory() : this.showTheory();
+  },
+
+  hideTheory() {
+    this._theoryOpen = false;
+    const p = document.getElementById('theory-panel');
+    if (p) p.classList.remove('show');
+  },
+
+  showTheory(hex) {
+    hex = hex || this.currentHex;
+    if (!hex || hex === '#888888') { App.toast('Point camera at a colour first'); return; }
+    this._theoryOpen = true;
+    // Position panel just below the live-bar
+    const bar = document.getElementById('live-bar');
+    const panel = document.getElementById('theory-panel');
+    if (!panel) return;
+    if (bar) {
+      const br = bar.getBoundingClientRect();
+      panel.style.top = (br.bottom + 10) + 'px';
+    }
+    panel.classList.add('show');
+    this._renderTheory(hex);
+  },
+
+  _renderTheory(hex) {
+    const sc = document.getElementById('theory-scroll');
+    const dots = document.getElementById('theory-dots');
+    if (!sc || !dots) return;
+    const h = CS.harmonies(hex);
+    const v = CS.variations(hex);
+
+    // 5 tones: 2 shades + seed + 2 tints
+    const mono5 = [v.shades[1], v.shades[0], hex, v.tints[0], v.tints[2]];
+
+    // Complementary: seed, complement, split-comp x2, one analogous
+    const comp5 = [hex, h.complementary[1], h.splitComp[1], h.splitComp[2], h.analogous[0]];
+
+    // Analogous: extra -45°, -22.5°, seed, +22.5°, +45° — use mono padding
+    const anal5 = [h.mono[0], h.analogous[0], hex, h.analogous[2], h.mono[4]];
+
+    // Triadic: seed, +120°, +240°, complement mid, analogous accent
+    const tri5  = [hex, h.triadic[1], h.triadic[2], h.complementary[1], h.analogous[2]];
+
+    // Wildcard: pick a "style" from CS.applyStyle deterministically from hex
+    const styles = ['warmPush','coolPush','tealOrange','bleach','cross','mood','silver','wabi','faded','punk'];
+    const styleIdx = parseInt(hex.slice(1,3),16) % styles.length;
+    const wStyle = styles[styleIdx];
+    const wild5 = [hex, ...mono5.slice(1)].map(h2 => {
+      try {
+        const {r:wr,g:wg,b:wb} = CS.hexToRgb(h2);
+        const baseLab = CS.rgbToLab(wr,wg,wb);
+        const {r:br,g:bg,b:bb} = CS.hexToRgb(hex);
+        const seedLab = CS.rgbToLab(br,bg,bb);
+        const ml = CS.applyStyle(baseLab, seedLab, wStyle);
+        const mc = CS.labToRgb(ml.l, ml.a, ml.b);
+        return CS.rgbToHex(Math.round(mc.r), Math.round(mc.g), Math.round(mc.b));
+      } catch(e) { return h2; }
+    });
+
+    const theories = [
+      { name: 'Monochromatic',  hexes: mono5 },
+      { name: 'Complementary',  hexes: comp5 },
+      { name: 'Analogous',      hexes: anal5 },
+      { name: 'Triadic',        hexes: tri5  },
+      { name: 'Wildcard · ' + wStyle, hexes: wild5 },
+    ];
+
+    sc.innerHTML = theories.map((t, idx) => {
+      const swatches = t.hexes.map(h2 => {
+        const pName = CS.poeticName(h2);
+        const shortName = pName.length > 14 ? pName.slice(0,12)+'…' : pName;
+        return `<div class="theory-swatch" style="background:${h2}" title="${pName} ${h2}" onclick="PaletteBuilder.addColour('${h2}');Haptics&&Haptics.light()">
+          <div class="theory-swatch-name">${shortName}</div>
+        </div>`;
+      }).join('');
+      return `<div class="theory-card">
+        <div class="theory-label">${t.name}</div>
+        <div class="theory-swatches">${swatches}</div>
+      </div>`;
+    }).join('');
+
+    // Dot indicators
+    dots.innerHTML = theories.map((_,i) =>
+      `<div class="theory-dot${i===0?' active':''}" onclick="document.getElementById('theory-scroll').scrollTo({left:${i}*document.getElementById('theory-scroll').offsetWidth,behavior:'smooth'})"></div>`
+    ).join('');
+
+    // Sync dots to scroll
+    sc.onscroll = function() {
+      const idx = Math.round(sc.scrollLeft / sc.offsetWidth);
+      const allDots = dots.querySelectorAll('.theory-dot');
+      allDots.forEach((d,i) => d.classList.toggle('active', i===idx));
+    };
   },
 
   // v448: updateUI — refresh the live bar display with currentHex
@@ -10282,11 +10594,18 @@ const Prompter={
   outputFormat:'normal', // 'normal' | 'colours'
   sortMode:'newest',
   tile:true,
-  raw:true,
+  raw:false,
   ar:'1:1',
-  ver:'--v 6.1',
+  ver:'--v 7',
   quality:'--q 1',
-  stylize:100,
+  stylize:250,
+  chaos:0,
+  weird:100,
+  negPrompt:'',
+  scale:'',
+  density:'',
+  srefMode:'none',
+  srefCode:'',
   bgMulti:false,
   bgHex:{'s':'#888888',1:'#888888',2:'#888888',3:'#888888'},
   // ── These MUST be initialised here to prevent .toLowerCase() crash on first render ──
@@ -10753,6 +11072,71 @@ const Prompter={
     if(el) el.textContent=`--s ${v}`;
   },
 
+  // v:v13.71 — chaos, weird, sref, scale, density, neg, discovery
+  setChaos(v){
+    this.chaos=parseInt(v);
+    const el=document.getElementById('chaos-val');
+    if(el) el.textContent=this.chaos===0?'off (best for seamless tiles)':'--chaos '+v;
+  },
+  setWeird(v){
+    this.weird=parseInt(v);
+    const el=document.getElementById('weird-val');
+    if(el) el.textContent=this.weird===0?'off':'--w '+v+' (editorial edge)';
+  },
+  setNegPrompt(v){ this.negPrompt=v||''; },
+  setSrefMode(btn){
+    document.querySelectorAll('#sref-grid .tog-btn').forEach(b=>b.classList.remove('on'));
+    this.srefMode=btn.dataset.sref||'none';
+    btn.classList.add('on');
+    const cr=document.getElementById('sref-custom-row');
+    if(cr) cr.style.display=this.srefMode==='custom'?'flex':'none';
+  },
+  setSrefCode(v){ this.srefCode=v||''; },
+  setScale(btn){
+    document.querySelectorAll('#scale-grid .tog-btn').forEach(b=>b.classList.remove('on'));
+    const val=btn.dataset.scale||'';
+    this.scale=this.scale===val?'':val;
+    if(this.scale) btn.classList.add('on');
+  },
+  setDensity(btn){
+    document.querySelectorAll('#density-grid .tog-btn').forEach(b=>b.classList.remove('on'));
+    const val=btn.dataset.density||'';
+    this.density=this.density===val?'':val;
+    if(this.density) btn.classList.add('on');
+  },
+
+  // v13.72 — Style Permutation: {minimalist, maximalist, avant-garde, retro-futurist}
+  buildStylePermutation(colours) {
+    // Build base prompt without any inline style word
+    const savedSref = this.srefMode;
+    this.srefMode = 'none';
+    const base = this.buildPrompt(colours);
+    this.srefMode = savedSref;
+    // Split at first parameter flag to separate text from params
+    const paramIdx = base.indexOf(' --');
+    const textPart  = paramIdx > 0 ? base.slice(0, paramIdx) : base.replace(/ --.*$/, '');
+    const paramPart = paramIdx > 0 ? base.slice(paramIdx) : '';
+    // Inject the style permutation bracket
+    const styles = '{minimalist, maximalist, avant-garde, retro-futurist}';
+    return `/imagine prompt: ${textPart}, ${styles} style${paramPart}`;
+  },
+
+  copyStylePermutation() {
+    const colours = DS.all().filter(c => this.sel.has(c.id));
+    const t = this.buildStylePermutation(colours);
+    document.getElementById('prompt-out').textContent = t;
+    this._updateCharCount(t);
+    this.copyToClipboard(t, '✦ Style Permutation copied — gives 4 variations in one Discord paste!');
+  },
+
+  copyDiscovery(){
+    const colours=DS.all().filter(c=>this.sel.has(c.id));
+    const t=this.buildDiscoveryPrompt(colours);
+    document.getElementById('prompt-out').textContent=t;
+    this._updateCharCount(t);
+    this.copyToClipboard(t,'Discovery prompt copied ✓ — paste into Discord');
+  },
+
   // Legacy compat  kept so 60/30/10 "load to prompter" still works
   use631(id1,id2,id3){
     [id1,id2,id3].filter(Boolean).forEach(id=>this.sel.add(id));
@@ -10848,51 +11232,90 @@ const Prompter={
   },
 
   buildPrompt(colours){
-    // Colour palette string (optional — omit if no colours selected)
-    const colourStr = colours.length
-      ? colours.map(c=>this._descColour(c)).join(', ')
+    const isTile     = this.tile;
+    const isNoRepeat = this.repeat==='__none__';
+    const repeatStr  = isNoRepeat ? '' : (this.repeat||'seamless repeat pattern');
+    const subjStr    = this._batchWrap(this.subjects,'');
+    const medStr     = this._batchWrap(this.mediums,'');
+    const eraStr     = this.era||'';
+    const bgPrompt   = this._bgPromptString();
+    const colourStr  = colours.length ? colours.map(c=>this._descColour(c)).join(', ') : '';
+    const paletteNote= colourStr ? 'colour palette drawn from '+colourStr : '';
+    const scalePhrase  = this._scalePhrase();
+    const densityPhrase= this._densityPhrase();
+    const suffix = this._buildSuffix(medStr);
+    const tileHint = (isTile && !isNoRepeat)
+      ? 'evenly distributed across the surface, balanced negative space, no dominant focal point'
       : '';
-    const paletteNote = colourStr ? `colour palette of ${colourStr}` : '';
-
-    // Subject  single or batch
-    // MASTER-FIX-V53: subjects is already an Array  pass directly
-    const subjStr = this._batchWrap(this.subjects, 'No specific subject');
-
-    // Medium  single or batch
-    // MASTER-FIX-V53: mediums is already an Array  pass directly
-    const medStr = this._batchWrap(this.mediums, '');
-
-    // Era
-    const eraStr=this.era||'';
-
-    // Repeat
-    const isNoRepeat=this.repeat==='__none__';
-    const repeatStr=isNoRepeat?'':(this.repeat||'seamless repeat pattern');
-
-    // Build core prompt  fabric/textile oriented
+    const harmony = this._harmonyNote(colours);
     const parts=[];
-    if(subjStr&&subjStr!=='No specific subject') parts.push(subjStr);
-    if(isNoRepeat) parts.push('single composition illustration, not a repeat pattern');
-    else parts.push(repeatStr);
+    if(subjStr) parts.push(subjStr);
+    if(isNoRepeat){
+      parts.push('single composition illustration, not a repeat pattern');
+    } else {
+      parts.push(repeatStr);
+      if(scalePhrase)   parts.push(scalePhrase);
+      if(densityPhrase) parts.push(densityPhrase);
+      if(tileHint)      parts.push(tileHint);
+    }
     if(medStr) parts.push(medStr);
     if(eraStr) parts.push(eraStr);
     if(paletteNote) parts.push(paletteNote);
-    const bgPrompt = this._bgPromptString();
-    if(bgPrompt) parts.push(bgPrompt);
-    parts.push('highly detailed, fine craftsmanship, flat on white ground, textile design');
-
-    // Harmony flavour note
-    const rel=this._harmonyNote(colours);
-    if(rel) parts.push(rel);
-
-    // MJ parameters
-    const params=this._buildParams();
-
-    const raw = parts.join(', ') + ' ' + params;
-    // ── Midjourney hard limit: truncate at 3800 chars and append ellipsis ──
-    return raw.length > 3800 ? raw.slice(0, 3797) + '...' : raw;
+    if(bgPrompt)    parts.push(bgPrompt);
+    if(suffix)      parts.push(suffix);
+    if(harmony)     parts.push(harmony);
+    const params = this._buildParams();
+    const raw = parts.join(', ')+' '+params;
+    return raw.length>3800 ? raw.slice(0,3797)+'...' : raw;
   },
 
+  buildDiscoveryPrompt(colours){
+    const savedSref=this.srefMode;
+    this.srefMode='none';
+    const base=this.buildPrompt(colours);
+    this.srefMode=savedSref;
+    // Build a permutation prompt with 4 sref seeds
+    const paramStr=this._buildParams().replace(/--sref\s+\S+/g,'').trim();
+    const textEnd=base.indexOf(' --');
+    const textPart=textEnd>0 ? base.slice(0,textEnd) : base.replace(/ --.*$/,'');
+    return textPart+' {--sref random, --sref 12345, --sref 67890, --sref 99999} '+paramStr;
+  },
+
+  _buildSuffix(medStr){
+    const m=(medStr||'').toLowerCase();
+    if(m.includes('vector')||m.includes('flat'))
+      return 'clean crisp edges, print-ready artwork, professional repeat design';
+    if(m.includes('watercolour')||m.includes('gouache'))
+      return 'painterly washes, soft luminous edges, fine botanical detail, surface design quality';
+    if(m.includes('etching')||m.includes('engraving'))
+      return 'fine cross-hatched line work, intaglio plate quality, rich press texture';
+    if(m.includes('woodblock')||m.includes('linocut'))
+      return 'hand-carved block quality, bold silhouettes, visible grain, reduction print character';
+    if(m.includes('screen')||m.includes('riso'))
+      return 'limited flat colour separations, bold graphic clarity, slight registration variation';
+    if(m.includes('pastel')||m.includes('charcoal'))
+      return 'soft powdery texture, subtle tonal blending, tactile surface quality';
+    if(m.includes('oil')||m.includes('impasto'))
+      return 'thick palette knife texture, impasto oil, dramatic chiaroscuro, museum surface quality';
+    if(m.includes('photograph')||m.includes('macro'))
+      return 'macro photography detail, hyper-real texture, studio lighting, tactile material surface';
+    return 'highly detailed, fine craftsmanship, museum-quality textile surface design';
+  },
+
+  _scalePhrase(){
+    return {'micro':'micro-scale motifs, tiny repeated elements, hair-thin fine detail',
+            'small':'small-scale pattern, compact motif, fine repeat',
+            'medium':'medium-scale repeat, balanced motif size',
+            'large':'large-scale statement motif, bold graphic repeat',
+            'oversized':'oversized macro print, dramatic scale, fashion-forward large repeat'}[this.scale]||'';
+  },
+
+  _densityPhrase(){
+    return {'sparse':'open airy layout, generous ground showing, breathing room between motifs',
+            'balanced':'balanced fill, equal weight of motif and ground',
+            'dense':'dense packed motifs, rich filled surface, little ground visible',
+            'allover':'dense allover fill, no ground visible, full surface coverage'}[this.density]||'';
+  },
   // MASTER-FIX-V53: _batchWrap  multiple items ALWAYS produce {item1, item2}.
   // Spec: 1 item  bare string. 0 items  fallback. 2+ items  {joined, list}.
   _batchWrap(arr, fallback=''){
@@ -10909,77 +11332,121 @@ const Prompter={
     p.push(`--ar ${this.ar}`);
     if(this.raw) p.push('--style raw');
     p.push(this.quality);
-    if(this.stylize!==100) p.push(`--s ${this.stylize}`);
+    if(this.stylize!==250) p.push(`--s ${this.stylize}`);
+    if(this.chaos>0)  p.push(`--chaos ${this.chaos}`);
+    if(this.weird>0)  p.push(`--w ${this.weird}`);
+    if(this.srefMode==='random')       p.push('--sref random');
+    else if(this.srefMode==='custom'&&this.srefCode) p.push(`--sref ${this.srefCode}`);
     p.push(this.ver);
+    const neg=this._buildNegPrompt();
+    if(neg) p.push('--no '+neg);
     return p.join(' ');
+  },
+
+  _buildNegPrompt(){
+    const tileBase=this.tile
+      ? 'border, frame, text, watermark, signature, single isolated element, centered composition, vignette, letterbox'
+      : '';
+    const custom=(this.negPrompt||'').trim();
+    if(!tileBase&&!custom) return '';
+    if(!tileBase) return custom;
+    if(!custom) return tileBase;
+    return tileBase+', '+custom;
   },
 
   _descColour(c){
     const{h,s,l}=c.hsl;
-
-    // Achromatic  name by luminosity only
     if(s<10){
-      if(l>90) return'porcelain white';
-      if(l>75) return'pale oyster';
-      if(l>55) return'ash grey';
-      if(l>35) return'slate grey';
-      if(l>18) return'charcoal';
-      return'near black';
+      if(l>92) return 'titanium white, chalk ground';
+      if(l>80) return 'oyster white, bleached linen';
+      if(l>65) return 'warm ash grey, pewter';
+      if(l>48) return 'mid grey, weathered stone';
+      if(l>30) return 'charcoal, dark slate';
+      if(l>15) return 'near black, lamp black';
+      return 'deep ink black, ebony';
     }
-
-    // Tonal vibe prefix: combines luminosity + saturation into a Midjourney-friendly adjective
-    let vibe;
-    if(l<18)                 vibe='deep moody';
-    else if(l<32)            vibe='rich dark';
-    else if(l>82)            vibe='soft pale';
-    else if(l>68&&s<35)      vibe='dusty';
-    else if(l>68)            vibe='light airy';
-    else if(s>72&&l>40&&l<70)vibe='vibrant';
-    else if(s>55)            vibe='saturated';
-    else if(s<28)            vibe='muted';
-    else                     vibe='warm';
-
-    // Precise hue naming  24 segments for real colour vocabulary
-    const hueNames=[
-      'crimson',       //   014
-      'scarlet',       //  1529
-      'vermillion',    //  3044
-      'burnt sienna',  //  4554
-      'amber',         //  5564
-      'golden amber',  //  6574
-      'golden',        //  7584
-      'chartreuse',    //  8599
-      'olive',         // 100114
-      'emerald green', // 115134
-      'forest green',  // 135154
-      'jade',          // 155169
-      'teal',          // 170184
-      'cyan',          // 185194
-      'cerulean',      // 195209
-      'azure',         // 210224
-      'cobalt blue',   // 225239
-      'ultramarine',   // 240254
-      'indigo',        // 255269
-      'violet',        // 270284
-      'purple',        // 285299
-      'magenta',       // 300314
-      'rose',          // 315329
-      'raspberry',     // 330359
-    ];
-    const idx=Math.min(Math.floor(h/15),hueNames.length-1);
-    const hue=hueNames[idx];
-
-    const _k = c.kelvin || CS.kelvin(c.rgb || CS.hexToRgb(c.hex));
-    const _pt = CS.psychTag(c.hex);
-    return`${vibe} ${hue} (~${_k.toLocaleString()}K, ${_pt.label.toLowerCase()})`.trim();
+    if(h<=30||h>=330){
+      if(l<22) return l<12?'deep claret, dried-blood carmine':'burgundy, darkened madder root';
+      if(l<42) return s>55?'alizarin crimson, madder lake':'brick red, Indian red oxide';
+      if(l<62) return s>60?'vermillion scarlet, scarlet lake':'muted terracotta, English red earth';
+      if(l<80) return s>50?'coral salmon, rose madder pale':'dusty blush, faded carmine rose';
+      return 'pale porcelain blush, chalked rose';
+    }
+    if(h>30&&h<=60){
+      if(l<22) return 'deep burnt umber, raw sienna shadow';
+      if(l<42) return s>55?'burnt orange, deep saffron':'raw umber, autumn oak bark';
+      if(l<62) return s>55?'warm amber, saffron gold':'muted ochre, dried wheat straw';
+      if(l<80) return s>45?'pale amber, honey gold':'sandy ochre, parchment vellum';
+      return 'pale cream gold, ivory board tone';
+    }
+    if(h>60&&h<=80){
+      if(l<32) return 'dark golden yellow, aged tarnished brass';
+      if(l<52) return s>55?'weld yellow, gamboge, chrome yellow':'muted gold, straw, unbleached linen';
+      if(l<72) return s>55?'Naples yellow, primary chrome':'pale citron, flaxen, bleached cotton';
+      return 'pale lemon, chalk yellow, bleached straw';
+    }
+    if(h>80&&h<=110){
+      if(l<32) return 'deep olive, reseda green, dark terre verte';
+      if(l<55) return s>50?'acid chartreuse, bright olive, weld-dyed green':'olive drab, dried sage, khaki';
+      if(l<75) return s>50?'lime green, bright apple':'soft sage green, dried rosemary';
+      return 'pale lime wash, celadon hint, mint';
+    }
+    if(h>110&&h<=165){
+      if(l<22) return 'deep viridian, bottle green, dark malachite';
+      if(l<40) return s>55?'forest green, deep emerald malachite':'dark myrtle, ivy shadow';
+      if(l<60) return s>55?'emerald green, viridian, sap green':'lichen green, fern frond, woad green';
+      if(l<78) return s>45?'jade green, spring meadow':'soft sage, faded verdigris patina';
+      return 'mint green, pale celadon porcelain, eau de nil';
+    }
+    if(h>165&&h<=200){
+      if(l<25) return 'deep teal, prussian teal, dark patina bronze';
+      if(l<45) return s>55?'deep cyan, Persian green':'petrol blue-green, dark duck egg';
+      if(l<65) return s>55?'turquoise, bright teal, Egyptian faience':'muted teal, aged duck egg blue';
+      if(l<80) return s>45?'pale aqua, tropical lagoon water':'soft robins egg, watercolour cerulean';
+      return 'pale aquamarine, ice teal, diluted turquoise wash';
+    }
+    if(h>200&&h<=255){
+      if(l<20) return 'navy blue, deep Prussian blue, indigo shadow';
+      if(l<38) return s>55?'cobalt blue, royal ultramarine':'Prussian blue, deep lapis lazuli';
+      if(l<58) return s>55?'cerulean blue, azure sky':'steel blue, Wedgwood, powder blue';
+      if(l<78) return s>45?'cornflower blue, periwinkle, speedwell':'cadet blue, pale delft, washed denim';
+      return 'pale porcelain blue, watercolour wash blue';
+    }
+    if(h>255&&h<=290){
+      if(l<22) return 'deep indigo, katazome resist-dyed blue-black, woad navy';
+      if(l<42) return s>55?'indigo vat dye, woad blue, blue-violet':'dark slate violet, dusky carbon blue';
+      if(l<62) return s>55?'blue-violet, iris, bright periwinkle':'muted iris, lavender shadow, grey violet';
+      if(l<80) return s>45?'lavender blue, soft parma violet':'dusty lilac, pale silver iris';
+      return 'pale lavender mist, chalk violet, blush iris';
+    }
+    if(h>290&&h<=330){
+      if(l<22) return 'deep purple, tyrian shellfish purple, dark damson';
+      if(l<42) return s>55?'rich mulberry purple, magenta lake':'deep plum, dark aubergine';
+      if(l<62) return s>55?'fuchsia magenta, vivid orchid':'dusty mauve, heather moor purple';
+      if(l<80) return s>45?'soft orchid, blush pink-violet':'pale mauve, muted rose quartz';
+      return 'pale pink-lilac, blush orchid, chalked rose violet';
+    }
+    const _k=c.kelvin||CS.kelvin(c.rgb||CS.hexToRgb(c.hex));
+    return `${l<40?'deep':l>70?'pale':'mid'} tone (~${_k.toLocaleString()}K)`;
   },
-
   _harmonyNote(colours){
     if(colours.length<2) return '';
     const hs=colours.map(c=>c.hsl.h);
+    const ls=colours.map(c=>c.hsl.l);
+    const ss=colours.map(c=>c.hsl.s);
     const spread=Math.max(...hs)-Math.min(...hs);
-    if(spread<35)  return 'analogous colour harmony';
-    if(spread>150) return 'complementary colour contrast';
+    const lSpread=Math.max(...ls)-Math.min(...ls);
+    const avgS=ss.reduce((a,b)=>a+b,0)/ss.length;
+    const avgL=ls.reduce((a,b)=>a+b,0)/ls.length;
+    if(spread<15)  return 'monochromatic tonal palette, refined value gradation';
+    if(spread<40)  return 'analogous colour harmony, naturally flowing cohesive palette';
+    if(spread>160&&spread<200) return 'complementary colour contrast, high chromatic tension, bold impact';
+    if(spread>80&&spread<140)  return 'split-complementary palette, dynamic yet balanced';
+    if(colours.length>=3&&spread>100) return 'triadic colour relationship, lively equal visual weight';
+    if(lSpread>50&&avgS<30)    return 'high-contrast tonal palette, graphic chiaroscuro';
+    if(avgS<18)    return 'near-neutral muted palette, sophisticated low-chroma luxury';
+    if(avgL>72)    return 'high-key palette, light airy bleached summer tones';
+    if(avgL<30)    return 'low-key moody palette, deep shadowed ground tones';
     return '';
   },
 
@@ -13798,9 +14265,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v18';
+    const SW_CACHE = 'spectrum-v20';
     const swSrc = `
-const CACHE='spectrum-v18';
+const CACHE='spectrum-v20';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
