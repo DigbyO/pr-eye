@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.64';  // v:v13.64 — picker dot tracks last picked colour
+  const APP_VERSION = '13.66';  // v:v13.65 — haptics + landscape freeze fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1393,69 +1393,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
   opacity: 0; pointer-events: none; visibility: hidden; z-index: -1;
   overflow: hidden; transform: translateZ(0);
 }
-/* ═══════════════════════════════════════════════════════════════════════════
-   v13.51 — LANDSCAPE LAYOUT  (JS-driven, works on Android Chrome + iOS PWA)
-   CSS @media queries are unreliable on Android Chrome for orientation.
-   Instead, JS sets body.landscape-phone when innerHeight <= 600 in landscape.
-   Variables --tab-h / --landscape-rail are also set via JS.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Shift top bar and content area right of the icon rail */
-body.landscape-phone #top     { margin-left: var(--landscape-rail); }
-body.landscape-phone #modules { margin-left: var(--landscape-rail); }
-
-/* Tabs become a vertical icon rail on the left */
-body.landscape-phone #tabs {
-  position: fixed;
-  left: 0; top: 0; bottom: 0;
-  width: var(--landscape-rail);
-  height: 100dvh;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  border-top: none;
-  border-right: 1px solid var(--border);
-  padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
-  z-index: var(--z-tabs);
-}
-
-/* Compact icon-only tabs */
-body.landscape-phone .tab {
-  flex: 0 0 auto;
-  min-height: 44px;
-  min-width: var(--landscape-rail);
-  padding: 8px 0;
-  font-size: 0;
-  letter-spacing: 0;
-}
-body.landscape-phone .tab svg { width: 22px; height: 22px; }
-
-/* Indicator: vertical bar on right edge */
-body.landscape-phone .tab::after {
-  bottom: unset; top: 15%; left: auto;
-  right: 0; width: 2px; height: 70%;
-  transform: scaleY(0);
-  transition: transform var(--tr);
-}
-body.landscape-phone .tab.on::after { transform: scaleY(1); }
-
-/* Toast above safe area (no tab bar below) */
-body.landscape-phone #toast { bottom: calc(20px + var(--safe-bottom)); }
-
-/* Overlay panel: use available height */
-body.landscape-phone #ov-panel { max-height: 92dvh; }
-
-/* Fixed bottom panels: lose tab-bar offset */
-body.landscape-phone #pb-cvd-panel { bottom: 0; }
-
-/* Dock: shift right of the icon rail */
-body.landscape-phone #sampler-bottom-dock { left: var(--landscape-rail); }
-
-/* Live-bar: centred in content area (right of rail) */
-body.landscape-phone.active-tab-sampler #live-bar {
-  left: calc(var(--landscape-rail) + (100vw - var(--landscape-rail)) / 2) !important;
-  width: 210px !important;
-}
+/* v:v13.66 — landscape layout removed */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    v13.50 — TABLET / DESKTOP LAYOUT  (min-width:768px AND min-height:501px)
@@ -3302,7 +3240,7 @@ body.landscape-phone.active-tab-sampler #live-bar {
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.58</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.64</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3429,7 +3367,7 @@ body.landscape-phone.active-tab-sampler #live-bar {
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.58</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.64</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -4918,6 +4856,7 @@ const App={
   },
 
   setTab(t){
+    Haptics.light(); // v:v13.65 tab switch
     // v121 Digby: body class gating — live-bar only visible on sampler
     document.body.classList.forEach(c => { if(c.startsWith('active-tab-')) document.body.classList.remove(c); });
     document.body.classList.add('active-tab-' + t);
@@ -5505,7 +5444,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.58</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.64</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6635,7 +6574,7 @@ const Sampler={
     const sEl=document.getElementById('live-secondary');
     if(pEl) pEl.textContent=primary;
     if(sEl) sEl.textContent=secondary;
-    // v:v13.58 — declare lrvReal+lch first (fixes TDZ crash that broke LRV/LCH display)
+    // v:v13.64 — declare lrvReal+lch first (fixes TDZ crash that broke LRV/LCH display)
     const lch=CS.rgbToLch(r,g,b);
     const lrvReal=CS.lrvLinear(r,g,b);
     // glow on swatch + adaptive text via .live-light class
@@ -7598,6 +7537,7 @@ const Sampler={
   },
 
   setMode(m){
+    Haptics.light(); // v:v13.65 mode switch
     this._teardownCurrentMode();  // v:F12.20 — clean-slate gatekeeper
     this.mode=m;
     // don't null currentHex — capture() guards on video readiness instead
@@ -12583,6 +12523,7 @@ const PaletteBuilder = {
     if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) { App.toast('Invalid colour'); return; }
     if (this._isDuplicate(hex)) { App.toast('Already in palette'); return; }
     if (this.colours.length >= this.MAX) { App.toast(`Palette full (max ${this.MAX})`); return; }
+    Haptics.medium(); // v:v13.65 colour added to palette
     this._pushHistory();
     this.colours.push(this._makeEntry(hex));
     this.render();
@@ -13834,9 +13775,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v12';
+    const SW_CACHE = 'spectrum-v14';
     const swSrc = `
-const CACHE='spectrum-v12';
+const CACHE='spectrum-v14';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15918,70 +15859,7 @@ const AIColourName = {
 })();
 </script>
 
-<script>
-/* v:v13.57 — STANDALONE landscape detection — runs independently of all other
-   scripts, cannot be blocked by live-bar early-return or any other IIFE.
-   Uses every available trigger: DOMContentLoaded, resize, orientationchange,
-   matchMedia change, and screen.orientation.change (Android Chrome API). */
-(function() {
-  var _r = document.documentElement;
-  var _wasOn = false;
-
-  function _applyLandscape() {
-    var w = window.innerWidth, h = window.innerHeight;
-    var on = (w > h) && (h <= 600);
-    document.body.classList.toggle('landscape-phone', on);
-    _r.style.setProperty('--tab-h',          on ? '0px'  : '62px');
-    _r.style.setProperty('--landscape-rail',  on ? '56px' : '0px');
-    if (on !== _wasOn) {
-      _wasOn = on;
-      // Restart camera so stream gets updated orientation dimensions
-      setTimeout(function() {
-        try {
-          if (typeof Sampler !== 'undefined' &&
-              Sampler.mode === 'camera' && !Sampler.frozen) {
-            Sampler.startCamera();
-          }
-        } catch(e) {}
-      }, 500);
-    }
-  }
-
-  // Run immediately (script is at bottom of body so DOM is ready)
-  _applyLandscape();
-
-  // Resize: fires reliably on Android Chrome when viewport changes
-  window.addEventListener('resize', _applyLandscape);
-
-  // orientationchange: iOS Safari primary trigger
-  window.addEventListener('orientationchange', function() {
-    setTimeout(_applyLandscape, 80);
-    setTimeout(_applyLandscape, 300);
-    setTimeout(_applyLandscape, 600);  // triple-fire for slow devices
-  });
-
-  // matchMedia: fires when CSS orientation media query changes — most
-  // reliable cross-browser trigger that is tied directly to the CSS engine
-  var _mql = window.matchMedia('(orientation: landscape)');
-  function _onMQL() {
-    setTimeout(_applyLandscape, 50);
-    setTimeout(_applyLandscape, 250);
-  }
-  if (_mql.addEventListener) {
-    _mql.addEventListener('change', _onMQL);
-  } else if (_mql.addListener) {
-    _mql.addListener(_onMQL);  // legacy Safari
-  }
-
-  // screen.orientation API: Android Chrome modern standard
-  if (window.screen && window.screen.orientation) {
-    screen.orientation.addEventListener('change', function() {
-      setTimeout(_applyLandscape, 80);
-      setTimeout(_applyLandscape, 300);
-    });
-  }
-})();
-</script>
+<!-- v:v13.66 landscape JS removed -->
 
 <!-- v:F1.3 AI Design Quiz overlay -->
 <div id="ai-quiz-overlay" role="dialog" aria-modal="true" aria-label="AI Design Quiz">
