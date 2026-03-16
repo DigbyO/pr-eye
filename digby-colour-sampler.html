@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.76 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.77 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.76</title>
+<title>Digby v13.77</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.76';  // v:v13.76 — Theory Switcher gated to Pro Mode
+  const APP_VERSION = '13.77';  // v:v13.77 — Theory Panel: fixed strip (top/left), all swatches visible
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -237,87 +237,78 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 
 
 /* v13.74 — Theory count selector row */
-#theory-count-row {
-  display: flex; align-items: center; justify-content: center;
-  gap: 3px; padding: 5px 9px 4px;
-  background: rgba(255,255,255,0.025);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  flex-shrink: 0;
-}
-#theory-panel.vertical #theory-count-row {
-  flex-wrap: wrap; gap: 2px; padding: 4px 5px 3px;
-}
-.theory-cnt {
-  background: rgba(255,255,255,0.06); border: none;
-  color: rgba(255,255,255,0.4); font-size: 9px; font-family: var(--mono);
-  font-weight: 700; padding: 3px 8px; border-radius: 5px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  letter-spacing: .04em; transition: background 0.1s, color 0.1s;
-}
-.theory-cnt:active { background: rgba(255,255,255,0.2); }
-.theory-cnt.on {
-  background: rgba(200,169,110,0.22);
-  color: var(--accent);
-  border: 1px solid rgba(200,169,110,0.3);
-}
-#theory-panel.vertical .theory-cnt { padding: 2px 5px; font-size: 8px; flex: 1; }
+/* v13.77 — Theory Strip: anchored to top or left side (no floating) */
+body:not(.pro-mode) #theory-panel       { display: none !important; }
+body:not(.pro-mode) #theory-dock-btn    { display: none !important; }
 
-
-/* v13.76 — Theory Switcher is a Pro feature */
-body:not(.pro-mode) #theory-toggle-btn { display: none !important; }
-body:not(.pro-mode) #theory-panel      { display: none !important; }
-/* v13.73 — Theory Panel: floating, independently draggable, H+V modes */
+/* ── Strip anchored full-width below top-nav (default: tp-top) ── */
 #theory-panel {
   display: none;
   position: fixed;
-  z-index: 9100;
-  background: rgba(10,10,14,0.97);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.13);
-  box-shadow: 0 10px 48px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.07);
+  z-index: 9050;
+  left: 0; right: 0;
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
+  background: rgba(8,8,12,0.97);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(255,255,255,0.11);
   flex-direction: column;
-  overflow: hidden;
-  /* anchor at viewport origin; position set via transform by JS */
-  left: 0; top: 0;
-  width: min(300px, calc(100vw - 24px));
-  /* position updates are transform — no transition so drag is instant */
-  transition: opacity 0.18s;
   user-select: none; -webkit-user-select: none;
-  /* transform is GPU-composited → zero layout cost during drag */
-  will-change: transform;
+  overflow: hidden;
 }
 #theory-panel.show { display: flex; }
-/* Vertical orientation: narrow strip */
-#theory-panel.vertical {
-  width: 108px;
-  height: 280px;
+/* tp-left: narrow full-height strip on the left edge */
+#theory-panel.tp-left {
+  left: 0; right: auto;
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--tab-h));
+  width: 76px;
+  border-bottom: none;
+  border-right: 1px solid rgba(255,255,255,0.11);
 }
-/* ── Header / drag handle ── */
-#theory-panel-head {
+/* ── Strip header ── */
+#theory-strip-head {
   display: flex; align-items: center;
-  padding: 8px 9px 7px;
-  background: rgba(255,255,255,0.04);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  cursor: grab; touch-action: none;
-  flex-shrink: 0; gap: 4px;
+  padding: 5px 8px 4px;
+  gap: 4px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-#theory-panel-head:active { cursor: grabbing; }
-#theory-panel-title {
-  font-size: 8.5px; font-family: var(--mono); letter-spacing: .11em;
-  text-transform: uppercase; color: rgba(255,255,255,0.55);
-  font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden;
+#theory-panel.tp-left #theory-strip-head {
+  flex-direction: column; align-items: center;
+  padding: 6px 4px; gap: 3px;
 }
+/* ── Count selector ── */
+#theory-count-row {
+  display: flex; gap: 3px; align-items: center;
+  flex-shrink: 0;
+}
+#theory-panel.tp-left #theory-count-row {
+  flex-direction: column; gap: 2px;
+}
+.theory-cnt {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.45); font-size: 9.5px; font-family: var(--mono);
+  font-weight: 700; padding: 3px 7px; border-radius: 5px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  letter-spacing: .04em; transition: background 0.1s, color 0.1s;
+}
+.theory-cnt:active { background: rgba(255,255,255,0.22); }
+.theory-cnt.on {
+  background: rgba(200,169,110,0.22);
+  color: var(--accent);
+  border-color: rgba(200,169,110,0.3);
+}
+#theory-panel.tp-left .theory-cnt { padding: 2px 5px; font-size: 8px; }
+/* ── Strip header buttons ── */
 .theory-hbtn {
   background: rgba(255,255,255,0.07); border: none;
-  color: rgba(255,255,255,0.5); font-size: 11px; line-height: 1;
-  padding: 3px 6px; border-radius: 6px; cursor: pointer;
+  color: rgba(255,255,255,0.5); font-size: 10px; line-height: 1;
+  padding: 4px 7px; border-radius: 6px; cursor: pointer;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   flex-shrink: 0;
 }
-.theory-hbtn:active { background: rgba(255,255,255,0.2); color: #fff; }
-/* ── Scroll container ── */
+.theory-hbtn:active { background: rgba(255,255,255,0.22); color: #fff; }
+/* ── Scroll container: swipe between theory CARDS (not between swatches) ── */
 #theory-scroll {
   display: flex;
   overflow-x: auto; overflow-y: hidden;
@@ -329,7 +320,7 @@ body:not(.pro-mode) #theory-panel      { display: none !important; }
   overscroll-behavior: contain;
   scroll-behavior: auto;
 }
-#theory-panel.vertical #theory-scroll {
+#theory-panel.tp-left #theory-scroll {
   flex-direction: column;
   overflow-x: hidden; overflow-y: auto;
   scroll-snap-type: y mandatory;
@@ -338,25 +329,26 @@ body:not(.pro-mode) #theory-panel      { display: none !important; }
   scroll-behavior: auto;
 }
 #theory-scroll::-webkit-scrollbar { display: none; }
-/* ── Cards ── */
+/* ── Theory cards ── */
 .theory-card {
   flex: 0 0 100%; scroll-snap-align: start;
-  padding: 8px 9px 6px;
+  padding: 7px 8px 8px;
   display: flex; flex-direction: column; gap: 5px;
   box-sizing: border-box;
 }
-#theory-panel.vertical .theory-card {
-  height: 100%; flex: 0 0 100%;
-  padding: 6px 6px 5px;
+#theory-panel.tp-left .theory-card {
+  flex: 0 0 100%; width: 76px;
+  padding: 5px 4px; gap: 3px;
   justify-content: space-between;
 }
 .theory-card-head {
   display: flex; align-items: center; justify-content: space-between;
   min-height: 14px;
 }
+#theory-panel.tp-left .theory-card-head { display: none; }
 .theory-label {
   font-size: 8px; font-family: var(--mono); letter-spacing: .09em;
-  text-transform: uppercase; color: rgba(255,255,255,0.38);
+  text-transform: uppercase; color: rgba(255,255,255,0.45);
 }
 .theory-save-btn {
   background: rgba(255,255,255,0.07); border: none;
@@ -367,48 +359,49 @@ body:not(.pro-mode) #theory-panel      { display: none !important; }
   white-space: nowrap;
 }
 .theory-save-btn:active { background: var(--accent); color: #000; }
-/* ── Swatches ── */
+/* ── Swatches: ALL visible at once — no intra-card scrolling ── */
 .theory-swatches {
-  display: flex; gap: 4px; flex: 1;
+  display: flex; gap: 3px; flex: 1;
 }
-#theory-panel.vertical .theory-swatches {
+#theory-panel.tp-left .theory-swatches {
   flex-direction: column;
 }
 .theory-swatch {
-  flex: 1; min-width: 0; min-height: 44px; border-radius: 8px;
+  flex: 1; min-width: 0; min-height: 56px; border-radius: 8px;
   border: 1.5px solid rgba(255,255,255,0.09);
   cursor: pointer; transition: transform 0.1s;
   display: flex; align-items: flex-end; justify-content: center;
   overflow: hidden; position: relative; padding-bottom: 3px;
 }
-/* With 9-12 swatches in a row, let them shrink below 44px tall too */
-#theory-count-row + #theory-scroll .theory-swatch { min-height: 32px; }
-#theory-panel.vertical .theory-swatch {
-  min-height: 0; border-radius: 6px; padding-bottom: 0;
+#theory-panel.tp-left .theory-swatch {
+  min-height: 0; flex: 1; border-radius: 5px; padding-bottom: 0;
 }
-.theory-swatch:active { transform: scale(0.9); }
+.theory-swatch:active { transform: scale(0.93); }
 .theory-swatch-name {
   font-size: 6.5px; font-family: var(--mono); color: rgba(255,255,255,0.8);
   text-align: center; line-height: 1; position: relative; z-index:2;
   text-shadow: 0 1px 4px rgba(0,0,0,0.95); padding: 0 2px;
 }
-/* Hide text labels in vertical mode — too cramped */
-#theory-panel.vertical .theory-swatch-name { display: none; }
-/* ── Dot pagination ── */
+#theory-panel.tp-left .theory-swatch-name { display: none; }
+/* ── Dot navigation ── */
 #theory-dots {
-  display: flex; justify-content: center; gap: 4px;
+  display: flex; justify-content: center; align-items: center; gap: 6px;
   padding: 5px 0 7px; flex-shrink: 0;
 }
-#theory-panel.vertical #theory-dots {
-  flex-direction: column; align-items: center;
-  padding: 4px 0 6px;
+#theory-panel.tp-left #theory-dots {
+  flex-direction: column; padding: 4px 0 6px;
 }
 .theory-dot {
-  width: 4px; height: 4px; border-radius: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
   background: rgba(255,255,255,0.2); transition: background 0.15s;
-  cursor: pointer; flex-shrink: 0;
+  cursor: pointer; flex-shrink: 0; touch-action: manipulation;
 }
 .theory-dot.active { background: rgba(255,255,255,0.88); }
+/* ── Live-bar: slide down when tp-top strip is open ── */
+#live-bar.theory-on {
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + var(--theory-h, 0px) + 4px);
+  transition: top 0.18s;
+}
 
 #live-bar.dragging {
   cursor: grabbing;
@@ -2551,22 +2544,19 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
         <div id="live-undertone">—</div>
       </div>
-      <!-- v13.73 — Theory Switcher panel: floating, draggable, H+V modes -->
-      <!-- Panel lives outside the live-bar flow so it doesn't move with it -->
+      <!-- v13.77 — Theory Strip: anchored to top or left, swipe between theory cards -->
       <div id="theory-panel">
-        <div id="theory-panel-head">
-          <span id="theory-panel-title">Theory</span>
-          <div style="display:flex;gap:3px">
-            <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to current live colour">↺</button>
-            <button class="theory-hbtn" id="theory-orient-btn" onclick="Sampler.toggleTheoryOrientation()" title="Switch horizontal / vertical">⟺</button>
-            <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
+        <div id="theory-strip-head">
+          <div id="theory-count-row">
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(3)" data-cnt="3">3</button>
+            <button class="theory-cnt on" onclick="Sampler.setTheoryCount(6)" data-cnt="6">6</button>
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(9)" data-cnt="9">9</button>
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(12)" data-cnt="12">12</button>
           </div>
-        </div>
-        <div id="theory-count-row">
-          <button class="theory-cnt" onclick="Sampler.setTheoryCount(3)" data-cnt="3">3</button>
-          <button class="theory-cnt on" onclick="Sampler.setTheoryCount(6)" data-cnt="6">6</button>
-          <button class="theory-cnt" onclick="Sampler.setTheoryCount(9)" data-cnt="9">9</button>
-          <button class="theory-cnt" onclick="Sampler.setTheoryCount(12)" data-cnt="12">12</button>
+          <div style="flex:1"></div>
+          <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to live colour">↺</button>
+          <button class="theory-hbtn" id="theory-orient-btn" onclick="Sampler.toggleTheoryOrientation()" title="Switch top / left strip">⊡</button>
+          <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
         </div>
         <div id="theory-scroll"></div>
         <div id="theory-dots"></div>
@@ -2576,7 +2566,6 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <input type="file" id="bar-image-upload" accept="image/*" style="display:none" onchange="Sampler.loadFromBar(this)">
       </div>
       <!-- Resize handle for live-bar scaling -->
-      <button id="theory-toggle-btn" onclick="Sampler.toggleTheory()" ontouchstart="" title="Show colour theory palettes" style="position:absolute;bottom:-28px;right:8px;background:rgba(22,22,28,0.88);border:1px solid rgba(255,255,255,0.14);border-radius:20px;color:rgba(255,255,255,0.7);font-size:10px;padding:3px 9px;cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:9001;backdrop-filter:blur(8px);touch-action:manipulation">🎨 Theory</button>
       <span id="live-bar-resize" title="Drag to resize">⤡</span>
     </div>
     <!-- Save card -->
@@ -3499,7 +3488,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.76</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.77</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3626,7 +3615,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.76</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.77</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -3739,6 +3728,18 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </svg>
     </span>
     <span class="sbd-label">Immersive</span>
+  </button>
+  <!-- v13.77 — Theory: three-circle palette icon -->
+  <button class="sbd-btn pro-only" id="theory-dock-btn" title="Colour Theory"
+          onclick="Sampler.toggleTheory()">
+    <span class="sbd-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7.5" cy="12" r="5"/>
+        <circle cx="12.5" cy="12" r="5"/>
+        <circle cx="10" cy="8" r="5"/>
+      </svg>
+    </span>
+    <span class="sbd-label">Theory</span>
   </button>
 </div>
 
@@ -5758,7 +5759,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.76</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.77</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7108,14 +7109,12 @@ const Sampler={
 
 
   // v13.72 — Theory Switcher: generate 5 palette types from seed and display
-  // ── Theory Switcher (v13.73) ────────────────────────────────────────────
+  // ── Theory Switcher (v13.77) — fixed strip, top or left side ───────────────
   _theoryOpen: false,
-  _theoryOrientation: 'h',  // 'h' horizontal | 'v' vertical
-  _theoryPos: null,          // { x, y } user-dragged position — preserved across renders
-  _theoryLockedHex: null,    // hex locked on open; only changes on explicit sync
-  _theoryDragState: null,    // active drag { startX, startY, origX, origY }
-  _theoryCardIdx:   0,        // current visible theory card index (0-4)
-  _theoryCount: 6,            // swatches per theory: 3 | 6 | 9 | 12
+  _theoryMode: 'tp-top',    // 'tp-top' | 'tp-left'
+  _theoryLockedHex: null,   // hex locked on open; only changes on explicit sync
+  _theoryCardIdx:   0,      // current visible theory card index (0-4)
+  _theoryCount:     6,      // swatches per theory: 3 | 6 | 9 | 12
 
   toggleTheory() {
     if (!State.proMode) { App.toast('Theory Switcher is a Pro feature'); return; }
@@ -7126,6 +7125,10 @@ const Sampler={
     this._theoryOpen = false;
     const p = document.getElementById('theory-panel');
     if (p) p.classList.remove('show');
+    // Restore live-bar to normal position
+    const lb = document.getElementById('live-bar');
+    if (lb) lb.classList.remove('theory-on');
+    document.documentElement.style.setProperty('--theory-h', '0px');
   },
 
   // ↺ Sync button — update theory to current live colour
@@ -7142,106 +7145,51 @@ const Sampler={
     hex = hex || this.currentHex;
     if (!hex || hex === '#888888') { App.toast('Point camera at a colour first'); return; }
     this._theoryOpen = true;
-    this._theoryLockedHex = hex;  // lock to this hex; won't change until user syncs
+    this._theoryLockedHex = hex;
 
     const panel = document.getElementById('theory-panel');
     if (!panel) return;
 
-    // ── Orientation class ─────────────────────────────────────────────────
-    panel.classList.toggle('vertical', this._theoryOrientation === 'v');
-    const isV = this._theoryOrientation === 'v';
+    // Apply mode class — strip is full-width top or narrow left side
+    panel.className = '';
+    panel.classList.add('show');
+    if (this._theoryMode === 'tp-left') panel.classList.add('tp-left');
 
-    // ── Position: set only on FIRST open or after orientation toggle ──────
-    // Never recalculate after that — panel stays exactly where user puts it
-    if (!this._theoryPos) {
-      if (isV) {
-        // Default: right edge, middle-ish height
-        this._theoryPos = { x: window.innerWidth - 120, y: Math.round(window.innerHeight * 0.18) };
-      } else {
-        // Default: bottom-left corner, clear of nav
-        this._theoryPos = { x: 8, y: window.innerHeight - 200 };
+    this._renderTheory(hex);
+
+    // For tp-top: push live-bar down by the strip height
+    if (this._theoryMode === 'tp-top') {
+      const lb = document.getElementById('live-bar');
+      if (lb) {
+        requestAnimationFrame(() => {
+          const h = panel.offsetHeight;
+          document.documentElement.style.setProperty('--theory-h', h + 'px');
+          lb.classList.add('theory-on');
+        });
       }
     }
-    panel.style.transform = `translate(${this._theoryPos.x}px, ${this._theoryPos.y}px)`;
-
-    panel.classList.add('show');
-
-    // Wire drag once (pointer events, idempotent)
-    this._setupTheoryDrag(panel);
-    this._renderTheory(hex);
-  },
-
-  _setupTheoryDrag(panel) {
-    // Idempotent: remove old listeners by replacing the head element clone
-    const oldHead = document.getElementById('theory-panel-head');
-    if (!oldHead) return;
-    const head = oldHead.cloneNode(true);
-    oldHead.parentNode.replaceChild(head, oldHead);
-
-    const self = this;
-
-    // ── Pointer events: one code path for both touch and mouse ────────────
-    // setPointerCapture means the pointer is "captured" to this element —
-    // it keeps firing pointermove even when the finger leaves the header.
-    // This is the standard fix for "drag stalls on fast gesture" bugs.
-    head.addEventListener('pointerdown', e => {
-      // Don't intercept taps on the buttons inside the header
-      if (e.target.closest('button')) return;
-      e.preventDefault();
-      head.setPointerCapture(e.pointerId);
-      // getBoundingClientRect on a transform-positioned element returns
-      // the actual on-screen rect — same as the transform translate values
-      // (because we anchor at left:0, top:0 in CSS).
-      const r = panel.getBoundingClientRect();
-      self._theoryDragState = { startX: e.clientX, startY: e.clientY, origX: r.left, origY: r.top };
-    });
-
-    head.addEventListener('pointermove', e => {
-      const d = self._theoryDragState;
-      if (!d) return;
-      let nx = d.origX + (e.clientX - d.startX);
-      let ny = d.origY + (e.clientY - d.startY);
-      // Clamp inside viewport with 4 px margin
-      const pw = panel.offsetWidth, ph = panel.offsetHeight;
-      nx = Math.max(4, Math.min(window.innerWidth  - pw - 4, nx));
-      ny = Math.max(4, Math.min(window.innerHeight - ph - 4, ny));
-      // transform: translate() is GPU composited — zero layout cost
-      panel.style.transform = `translate(${nx}px, ${ny}px)`;
-      self._theoryPos = { x: nx, y: ny };
-    });
-
-    const endDrag = () => { self._theoryDragState = null; };
-    head.addEventListener('pointerup',     endDrag);
-    head.addEventListener('pointercancel', endDrag);
   },
 
   toggleTheoryOrientation() {
-    this._theoryOrientation = this._theoryOrientation === 'h' ? 'v' : 'h';
-    const panel = document.getElementById('theory-panel');
-    const btn   = document.getElementById('theory-orient-btn');
-    if (!panel) return;
-    const isV = this._theoryOrientation === 'v';
-    panel.classList.toggle('vertical', isV);
-    if (btn) btn.textContent = isV ? '⟺' : '⟻';
-    // Reset to a sensible default position for the new orientation
-    this._theoryPos = isV
-      ? { x: window.innerWidth - 120, y: Math.round(window.innerHeight * 0.18) }
-      : { x: 8, y: window.innerHeight - 200 };
-    panel.style.transform = `translate(${this._theoryPos.x}px, ${this._theoryPos.y}px)`;
-    // Re-render for new layout
-    if (this._theoryLockedHex) this._renderTheory(this._theoryLockedHex);
+    this._theoryMode = this._theoryMode === 'tp-top' ? 'tp-left' : 'tp-top';
+    // Clean up live-bar offset from previous mode
+    const lb = document.getElementById('live-bar');
+    if (lb) lb.classList.remove('theory-on');
+    document.documentElement.style.setProperty('--theory-h', '0px');
+    // Re-open in new mode
+    if (this._theoryLockedHex) this.showTheory(this._theoryLockedHex);
   },
 
   theorySaveAll() {
     const sc = document.getElementById('theory-scroll');
     if (!sc) return;
-    const isV = this._theoryOrientation === 'v';
-    const idx = isV
+    const isLeft = this._theoryMode === 'tp-left';
+    const cur = isLeft
       ? Math.round(sc.scrollTop  / Math.max(1, sc.offsetHeight))
       : Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
     const cards = sc.querySelectorAll('.theory-card');
-    if (!cards[idx]) return;
-    const swatches = cards[idx].querySelectorAll('.theory-swatch[data-hex]');
+    if (!cards[cur]) return;
+    const swatches = cards[cur].querySelectorAll('.theory-swatch[data-hex]');
     let added = 0;
     swatches.forEach(sw => {
       const h2 = sw.getAttribute('data-hex');
@@ -7333,7 +7281,8 @@ const Sampler={
     const dots = document.getElementById('theory-dots');
     if (!sc || !dots) return;
 
-    const isV = this._theoryOrientation === 'v';
+    // tp-left: vertical scroll between cards; tp-top: horizontal scroll
+    const isLeft = this._theoryMode === 'tp-left';
 
     // Use stored card index (more reliable than reading offsetWidth before layout settles)
     const prevIdx = this._theoryCardIdx || 0;
@@ -7351,49 +7300,40 @@ const Sampler={
       { name: wStyle,      hexes: this._theoryHexes('wildcard',  hex, n) },
     ];
 
-    // ── Render cards ───────────────────────────────────────────────────────
+    // ── Render cards: ALL swatches visible at once (no intra-card scroll) ─
     sc.innerHTML = theories.map(t => {
       const swatches = t.hexes.map(h2 => {
         const pName = CS.poeticName(h2);
-        const label = isV ? '' : `<div class="theory-swatch-name">${pName.length > 13 ? pName.slice(0,11)+'…' : pName}</div>`;
+        // In left-strip mode, labels are hidden by CSS — omit for DOM cleanliness
+        const label = isLeft ? '' : `<div class="theory-swatch-name">${pName.length > 13 ? pName.slice(0,11)+'…' : pName}</div>`;
         return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="PaletteBuilder.addColour('${h2}');Haptics&&Haptics.light()">${label}</div>`;
       }).join('');
 
-      return isV
-        // Vertical card: label top, swatches fill, Save All bottom
-        ? `<div class="theory-card">
+      return `<div class="theory-card">
+          <div class="theory-card-head">
             <div class="theory-label">${t.name}</div>
-            <div class="theory-swatches">${swatches}</div>
-            <button class="theory-save-btn" onclick="Sampler.theorySaveAll()">+All</button>
-          </div>`
-        // Horizontal card: label+save-all in header row, swatches below
-        : `<div class="theory-card">
-            <div class="theory-card-head">
-              <div class="theory-label">${t.name}</div>
-              <button class="theory-save-btn" onclick="Sampler.theorySaveAll()">+ Save All</button>
-            </div>
-            <div class="theory-swatches">${swatches}</div>
-          </div>`;
+            <button class="theory-save-btn" onclick="Sampler.theorySaveAll()">+ Save All</button>
+          </div>
+          <div class="theory-swatches">${swatches}</div>
+        </div>`;
     }).join('');
 
-    // ── Dot pagination ─────────────────────────────────────────────────────
+    // ── Dot navigation ─────────────────────────────────────────────────────
     dots.innerHTML = theories.map((_, i) => {
-      const scrollCmd = isV
+      const scrollCmd = isLeft
         ? `document.getElementById('theory-scroll').scrollTo({top:${i}*document.getElementById('theory-scroll').offsetHeight,behavior:'smooth'})`
         : `document.getElementById('theory-scroll').scrollTo({left:${i}*document.getElementById('theory-scroll').offsetWidth,behavior:'smooth'})`;
       return `<div class="theory-dot${i===prevIdx?' active':''}" onclick="${scrollCmd}"></div>`;
     }).join('');
 
-    // Double rAF: first frame triggers layout; second reads correct dimensions.
-    // Disable snap temporarily so the restore is truly instant (no snap animation).
+    // Double rAF: layout must settle before reading dimensions for scroll restore
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const dim = isV ? sc.offsetHeight : sc.offsetWidth;
+        const dim = isLeft ? sc.offsetHeight : sc.offsetWidth;
         if (dim > 0) {
           sc.style.scrollSnapType = 'none';
-          if (isV) sc.scrollTop  = prevIdx * dim;
-          else     sc.scrollLeft = prevIdx * dim;
-          // Re-enable snap after position settles
+          if (isLeft) sc.scrollTop  = prevIdx * dim;
+          else        sc.scrollLeft = prevIdx * dim;
           requestAnimationFrame(() => { sc.style.scrollSnapType = ''; });
         }
       });
@@ -7401,7 +7341,7 @@ const Sampler={
 
     // Keep dots in sync + persist card index for stable re-renders
     sc.onscroll = () => {
-      const cur = isV
+      const cur = isLeft
         ? Math.round(sc.scrollTop  / Math.max(1, sc.offsetHeight))
         : Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
       this._theoryCardIdx = cur;
@@ -14575,9 +14515,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v24';
+    const SW_CACHE = 'spectrum-v25';
     const swSrc = `
-const CACHE='spectrum-v24';
+const CACHE='spectrum-v25';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
