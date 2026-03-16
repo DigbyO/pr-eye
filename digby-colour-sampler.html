@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.74 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.75 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.74</title>
+<title>Digby v13.75</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.74';  // v:v13.74 — Theory Panel: dynamic N swatches; picker seeds last colour
+  const APP_VERSION = '13.75';  // v:v13.75 — Theory Panel: transform drag, pointer capture, stable scroll restore
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -275,12 +275,14 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   box-shadow: 0 10px 48px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.07);
   flex-direction: column;
   overflow: hidden;
-  /* size set by JS; default horizontal */
+  /* anchor at viewport origin; position set via transform by JS */
+  left: 0; top: 0;
   width: min(300px, calc(100vw - 24px));
-  /* no transition on position — instant so drag feels glued to finger */
+  /* position updates are transform — no transition so drag is instant */
   transition: opacity 0.18s;
   user-select: none; -webkit-user-select: none;
-  will-change: left, top;
+  /* transform is GPU-composited → zero layout cost during drag */
+  will-change: transform;
 }
 #theory-panel.show { display: flex; }
 /* Vertical orientation: narrow strip */
@@ -320,12 +322,16 @@ body.active-tab-sampler #live-bar { display: flex !important; }
   scrollbar-width: none;
   touch-action: pan-x;
   flex: 1;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
 }
 #theory-panel.vertical #theory-scroll {
   flex-direction: column;
   overflow-x: hidden; overflow-y: auto;
   scroll-snap-type: y mandatory;
   touch-action: pan-y;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
 }
 #theory-scroll::-webkit-scrollbar { display: none; }
 /* ── Cards ── */
@@ -3489,7 +3495,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.74</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.75</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3616,7 +3622,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.74</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.75</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5748,7 +5754,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.74</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.75</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7104,6 +7110,7 @@ const Sampler={
   _theoryPos: null,          // { x, y } user-dragged position — preserved across renders
   _theoryLockedHex: null,    // hex locked on open; only changes on explicit sync
   _theoryDragState: null,    // active drag { startX, startY, origX, origY }
+  _theoryCardIdx:   0,        // current visible theory card index (0-4)
   _theoryCount: 6,            // swatches per theory: 3 | 6 | 9 | 12
 
   toggleTheory() {
@@ -7149,59 +7156,57 @@ const Sampler={
         this._theoryPos = { x: 8, y: window.innerHeight - 200 };
       }
     }
-    panel.style.left = this._theoryPos.x + 'px';
-    panel.style.top  = this._theoryPos.y + 'px';
+    panel.style.transform = `translate(${this._theoryPos.x}px, ${this._theoryPos.y}px)`;
 
     panel.classList.add('show');
 
-    // Wire drag once
+    // Wire drag once (pointer events, idempotent)
     this._setupTheoryDrag(panel);
     this._renderTheory(hex);
   },
 
   _setupTheoryDrag(panel) {
-    if (panel._dragReady) return;
-    panel._dragReady = true;
-    const head = document.getElementById('theory-panel-head');
-    if (!head) return;
+    // Idempotent: remove old listeners by replacing the head element clone
+    const oldHead = document.getElementById('theory-panel-head');
+    if (!oldHead) return;
+    const head = oldHead.cloneNode(true);
+    oldHead.parentNode.replaceChild(head, oldHead);
+
     const self = this;
 
-    const dragStart = (cx, cy) => {
+    // ── Pointer events: one code path for both touch and mouse ────────────
+    // setPointerCapture means the pointer is "captured" to this element —
+    // it keeps firing pointermove even when the finger leaves the header.
+    // This is the standard fix for "drag stalls on fast gesture" bugs.
+    head.addEventListener('pointerdown', e => {
+      // Don't intercept taps on the buttons inside the header
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      head.setPointerCapture(e.pointerId);
+      // getBoundingClientRect on a transform-positioned element returns
+      // the actual on-screen rect — same as the transform translate values
+      // (because we anchor at left:0, top:0 in CSS).
       const r = panel.getBoundingClientRect();
-      self._theoryDragState = { startX: cx, startY: cy, origX: r.left, origY: r.top };
-    };
-    const dragMove = (cx, cy) => {
+      self._theoryDragState = { startX: e.clientX, startY: e.clientY, origX: r.left, origY: r.top };
+    });
+
+    head.addEventListener('pointermove', e => {
       const d = self._theoryDragState;
       if (!d) return;
-      let nx = d.origX + (cx - d.startX);
-      let ny = d.origY + (cy - d.startY);
-      // Clamp inside viewport
+      let nx = d.origX + (e.clientX - d.startX);
+      let ny = d.origY + (e.clientY - d.startY);
+      // Clamp inside viewport with 4 px margin
       const pw = panel.offsetWidth, ph = panel.offsetHeight;
       nx = Math.max(4, Math.min(window.innerWidth  - pw - 4, nx));
       ny = Math.max(4, Math.min(window.innerHeight - ph - 4, ny));
-      panel.style.left = nx + 'px';
-      panel.style.top  = ny + 'px';
+      // transform: translate() is GPU composited — zero layout cost
+      panel.style.transform = `translate(${nx}px, ${ny}px)`;
       self._theoryPos = { x: nx, y: ny };
-    };
-    const dragEnd = () => { self._theoryDragState = null; };
+    });
 
-    // Touch
-    head.addEventListener('touchstart', e => {
-      const t = e.touches[0];
-      dragStart(t.clientX, t.clientY);
-    }, { passive: true });
-    head.addEventListener('touchmove', e => {
-      if (!self._theoryDragState) return;
-      e.stopPropagation();
-      const t = e.touches[0];
-      dragMove(t.clientX, t.clientY);
-    }, { passive: false });
-    head.addEventListener('touchend', dragEnd, { passive: true });
-
-    // Mouse
-    head.addEventListener('mousedown', e => dragStart(e.clientX, e.clientY));
-    document.addEventListener('mousemove', e => { if (self._theoryDragState) dragMove(e.clientX, e.clientY); });
-    document.addEventListener('mouseup', dragEnd);
+    const endDrag = () => { self._theoryDragState = null; };
+    head.addEventListener('pointerup',     endDrag);
+    head.addEventListener('pointercancel', endDrag);
   },
 
   toggleTheoryOrientation() {
@@ -7216,8 +7221,7 @@ const Sampler={
     this._theoryPos = isV
       ? { x: window.innerWidth - 120, y: Math.round(window.innerHeight * 0.18) }
       : { x: 8, y: window.innerHeight - 200 };
-    panel.style.left = this._theoryPos.x + 'px';
-    panel.style.top  = this._theoryPos.y + 'px';
+    panel.style.transform = `translate(${this._theoryPos.x}px, ${this._theoryPos.y}px)`;
     // Re-render for new layout
     if (this._theoryLockedHex) this._renderTheory(this._theoryLockedHex);
   },
@@ -7325,10 +7329,8 @@ const Sampler={
 
     const isV = this._theoryOrientation === 'v';
 
-    // Preserve current scroll index across re-renders
-    const prevIdx = isV
-      ? Math.round(sc.scrollTop  / Math.max(1, sc.offsetHeight))
-      : Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
+    // Use stored card index (more reliable than reading offsetWidth before layout settles)
+    const prevIdx = this._theoryCardIdx || 0;
 
     // ── Build N-swatch theory palettes via LCH generator ─────────────────
     const n = this._theoryCount || 6;
@@ -7376,17 +7378,27 @@ const Sampler={
       return `<div class="theory-dot${i===prevIdx?' active':''}" onclick="${scrollCmd}"></div>`;
     }).join('');
 
-    // Restore previous scroll position
+    // Double rAF: first frame triggers layout; second reads correct dimensions.
+    // Disable snap temporarily so the restore is truly instant (no snap animation).
     requestAnimationFrame(() => {
-      if (isV) sc.scrollTop  = prevIdx * sc.offsetHeight;
-      else     sc.scrollLeft = prevIdx * sc.offsetWidth;
+      requestAnimationFrame(() => {
+        const dim = isV ? sc.offsetHeight : sc.offsetWidth;
+        if (dim > 0) {
+          sc.style.scrollSnapType = 'none';
+          if (isV) sc.scrollTop  = prevIdx * dim;
+          else     sc.scrollLeft = prevIdx * dim;
+          // Re-enable snap after position settles
+          requestAnimationFrame(() => { sc.style.scrollSnapType = ''; });
+        }
+      });
     });
 
-    // Keep dots in sync as user swipes
+    // Keep dots in sync + persist card index for stable re-renders
     sc.onscroll = () => {
       const cur = isV
         ? Math.round(sc.scrollTop  / Math.max(1, sc.offsetHeight))
         : Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
+      this._theoryCardIdx = cur;
       dots.querySelectorAll('.theory-dot').forEach((d,i) => d.classList.toggle('active', i===cur));
     };
   },
@@ -14557,9 +14569,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v22';
+    const SW_CACHE = 'spectrum-v23';
     const swSrc = `
-const CACHE='spectrum-v22';
+const CACHE='spectrum-v23';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
