@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.69 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.70 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.69</title>
+<title>Digby v13.70</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.69';  // v:v13.65 — haptics + landscape freeze fix
+  const APP_VERSION = '13.70';  // v:v13.65 — haptics + landscape freeze fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -180,16 +180,10 @@ a{color:var(--accent);text-decoration:none}
   /* v109: flex:1 fills available col height — eliminates black gap */
 }
 #cam-video{
-  /* v:v13.69 — min-w/min-h auto technique: guaranteed correct aspect ratio
-     even when Android Chrome doesn't honour object-fit on MediaStream video */
-  position:absolute;
-  top:50%;left:50%;
-  min-width:100%;min-height:100%;
-  width:auto;height:auto;
-  transform:translate(-50%,-50%);
-  transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
-  display:block;z-index:1;
+  position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;
+  object-fit:cover;display:block;
   will-change:transform;
+  transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
 }
 #cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
@@ -3244,7 +3238,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.69</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.70</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3371,7 +3365,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.69</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.70</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5448,7 +5442,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.69</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.70</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -5923,6 +5917,9 @@ const Sampler={
 
   // v446: centralised stream teardown — prevents camera locks & battery drain
   stopStream() {
+    // v:v13.70 — reset JS-applied sizing so next camera start is clean
+    var _v = document.getElementById('cam-video');
+    if (_v) { _v.style.width=''; _v.style.height=''; _v.style.top=''; _v.style.left=''; _v.style.objectFit=''; }
     if (this.stream) {
       try {
         this.stream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
@@ -6061,6 +6058,28 @@ const Sampler={
       try {
         await v.play();
         _diag('play() OK — w:' + (v.videoWidth||'?') + ' h:' + (v.videoHeight||'?'));
+        // v:v13.70 — correct aspect ratio if stream dimensions differ from container
+        (function _fixVideoAspect() {
+          function apply() {
+            var vw = v.videoWidth, vh = v.videoHeight;
+            if (!vw || !vh) return;
+            var wrap = v.parentElement;
+            if (!wrap) return;
+            var cw = wrap.offsetWidth, ch = wrap.offsetHeight;
+            if (!cw || !ch) return;
+            var videoRatio = vw / vh, containerRatio = cw / ch;
+            if (Math.abs(videoRatio - containerRatio) < 0.05) return;
+            var scale = videoRatio > containerRatio ? ch / vh : cw / vw;
+            var dw = vw * scale, dh = vh * scale;
+            v.style.width  = dw + 'px';
+            v.style.height = dh + 'px';
+            v.style.top    = ((ch - dh) / 2) + 'px';
+            v.style.left   = ((cw - dw) / 2) + 'px';
+            v.style.objectFit = '';
+          }
+          if (v.videoWidth) { apply(); }
+          else { v.addEventListener('loadedmetadata', apply, {once:true}); }
+        })();
         // Hide diag after 4s once playing
         setTimeout(()=>{const d=document.getElementById('cam-diag-bar');if(d)d.style.display='none';},4000);
       } catch (err) {
@@ -6657,8 +6676,7 @@ const Sampler={
   toggle2xZoom(){
     this._zoom2x = !this._zoom2x;
     const v = document.getElementById('cam-video');
-    // v:v13.69 — base translate(-50%,-50%) must be composed with scale
-    const xform = this._zoom2x ? 'translate(-50%,-50%) scale(2)' : 'translate(-50%,-50%) scale(1)';
+    const xform = this._zoom2x ? 'scale(2)' : 'scale(1)';
     const trans  = 'transform 0.22s cubic-bezier(0.22,1,0.36,1)';
     if (v) { v.style.transition = trans; v.style.transform = xform; }
     // v:F1.11 — scale canvas in lockstep so LUT overlay zooms too
@@ -13780,9 +13798,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v17';
+    const SW_CACHE = 'spectrum-v18';
     const swSrc = `
-const CACHE='spectrum-v17';
+const CACHE='spectrum-v18';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
