@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.61';  // v:v13.61 — premium dock SVG icons
+  const APP_VERSION = '13.62';  // v:v13.62 — polaroid export copy fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -13822,9 +13822,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v9';
+    const SW_CACHE = 'spectrum-v10';
     const swSrc = `
-const CACHE='spectrum-v9';
+const CACHE='spectrum-v10';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15394,7 +15394,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     const SW_PAD      = 5;           // inner strip top/bottom padding
     const SW_GAP      = 5;           // gap between individual swatches
     const SW_COLOR_H  = 68;          // taller colour blocks — more visual weight
-    const SW_LABEL_H  = 18;          // compact label strip (7-8px mono reads in 18px)
+    const SW_LABEL_H  = 32;          // v:v13.62 — two-line label strip (name + hex)
     const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD; // total strip = 96px
     const BYLINE_PAD  = 14;          // v:v13.51 was 2 — too tight, digby.shop text clipped
 
@@ -15524,6 +15524,12 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
 
+      // v:v13.62 — hard-clip each swatch column: PM ink can't spill past edge
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, swLabelY, w, SW_LABEL_H + SW_PAD);
+      ctx.clip();
+
       if (showGeo) {
         const geoStr = GeoCapture.label(GeoCapture.last);
         if (geoStr) {
@@ -15537,8 +15543,8 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
         let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
         // Strip the prefix (e.g. "Sunlit / ") for compactness if too wide
         let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
-        ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
-        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `bold ${fSize}px "Permanent Marker",cursive`; }
+        ctx.font = `400 ${fSize}px "Permanent Marker",cursive`;
+        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `400 ${fSize}px "Permanent Marker",cursive`; }
         if (ctx.measureText(rawName).width > maxTW) {
           // Try without prefix
           const slash = rawName.indexOf(' / ');
@@ -15547,18 +15553,18 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
           if (ctx.measureText(rawName).width > maxTW) rawName = rawName + '…';
         }
         ctx.fillStyle = '#000000';
-        ctx.fillText(rawName, cx, swLabelY + 10, maxTW);
-        // HEX below name
+        ctx.fillText(rawName, cx, swLabelY + 12, maxTW);
+        // HEX sits at y=26 in the expanded 32px strip
         const hSize = Math.max(6, Math.floor(fSize * 0.72));
-        ctx.font      = `bold ${hSize}px "Space Mono",monospace`;
+        ctx.font      = `${hSize}px "Space Mono",monospace`;
         ctx.fillStyle = '#444444';
-        ctx.fillText(hex.toUpperCase(), cx, swLabelY + 22, maxTW);
+        ctx.fillText(hex.toUpperCase(), cx, swLabelY + 26, maxTW);
 
       } else if (showName) {
         let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
         let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
-        ctx.font = `bold ${fSize}px "Permanent Marker",cursive`;
-        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `bold ${fSize}px "Permanent Marker",cursive`; }
+        ctx.font = `400 ${fSize}px "Permanent Marker",cursive`;
+        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `400 ${fSize}px "Permanent Marker",cursive`; }
         if (ctx.measureText(rawName).width > maxTW) {
           const slash = rawName.indexOf(' / ');
           if (slash !== -1) rawName = rawName.slice(slash + 3);
@@ -15569,11 +15575,13 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
 
       } else if (showHex) {
         const hSize = Math.min(10, Math.max(6, Math.floor(w / 7)));
-        ctx.font      = `bold ${hSize}px "Space Mono",monospace`;
+        ctx.font      = `${hSize}px "Space Mono",monospace`;
         ctx.fillStyle = '#000000';
         ctx.fillText(hex.toUpperCase(), cx, swLabelY + SW_LABEL_H / 2, maxTW);
       }
       // slMode === 'none': no labels
+
+      ctx.restore();  // v:v13.62 end per-swatch label clip
     });
 
     // ── digby.shop byline ────────────────────────────────────────────────────
