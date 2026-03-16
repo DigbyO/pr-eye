@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.75 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.76 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.75</title>
+<title>Digby v13.76</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.75';  // v:v13.75 — Theory Panel: transform drag, pointer capture, stable scroll restore
+  const APP_VERSION = '13.76';  // v:v13.76 — Theory Switcher gated to Pro Mode
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -262,6 +262,10 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 }
 #theory-panel.vertical .theory-cnt { padding: 2px 5px; font-size: 8px; flex: 1; }
 
+
+/* v13.76 — Theory Switcher is a Pro feature */
+body:not(.pro-mode) #theory-toggle-btn { display: none !important; }
+body:not(.pro-mode) #theory-panel      { display: none !important; }
 /* v13.73 — Theory Panel: floating, independently draggable, H+V modes */
 #theory-panel {
   display: none;
@@ -3495,7 +3499,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.75</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.76</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3622,7 +3626,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.75</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.76</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5754,7 +5758,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.75</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.76</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7114,6 +7118,7 @@ const Sampler={
   _theoryCount: 6,            // swatches per theory: 3 | 6 | 9 | 12
 
   toggleTheory() {
+    if (!State.proMode) { App.toast('Theory Switcher is a Pro feature'); return; }
     this._theoryOpen ? this.hideTheory() : this.showTheory();
   },
 
@@ -7133,6 +7138,7 @@ const Sampler={
   },
 
   showTheory(hex) {
+    if (!State.proMode) { App.toast('Theory Switcher is a Pro feature'); return; }
     hex = hex || this.currentHex;
     if (!hex || hex === '#888888') { App.toast('Point camera at a colour first'); return; }
     this._theoryOpen = true;
@@ -14569,9 +14575,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v23';
+    const SW_CACHE = 'spectrum-v24';
     const swSrc = `
-const CACHE='spectrum-v23';
+const CACHE='spectrum-v24';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
