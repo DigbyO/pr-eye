@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.78 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.79 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.78</title>
+<title>Digby v13.79</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.78';  // v:v13.78 — Theory Strip: fixed height, stable flex layout
+  const APP_VERSION = '13.79';  // v:v13.79 — Theory Strip: clear inline style, transform:none guard
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -237,24 +237,25 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 
 
 /* v13.74 — Theory count selector row */
-/* v13.78 — Theory Strip: fixed-height so flex children size correctly */
+/* v13.79 — Theory Strip: transform:none overrides any inline style from old cache */
 body:not(.pro-mode) #theory-panel    { display: none !important; }
 body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 
-/* ── tp-top (default): full-width strip, FIXED 96px height ── */
-/* Fixed height is critical — it gives #theory-scroll (flex:1) a defined   */
-/* space to fill; without it flex:1 collapses to 0 and swatches vanish.    */
+/* ── tp-top (default): full-width strip, FIXED 100px height ── */
 #theory-panel {
   display: none;
   position: fixed;
   z-index: 9050;
   left: 0; right: 0;
   top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
-  height: 96px;
-  background: rgba(8,8,12,0.97);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  backdrop-filter: blur(22px) saturate(160%);
-  border-bottom: 1px solid rgba(255,255,255,0.11);
+  height: 100px;
+  /* CRITICAL: override any inline transform set by old cached JS */
+  transform: none !important;
+  background: rgba(6,6,10,0.98);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.13);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.5);
   flex-direction: column;
   user-select: none; -webkit-user-select: none;
   overflow: hidden;
@@ -266,18 +267,19 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   left: 0; right: auto;
   top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--tab-h));
-  width: 78px; height: auto;
+  width: 80px; height: auto;
   border-bottom: none;
-  border-right: 1px solid rgba(255,255,255,0.11);
+  border-right: 1px solid rgba(255,255,255,0.12);
 }
 
 /* ── Strip header: count | name+dots | actions ── */
 #theory-strip-head {
   display: flex; align-items: center;
-  height: 30px; flex-shrink: 0;
-  padding: 0 8px; gap: 5px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  height: 32px; flex-shrink: 0;
+  padding: 0 10px; gap: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   box-sizing: border-box;
+  background: rgba(255,255,255,0.025);
 }
 #theory-panel.tp-left #theory-strip-head {
   flex-direction: column; height: auto; flex-shrink: 0;
@@ -320,11 +322,14 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 }
 #theory-panel.tp-left #theory-dots { flex-direction: column; }
 .theory-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: rgba(255,255,255,0.2); transition: background 0.15s;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); transition: background 0.18s;
   cursor: pointer; flex-shrink: 0; touch-action: manipulation;
 }
-.theory-dot.active { background: rgba(255,255,255,0.88); }
+.theory-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 5px rgba(212,165,53,0.6);
+}
 
 /* ── Action buttons ── */
 #theory-actions {
@@ -370,7 +375,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   box-sizing: border-box;
 }
 #theory-panel.tp-left .theory-card {
-  flex: 0 0 100%; width: 78px;
+  flex: 0 0 100%; width: 80px;
   padding: 4px; flex-direction: column;
 }
 
@@ -387,15 +392,14 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 #theory-panel.tp-left .theory-swatch {
-  min-height: 0; flex: 1; border-radius: 5px;
+  min-height: 0; flex: 1; border-radius: 6px;
 }
 .theory-swatch:active { transform: scale(0.94); }
 
-/* ── Live-bar: hardcoded 96px offset when tp-top strip is open ── */
-/* (avoids rAF measurement which may read 0 before layout completes) */
+/* ── Live-bar: offset by theory strip height when tp-top is open ── */
 #live-bar.theory-on {
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 96px + 4px);
-  transition: top 0.18s;
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 100px + 4px);
+  transition: top 0.2s ease;
 }
 
 #live-bar.dragging {
@@ -3488,7 +3492,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.78</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.79</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3615,7 +3619,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.78</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.79</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5759,7 +5763,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.78</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.79</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7148,6 +7152,10 @@ const Sampler={
 
     const panel = document.getElementById('theory-panel');
     if (!panel) return;
+
+    // CRITICAL: clear any inline style (e.g. transform from old cached code)
+    // CSS `top` cannot override an inline transform — must wipe it first
+    panel.removeAttribute('style');
 
     // Apply mode class — strip is full-width top or narrow left side
     panel.className = '';
@@ -14499,9 +14507,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v26';
+    const SW_CACHE = 'spectrum-v27';
     const swSrc = `
-const CACHE='spectrum-v26';
+const CACHE='spectrum-v27';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
