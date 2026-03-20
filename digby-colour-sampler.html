@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.94 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.95 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.94</title>
+<title>Digby v13.95</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.94';  // v:v13.94 — Liquid Scroll, Pinch-to-Resize, Focus Dim
+  const APP_VERSION = '13.95';  // v:v13.95 — Bottom Row, Reactive Theory, Pinch Fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1259,13 +1259,20 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 #palette-builder-panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 /* v:v13.90 — Filmstrip: horizontal scroll row instead of fixed grid */
 /* v:v13.94 — liquid scroll: smooth behavior + pan-x hint eliminates start-up lag */
+/* v:v13.95 — Bottom-Row: fixed to viewport bottom so slots are always visible */
 #pb-grid{
-  display:flex;
-  flex-direction:row;
+  position:fixed!important;
+  bottom:env(safe-area-inset-bottom,20px)!important;
+  left:0;
+  width:100vw;
+  display:flex!important;
+  flex-direction:row!important;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  z-index:1000;
   overflow-x:auto;
-  white-space:nowrap;
-  gap:10px;
-  padding:10px;
   -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
   touch-action:pan-x;
@@ -3608,7 +3615,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.94</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.95</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3735,7 +3742,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.94</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.95</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5892,7 +5899,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.94</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.95</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -13756,6 +13763,8 @@ const PaletteBuilder = {
     this._pushHistory();
     this.colours.push(this._makeEntry(hex));
     this.render();
+    // v:v13.95 — Reactive Theory: refresh harmony panel when colour is added
+    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} }
     App.toast(`${CS.autoName(hex)} added`);
   },
 
@@ -13775,6 +13784,8 @@ const PaletteBuilder = {
     }
     Haptics && Haptics.medium();
     this.render();
+    // v:v13.95 — Reactive Theory: refresh harmony panel when conveyor adds colour
+    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} }
   },
 
   saveToLib(idx) {
@@ -15080,9 +15091,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v46';
+    const SW_CACHE = 'spectrum-v47';
     const swSrc = `
-const CACHE='spectrum-v46';
+const CACHE='spectrum-v47';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -17192,6 +17203,7 @@ const AIColourName = {
   grid.addEventListener('touchmove', function(e) {
     if (!pinchActive || e.touches.length !== 2) return;
     e.preventDefault();
+    e.stopPropagation(); // v:v13.95 — prevent pinch bubbling to camera pointer events
     var ratio = pDist(e.touches) / pinchStartDist;
     currentScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, pinchStartScale * ratio));
     panel.style.transform = 'scale(' + currentScale.toFixed(3) + ')';
