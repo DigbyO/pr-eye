@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.04 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.09 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.04</title>
+<title>Digby v14.09</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.08';  // v:v14.08 — Theory Freeze (clean from v14.04 baseline)
+  const APP_VERSION = '14.09';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1318,6 +1318,29 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
   width: 100%;
 }
 #palette-builder-panel::-webkit-scrollbar{display:none}
+/* v:v14.09 — multi-palette page navigator */
+#pb-page-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 4px 12px 0; flex-shrink: 0; min-height: 24px;
+}
+.pb-pg-btn {
+  background: none; border: none; color: var(--accent);
+  font-size: 24px; line-height: 1; cursor: pointer; padding: 0 4px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  visibility: hidden; opacity: 0.85;
+}
+.pb-pg-btn:active { opacity: 0.5; }
+#pb-page-dots { display: flex; gap: 7px; align-items: center; }
+.pb-page-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.22); cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.pb-page-dot.on {
+  background: var(--accent); transform: scale(1.35);
+  box-shadow: 0 0 6px rgba(212,165,53,0.55);
+}
 /* v:v14.02 — CSS Grid: 3-column card layout on palette tab */
 #pb-grid {
   display: grid;
@@ -3577,6 +3600,12 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
             <button class="tog-btn" id="pbc12" onclick="PaletteBuilder.setCapacity(12)" title="12-slot palette">12</button>
           </div>
         </div>
+        <!-- v:v14.09 — multi-palette page nav -->
+        <div id="pb-page-nav">
+          <button id="pb-page-prev" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx-1)" title="Previous palette">&#8249;</button>
+          <div id="pb-page-dots"></div>
+          <button id="pb-page-next" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx+1)" title="Next palette">&#8250;</button>
+        </div>
         <div id="pb-grid"></div>
         <div id="pb-actions">
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleWheelPicker()">+ Wheel</button>
@@ -5441,6 +5470,22 @@ const App={
     if(t==='prompter') Prompter.render();
     if(t==='palette'){
       try{ PaletteBuilder.setCapacity(12); PaletteBuilder.render(); }catch(e){}  // v:v14.02 — always 12
+      // v:v14.09 — swipe left/right on pb-grid to switch palette pages (attach once)
+      if (!PaletteBuilder._swipeInit) {
+        PaletteBuilder._swipeInit = true;
+        const _pg = document.getElementById('pb-grid');
+        if (_pg) {
+          let _sx = 0, _sy = 0;
+          _pg.addEventListener('pointerdown', e => { _sx = e.clientX; _sy = e.clientY; }, {passive:true});
+          _pg.addEventListener('pointerup', e => {
+            const dx = e.clientX - _sx, dy = e.clientY - _sy;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 55) {
+              dx < 0 ? PaletteBuilder.goToPage(PaletteBuilder.pageIdx + 1)
+                     : PaletteBuilder.goToPage(PaletteBuilder.pageIdx - 1);
+            }
+          }, {passive:true});
+        }
+      }
       // v:F12.9 — scroll palette module to top on every open
       const _pm=document.getElementById('mod-palette');
       if(_pm){const _ms=_pm.querySelector('.mod-scroll');if(_ms)_ms.scrollTop=0;}
@@ -13710,7 +13755,9 @@ const ColourGenerator = {
 <script>
 const PaletteBuilder = {
   MAX: 12,
-  colours: [],
+  colours: [],        // always mirrors pages[pageIdx]
+  pages:   [[]],      // v:v14.09 — array of palette pages (each = colours array)
+  pageIdx: 0,         // v:v14.09 — active page index
   suggestTheme: 'harmony',
   _dragIdx: null,
   historyStack: [],   // ── Undo history: each entry is an array of hex strings
@@ -13891,7 +13938,15 @@ const PaletteBuilder = {
   addColour(hex) {
     if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) { App.toast('Invalid colour'); return; }
     if (this._isDuplicate(hex)) { App.toast('Already in palette'); return; }
-    if (this.colours.length >= this.MAX) { App.toast(`Palette full (max ${this.MAX})`); return; }
+    if (this.colours.length >= this.MAX) {
+      // v:v14.09 — palette full: auto-create next page rather than blocking
+      this.pages[this.pageIdx] = this.colours.slice();
+      this.pageIdx = this.pages.length;
+      this.pages.push([]);
+      this.colours = this.pages[this.pageIdx];
+      this.render();
+      App.toast(`Palette ${this.pageIdx + 1} started — swipe to switch`);
+    }
     Haptics.medium(); // v:v13.65 colour added to palette
     this._pushHistory();
     this.colours.push(this._makeEntry(hex));
@@ -13965,6 +14020,28 @@ const PaletteBuilder = {
     App.toast(n + '-slot palette activated');
   },
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
+
+  // v:v14.09 — Multi-page palette navigation ───────────────────────────────
+  goToPage(idx) {
+    if (idx < 0 || idx >= this.pages.length) return;
+    this.pages[this.pageIdx] = this.colours.slice();
+    this.pageIdx = idx;
+    this.colours = this.pages[this.pageIdx] ? this.pages[this.pageIdx].slice() : [];
+    this.pages[this.pageIdx] = this.colours;
+    this.render();
+  },
+  _renderPageDots() {
+    const c = document.getElementById('pb-page-dots');
+    if (!c || this.pages.length <= 1) { if(c) c.innerHTML = ''; return; }
+    c.innerHTML = this.pages.map((_, i) =>
+      `<span class="pb-page-dot${i === this.pageIdx ? ' on' : ''}"
+             onclick="PaletteBuilder.goToPage(${i})" title="Palette ${i + 1}"></span>`
+    ).join('');
+    const prev = document.getElementById('pb-page-prev');
+    const next = document.getElementById('pb-page-next');
+    if (prev) prev.style.visibility = this.pageIdx > 0 ? 'visible' : 'hidden';
+    if (next) next.style.visibility = this.pageIdx < this.pages.length - 1 ? 'visible' : 'hidden';
+  },
 
   //  INLINE WHEEL PICKER 
   toggleWheelPicker() {
@@ -15115,6 +15192,7 @@ const PaletteBuilder = {
       html += `<div class="pb-slot-empty" onclick="PaletteBuilder.addFromWheel()">+</div>`;
     }
     grid.innerHTML = html;
+    try { this._renderPageDots(); } catch(e) {}  // v:v14.09
     // v:F1.15 — Mood DNA: 2-word label from palette hue/saturation average
     const moodEl = document.getElementById('pb-mood-label');
     if(moodEl){
@@ -15224,9 +15302,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v60';
+    const SW_CACHE = 'spectrum-v61';
     const swSrc = `
-const CACHE='spectrum-v60';
+const CACHE='spectrum-v61';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
