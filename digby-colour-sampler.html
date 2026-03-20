@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.86 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.94 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.86</title>
+<title>Digby v13.94</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.86';  // v:v13.86 — WB relocation, Pro visibility, Resurrection API
+  const APP_VERSION = '13.94';  // v:v13.94 — Liquid Scroll, Pinch-to-Resize, Focus Dim
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -190,18 +190,31 @@ a{color:var(--accent);text-decoration:none}
 }
 #cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
-/* Picker crosshair - moves on touch */
+/* v:v13.93 — GPU-accelerated: translate3d replaces top/left mutation */
 #picker-crosshair{
   position:absolute;
   width:70px;height:70px;
-  transform:translate(-50%,-50%);
+  top:0;left:0;
+  transform:translate3d(0,0,0);
   pointer-events:none;
   z-index:5;
-  top:50%;left:50%;
   image-rendering:crisp-edges;
-  will-change:top,left;
+  will-change:transform;
+  touch-action:none;
 }
 #picker-crosshair svg{width:70px;height:70px;shape-rendering:crispEdges}
+/* v:v13.93 — 60px invisible grab zone for direct reticle manipulation */
+#picker-hitbox{
+  position:absolute;
+  width:60px;height:60px;
+  border-radius:50%;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:auto;
+  cursor:grab;
+  touch-action:none;
+}
+#picker-hitbox:active{cursor:grabbing;}
 
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 /* v:v13.82 — Unified top dashboard: fixed wrapper eliminates layout-shift */
@@ -215,7 +228,11 @@ a{color:var(--accent);text-decoration:none}
   flex-direction: column;
   align-items: center;
   pointer-events: none;
+  /* v:v13.94 — smooth opacity transition for focus dim */
+  transition: opacity 0.25s ease;
 }
+/* v:v13.94 — 40% dim when user actively scrolls/touches the palette */
+body.palette-interacting #top-dashboard { opacity: 0.4; }
 #top-dashboard > * { pointer-events: auto; }
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
@@ -344,6 +361,81 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   flex-shrink: 0;
 }
 .theory-hbtn:active { background: rgba(255,255,255,0.22); color: #fff; }
+/* v:v13.87 — Studio Vault overlay */
+#vault-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-top);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#vault-overlay.open {
+  display: flex;
+  animation: quizSlideUp 0.38s cubic-bezier(0.22,1,0.36,1) both;
+}
+#vault-panel {
+  position: relative;
+  background: rgba(18,18,24,0.96);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,.80);
+}
+#vault-title {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-family: var(--mono, monospace);
+  color: rgba(0,255,120,.8);
+  margin-bottom: 14px;
+  text-align: center;
+}
+#vault-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+#vault-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 20px 0;
+}
+.vault-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vault-card:active { background: rgba(255,255,255,0.14); }
+.vault-mini-strip {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 28px;
+  margin-bottom: 7px;
+}
+.vault-swatch { flex: 1; }
+.vault-card-prompt {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 
 /* ── Scroll container: swipe between theory CARDS ── */
 #theory-scroll {
@@ -1165,8 +1257,23 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .lut-grad-top{flex:1;border-bottom:1px solid rgba(255,255,255,.1)}
 .lut-grad-bot{flex:1}
 #palette-builder-panel{padding:12px;display:flex;flex-direction:column;gap:10px}
-#pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pb-slot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:default;transition:opacity .2s,transform .2s}
+/* v:v13.90 — Filmstrip: horizontal scroll row instead of fixed grid */
+/* v:v13.94 — liquid scroll: smooth behavior + pan-x hint eliminates start-up lag */
+#pb-grid{
+  display:flex;
+  flex-direction:row;
+  overflow-x:auto;
+  white-space:nowrap;
+  gap:10px;
+  padding:10px;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+  touch-action:pan-x;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.15) transparent;
+}
+/* v:v13.90 — fixed 90px card width so 12 slots scroll cleanly */
+.pb-slot{position:relative;flex-shrink:0;width:90px;height:120px;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;flex-direction:column;cursor:default;transition:opacity .2s,transform .2s}
 .pb-slot.dragging{opacity:.4;transform:scale(.96)}
 .pb-slot.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.4)}
 .pb-slot-colour{flex:1;min-height:0;position:relative}
@@ -1244,7 +1351,8 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .pcc-kelvin{font-size:10px;font-family:var(--mono);font-weight:700;color:var(--accent);letter-spacing:.02em}
 .pcc-celsius{font-size:11px;font-family:var(--mono);font-weight:800;color:var(--fg);letter-spacing:.01em}
 .pcc-kdesc{font-size:9px;color:var(--muted)}
-.pb-slot-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
+/* v:v13.90 — empty slot matches fixed 90×120px card */
+.pb-slot-empty{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:90px;height:120px;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
 .pb-slot-empty:active{border-color:var(--accent);color:var(--accent)}
 #pb-actions{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 8px;scrollbar-width:none;-ms-overflow-style:none}
 #pb-actions::-webkit-scrollbar{display:none}
@@ -2139,6 +2247,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 
       <!-- Picker crosshair -->
       <div id="picker-crosshair">
+        <!-- v:v13.93 — 60px invisible hitbox for direct-grab dragging -->
+        <div id="picker-hitbox"></div>
         <!-- v:v13.62 commanding crosshair — dual ring + bold arms -->
         <svg viewBox="0 0 70 70" fill="none">
           <!-- outer dashed ring -->
@@ -2520,6 +2630,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
             <button class="theory-hbtn" onclick="Sampler.theorySaveAll()" title="Add all to palette">+All</button>
             <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to live colour">↺</button>
             <button class="theory-hbtn" id="theory-evolve-btn" onclick="Sampler.evolveTheory()" title="Evolve hue — endless discovery">✧ Evolve</button>
+            <button class="theory-hbtn" onclick="Vault.open()" title="Open saved palette vault">🏛️ Vault</button>
             <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
           </div>
         </div>
@@ -3326,12 +3437,14 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         <button class="btn btn-p btn-sm" onclick="Prompter.generate()">Generate</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copyDiscovery()" title="Generate 4 style-reference variations for rapid discovery — paste into Discord">🎲 Discovery</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copyStylePermutation()" title="Copy 4-way style permutation: minimalist / maximalist / avant-garde / retro-futurist — paste into Discord for 4 variations">✦ Styles</button>
+        <button class="btn btn-p btn-sm" onclick="Prompter.shareImage()" title="Share composition card via native share sheet">↗ Share</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copy()" title="Copy prompt to clipboard">📋 Copy Prompt</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.exportImage()" title="Export 60/30/10 Composition Card as PNG">📷 Export Card</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.share()">Share</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.openMJ()" title="Copy prompt and open Midjourney">Open MJ ↗</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.resetModifiers()" title="Clear all text choices, keep colours">Reset Modifiers</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.clearColours()" title="Remove selected colours, keep text choices">Clear Colours</button>
+        <button class="btn btn-p btn-sm" id="vault-save-btn" onclick="Vault.save()" title="Save palette + prompt to Vault">♥ Save</button>
       </div>
 
 
@@ -3348,11 +3461,14 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     <div class="mod-scroll">
       <div id="palette-builder-panel">
         <div id="pb-mood-label" style="display:none;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:0 0 8px;text-align:center"></div>
-        <!-- v:v13.18 palette grid zoom toggle -->
-        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-          <div class="tog-group">
-            <button class="tog-btn" id="pbz2" onclick="PaletteBuilder.setZoom(2)" title="2 columns">2</button>
-            <button class="tog-btn on" id="pbz3" onclick="PaletteBuilder.setZoom(3)" title="3 columns">3</button>
+        <!-- v:v13.90 — Palette Capacity selector (3 / 6 / 9 / 12 slots) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em">SLOTS</span>
+          <div class="tog-group" id="pb-cap-group">
+            <button class="tog-btn" id="pbc3"  onclick="PaletteBuilder.setCapacity(3)"  title="3-slot palette">3</button>
+            <button class="tog-btn on" id="pbc6"  onclick="PaletteBuilder.setCapacity(6)"  title="6-slot palette">6</button>
+            <button class="tog-btn" id="pbc9"  onclick="PaletteBuilder.setCapacity(9)"  title="9-slot palette">9</button>
+            <button class="tog-btn" id="pbc12" onclick="PaletteBuilder.setCapacity(12)" title="12-slot palette">12</button>
           </div>
         </div>
         <div id="pb-grid"></div>
@@ -3492,7 +3608,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.86</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.94</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3619,7 +3735,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.86</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.94</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5776,7 +5892,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.86</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.94</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6557,26 +6673,49 @@ const Sampler={
   bindCameraTouch(){
     const wrap=document.getElementById('sampler-cam-wrap');
     // v:F1.12 fat-finger fix — on touch, sample 60px above the finger so the
-    // crosshair is never hidden under the thumb. Mouse stays 1:1.
+    // crosshair is never hidden under the thumb. Mouse/pen stays 1:1.
     const TOUCH_LIFT = 60;
+    // v:v13.93 — Pointer Events replace Touch Events for lower latency
     const moveHandler=(ev)=>{
-      // Check for button tap BEFORE preventDefault  otherwise onclick never fires
+      // Check for button tap BEFORE preventDefault — otherwise onclick never fires
       if(ev.target?.tagName==='BUTTON'||ev.target?.closest('button')||ev.target?.closest('#cam-tap-overlay'))return;
       ev.preventDefault();
-      const touch=ev.touches?ev.touches[0]:ev;
       const rect=wrap.getBoundingClientRect();
-      const rawX = touch.clientX - rect.left;
-      const rawY = touch.clientY - rect.top;
-      // Touch: lift sampling point above finger. Mouse: unchanged.
-      const pickY = ev.touches ? Math.max(0, rawY - TOUCH_LIFT) : rawY;
+      const rawX = ev.clientX - rect.left;
+      const rawY = ev.clientY - rect.top;
+      // Touch pointer: lift sampling point above finger. Mouse/pen: unchanged.
+      const pickY = ev.pointerType === 'touch' ? Math.max(0, rawY - TOUCH_LIFT) : rawY;
       this.sampleX = Math.max(0, Math.min(1, rawX / rect.width));
       this.sampleY = Math.max(0, Math.min(1, pickY / rect.height));
-      // movePicker clamps to 35px from all edges — handles top-edge protection
       this.movePicker(rawX, pickY);
     };
-    wrap.addEventListener('touchmove',moveHandler,{passive:false});
-    wrap.addEventListener('touchstart',moveHandler,{passive:false});
-    wrap.addEventListener('mousemove',moveHandler);
+    // v:v13.93 — {passive:false} ensures ev.preventDefault() fires synchronously
+    wrap.addEventListener('pointermove', moveHandler, {passive:false});
+    wrap.addEventListener('pointerdown', moveHandler, {passive:false});
+    // v:v13.93 — Hitbox: direct reticle grab with pointer capture for fluid drag
+    const hitbox = document.getElementById('picker-hitbox');
+    if (hitbox) {
+      hitbox.addEventListener('pointerdown', (ev) => {
+        ev.stopPropagation();
+        hitbox.setPointerCapture(ev.pointerId);
+      }, {passive:false});
+      hitbox.addEventListener('pointermove', (ev) => {
+        if (!hitbox.hasPointerCapture(ev.pointerId)) return;
+        ev.preventDefault();
+        const rect = wrap.getBoundingClientRect();
+        const rawX = ev.clientX - rect.left;
+        const rawY = ev.clientY - rect.top;
+        const pickY = ev.pointerType === 'touch' ? Math.max(0, rawY - TOUCH_LIFT) : rawY;
+        this.sampleX = Math.max(0, Math.min(1, rawX / rect.width));
+        this.sampleY = Math.max(0, Math.min(1, pickY / rect.height));
+        this.movePicker(rawX, pickY);
+      }, {passive:false});
+    }
+    // v:v13.93 — centre crosshair on initial render
+    setTimeout(() => {
+      const w = wrap.offsetWidth, h = wrap.offsetHeight;
+      if (w && h) this.movePicker(w / 2, h / 2);
+    }, 120);
   },
 
   movePicker(x,y){
@@ -6585,8 +6724,9 @@ const Sampler={
     const w=wrap.offsetWidth,h=wrap.offsetHeight;
     const cx=Math.round(Math.max(35,Math.min(w-35,x)));
     const cy=Math.round(Math.max(35,Math.min(h-35,y)));
-    ch.style.left=cx+'px';
-    ch.style.top=cy+'px';
+    // v:v13.93 — GPU-accelerated: translate3d avoids layout/reflow (was style.left/top)
+    // Offset by half width/height (35px) so (cx,cy) is the element centre
+    ch.style.transform='translate3d('+(cx-35)+'px,'+(cy-35)+'px,0)';
   },
 
   // ── Tap-to-play overlay (iOS autoplay policy) ──────────────────
@@ -7390,7 +7530,7 @@ const Sampler={
     sc.innerHTML = theories.map(t => {
       const swatches = t.hexes.map(h2 => {
         const pName = CS.poeticName(h2);
-        return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="PaletteBuilder.addColour('${h2}');Haptics&&Haptics.light()"></div>`;
+        return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="PaletteBuilder.addColourConveyor('${h2}');Haptics&&Haptics.light()"></div>`;  // v:v13.90 FIFO
       }).join('');
       return `<div class="theory-card"><div class="theory-swatches">${swatches}</div></div>`;
     }).join('');
@@ -10910,6 +11050,78 @@ const Explorer={
 };
 </script>
 
+<!--  VAULT  -->
+<script>
+// v:v13.87 — Studio Vault: save/recall palettes + prompts via localStorage
+const Vault = {
+  _KEY: 'digby_vault',
+
+  save() {
+    const colours = PaletteBuilder.colours.map(c => c.hex);
+    if (!colours.length) { App.toast('Add colours to the palette first'); return; }
+    const text = document.getElementById('prompt-out')?.textContent?.trim() || '';
+    const entry = { colours, text, ts: Date.now() };
+    let all = [];
+    try { all = JSON.parse(localStorage.getItem(this._KEY) || '[]'); } catch(e) { all = []; }
+    all.unshift(entry);
+    if (all.length > 50) all = all.slice(0, 50);
+    try { localStorage.setItem(this._KEY, JSON.stringify(all)); } catch(e) {}
+    Haptics && Haptics.success();
+    const btn = document.getElementById('vault-save-btn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Saved!';
+      setTimeout(() => { btn.textContent = orig; }, 1500);
+    }
+    App.toast('Palette saved to Vault ✓');
+  },
+
+  open() {
+    let all = [];
+    try { all = JSON.parse(localStorage.getItem(this._KEY) || '[]'); } catch(e) { all = []; }
+    const grid  = document.getElementById('vault-grid');
+    const empty = document.getElementById('vault-empty');
+    if (grid) {
+      if (!all.length) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+      } else {
+        if (empty) empty.style.display = 'none';
+        grid.innerHTML = all.map((entry, i) => {
+          const hexes   = (entry.colours || []).slice(0, 5);
+          const strip   = hexes.map(h => `<div class="vault-swatch" style="background:${h}"></div>`).join('');
+          const preview = (entry.text || '').slice(0, 60) + (entry.text && entry.text.length > 60 ? '…' : '');
+          return `<div class="vault-card" onclick="Vault.recall(${i})" title="Tap to reload palette">
+            <div class="vault-mini-strip">${strip}</div>
+            <div class="vault-card-prompt">${preview || '(no prompt)'}</div>
+          </div>`;
+        }).join('');
+      }
+    }
+    const ov = document.getElementById('vault-overlay');
+    if (ov) ov.classList.add('open');
+  },
+
+  close() {
+    const ov = document.getElementById('vault-overlay');
+    if (ov) ov.classList.remove('open');
+  },
+
+  recall(idx) {
+    let all = [];
+    try { all = JSON.parse(localStorage.getItem(this._KEY) || '[]'); } catch(e) { all = []; }
+    const entry = all[idx];
+    if (!entry || !entry.colours || !entry.colours.length) { App.toast('Nothing to load'); return; }
+    PaletteBuilder.colours = entry.colours.map(h => PaletteBuilder._makeEntry(h));
+    PaletteBuilder.render();
+    if (typeof Prompter !== 'undefined') setTimeout(() => Prompter.generate(), 100);
+    this.close();
+    App.toast('Palette recalled ✓');
+    Haptics && Haptics.light();
+  }
+};
+</script>
+
 <!--  PROMPTER  -->
 <script>
 const Prompter={
@@ -11973,6 +12185,74 @@ const Prompter={
     Haptics.success();
   },
 
+  // v:v13.87 — Native Web Share: generate composition canvas, share as file or download
+  shareImage(){
+    const colours=[...this.sel].map(id=>DS.get(id)).filter(Boolean);
+    if(colours.length<3){App.toast('Select at least 3 colours to share');return;}
+    const primary=colours[0].hex, secondary=colours[1].hex, accent=colours[2].hex;
+    const promptText=(document.getElementById('prompt-out')?.textContent||'').trim();
+    const W=800, H=600, SCALE=Math.min(window.devicePixelRatio||2,2);
+    const canvas=document.createElement('canvas');
+    canvas.width=W*SCALE; canvas.height=H*SCALE;
+    const ctx=canvas.getContext('2d');
+    ctx.scale(SCALE,SCALE);
+    ctx.fillStyle=primary; ctx.fillRect(0,0,W,H);
+    const rx=Math.round(W*0.20), ry=Math.round(H*0.10);
+    const rw=Math.round(W*0.55), rh=Math.round(H*0.62);
+    ctx.fillStyle=secondary; ctx.fillRect(rx,ry,rw,rh);
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,0.40)'; ctx.shadowBlur=14;
+    const cx2=Math.round(W*0.845), cy2=Math.round(H*0.28);
+    const rad=Math.min(W,H)*0.092;
+    ctx.beginPath(); ctx.arc(cx2,cy2,rad,0,Math.PI*2); ctx.fillStyle=accent; ctx.fill(); ctx.restore();
+    const _lrv=h=>{const {r,g,b}=CS.hexToRgb(h);return(0.2126*r/255+0.7152*g/255+0.0722*b/255);};
+    const labFont='bold 9px "Space Mono",monospace';
+    ctx.font=labFont; ctx.textAlign='left'; ctx.textBaseline='bottom';
+    ctx.fillStyle=_lrv(primary)>0.4?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.70)';
+    ctx.fillText('60% '+primary.toUpperCase(),10,H-6);
+    ctx.fillStyle=_lrv(secondary)>0.4?'rgba(0,0,0,0.7)':'rgba(255,255,255,0.85)';
+    ctx.fillText('30% '+secondary.toUpperCase(),rx+6,ry+rh-6);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold 8px "Space Mono",monospace';
+    ctx.fillStyle=_lrv(accent)>0.4?'rgba(0,0,0,0.7)':'rgba(255,255,255,0.85)';
+    ctx.fillText('10%',cx2,cy2+rad+12); ctx.fillText(accent.toUpperCase(),cx2,cy2+rad+23);
+    if(promptText && !promptText.startsWith('Select')){
+      const stripH=72, stripY=H-stripH;
+      ctx.fillStyle='rgba(0,0,0,0.62)'; ctx.fillRect(0,stripY,W,stripH);
+      ctx.font='9px "Space Mono",monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillStyle='rgba(255,255,255,0.88)';
+      const words=promptText.split(' '); const maxW=W-20, lineH=13;
+      let line='', y=stripY+8;
+      for(const w of words){
+        const test=line+(line?' ':'')+w;
+        if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,10,y);y+=lineH;line=w;if(y>H-lineH-4)break;}else{line=test;}
+      }
+      if(line&&y<=H-lineH-4)ctx.fillText(line,10,y);
+    }
+    ctx.font='bold 10px sans-serif'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillStyle='rgba(255,255,255,0.30)'; ctx.fillText('digby.shop',W-10,8);
+    canvas.toBlob(async blob=>{
+      const file = new File([blob],'composition-card.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file],title:'Digby Palette',text:promptText||'My palette from Digby'});
+        } catch(e){
+          if(e.name!=='AbortError'){
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url; a.download='composition-card.png'; a.click();
+            setTimeout(()=>URL.revokeObjectURL(url),3000);
+          }
+        }
+      } else {
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download='composition-card.png'; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url),3000);
+        App.toast('Saved — Web Share not supported on this browser');
+      }
+    },'image/png');
+  },
+
   // Kept for wallpaper panel compat
   setPat(){},
   setStyle(){}
@@ -12137,6 +12417,11 @@ const ColourWheel = {
     this._drawHueStrip();
     if (typeof ColorMath !== 'undefined') ColorMath.renderTheoryStrips(hex);  // v:v13.2 — live strip update
     setTimeout(function(){ if(typeof ColorMath!=='undefined') ColorMath.renderTheoryStrips(hex); }, 50); // v:v13.36 — 50ms reflow headroom on slow devices
+    // v:v13.87 — Reactive Theory: sync panel when user picks from native colour picker
+    if (typeof Sampler !== 'undefined' && Sampler._theoryOpen) {
+      Sampler._theoryLockedHex = hex;
+      try { Sampler._renderTheory(hex); } catch(e) {}
+    }
   },
 
   fromHex(hex) {
@@ -13474,6 +13759,24 @@ const PaletteBuilder = {
     App.toast(`${CS.autoName(hex)} added`);
   },
 
+  // v:v13.90 — Conveyor Belt (FIFO): if palette is full, shift oldest out and push new in
+  addColourConveyor(hex) {
+    if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) { App.toast('Invalid colour'); return; }
+    if (this.colours.length < this.MAX) {
+      // Space available — behave like addColour but without duplicate toast
+      if (this._isDuplicate(hex)) { App.toast('Already in palette'); return; }
+      this._pushHistory();
+      this.colours.push(this._makeEntry(hex));
+    } else {
+      // Palette full — FIFO: remove oldest, add newest
+      this._pushHistory();
+      this.colours.shift();
+      this.colours.push(this._makeEntry(hex));
+    }
+    Haptics && Haptics.medium();
+    this.render();
+  },
+
   saveToLib(idx) {
     const c = this.colours[idx];
     if (!c) return;
@@ -13500,6 +13803,22 @@ const PaletteBuilder = {
     if (g) g.style.gridTemplateColumns = `repeat(${n},1fr)`;
     document.getElementById('pbz2')?.classList.toggle('on', n===2);
     document.getElementById('pbz3')?.classList.toggle('on', n===3);
+  },
+
+  // v:v13.90 — Safe-Switch: set palette capacity (3 / 6 / 9 / 12)
+  setCapacity(n) {
+    this.MAX = n;
+    // Trim excess colours if current palette is wider than new capacity
+    if (this.colours.length > n) {
+      this._pushHistory();
+      this.colours = this.colours.slice(0, n);
+    }
+    // Highlight the active capacity button
+    [3, 6, 9, 12].forEach(c => {
+      document.getElementById('pbc' + c)?.classList.toggle('on', c === n);
+    });
+    this.render();
+    App.toast(n + '-slot palette activated');
   },
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
@@ -14761,9 +15080,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v37';
+    const SW_CACHE = 'spectrum-v46';
     const swSrc = `
-const CACHE='spectrum-v37';
+const CACHE='spectrum-v46';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -16846,10 +17165,72 @@ const AIColourName = {
     Sampler.openInPicker();
   });
 })();
+
+// v:v13.94 — Pinch-to-resize palette filmstrip (transform:scale + localStorage) ──
+(function(){
+  var panel = document.getElementById('palette-builder-panel');
+  var grid  = document.getElementById('pb-grid');
+  if (!panel || !grid) return;
+  var MIN_SCALE = 0.8, MAX_SCALE = 1.5;
+  var currentScale = parseFloat(localStorage.getItem('digby_palette_scale') || '1');
+  currentScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, isNaN(currentScale) ? 1 : currentScale));
+  panel.style.transformOrigin = 'top center';
+  if (currentScale !== 1) panel.style.transform = 'scale(' + currentScale.toFixed(3) + ')';
+  var pinchActive = false, pinchStartDist = 0, pinchStartScale = 1;
+  function pDist(t) {
+    var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  grid.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      pinchActive = true;
+      pinchStartDist  = pDist(e.touches);
+      pinchStartScale = currentScale;
+      e.preventDefault();
+    }
+  }, {passive:false});
+  grid.addEventListener('touchmove', function(e) {
+    if (!pinchActive || e.touches.length !== 2) return;
+    e.preventDefault();
+    var ratio = pDist(e.touches) / pinchStartDist;
+    currentScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, pinchStartScale * ratio));
+    panel.style.transform = 'scale(' + currentScale.toFixed(3) + ')';
+  }, {passive:false});
+  grid.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) {
+      pinchActive = false;
+      try { localStorage.setItem('digby_palette_scale', currentScale.toFixed(3)); } catch(e2) {}
+    }
+  });
+})();
+
+// v:v13.94 — Dim #top-dashboard to 40% opacity while palette is being interacted ──
+(function(){
+  var grid = document.getElementById('pb-grid');
+  if (!grid) return;
+  var dimTimer = null;
+  function startDim() {
+    document.body.classList.add('palette-interacting');
+    clearTimeout(dimTimer);
+    dimTimer = setTimeout(function(){ document.body.classList.remove('palette-interacting'); }, 800);
+  }
+  grid.addEventListener('scroll', startDim, {passive:true});
+  grid.addEventListener('touchstart', startDim, {passive:true});
+  grid.addEventListener('pointerdown', startDim, {passive:true});
+})();
 </script>
 
 <!-- v:v13.67 landscape JS removed -->
 
+<!-- v:v13.87 — Studio Vault overlay -->
+<div id="vault-overlay" role="dialog" aria-modal="true" aria-label="Studio Vault">
+  <div id="vault-panel">
+    <div id="vault-title">🏛️ Studio Vault</div>
+    <div id="vault-grid"></div>
+    <div id="vault-empty">No saved palettes yet.<br>Tap ♥ Save in Prompter to save one.</div>
+    <button class="btn btn-s btn-sm" style="width:100%;margin-top:14px" onclick="Vault.close()">Close</button>
+  </div>
+</div>
 <!-- v:F1.3 AI Design Quiz overlay -->
 <div id="ai-quiz-overlay" role="dialog" aria-modal="true" aria-label="AI Design Quiz">
   <div id="ai-quiz-card" style="position:relative">
