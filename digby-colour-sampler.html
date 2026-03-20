@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.79 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.84 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.79</title>
+<title>Digby v13.84</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.79';  // v:v13.79 — Theory Strip: clear inline style, transform:none guard
+  const APP_VERSION = '13.84';  // v:v13.84 — Camera CSS isolation, 4K resolution unlock, canvas sync
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -179,9 +179,12 @@ a{color:var(--accent);text-decoration:none}
   overflow:hidden!important;border-radius:16px;
   /* v109: flex:1 fills available col height — eliminates black gap */
 }
+/* v:v13.84 — video decoupled from UI flex flow; fixed full-viewport bg layer */
 #cam-video{
-  position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;
-  object-fit:cover;display:block;
+  position:fixed!important;top:0!important;left:0!important;
+  width:100vw!important;height:100vh!important;
+  object-fit:cover!important;display:block;
+  z-index:0;
   will-change:transform;
   transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
 }
@@ -201,19 +204,30 @@ a{color:var(--accent);text-decoration:none}
 #picker-crosshair svg{width:70px;height:70px;shape-rendering:crispEdges}
 
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
+/* v:v13.82 — Unified top dashboard: fixed wrapper eliminates layout-shift */
+#top-dashboard {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
+  left: 0;
+  width: 100vw;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+#top-dashboard > * { pointer-events: auto; }
 #live-bar { display: none !important; }
 body.active-tab-sampler #live-bar { display: flex !important; }
 /* v449: live-bar — full-width swatch banner, single focused reading */
 #live-bar {
-  position: fixed;
+  /* v:v13.82 — position:relative flex child of #top-dashboard (no more fixed/top/left) */
+  position: relative;
   flex-direction: column;
   align-items: center;
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 4px);
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 4px;
   width: min(300px, calc(100vw - 24px));
   height: auto;
-  z-index: var(--z-overlay);
   background: rgba(6,6,6,0.78);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
   backdrop-filter: blur(26px) saturate(180%);
@@ -244,13 +258,10 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 /* ── tp-top (default): full-width strip, FIXED 100px height ── */
 #theory-panel {
   display: none;
-  position: fixed;
-  z-index: 9050;
-  left: 0; right: 0;
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
+  /* v:v13.82 — position:relative flex child of #top-dashboard; no more fixed/top/z-index */
+  position: relative;
+  width: 100%;
   height: 100px;
-  /* CRITICAL: override any inline transform set by old cached JS */
-  transform: none !important;
   background: rgba(6,6,10,0.98);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
@@ -262,12 +273,9 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 }
 #theory-panel.show { display: flex; }
 
-/* tp-left: narrow strip, height auto from top+bottom anchors */
+/* tp-left: narrow strip — in dashboard, aligns itself left */
 #theory-panel.tp-left {
-  left: 0; right: auto;
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h));
-  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--tab-h));
-  width: 80px; height: auto;
+  width: 80px; height: auto; align-self: flex-start;
   border-bottom: none;
   border-right: 1px solid rgba(255,255,255,0.12);
 }
@@ -388,19 +396,15 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   flex: 1; min-width: 0;
   border-radius: 7px;
   border: 1px solid rgba(255,255,255,0.08);
-  cursor: pointer; transition: transform 0.1s;
+  cursor: pointer;
+  /* v:v13.82 — sync background transition with live-bar for visual coherence */
+  transition: transform 0.1s, background 0.4s ease-in-out;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 #theory-panel.tp-left .theory-swatch {
   min-height: 0; flex: 1; border-radius: 6px;
 }
 .theory-swatch:active { transform: scale(0.94); }
-
-/* ── Live-bar: offset by theory strip height when tp-top is open ── */
-#live-bar.theory-on {
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h) + 100px + 4px);
-  transition: top 0.2s ease;
-}
 
 #live-bar.dragging {
   cursor: grabbing;
@@ -793,6 +797,8 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
   -webkit-tap-highlight-color:transparent;
 }
 .cap-side-btn.on{background:var(--accent);color:#000;border-color:var(--accent)}
+#wb-pro-btn{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(255,255,255,.15);font-weight:700;letter-spacing:.04em}
+#wb-pro-btn.active{background:rgba(255,220,80,.92);color:#000;border-color:#e8c830}
 
 /* LUT badge */
 #lut-badge{
@@ -1187,6 +1193,8 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .pb-slot-drag{position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:4px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.8);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:grab;-webkit-tap-highlight-color:transparent;touch-action:none}
 .pb-slot-save{position:absolute;top:4px;right:26px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pb-slot-save:active{background:var(--accent)}
+.pb-slot-edit{position:absolute;top:4px;right:48px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);font-size:9px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.pb-slot-edit:active{background:rgba(80,160,255,.75)}
 .pb-slot-info{background:#fff;padding:5px 6px 4px;display:flex;flex-direction:column;gap:1px}
 .pb-slot-name{font-family:var(--sharpie);font-size:12px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pb-slot-hex{font-family:var(--mono);font-size:9px;color:#555}
@@ -2197,6 +2205,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- Capture row -->
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
+        <button class="cap-side-btn" id="wb-pro-btn" onclick="Sampler.toggleWBPro()" title="White balance — tap to calibrate to pure white">[ WB ]</button>
         <button class="cap-side-btn" onclick="AutoPalette.fromCameraDensity()" title="Extract dominant colours from camera frame" id="auto-pal-btn">🎨</button>
         <button class="cap-side-btn" id="zoom2x-btn"
                 onclick="Sampler.toggle2xZoom()"
@@ -2510,6 +2519,31 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       </div>
     </div>
 
+    <!-- v:v13.82 — Unified top dashboard: theory + live-bar flex-stacked, zero layout shift -->
+    <div id="top-dashboard">
+    <!-- Theory Strip first (stacks above live-bar in flex-column flow) -->
+    <!-- v13.78 — Theory Strip: fixed height, header-integrated dots + name -->
+      <div id="theory-panel">
+        <div id="theory-strip-head">
+          <div id="theory-count-row">
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(3)" data-cnt="3">3</button>
+            <button class="theory-cnt on" onclick="Sampler.setTheoryCount(6)" data-cnt="6">6</button>
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(9)" data-cnt="9">9</button>
+            <button class="theory-cnt" onclick="Sampler.setTheoryCount(12)" data-cnt="12">12</button>
+          </div>
+          <div id="theory-nav">
+            <span id="theory-name-label">—</span>
+            <div id="theory-dots"></div>
+          </div>
+          <div id="theory-actions">
+            <button class="theory-hbtn" onclick="Sampler.theorySaveAll()" title="Add all to palette">+All</button>
+            <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to live colour">↺</button>
+            <button class="theory-hbtn" id="theory-orient-btn" onclick="Sampler.toggleTheoryOrientation()" title="Switch top / left">⊡</button>
+            <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
+          </div>
+        </div>
+        <div id="theory-scroll"></div>
+      </div>
     <!-- Floating colour console — v449: full-width swatch, single focused reading -->
     <div id="live-bar">
       <!-- v449: WB Preset Panel — floats above bar, opened by WB button -->
@@ -2543,28 +2577,6 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
         <div id="live-undertone">—</div>
       </div>
-      <!-- v13.78 — Theory Strip: fixed height, header-integrated dots + name -->
-      <div id="theory-panel">
-        <div id="theory-strip-head">
-          <div id="theory-count-row">
-            <button class="theory-cnt" onclick="Sampler.setTheoryCount(3)" data-cnt="3">3</button>
-            <button class="theory-cnt on" onclick="Sampler.setTheoryCount(6)" data-cnt="6">6</button>
-            <button class="theory-cnt" onclick="Sampler.setTheoryCount(9)" data-cnt="9">9</button>
-            <button class="theory-cnt" onclick="Sampler.setTheoryCount(12)" data-cnt="12">12</button>
-          </div>
-          <div id="theory-nav">
-            <span id="theory-name-label">—</span>
-            <div id="theory-dots"></div>
-          </div>
-          <div id="theory-actions">
-            <button class="theory-hbtn" onclick="Sampler.theorySaveAll()" title="Add all to palette">+All</button>
-            <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to live colour">↺</button>
-            <button class="theory-hbtn" id="theory-orient-btn" onclick="Sampler.toggleTheoryOrientation()" title="Switch top / left">⊡</button>
-            <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
-          </div>
-        </div>
-        <div id="theory-scroll"></div>
-      </div>
       <!-- v:F12.31 — live-actions emptied; buttons moved to #sampler-bottom-dock -->
       <div id="live-actions" style="display:none">
         <input type="file" id="bar-image-upload" accept="image/*" style="display:none" onchange="Sampler.loadFromBar(this)">
@@ -2572,6 +2584,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- Resize handle for live-bar scaling -->
       <span id="live-bar-resize" title="Drag to resize">⤡</span>
     </div>
+    </div><!-- /#top-dashboard -->
     <!-- Save card -->
     <div id="save-wrap">
       <div id="save-swatch"></div>
@@ -3328,6 +3341,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
         <button class="btn btn-p btn-sm" onclick="Prompter.copyDiscovery()" title="Generate 4 style-reference variations for rapid discovery — paste into Discord">🎲 Discovery</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copyStylePermutation()" title="Copy 4-way style permutation: minimalist / maximalist / avant-garde / retro-futurist — paste into Discord for 4 variations">✦ Styles</button>
         <button class="btn btn-p btn-sm" onclick="Prompter.copy()" title="Copy prompt to clipboard">📋 Copy Prompt</button>
+        <button class="btn btn-s btn-sm" onclick="Prompter.exportImage()" title="Export 60/30/10 Composition Card as PNG">📷 Export Card</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.share()">Share</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.openMJ()" title="Copy prompt and open Midjourney">Open MJ ↗</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.resetModifiers()" title="Clear all text choices, keep colours">Reset Modifiers</button>
@@ -3492,7 +3506,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.79</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.84</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3619,7 +3633,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.79</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.84</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5763,7 +5777,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.79</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.84</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6161,7 +6175,11 @@ const Sampler={
   upCtx:null,
   pickQueue:[], // multi-pick queue
   activeExportTarget: null, // v:F1.11 — hex set by explicit swatch tap; drives export
-  wb:{r:1,g:1,b:1}, // white balance multipliers — set via setWhiteBalance()
+  wb:{r:1,g:1,b:1},
+  // v:v13.81 WB Pro — additive offset sampled from center pixel
+  wbOffset:{r:0,g:0,b:0},
+  wbActive:false,
+  _lastTheoryUpdate: 0,  // v:v13.82 — throttle theory render to ≤150ms // white balance multipliers — set via setWhiteBalance()
   wbMatrix:[1,1,1],  // v:F1 D65 array alias [R,G,B gains]
   _globalListeners:[], // v85: tracked global/document event listeners for cleanup
 
@@ -6314,8 +6332,8 @@ const Sampler={
     //    Tier 2: soft facing hint (works on most phones)
     //    Tier 3: any camera (absolute last resort — also catches desktop single-cam setups)
     const _facing = this.camFront ? 'user' : 'environment';
-    const tier1 = { video: { facingMode: { exact: _facing }, frameRate: { ideal: 30, max: 60 } } }; // v96: 720p cap
-    const tier2 = { video: { facingMode: _facing,            frameRate: { ideal: 30, max: 60 } } }; // v96: 720p cap
+    const tier1 = { video: { facingMode: { exact: _facing }, width: { ideal: 3840 }, height: { ideal: 2160 } } }; // v:v13.84 — demand max optical resolution
+    const tier2 = { video: { facingMode: _facing,            width: { ideal: 3840 }, height: { ideal: 2160 } } }; // v:v13.84 — 4K fallback
     const tier3 = { video: true };
 
     const isOverconstrained = function(e) {
@@ -6369,6 +6387,20 @@ const Sampler={
       v.setAttribute('autoplay',    '');
       v.setAttribute('muted',       '');
 
+      // v:v13.84 Part 3 — sync offscreen canvas to hardware stream dimensions;
+      // also re-assert fixed full-viewport inline styles so no subsequent
+      // style write (e.g. deferred RAF frame) can shrink the video layer.
+      v.onloadedmetadata = () => {
+        const cvs = document.getElementById('cam-canvas');
+        if (cvs && v.videoWidth) {
+          cvs.width  = v.videoWidth;
+          cvs.height = v.videoHeight;
+        }
+        // Re-assert full-viewport after any deferred style mutations
+        v.style.cssText = 'position:fixed!important;top:0!important;left:0!important;'
+                        + 'width:100vw!important;height:100vh!important;'
+                        + 'object-fit:cover!important;z-index:0;';
+      };
       v.srcObject = stream;
 
       // ── play() directly — no loadedmetadata wait ──────────────────
@@ -6379,28 +6411,8 @@ const Sampler={
       try {
         await v.play();
         _diag('play() OK — w:' + (v.videoWidth||'?') + ' h:' + (v.videoHeight||'?'));
-        // v:v13.70 — correct aspect ratio if stream dimensions differ from container
-        (function _fixVideoAspect() {
-          function apply() {
-            var vw = v.videoWidth, vh = v.videoHeight;
-            if (!vw || !vh) return;
-            var wrap = v.parentElement;
-            if (!wrap) return;
-            var cw = wrap.offsetWidth, ch = wrap.offsetHeight;
-            if (!cw || !ch) return;
-            var videoRatio = vw / vh, containerRatio = cw / ch;
-            if (Math.abs(videoRatio - containerRatio) < 0.05) return;
-            var scale = videoRatio > containerRatio ? ch / vh : cw / vw;
-            var dw = vw * scale, dh = vh * scale;
-            v.style.width  = dw + 'px';
-            v.style.height = dh + 'px';
-            v.style.top    = ((ch - dh) / 2) + 'px';
-            v.style.left   = ((cw - dw) / 2) + 'px';
-            v.style.objectFit = '';
-          }
-          if (v.videoWidth) { apply(); }
-          else { v.addEventListener('loadedmetadata', apply, {once:true}); }
-        })();
+        // v:v13.84 — video is position:fixed full-viewport background;
+        // no layout-relative aspect correction needed (removed _fixVideoAspect).
         // Hide diag after 4s once playing
         setTimeout(()=>{const d=document.getElementById('cam-diag-bar');if(d)d.style.display='none';},4000);
       } catch (err) {
@@ -6651,6 +6663,40 @@ const Sampler={
     else this.setWhiteBalance();
   },
 
+  // v:v13.81 — WB Pro: simple additive offset mode
+  // ON:  sample center pixel, compute delta needed to reach 255,255,255
+  // OFF: reset offset to zero
+  toggleWBPro(){
+    const btn=document.getElementById('wb-pro-btn');
+    if(this.wbActive){
+      // Reset
+      this.wbOffset={r:0,g:0,b:0};
+      this.wbActive=false;
+      if(btn){btn.classList.remove('active');btn.title='White balance — tap to calibrate to pure white';}
+      App.toast('WB Pro reset');
+    } else {
+      // Sample center pixel from live video
+      const v=document.getElementById('cam-video');
+      if(!v||!v.videoWidth){App.toast('Camera not active');return;}
+      const tmp=document.createElement('canvas');
+      tmp.width=v.videoWidth;tmp.height=v.videoHeight;
+      const tctx=tmp.getContext('2d',{willReadFrequently:true});
+      tctx.drawImage(v,0,0);
+      const cx=Math.round(v.videoWidth*0.5),cy=Math.round(v.videoHeight*0.5);
+      const px=tctx.getImageData(Math.max(0,cx-5),Math.max(0,cy-5),10,10).data;
+      let sr=0,sg=0,sb=0,n=0;
+      for(let i=0;i<px.length;i+=4){sr+=px[i];sg+=px[i+1];sb+=px[i+2];n++;}
+      if(!n){App.toast('Could not read pixel');return;}
+      const r0=Math.round(sr/n),g0=Math.round(sg/n),b0=Math.round(sb/n);
+      if(r0<8&&g0<8&&b0<8){App.toast('Too dark — point at a white surface first');return;}
+      // Store additive delta: what we need to add to get to 255
+      this.wbOffset={r:255-r0, g:255-g0, b:255-b0};
+      this.wbActive=true;
+      if(btn){btn.classList.add('active');btn.title='WB Pro active — tap to reset';}
+      App.toast('WB Pro calibrated to centre pixel');
+    }
+  },
+
   // ── v449: WB Preset Engine ──────────────────────────────────────
   _WB_PRESETS: [
     {id:'awb',      label:'AWB',        k:null,     gains:null},
@@ -6816,6 +6862,12 @@ const Sampler={
     R=Math.round(Math.min(255,Math.max(0,R*this.wb.r)));
     G=Math.round(Math.min(255,Math.max(0,G*this.wb.g)));
     B=Math.round(Math.min(255,Math.max(0,B*this.wb.b)));
+    // v:v13.81 WB Pro additive offset — clamp to 0-255
+    if(this.wbActive){
+      R=Math.min(255,Math.max(0,R+this.wbOffset.r));
+      G=Math.min(255,Math.max(0,G+this.wbOffset.g));
+      B=Math.min(255,Math.max(0,B+this.wbOffset.b));
+    }
     const hex=CS.rgbToHex(R,G,B);
     this.currentHex=hex;
     this.updateLiveLoupe(hex);  // v:F12.15 — guard lives in updateLiveLoupe
@@ -6933,6 +6985,15 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
+    // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
+    // while theory panel is open (prevents stutter when panning camera).
+    if (this._theoryOpen && this._theoryLockedHex) {
+      const _now = Date.now();
+      if (_now - this._lastTheoryUpdate > 150) {
+        this._lastTheoryUpdate = _now;
+        try { this._renderTheory(this._theoryLockedHex); } catch(e) {}
+      }
+    }
   },
 
   toggleWBDropdown() {
@@ -7129,9 +7190,7 @@ const Sampler={
     this._theoryOpen = false;
     const p = document.getElementById('theory-panel');
     if (p) p.classList.remove('show');
-    // Restore live-bar to normal position
-    const lb = document.getElementById('live-bar');
-    if (lb) lb.classList.remove('theory-on');
+    // v:v13.82 — no theory-on class needed; #top-dashboard flex handles spacing
   },
 
   // ↺ Sync button — update theory to current live colour
@@ -7164,19 +7223,13 @@ const Sampler={
 
     this._renderTheory(hex);
 
-    // tp-top: push live-bar down by 96px (hardcoded = panel height in CSS)
-    if (this._theoryMode === 'tp-top') {
-      const lb = document.getElementById('live-bar');
-      if (lb) lb.classList.add('theory-on');
-    }
+    // v:v13.82 — #top-dashboard flex-column naturally pushes live-bar down;
+    // no theory-on class needed.
   },
 
   toggleTheoryOrientation() {
     this._theoryMode = this._theoryMode === 'tp-top' ? 'tp-left' : 'tp-top';
-    // Clean up live-bar offset from previous mode
-    const lb = document.getElementById('live-bar');
-    if (lb) lb.classList.remove('theory-on');
-    // Re-open in new mode
+    // v:v13.82 — no theory-on class; just re-open in new mode
     if (this._theoryLockedHex) this.showTheory(this._theoryLockedHex);
   },
 
@@ -11145,7 +11198,7 @@ const Prompter={
         if(pout) pout.style.color = safe;
         // v:F1.12 export sync — keep activeExportTarget in step with swatch selection
         // so the camera quick-export button always captures the intended colour
-        if(c && typeof Sampler \!== 'undefined') { Sampler.activeExportTarget = c.hex; Sampler.lastHex = c.hex; }  // v:v13.20 — persist for Picker seed
+        if(c && typeof Sampler !== 'undefined') { Sampler.activeExportTarget = c.hex; Sampler.lastHex = c.hex; }  // v:v13.20 — persist for Picker seed
       }catch(e){}
     }
   },
@@ -11786,6 +11839,102 @@ const Prompter={
       warnEl.style.display = over ? 'block' : 'none';
       warnEl.textContent   = over ? '⚠ Truncated to 3800 chars for Midjourney' : '';
     }
+  },
+
+  // v:v13.81 — 60/30/10 Composition Card export
+  // Canvas layout:
+  //   Background (60%) = Primary colour (first selected)
+  //   Large rect (30%) = Secondary colour (second selected)
+  //   Circle badge (10%) = Accent colour (third selected)
+  //   Generated MJ prompt text at the bottom
+  exportImage(){
+    const colours=[...this.sel].map(id=>DS.get(id)).filter(Boolean);
+    if(colours.length<3){App.toast('Select at least 3 colours for the composition card');return;}
+    const primary=colours[0].hex, secondary=colours[1].hex, accent=colours[2].hex;
+    const promptText=(document.getElementById('prompt-out')?.textContent||'').trim();
+    const W=800, H=600, SCALE=Math.min(window.devicePixelRatio||2,2);
+    const canvas=document.createElement('canvas');
+    canvas.width=W*SCALE; canvas.height=H*SCALE;
+    const ctx=canvas.getContext('2d');
+    ctx.scale(SCALE,SCALE);
+    // ── 60% background — primary ──────────────────────────────────
+    ctx.fillStyle=primary;
+    ctx.fillRect(0,0,W,H);
+    // ── 30% large geometric rectangle — secondary ─────────────────
+    const rx=Math.round(W*0.20), ry=Math.round(H*0.10);
+    const rw=Math.round(W*0.55), rh=Math.round(H*0.62);
+    ctx.fillStyle=secondary;
+    ctx.fillRect(rx,ry,rw,rh);
+    // Inner shadow on rect
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,0.32)';
+    ctx.shadowBlur=18;
+    ctx.strokeStyle='transparent';
+    ctx.strokeRect(rx,ry,rw,rh);
+    ctx.restore();
+    // ── 10% circular badge — accent ───────────────────────────────
+    const cx=Math.round(W*0.845), cy=Math.round(H*0.28);
+    const rad=Math.min(W,H)*0.092;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,0.40)';
+    ctx.shadowBlur=14;
+    ctx.beginPath();
+    ctx.arc(cx,cy,rad,0,Math.PI*2);
+    ctx.fillStyle=accent;
+    ctx.fill();
+    ctx.restore();
+    // ── Rule labels ───────────────────────────────────────────────
+    const _lrv=hex=>{const {r,g,b}=CS.hexToRgb(hex);return(0.2126*r/255+0.7152*g/255+0.0722*b/255);};
+    const labFont='bold 9px "Space Mono",monospace';
+    // Primary label
+    ctx.font=labFont; ctx.textAlign='left'; ctx.textBaseline='bottom';
+    ctx.fillStyle=_lrv(primary)>0.4?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.70)';
+    ctx.fillText('60% '+primary.toUpperCase(),10,H-6);
+    // Secondary label
+    ctx.fillStyle=_lrv(secondary)>0.4?'rgba(0,0,0,0.7)':'rgba(255,255,255,0.85)';
+    ctx.fillText('30% '+secondary.toUpperCase(),rx+6,ry+rh-6);
+    // Accent label
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold 8px "Space Mono",monospace';
+    ctx.fillStyle=_lrv(accent)>0.4?'rgba(0,0,0,0.7)':'rgba(255,255,255,0.85)';
+    ctx.fillText('10%',cx,cy+rad+12);
+    ctx.fillText(accent.toUpperCase(),cx,cy+rad+23);
+    // ── Prompt text strip at bottom ───────────────────────────────
+    if(promptText && !promptText.startsWith('Select')){
+      const stripH=72, stripY=H-stripH;
+      ctx.fillStyle='rgba(0,0,0,0.62)';
+      ctx.fillRect(0,stripY,W,stripH);
+      ctx.font='9px "Space Mono",monospace';
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillStyle='rgba(255,255,255,0.88)';
+      // Word-wrap into strip
+      const words=promptText.split(' ');
+      const maxW=W-20, lineH=13;
+      let line='', y=stripY+8;
+      for(const w of words){
+        const test=line+(line?' ':'')+w;
+        if(ctx.measureText(test).width>maxW&&line){
+          ctx.fillText(line,10,y);
+          y+=lineH; line=w;
+          if(y>H-lineH-4) break;
+        } else { line=test; }
+      }
+      if(line&&y<=H-lineH-4) ctx.fillText(line,10,y);
+    }
+    // ── Digby watermark ───────────────────────────────────────────
+    ctx.font='bold 10px sans-serif';
+    ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillStyle='rgba(255,255,255,0.30)';
+    ctx.fillText('digby.shop',W-10,8);
+    // ── Download ──────────────────────────────────────────────────
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='composition-card-60-30-10.png'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+    },'image/png');
+    App.toast('Composition Card exported ✓');
+    Haptics.success();
   },
 
   // Kept for wallpaper panel compat
@@ -13192,6 +13341,33 @@ const PaletteBuilder = {
     this.render(); // re-render to flip padlock icon
   },
 
+  // v:v13.81 — autoFill: load k-means hexes without wiping user picks.
+  //   • Slots already occupied (any hex) are left untouched.
+  //   • Empty / null slots are filled from the incoming hexes array in order.
+  //   • If no empty slots exist, we append up to MAX - current.length new entries.
+  autoFill(hexes) {
+    if (!hexes || !hexes.length) return;
+    this._pushHistory();
+    let hi = 0; // index into incoming hexes
+    // Phase 1: fill null/empty/placeholder entries already in the array
+    for (let i = 0; i < this.colours.length && hi < hexes.length; i++) {
+      const c = this.colours[i];
+      if (!c || !c.hex || c.hex === '#888888') {
+        this.colours[i] = this._makeEntry(hexes[hi++]);
+      }
+    }
+    // Phase 2: append remaining hexes until palette is full
+    while (hi < hexes.length && this.colours.length < this.MAX) {
+      const h = hexes[hi++];
+      if (h && !this._isDuplicate(h)) {
+        this.colours.push(this._makeEntry(h));
+      }
+    }
+    this.render();
+    App.setTab('palette');
+    App.toast('Auto-Palette loaded — existing picks preserved ✓');
+  },
+
   // v:F1.13 — Fisher-Yates shuffle of unlocked slots; locked slots stay in place
   shuffle() {
     if (this.colours.length < 2) { App.toast('Add more colours first'); return; }
@@ -13345,6 +13521,18 @@ const PaletteBuilder = {
         lS.style.background = `linear-gradient(to right,#111,hsl(${h},${s}%,50%),#eee)`; }
     } catch(e) {}
   },
+  // v:v13.81 — Update colour at slot index; syncs native <input type="color">
+  //             so re-opening the picker starts at the correct hex.
+  _updateColourAt(idx, hex) {
+    if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return;
+    if (!this.colours[idx]) return;
+    this._pushHistory();
+    this.colours[idx] = this._makeEntry(hex);
+    // Rebuild DOM — each slot renders its native input with value="${c.hex}"
+    this.render();
+    App.toast(CS.autoName(hex) + ' updated');
+  },
+
   addFromPickerInput() {
     const hex = document.getElementById('pb-hex-input')?.value;
     if (hex) this.addColour(hex);
@@ -13578,8 +13766,8 @@ const PaletteBuilder = {
 
   _launchAIQuiz() {
     // Reset selections to defaults
-    this._aiAnswers = { atm: 'warm', aud: 'calm', lit: 'ambient' };
-    ['q-atm','q-aud','q-lit'].forEach(id => {
+    this._aiAnswers = { horm: 'serotonin', room: 'neutral', lit: 'ambient' };
+    ['q-horm','q-room','q-lit'].forEach(id => {
       const grp = document.getElementById(id);
       if (!grp) return;
       grp.querySelectorAll('.quiz-opt').forEach((b, i) => b.classList.toggle('sel', i === 0));
@@ -13608,44 +13796,64 @@ const PaletteBuilder = {
       return sel ? (sel.dataset.val || fallback) : fallback;
     };
     const a = {
-      atm: _dom('q-atm', this._aiAnswers.atm || 'warm'),
-      aud: _dom('q-aud', this._aiAnswers.aud || 'calm'),
-      lit: _dom('q-lit', this._aiAnswers.lit || 'ambient')
+      horm: _dom('q-horm', this._aiAnswers.horm || 'serotonin'),
+      room: _dom('q-room', this._aiAnswers.room || 'neutral'),
+      lit:  _dom('q-lit',  this._aiAnswers.lit  || 'ambient')
     };
     // Persist so _aiAnswers stays in sync
-    this._aiAnswers = { atm: a.atm, aud: a.aud, lit: a.lit };
+    this._aiAnswers = { horm: a.horm, room: a.room, lit: a.lit };
+    // v:v13.81 — Map hormonal goal → Midjourney parameters
+    // Serotonin (restful) → low stylize; Adrenaline (stimulating) → high chaos
+    if (a.horm === 'serotonin')  { Prompter.stylize = 50;  Prompter.chaos = 0; }
+    if (a.horm === 'oxytocin')   { Prompter.stylize = 150; Prompter.chaos = 10; }
+    if (a.horm === 'adrenaline') { Prompter.stylize = 750; Prompter.chaos = 80; }
+    // Update Prompter sliders UI to reflect new values
+    const _sEl=document.getElementById('stylize-val');
+    if(_sEl) _sEl.textContent='--s '+Prompter.stylize;
+    const _cEl=document.getElementById('chaos-val');
+    if(_cEl) _cEl.textContent=(Prompter.chaos===0?'off (best for seamless tiles)':'--chaos '+Prompter.chaos);
     // Decision matrix → top 3 themes + narrative
     let themes = [];
     let narrative = '';
-
-    // v:F1.11 — Full 2-sentence narrative for every combination
-    if (a.atm === 'warm' && a.aud === 'calm' && a.lit === 'ambient') {
-      themes = ['earth','moss','offwhite'];
-      narrative = 'Biophilic warmth — grounded earth tones with soft organic whites for a restorative, calm space. Layer moss greens as accents to reinforce the natural, unhurried atmosphere.';
-    } else if (a.atm === 'warm' && a.aud === 'bold' && a.lit === 'ambient') {
-      themes = ['teal_orange','sunset','earth'];
-      narrative = 'Cinematic energy — vibrant teal/orange tension with earthy anchors creates bold, immersive impact. Use the complementary contrast as a directional signal; reserve earth tones for surfaces that need to breathe.';
-    } else if (a.atm === 'crisp' && a.aud === 'calm' && a.lit === 'ambient') {
-      themes = ['slate','offwhite','nordic'];
-      narrative = 'Architectural calm — cool grays and pale whites under ambient light project refined, quiet authority. Introduce a single warm accent sparingly to prevent the palette reading as sterile.';
-    } else if (a.atm === 'crisp' && a.aud === 'bold' && a.lit === 'clinical') {
+    // v:v13.81 — Hormonal + direction decision matrix
+    if (a.horm === 'serotonin' && a.room === 'neutral') {
+      themes = ['offwhite','moss','earth'];
+      narrative = 'Serotonin reset — muted sage greens and warm putty tones under balanced light create a restorative sanctuary. Limit contrast ratio to under 4:1 for surfaces; the eye should rest, not scan.';
+    } else if (a.horm === 'serotonin' && a.room === 'north') {
+      themes = ['offwhite','earth','nordic'];
+      narrative = 'Northern serenity — north-facing light reads cool-grey, so warm undertones in cream and biscuit counteract the chill without adding visual noise. A restful palette that works with, not against, the light.';
+    } else if (a.horm === 'serotonin' && a.room === 'south') {
+      themes = ['moss','slate','offwhite'];
+      narrative = 'Southern calm — south-facing warmth already energises; cool sage and stone tones absorb the excess and return the space to equilibrium. Ideal for bedrooms and reading rooms.';
+    } else if (a.horm === 'oxytocin' && a.room === 'neutral') {
+      themes = ['earth','sunset','moss'];
+      narrative = 'Nurturing hearth — terracotta, warm sand and olive create the psychological warmth of skin, wood and food — the primal triggers of belonging. Use on large walls with natural textile texture.';
+    } else if (a.horm === 'oxytocin' && a.room === 'north') {
+      themes = ['earth','sunset','offwhite'];
+      narrative = 'North-facing warmth — in a cool-light room, terracotta and apricot reads as a bonfire; warm undertones compensate for the grey-blue cast and make the space feel genuinely welcoming.';
+    } else if (a.horm === 'oxytocin' && a.room === 'south') {
+      themes = ['moss','earth','nordic'];
+      narrative = 'Sun-drenched nurture — south-facing rooms amplify warm hues, so anchor the palette in earthy greens and clay to prevent the feeling of overheating. Soft and sociable, not strident.';
+    } else if (a.horm === 'adrenaline' && a.room === 'neutral') {
       themes = ['triadic','neon','noir'];
-      narrative = 'High-contrast precision — saturated triadic hues with near-black anchors enforce clinical clarity. This palette signals expertise and intent; deploy neon as a single focal accent, never a field colour.';
-    } else if (a.atm === 'crisp' && a.aud === 'calm' && a.lit === 'clinical') {
-      themes = ['harmony','slate','offwhite'];
-      narrative = 'Studio neutral — analogous harmony with architectural grays delivers clean, professional focus. The narrow hue range reduces visual noise, making every colour decision read as deliberate.';
-    } else if (a.atm === 'warm' && a.aud === 'calm' && a.lit === 'clinical') {
-      themes = ['offwhite','earth','moss'];
-      narrative = 'Nordic biophilic — warm whites with green-earth tones stay approachable even under clinical lighting. This pairing works best when textural variation (matte vs satin) carries the visual interest.';
-    } else if (a.atm === 'crisp' && a.aud === 'bold' && a.lit === 'ambient') {
-      themes = ['triadic','teal_orange','noir'];
-      narrative = 'Dramatic tension — classical triadic drama layered with cinematic contrast creates a striking, purposeful space. Anchor the scheme with noir on dominant surfaces to prevent the vivid hues from competing.';
-    } else if (a.atm === 'warm' && a.aud === 'bold' && a.lit === 'clinical') {
-      themes = ['sunset','teal_orange','earth'];
-      narrative = 'Warm precision — sunset oranges and teal-orange contrast read energetically even under cold clinical light. Ground the scheme with dark earth tones to stop the warmth from overwhelming the space.';
+      narrative = 'Kinetic field — triadic primaries at full saturation with near-black anchors create maximum visual stimulation. Suitable for gyms, studios or retail activations where urgency drives behaviour.';
+    } else if (a.horm === 'adrenaline' && a.room === 'north') {
+      themes = ['teal_orange','triadic','sunset'];
+      narrative = 'North-facing intensity — cool north light dulls warm hues, so push saturation and use warm undertones aggressively to keep the space feeling energised. High-contrast complementary pairs work best.';
+    } else if (a.horm === 'adrenaline' && a.room === 'south') {
+      themes = ['neon','triadic','noir'];
+      narrative = 'Solar maximalism — south-facing sun bleaches, so ultra-saturated neons and deep darks are needed to hold contrast at peak hours. A palette that performs under flood-lit conditions.';
     } else {
       themes = ['harmony','triadic','moss'];
       narrative = 'Balanced resonance — classical analogous harmony with organic life creates a versatile, timeless foundation. This palette adapts naturally between formal and relaxed contexts without losing coherence.';
+    }
+    // v:v13.81 — North direction → append warm undertones instruction to prompt
+    if (a.room === 'north') {
+      const po = document.getElementById('prompt-out');
+      const cur = po ? po.textContent : '';
+      if (cur && !cur.startsWith('Select') && !cur.includes('warm undertones')) {
+        po.textContent = cur.replace(/ --/, ', warm undertones to compensate for cool north-facing light --');
+      }
     }
 
     // v:F1.10 — Apply base colour + show full 2-sentence design narrative
@@ -14382,8 +14590,12 @@ const PaletteBuilder = {
                  ondragover="PaletteBuilder._onDragOver(event,${i})"
                  ondrop="PaletteBuilder._onDrop(event,${i})">
         <div class="pb-slot-colour" style="background:${c.hex}">
+          <input type="color" class="pb-slot-native" value="${c.hex}"
+            style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+            onchange="PaletteBuilder._updateColourAt(${i},this.value)">
           <div class="pb-slot-drag" title="Drag to reorder"></div>
           <button class="pb-slot-lock${c.locked ? ' on' : ''}" onclick="PaletteBuilder.toggleLock(${i})" title="${c.locked ? 'Unlock — will regenerate' : 'Lock — keep this colour'}">${c.locked ? '🔒' : '🔓'}</button>
+          <button class="pb-slot-edit" onclick="(function(){var inp=document.querySelectorAll('.pb-slot-native')[${i}];if(inp){inp.value='${c.hex}';inp.click();}})()" title="Edit colour">✏</button>
           <button class="pb-slot-save" onclick="PaletteBuilder.saveToLib(${i})" title="Save to library">+</button>
           <button class="pb-slot-rm"   onclick="PaletteBuilder.remove(${i})" title="Remove">−</button>
         </div>
@@ -14507,9 +14719,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v27';
+    const SW_CACHE = 'spectrum-v32';
     const swSrc = `
-const CACHE='spectrum-v27';
+const CACHE='spectrum-v32';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15863,10 +16075,8 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
   // Load auto palette hexes into PaletteBuilder and switch to that tab
   _loadToPalette(hexes) {
     if (!hexes || !hexes.length) return;
-    PaletteBuilder.colours = hexes.map(h => PaletteBuilder._makeEntry(h));
-    PaletteBuilder.render();
-    App.setTab('palette');
-    App.toast('Loaded into Palette tab \u2713');
+    // v:v13.81 — delegate to autoFill so user-picked colours are preserved
+    PaletteBuilder.autoFill(hexes);
     const panel = document.getElementById('_ap_panel');
     if (panel) panel.remove();
   },
@@ -16600,18 +16810,20 @@ const AIColourName = {
     <div id="ai-quiz-title">🤖 Design Narrative</div>
 
     <div class="quiz-q">
-      <div class="quiz-q-label">ATMOSPHERE?</div>
-      <div class="quiz-opts" id="q-atm">
-        <button class="quiz-opt sel" data-val="warm" onclick="PaletteBuilder._quizPick('atm',this)">Warm · Cozy</button>
-        <button class="quiz-opt"     data-val="crisp" onclick="PaletteBuilder._quizPick('atm',this)">Crisp · Modern</button>
+      <div class="quiz-q-label">HORMONAL GOAL?</div>
+      <div class="quiz-opts" id="q-horm">
+        <button class="quiz-opt sel" data-val="serotonin"  onclick="PaletteBuilder._quizPick('horm',this)">Serotonin (Restful)</button>
+        <button class="quiz-opt"     data-val="oxytocin"   onclick="PaletteBuilder._quizPick('horm',this)">Oxytocin (Nurturing)</button>
+        <button class="quiz-opt"     data-val="adrenaline" onclick="PaletteBuilder._quizPick('horm',this)">Adrenaline (Stimulating)</button>
       </div>
     </div>
 
     <div class="quiz-q">
-      <div class="quiz-q-label">AUDIENCE?</div>
-      <div class="quiz-opts" id="q-aud">
-        <button class="quiz-opt sel" data-val="calm" onclick="PaletteBuilder._quizPick('aud',this)">Calm · Stable</button>
-        <button class="quiz-opt"     data-val="bold" onclick="PaletteBuilder._quizPick('aud',this)">Energetic · Bold</button>
+      <div class="quiz-q-label">ROOM DIRECTION?</div>
+      <div class="quiz-opts" id="q-room">
+        <button class="quiz-opt sel" data-val="neutral" onclick="PaletteBuilder._quizPick('room',this)">Neutral</button>
+        <button class="quiz-opt"     data-val="north"   onclick="PaletteBuilder._quizPick('room',this)">North (Cool Light)</button>
+        <button class="quiz-opt"     data-val="south"   onclick="PaletteBuilder._quizPick('room',this)">South (Warm Light)</button>
       </div>
     </div>
 
