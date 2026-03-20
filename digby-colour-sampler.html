@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.09 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.11 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.09</title>
+<title>Digby v14.11</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.09';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.11';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -47,6 +47,9 @@
       var el = document.getElementById(id);
       if (el) el.textContent = vStr;
     });
+    // v:v14.10 — also sync welcome screen version badge
+    var wsv = document.getElementById('ws-version');
+    if (wsv) wsv.textContent = 'v' + APP_VERSION.replace('F','');
     document.title = vStr;
     var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', vStr + ' — Colour Sampler by Digby Oldridge');
@@ -2189,6 +2192,17 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   letter-spacing:.06em;margin-bottom:4px;
   animation:wsLogoGlow 7s ease-in-out infinite;
   position:relative;z-index:1;}
+.ws-ver{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px;opacity:.7}
+/* v:v14.11 — first-time onboarding hints */
+.ob-hint{position:fixed;z-index:19999;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:ob-fade-in .4s ease both}
+.ob-hint.ob-hidden{display:none}
+.ob-bubble{background:rgba(255,180,0,.93);color:#111;font-size:12px;font-weight:700;
+  padding:7px 14px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.45);letter-spacing:.01em}
+.ob-arrow{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid rgba(255,180,0,.93)}
+.ob-arrow.up{border-top:none;border-bottom:8px solid rgba(255,180,0,.93)}
+@keyframes ob-fade-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.ob-pulse{animation:ob-pulse 1.4s ease-in-out infinite}
+@keyframes ob-pulse{0%,100%{box-shadow:0 4px 18px rgba(0,0,0,.45)}50%{box-shadow:0 4px 24px rgba(255,180,0,.7),0 0 0 4px rgba(255,180,0,.2)}}
 .ws-sub{font-size:11px;color:rgba(255,255,255,.38);font-family:var(--mono);
   margin-bottom:28px;position:relative;z-index:1;}
 .ws-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px;
@@ -2298,10 +2312,20 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     </filter>
   </defs>
 </svg>
+<!-- v:v14.11 — Onboarding hints (shown once to new users) -->
+<div id="ob-capture" class="ob-hint ob-hidden" style="bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 72px);left:50%;transform:translateX(-50%)">
+  <div class="ob-bubble ob-pulse">Tap to save a colour</div>
+  <div class="ob-arrow up"></div>
+</div>
+<div id="ob-palette" class="ob-hint ob-hidden" style="bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 8px);right:16px">
+  <div class="ob-arrow" style="margin-left:40px"></div>
+  <div class="ob-bubble">Find it in Palette →</div>
+</div>
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
+  <div class="ws-ver" id="ws-version">v14.11</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3743,7 +3767,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.04</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.11</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3870,7 +3894,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.04</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.11</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -3955,16 +3979,17 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           onclick="Sampler.toggleWBDropdown()">
     <span class="sbd-icon">
       <!-- v:v13.61 WB — colour temperature sun with rays -->
+      <!-- v:v14.11 — rebalanced sun: equal-length rays at all 8 angles -->
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         <circle cx="10" cy="10" r="3.5"/>
-        <line x1="10" y1="1.5" x2="10" y2="4"/>
-        <line x1="10" y1="16" x2="10" y2="18.5"/>
-        <line x1="1.5" y1="10" x2="4" y2="10"/>
-        <line x1="16" y1="10" x2="18.5" y2="10"/>
-        <line x1="4.1" y1="4.1" x2="5.9" y2="5.9"/>
-        <line x1="14.1" y1="14.1" x2="15.9" y2="15.9"/>
-        <line x1="15.9" y1="4.1" x2="14.1" y2="5.9"/>
-        <line x1="5.9" y1="14.1" x2="4.1" y2="15.9"/>
+        <line x1="10" y1="1.5" x2="10" y2="4.5"/>
+        <line x1="10" y1="15.5" x2="10" y2="18.5"/>
+        <line x1="1.5" y1="10" x2="4.5" y2="10"/>
+        <line x1="15.5" y1="10" x2="18.5" y2="10"/>
+        <line x1="4"    y1="4"    x2="6.1"  y2="6.1"/>
+        <line x1="13.9" y1="13.9" x2="16"   y2="16"/>
+        <line x1="16"   y1="4"    x2="13.9" y2="6.1"/>
+        <line x1="4"    y1="16"   x2="6.1"  y2="13.9"/>
       </svg>
     </span>
     <span class="sbd-label">Balance</span>
@@ -6043,7 +6068,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.04</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.11</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -13948,6 +13973,7 @@ const PaletteBuilder = {
       App.toast(`Palette ${this.pageIdx + 1} started — swipe to switch`);
     }
     Haptics.medium(); // v:v13.65 colour added to palette
+    try { if(Onboard&&Onboard._shown){Onboard.dismissCapture();} }catch(e){} // v:v14.11
     this._pushHistory();
     this.colours.push(this._makeEntry(hex));
     this.render();
@@ -15283,9 +15309,45 @@ const WelcomeScreen = {
 // v132: switchTab global alias (spec-required name)
 function switchTab(id) { App.setTab(id); }
 
+// v:v14.11 — Onboarding hint controller
+const Onboard = {
+  _shown: false,
+  init() {
+    try {
+      if (localStorage.getItem('ob_done')) return; // already completed onboarding
+    } catch(e) {}
+    // Show capture hint 1.2s after sampler loads
+    setTimeout(() => this._showCapture(), 1200);
+  },
+  _showCapture() {
+    var el = document.getElementById('ob-capture');
+    if (el) el.classList.remove('ob-hidden');
+    this._shown = true;
+  },
+  dismissCapture() {
+    var el = document.getElementById('ob-capture');
+    if (el) el.classList.add('ob-hidden');
+    // show palette hint 0.8s after first colour added
+    setTimeout(() => this._showPalette(), 800);
+  },
+  _showPalette() {
+    var el = document.getElementById('ob-palette');
+    if (el) el.classList.remove('ob-hidden');
+    setTimeout(() => this.done(), 4000); // auto-dismiss after 4s
+  },
+  done() {
+    ['ob-capture','ob-palette'].forEach(id => {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('ob-hidden');
+    });
+    try { localStorage.setItem('ob_done','1'); } catch(e) {}
+  }
+};
+
 document.addEventListener('DOMContentLoaded',async ()=>{
   await App.init();
   Theme.init();
+  try { Onboard.init(); } catch(e) {} // v:v14.11
   restoreDesignProMode(); // v132: restore Design Pro Mode state
   // v:F1.12.5 — Welcome screen: show unless user has dismissed it
   try { if(State.showWelcome && !localStorage.getItem('fraggle_skipWelcome')) WelcomeScreen.show(); } catch(e){}
@@ -15302,9 +15364,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v61';
+    const SW_CACHE = 'spectrum-v63';
     const swSrc = `
-const CACHE='spectrum-v61';
+const CACHE='spectrum-v63';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -15320,21 +15382,14 @@ self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
   if(u.origin!==self.location.origin) return;
   e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const net=fetch(e.request).then(res=>{
-        if(res&&res.status===200&&res.type!=='opaque'){
-          const cl=res.clone();
-          caches.open(CACHE).then(c=>{
-            c.put(e.request,cl);
-            // v:v13.54 — notify open tabs that fresher content is now cached
-            self.clients.matchAll({includeUncontrolled:true,type:'window'})
-              .then(cls=>cls.forEach(c=>c.postMessage('sw-updated')));
-          });
-        }
-        return res;
-      }).catch(()=>cached);
-      return cached||net;
-    })
+    // v:v14.10 — network-first: always try fresh, fall back to cache offline
+    fetch(e.request).then(res=>{
+      if(res&&res.status===200&&res.type!=='opaque'){
+        const cl=res.clone();
+        caches.open(CACHE).then(c=>c.put(e.request,cl));
+      }
+      return res;
+    }).catch(()=>caches.match(e.request))
   );
 });
 `;
@@ -15343,20 +15398,23 @@ self.addEventListener('fetch',e=>{
       const swUrl=URL.createObjectURL(blob);
       const scope=location.pathname.replace(/\/[^\/]*$/,'/')||'/';
       navigator.serviceWorker.register(swUrl,{scope})
-        .then(r=>{console.log('[Digby SW] registered, scope:',r.scope);URL.revokeObjectURL(swUrl);})
+        .then(r=>{
+          console.log('[Digby SW] registered, scope:',r.scope);
+          URL.revokeObjectURL(swUrl);
+          // v:v14.10 — force update check on every page focus so stale SW never lingers
+          document.addEventListener('visibilitychange', function(){
+            if(document.visibilityState==='visible') r.update();
+          });
+        })
         .catch(e=>{console.warn('[Digby SW] Blob SW failed (OK on file://):', e.message);URL.revokeObjectURL(swUrl);});
     } catch(e){console.warn('[Digby SW]',e.message);}
     // v:v13.54 — listen for 'sw-updated' from the SW fetch handler
     // Shows a tappable toast so the user can reload to get the new version immediately
+    // v:v14.10 — auto-reload 1.5 s after SW signals fresh content (network-first means
+    //             this fires when the NEW file has already been served, so reload is instant)
     navigator.serviceWorker.addEventListener('message', function(ev) {
       if (ev.data !== 'sw-updated') return;
-      var t = document.getElementById('toast');
-      if (!t || t.classList.contains('show')) return; // don't interrupt an existing toast
-      t.innerHTML = '&#10003; Digby updated &nbsp;<span onclick="location.reload()" ' +
-        'style="text-decoration:underline;cursor:pointer;font-weight:700">Reload</span>';
-      t.classList.add('show');
-      clearTimeout(App && App._toastT);
-      if (App) App._toastT = setTimeout(function(){ t.classList.remove('show'); t.innerHTML=''; }, 9000);
+      setTimeout(function(){ location.reload(); }, 1500);
     });
   }
 });
