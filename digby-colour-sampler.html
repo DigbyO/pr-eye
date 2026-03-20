@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.99 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.00 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.99</title>
+<title>Digby v14.00</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.99';  // v:v13.99 — Bottom Dock, Unconditional Theory, Hex Span
+  const APP_VERSION = '14.00';  // v:v14.00 — Right Rail + Theory Top Bar Restore
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -308,25 +308,21 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 body:not(.pro-mode) #theory-panel    { display: none !important; }
 body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 
-/* ── tp-top (default): full-width strip, FIXED 100px height ── */
+/* v:v14.00 — Theory: fixed top bar below main header (v13.80 style) */
 #theory-panel {
   display: none;
-  /* v:v13.82 — position:relative flex child of #top-dashboard; no more fixed/top/z-index */
-  position: relative;
-  width: 100%;
-  height: 100px;
-  background: rgba(6,6,10,0.98);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255,255,255,0.13);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.5);
-  flex-direction: column;
-  user-select: none; -webkit-user-select: none;
+  position: fixed !important;
+  top: 70px !important;
+  left: 10px !important;
+  right: 100px !important;
+  height: 60px !important;
+  flex-direction: row !important;
+  gap: 5px !important;
+  z-index: 9998 !important;
   overflow: hidden;
+  user-select: none; -webkit-user-select: none;
 }
-#theory-panel.show { display: flex; }
-/* v:v13.99 — no-fly zone: keep theory panel clear of 95px bottom dock */
-#theory-panel { bottom: 110px !important; }
+#theory-panel.show { display: flex !important; }
 
 /* v:v13.85 — tp-left mode removed; #top-dashboard is permanent home */
 
@@ -1294,41 +1290,33 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .lut-grad-seg{flex:1;display:flex;flex-direction:column}
 .lut-grad-top{flex:1;border-bottom:1px solid rgba(255,255,255,.1)}
 .lut-grad-bot{flex:1}
-/* v:v13.99 — Bottom Dock: full-width fixed bar pinned to bottom */
+/* v:v14.00 — Palette: right vertical rail restored (v13.79 style) */
 #palette-builder-panel {
   position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100vw !important;
-  height: 95px !important;
-  top: auto !important;
+  top: 70px !important;
+  right: 10px !important;
+  width: 80px !important;
+  height: auto !important;
+  max-height: 80vh !important;
   display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  background: rgba(10,10,10,0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  flex-direction: column !important;
   z-index: 9999 !important;
-  border-top: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
+  background: rgba(10,10,10,0.8) !important;
+  border-radius: 15px !important;
+  padding: 10px 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 #palette-builder-panel::-webkit-scrollbar{display:none}
-/* v:v13.99 — Horizontal row; scrolls left-right inside bottom dock */
+/* v:v14.00 — Vertical column slots */
 #pb-grid {
   display: flex !important;
-  flex-direction: row !important;
-  gap: 12px !important;
-  padding: 12px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  flex-direction: column !important;
+  gap: 10px !important;
   align-items: center !important;
-  width: 100% !important;
-  scrollbar-width: none;
+  width: 100%;
 }
 /* v:v13.90 — fixed 90px card width so 12 slots scroll cleanly */
 /* v:v13.98 — 60×60 compact chip; softer 14px radius */
@@ -1776,7 +1764,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     width: var(--app-max-w);
     border-radius: 20px 20px 0 0;
   }
-  /* v:v13.99 — Bottom dock spans full width; no desktop positional override */
+  /* v:v14.00 — Right rail + theory top bar; no desktop positional override needed */
   /* Colour tray handle & tray */
   #colour-tray-handle {
     left: 50%;
@@ -3685,7 +3673,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.99</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.00</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3812,7 +3800,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.99</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.00</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5969,7 +5957,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.99</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.00</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6814,7 +6802,8 @@ const Sampler={
       if (!this._ptrTheoryTs || _now - this._ptrTheoryTs > 100) {
         this._ptrTheoryTs = _now;
         this._theoryLockedHex = _dragHex;
-        try { this._renderTheory(_dragHex); } catch(e) {}
+        try { this._renderTheory(_dragHex); } catch(e) {}  // v:v14.00 — Sampler._renderTheory
+        if (this.currentHex) { try { Sampler._renderTheory(this.currentHex); } catch(e) {} }  // v:v14.00 heartbeat
         if (window.PaletteBuilder && typeof PaletteBuilder._renderTheory === 'function') {
           try { PaletteBuilder._renderTheory(_dragHex); } catch(e) {}
         }
@@ -15182,9 +15171,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v51';
+    const SW_CACHE = 'spectrum-v52';
     const swSrc = `
-const CACHE='spectrum-v51';
+const CACHE='spectrum-v52';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
