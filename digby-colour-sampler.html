@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.95 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.96 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.95</title>
+<title>Digby v13.96</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.95';  // v:v13.95 — Bottom Row, Reactive Theory, Pinch Fix
+  const APP_VERSION = '13.96';  // v:v13.96 — Vertical Right-Rail, Compact Chips
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1256,31 +1256,48 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .lut-grad-seg{flex:1;display:flex;flex-direction:column}
 .lut-grad-top{flex:1;border-bottom:1px solid rgba(255,255,255,.1)}
 .lut-grad-bot{flex:1}
-#palette-builder-panel{padding:12px;display:flex;flex-direction:column;gap:10px}
-/* v:v13.90 — Filmstrip: horizontal scroll row instead of fixed grid */
-/* v:v13.94 — liquid scroll: smooth behavior + pan-x hint eliminates start-up lag */
-/* v:v13.95 — Bottom-Row: fixed to viewport bottom so slots are always visible */
-#pb-grid{
+/* v:v13.96 — Right-Rail: fixed vertical HUD on the right side */
+#palette-builder-panel{
   position:fixed!important;
-  bottom:env(safe-area-inset-bottom,20px)!important;
-  left:0;
-  width:100vw;
-  display:flex!important;
-  flex-direction:row!important;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  z-index:1000;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  scroll-behavior:smooth;
-  touch-action:pan-x;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,.15) transparent;
+  top:100px!important;
+  right:20px!important;
+  bottom:auto!important;
+  left:auto!important;
+  width:80px!important;
+  height:auto!important;
+  display:block!important;
+  z-index:998;
+  padding:6px;
+  background:rgba(10,10,16,0.94);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+  backdrop-filter:blur(14px) saturate(160%);
+  box-shadow:0 4px 24px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.06);
+  max-height:calc(100vh - 130px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
+#palette-builder-panel::-webkit-scrollbar{display:none}
+/* v:v13.96 — Vertical column stack inside right-rail panel */
+#pb-grid{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  align-items:center!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  max-height:70vh!important;
+  width:100%;
+  padding:2px 0;
+  scrollbar-width:none;
+}
+#pb-grid::-webkit-scrollbar{display:none}
 /* v:v13.90 — fixed 90px card width so 12 slots scroll cleanly */
-.pb-slot{position:relative;flex-shrink:0;width:90px;height:120px;border-radius:var(--r);overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;flex-direction:column;cursor:default;transition:opacity .2s,transform .2s}
+/* v:v13.96 — 60×60 compact chip for vertical rail */
+.pb-slot{position:relative;flex-shrink:0;width:60px;height:60px;border-radius:12px;margin:0 auto;overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;flex-direction:column;cursor:default;transition:opacity .2s,transform .2s}
 .pb-slot.dragging{opacity:.4;transform:scale(.96)}
 .pb-slot.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,152,112,.4)}
 .pb-slot-colour{flex:1;min-height:0;position:relative}
@@ -1289,7 +1306,7 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .pb-slot-save:active{background:var(--accent)}
 .pb-slot-edit{position:absolute;top:4px;right:48px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);font-size:9px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .pb-slot-edit:active{background:rgba(80,160,255,.75)}
-.pb-slot-info{background:#fff;padding:5px 6px 4px;display:flex;flex-direction:column;gap:1px}
+.pb-slot-info{display:none} /* v:v13.96 — no text room in 60px chip */
 .pb-slot-name{font-family:var(--sharpie);font-size:12px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pb-slot-hex{font-family:var(--mono);font-size:9px;color:#555}
 .pb-slot-pan{font-family:var(--mono);font-size:8px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1299,6 +1316,19 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .pb-slot-lock:active{transform:scale(.88)}
 .pb-slot-lock.on{background:var(--accent);color:#1a1208}
 .pb-slot.locked{outline:2.5px solid var(--accent);outline-offset:-2px}
+/* v:v13.96 — hide buttons that crowd the 60×60 chip */
+.pb-slot-drag{display:none!important}
+.pb-slot-save{display:none!important}
+.pb-slot-edit{display:none!important}
+/* Rescale surviving rm + lock buttons to fit chip */
+.pb-slot-rm{top:2px;right:2px;width:16px;height:16px;font-size:9px}
+.pb-slot-lock{bottom:2px;left:2px;width:18px;height:18px;font-size:10px}
+/* Compact cap toggle for 80px rail */
+#pb-cap-group{flex-wrap:wrap;gap:2px;justify-content:center}
+#pb-cap-group .tog-btn{min-width:0;padding:2px 4px;font-size:9px;flex:1 1 40%}
+/* Wrap action buttons so they fit in narrow panel */
+#pb-actions{flex-wrap:wrap!important;overflow-x:hidden!important;gap:3px!important}
+#pb-actions .btn{font-size:8px!important;padding:3px 5px!important;white-space:nowrap}
 .pb-algo-chip{flex:1;min-width:0;height:60px;border-radius:6px;cursor:pointer;position:relative;transition:transform .14s,box-shadow .14s;-webkit-tap-highlight-color:transparent;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
 .pb-algo-chip:active{transform:scale(.90)}
 .pb-algo-chip:hover{box-shadow:0 0 0 2px var(--accent)}
@@ -1358,8 +1388,8 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 .pcc-kelvin{font-size:10px;font-family:var(--mono);font-weight:700;color:var(--accent);letter-spacing:.02em}
 .pcc-celsius{font-size:11px;font-family:var(--mono);font-weight:800;color:var(--fg);letter-spacing:.01em}
 .pcc-kdesc{font-size:9px;color:var(--muted)}
-/* v:v13.90 — empty slot matches fixed 90×120px card */
-.pb-slot-empty{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:90px;height:120px;border-radius:var(--r);border:2px dashed var(--border);color:var(--faint);font-size:22px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
+/* v:v13.96 — empty slot matches 60×60 chip */
+.pb-slot-empty{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:60px;height:60px;border-radius:12px;margin:0 auto;border:2px dashed var(--border);color:var(--faint);font-size:18px;cursor:pointer;transition:border-color var(--tr),color var(--tr)}
 .pb-slot-empty:active{border-color:var(--accent);color:var(--accent)}
 #pb-actions{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 8px;scrollbar-width:none;-ms-overflow-style:none}
 #pb-actions::-webkit-scrollbar{display:none}
@@ -1710,6 +1740,10 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     transform: translateX(-50%);
     width: var(--app-max-w);
     border-radius: 20px 20px 0 0;
+  }
+  /* v:v13.96 — Right-rail: nudge panel so it sits just outside centred shell */
+  #palette-builder-panel {
+    right: calc(50% - var(--app-max-w)/2 - 88px) !important;
   }
   /* Colour tray handle & tray */
   #colour-tray-handle {
@@ -3469,9 +3503,9 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <div id="palette-builder-panel">
         <div id="pb-mood-label" style="display:none;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:0 0 8px;text-align:center"></div>
         <!-- v:v13.90 — Palette Capacity selector (3 / 6 / 9 / 12 slots) -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em">SLOTS</span>
-          <div class="tog-group" id="pb-cap-group">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;margin-bottom:6px">
+          <span style="font-size:8px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.7">SLOTS</span>
+          <div class="tog-group" id="pb-cap-group" style="flex-wrap:wrap;gap:2px;justify-content:center;width:100%">
             <button class="tog-btn" id="pbc3"  onclick="PaletteBuilder.setCapacity(3)"  title="3-slot palette">3</button>
             <button class="tog-btn on" id="pbc6"  onclick="PaletteBuilder.setCapacity(6)"  title="6-slot palette">6</button>
             <button class="tog-btn" id="pbc9"  onclick="PaletteBuilder.setCapacity(9)"  title="9-slot palette">9</button>
@@ -3615,7 +3649,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.95</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.96</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3742,7 +3776,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.95</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.96</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5899,7 +5933,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.95</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.96</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -15091,9 +15125,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v47';
+    const SW_CACHE = 'spectrum-v48';
     const swSrc = `
-const CACHE='spectrum-v47';
+const CACHE='spectrum-v48';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
