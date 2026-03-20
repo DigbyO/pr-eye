@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.84 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.86 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.84</title>
+<title>Digby v13.86</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.84';  // v:v13.84 — Camera CSS isolation, 4K resolution unlock, canvas sync
+  const APP_VERSION = '13.86';  // v:v13.86 — WB relocation, Pro visibility, Resurrection API
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -273,12 +273,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 }
 #theory-panel.show { display: flex; }
 
-/* tp-left: narrow strip — in dashboard, aligns itself left */
-#theory-panel.tp-left {
-  width: 80px; height: auto; align-self: flex-start;
-  border-bottom: none;
-  border-right: 1px solid rgba(255,255,255,0.12);
-}
+/* v:v13.85 — tp-left mode removed; #top-dashboard is permanent home */
 
 /* ── Strip header: count | name+dots | actions ── */
 #theory-strip-head {
@@ -289,16 +284,13 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   box-sizing: border-box;
   background: rgba(255,255,255,0.025);
 }
-#theory-panel.tp-left #theory-strip-head {
-  flex-direction: column; height: auto; flex-shrink: 0;
-  padding: 5px 4px; gap: 4px; align-items: center;
-}
+
 
 /* ── Count buttons ── */
 #theory-count-row {
   display: flex; gap: 2px; align-items: center; flex-shrink: 0;
 }
-#theory-panel.tp-left #theory-count-row { flex-direction: column; gap: 2px; }
+
 .theory-cnt {
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
   color: rgba(255,255,255,0.4); font-size: 9px; font-family: var(--mono);
@@ -312,14 +304,14 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   background: rgba(200,169,110,0.22); color: var(--accent);
   border-color: rgba(200,169,110,0.3);
 }
-#theory-panel.tp-left .theory-cnt { padding: 2px 4px; font-size: 7.5px; }
+
 
 /* ── Theory name + dot nav (centre of header) ── */
 #theory-nav {
   flex: 1; display: flex; align-items: center; justify-content: center;
   gap: 6px; min-width: 0; overflow: hidden;
 }
-#theory-panel.tp-left #theory-nav { flex: 0; flex-direction: column; gap: 3px; }
+
 #theory-name-label {
   font-size: 8px; font-family: var(--mono); letter-spacing: .1em;
   text-transform: uppercase; color: rgba(255,255,255,0.5);
@@ -328,7 +320,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 #theory-dots {
   display: flex; align-items: center; gap: 4px; flex-shrink: 0;
 }
-#theory-panel.tp-left #theory-dots { flex-direction: column; }
+
 .theory-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: rgba(255,255,255,0.18); transition: background 0.18s;
@@ -343,7 +335,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 #theory-actions {
   display: flex; gap: 3px; flex-shrink: 0;
 }
-#theory-panel.tp-left #theory-actions { flex-direction: column; gap: 3px; }
+
 .theory-hbtn {
   background: rgba(255,255,255,0.07); border: none;
   color: rgba(255,255,255,0.5); font-size: 10px; line-height: 1;
@@ -365,14 +357,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   overscroll-behavior: contain;
   scroll-behavior: auto;
 }
-#theory-panel.tp-left #theory-scroll {
-  flex-direction: column;
-  overflow-x: hidden; overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  touch-action: pan-y;
-  overscroll-behavior: contain;
-  scroll-behavior: auto;
-}
+
 #theory-scroll::-webkit-scrollbar { display: none; }
 
 /* ── Theory cards: pure swatch blocks, fill entire scroll height/width ── */
@@ -382,16 +367,13 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   display: flex; align-items: stretch;
   box-sizing: border-box;
 }
-#theory-panel.tp-left .theory-card {
-  flex: 0 0 100%; width: 80px;
-  padding: 4px; flex-direction: column;
-}
+
 
 /* ── Swatches: all visible, flex fills card ── */
 .theory-swatches {
   display: flex; gap: 3px; flex: 1;
 }
-#theory-panel.tp-left .theory-swatches { flex-direction: column; }
+
 .theory-swatch {
   flex: 1; min-width: 0;
   border-radius: 7px;
@@ -401,9 +383,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   transition: transform 0.1s, background 0.4s ease-in-out;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
-#theory-panel.tp-left .theory-swatch {
-  min-height: 0; flex: 1; border-radius: 6px;
-}
+
 .theory-swatch:active { transform: scale(0.94); }
 
 #live-bar.dragging {
@@ -1511,6 +1491,8 @@ body.active-tab-sampler #sampler-bottom-dock { display: flex; }
 /* Pro-only dock items hidden until pro mode */
 .sbd-btn.pro-only { display: none !important; }
 body.pro-mode .sbd-btn.pro-only { display: flex !important; }
+/* v:v13.86 — belt-and-suspenders: explicit hide for Immersive btn when not Pro */
+body:not(.pro-mode) #live-imm-btn { display: none !important; }
 /* Live-bar resize handle (v:F12.31) */
 /* v:F12.32 - resize handle: block scroll during drag */
 #live-bar-resize {
@@ -2205,7 +2187,6 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- Capture row -->
       <div id="capture-row">
         <button class="cap-side-btn" id="freeze-btn" onclick="Sampler.toggleFreeze()">Freeze</button>
-        <button class="cap-side-btn" id="wb-pro-btn" onclick="Sampler.toggleWBPro()" title="White balance — tap to calibrate to pure white">[ WB ]</button>
         <button class="cap-side-btn" onclick="AutoPalette.fromCameraDensity()" title="Extract dominant colours from camera frame" id="auto-pal-btn">🎨</button>
         <button class="cap-side-btn" id="zoom2x-btn"
                 onclick="Sampler.toggle2xZoom()"
@@ -2538,7 +2519,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <div id="theory-actions">
             <button class="theory-hbtn" onclick="Sampler.theorySaveAll()" title="Add all to palette">+All</button>
             <button class="theory-hbtn" onclick="Sampler.syncTheory()" title="Sync to live colour">↺</button>
-            <button class="theory-hbtn" id="theory-orient-btn" onclick="Sampler.toggleTheoryOrientation()" title="Switch top / left">⊡</button>
+            <button class="theory-hbtn" id="theory-evolve-btn" onclick="Sampler.evolveTheory()" title="Evolve hue — endless discovery">✧ Evolve</button>
             <button class="theory-hbtn" onclick="Sampler.hideTheory()" title="Close">✕</button>
           </div>
         </div>
@@ -2570,6 +2551,11 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
           <span id="wb-k-val" style="font-family:var(--mono);font-size:9px;color:rgba(0,255,0,0.75);min-width:36px;text-align:right">5500K</span>
         </div>
       </div>
+      <!-- v:v13.86 — WB Pro relocated inside #top-dashboard live-bar overlay -->
+      <button class="cap-side-btn" id="wb-pro-btn"
+              onclick="Sampler.toggleWBPro()"
+              title="White balance — tap to calibrate to pure white"
+              style="position:absolute;top:8px;right:8px;z-index:4;padding:5px 10px;font-size:9px;">[ WB ]</button>
       <!-- v:v13.57 — full-bleed colour + gradient scrim; text at bottom -->
       <div id="live-swatch" title="Tap to sample this colour" onclick="Sampler.openInPicker()">
         <div id="live-primary">#------</div>
@@ -3506,7 +3492,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.84</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.86</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3633,7 +3619,7 @@ body.pro-mode .sbd-btn.pro-only { display: flex !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.84</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.86</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5145,17 +5131,30 @@ const App={
     // throttles the hardware stream automatically when the page is hidden.
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
+        // v:v13.86 — cancel RAF loop to save battery; never pause the MediaStream
+        // (pausing resets videoWidth on iOS and breaks Polaroid capture)
         if (Sampler.rafId) { cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
       } else {
         if (App.tab === 'sampler' && Sampler.mode === 'camera' && !Sampler.frozen) {
-          // v:F1.14 — check track.readyState, not videoWidth/paused.
-          // iOS zombie tracks report stale non-zero videoWidth even when dead.
-          // track.readyState === 'live' is the only reliable liveness signal.
-          const _vt = Sampler.stream?.getVideoTracks?.()[0];
-          if (_vt && _vt.readyState === 'live') {
+          // v:v13.86 Resurrection API — check both stream.active AND track.readyState
+          // iOS zombie tracks: stream.active stays true but readyState flips 'ended'
+          // Android track kill: stream.active goes false immediately
+          const _vt     = Sampler.stream?.getVideoTracks?.()[0];
+          const _alive  = Sampler.stream?.active && _vt?.readyState === 'live';
+          if (_alive) {
+            // Stream is healthy — resume the RAF sampling loop directly
             Sampler.startSampling();
           } else {
-            setTimeout(()=>Sampler.startCamera(), 80);
+            // Stream was killed by the OS — forcefully re-initialise the camera
+            // to fetch a fresh 4K hardware stream
+            try {
+              Sampler.startCamera();
+            } catch (e) {
+              // Hardware may still be waking up; retry after 500ms
+              setTimeout(() => {
+                try { Sampler.startCamera(); } catch (e2) {}
+              }, 500);
+            }
           }
         }
       }
@@ -5777,7 +5776,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.84</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.86</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7176,7 +7175,7 @@ const Sampler={
   // v13.72 — Theory Switcher: generate 5 palette types from seed and display
   // ── Theory Switcher (v13.77) — fixed strip, top or left side ───────────────
   _theoryOpen: false,
-  _theoryMode: 'tp-top',    // 'tp-top' | 'tp-left'
+  // v:v13.85 — _theoryMode removed; tp-top is the only layout
   _theoryLockedHex: null,   // hex locked on open; only changes on explicit sync
   _theoryCardIdx:   0,      // current visible theory card index (0-4)
   _theoryCount:     6,      // swatches per theory: 3 | 6 | 9 | 12
@@ -7191,6 +7190,30 @@ const Sampler={
     const p = document.getElementById('theory-panel');
     if (p) p.classList.remove('show');
     // v:v13.82 — no theory-on class needed; #top-dashboard flex handles spacing
+  },
+
+  // v:v13.85 — ✧ Evolve: apply random hue drift and re-render
+  // Creates an infinite procedural discovery loop from the current seed.
+  evolveTheory() {
+    if (!this._theoryOpen || !this._theoryLockedHex) {
+      App.toast('Open the Theory Panel first');
+      return;
+    }
+    const {r, g, b} = CS.hexToRgb(this._theoryLockedHex);
+    const {h, s, l} = CS.rgbToHsl(r, g, b);
+    // Random hue shift between ±5°–±20° (guarantees visible but not jarring change)
+    const mag   = 5 + Math.random() * 15;
+    const shift = Math.random() < 0.5 ? -mag : mag;
+    const newH  = ((h + shift) % 360 + 360) % 360;
+    // rgbToHsl returns s,l as 0–100; hslToHex expects 0–1
+    const newHex = CS.hslToHex(newH, s / 100, l / 100);
+    this._theoryLockedHex = newHex;
+    this.currentHex = newHex;
+    this._renderTheory(newHex);
+    // Sync live bar to evolved seed so the whole UI reflects the new colour
+    const rgb2 = CS.hexToRgb(newHex);
+    this.updateLiveBar(newHex, rgb2.r, rgb2.g, rgb2.b);
+    Haptics && Haptics.light();
   },
 
   // ↺ Sync button — update theory to current live colour
@@ -7217,9 +7240,7 @@ const Sampler={
     panel.removeAttribute('style');
 
     // Apply mode class — strip is full-width top or narrow left side
-    panel.className = '';
-    panel.classList.add('show');
-    if (this._theoryMode === 'tp-left') panel.classList.add('tp-left');
+    panel.className = 'show'; // v:v13.85 — tp-top only
 
     this._renderTheory(hex);
 
@@ -7227,19 +7248,13 @@ const Sampler={
     // no theory-on class needed.
   },
 
-  toggleTheoryOrientation() {
-    this._theoryMode = this._theoryMode === 'tp-top' ? 'tp-left' : 'tp-top';
-    // v:v13.82 — no theory-on class; just re-open in new mode
-    if (this._theoryLockedHex) this.showTheory(this._theoryLockedHex);
-  },
+  // v:v13.85 — toggleTheoryOrientation removed (tp-left mode eliminated)
 
   theorySaveAll() {
     const sc = document.getElementById('theory-scroll');
     if (!sc) return;
-    const isLeft = this._theoryMode === 'tp-left';
-    const cur = isLeft
-      ? Math.round(sc.scrollTop  / Math.max(1, sc.offsetHeight))
-      : Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
+    const isLeft = false; // v:v13.85 — tp-top only
+    const cur = Math.round(sc.scrollLeft / Math.max(1, sc.offsetWidth));
     const cards = sc.querySelectorAll('.theory-card');
     if (!cards[cur]) return;
     const swatches = cards[cur].querySelectorAll('.theory-swatch[data-hex]');
@@ -7314,6 +7329,26 @@ const Sampler={
       });
     }
 
+    // split-comp: seed + 2 split-complements (±30° from opposite) + tints/shades
+    // Creates a cinematic, high-contrast 3-pole palette
+    if (type === 'split-comp') {
+      const oppH  = (Hc + 180) % 360;
+      const splitA = (Hc + 150) % 360; // -30° from opposite
+      const splitB = (Hc + 210) % 360; // +30° from opposite
+      const poles  = [Hc, splitA, splitB];
+      return Array.from({length: n}, (_, i) => {
+        if (i < 3) {
+          // One swatch per hue pole at seed lightness — maximum vibrance
+          return CS.lchToHex(clamp(Lc, 15, 88), Cc, poles[i]);
+        } else {
+          // Remaining swatches: tints / shades of the seed for supporting tones
+          const t  = (i - 3) / Math.max(1, n - 4);
+          const tl = clamp(22 + t * 66, 12, 90);
+          return CS.lchToHex(tl, Cc * 0.72, Hc);
+        }
+      });
+    }
+
     // wildcard: apply mood style to n mono tones
     const wStyles = ['warmPush','coolPush','tealOrange','bleach','cross','mood','silver','wabi','faded','punk'];
     const wStyle  = wStyles[parseInt(seed.slice(1,3),16) % wStyles.length];
@@ -7335,7 +7370,7 @@ const Sampler={
     const nameLabel = document.getElementById('theory-name-label');
     if (!sc || !dots) return;
 
-    const isLeft  = this._theoryMode === 'tp-left';
+    const isLeft  = false; // v:v13.85 — tp-top only
     const prevIdx = this._theoryCardIdx || 0;
     const n = this._theoryCount || 6;
 
@@ -7347,7 +7382,8 @@ const Sampler={
       { name: 'Comp',      hexes: this._theoryHexes('comp',      hex, n) },
       { name: 'Analogous', hexes: this._theoryHexes('analogous', hex, n) },
       { name: 'Triadic',   hexes: this._theoryHexes('triadic',   hex, n) },
-      { name: wStyle,      hexes: this._theoryHexes('wildcard',  hex, n) },
+      { name: wStyle,      hexes: this._theoryHexes('wildcard',   hex, n) },
+      { name: 'Hi-Contrast', hexes: this._theoryHexes('split-comp', hex, n) }, // v:v13.85
     ];
 
     // ── Cards: ONLY swatches — no card-head, no intra-card scroll ────────
@@ -13530,6 +13566,11 @@ const PaletteBuilder = {
     this.colours[idx] = this._makeEntry(hex);
     // Rebuild DOM — each slot renders its native input with value="${c.hex}"
     this.render();
+    // v:v13.85 — reactive theory update: keep Theory Panel in sync
+    if (Sampler._theoryOpen) {
+      Sampler._theoryLockedHex = hex;
+      try { Sampler._renderTheory(hex); } catch(e) {}
+    }
     App.toast(CS.autoName(hex) + ' updated');
   },
 
@@ -14589,7 +14630,8 @@ const PaletteBuilder = {
                  ondragend="PaletteBuilder._onDragEnd(event)"
                  ondragover="PaletteBuilder._onDragOver(event,${i})"
                  ondrop="PaletteBuilder._onDrop(event,${i})">
-        <div class="pb-slot-colour" style="background:${c.hex}">
+        <div class="pb-slot-colour" style="background:${c.hex}"
+             onclick="if(Sampler._theoryOpen){Sampler._theoryLockedHex='${c.hex}';try{Sampler._renderTheory('${c.hex}');}catch(e){}}">
           <input type="color" class="pb-slot-native" value="${c.hex}"
             style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
             onchange="PaletteBuilder._updateColourAt(${i},this.value)">
@@ -14719,9 +14761,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v32';
+    const SW_CACHE = 'spectrum-v37';
     const swSrc = `
-const CACHE='spectrum-v32';
+const CACHE='spectrum-v37';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -16077,6 +16119,11 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
     if (!hexes || !hexes.length) return;
     // v:v13.81 — delegate to autoFill so user-picked colours are preserved
     PaletteBuilder.autoFill(hexes);
+    // v:v13.85 — reactive theory update after k-means fill
+    if (hexes[0] && Sampler._theoryOpen) {
+      Sampler._theoryLockedHex = hexes[0];
+      try { Sampler._renderTheory(hexes[0]); } catch(e) {}
+    }
     const panel = document.getElementById('_ap_panel');
     if (panel) panel.remove();
   },
