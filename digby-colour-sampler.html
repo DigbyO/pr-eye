@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.07';  // v:v14.07 — Theory Swatches Visible Fix
+  const APP_VERSION = '14.08';  // v:v14.08 — Theory Freeze (clean from v14.04 baseline)
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -308,24 +308,19 @@ body.active-tab-sampler #live-bar { display: flex !important; }
 body:not(.pro-mode) #theory-panel    { display: none !important; }
 body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 
-/* v:v14.06 — Theory: position:relative flex child of #top-dashboard.
-   position:fixed at top:75px overlapped the live-bar (#top-dashboard
-   starts at top:50px). Relative keeps theory above live-bar in the
-   flex-column flow — live-bar appears below naturally. */
+/* v:v14.08 — Theory: compact 80px strip, position:relative flex child.
+   flex-direction:column: strip-head (32px) above theory-scroll (48px). */
 #theory-panel {
   display: none;
   position: relative;
   width: 100%;
   height: 80px;
+  background: rgba(6,6,10,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
   flex-direction: column;
-  z-index: 9998;
-  background: rgba(0,0,0,0.5);
-  border-radius: 8px;
-  padding: 0;
-  margin: 2px 0;
-  overflow: hidden;
-  box-sizing: border-box;
   user-select: none; -webkit-user-select: none;
+  overflow: hidden;
 }
 #theory-panel.show { display: flex; }
 
@@ -1331,22 +1326,19 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
   width: 100%;
 }
 /* v:v14.01 — Sampler sidebar: ONLY when on the Sampler tab */
-/* v:v14.06 — LANE 2: Right vertical palette rail (CSS-var top) */
 body.active-tab-sampler #palette-builder-panel {
   position: fixed !important;
-  top: calc(env(safe-area-inset-top, 0px) + var(--top-h)) !important;
-  right: 15px !important;
-  width: 75px !important;
+  top: 70px !important;
+  right: 10px !important;
+  width: 80px !important;
   height: auto !important;
   max-height: 80vh !important;
   display: flex !important;
   flex-direction: column !important;
-  background: rgba(15,15,15,0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 15px !important;
   z-index: 9999 !important;
+  background: rgba(10,10,10,0.8) !important;
+  border-radius: 15px !important;
   padding: 10px 0 !important;
-  box-shadow: -5px 0 15px rgba(0,0,0,0.5) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   scrollbar-width: none;
@@ -1356,7 +1348,7 @@ body.active-tab-sampler #palette-builder-panel {
 body.active-tab-sampler #pb-grid {
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 10px !important;
   align-items: center !important;
   grid-template-columns: unset !important;
   width: 100%;
@@ -6846,7 +6838,7 @@ const Sampler={
     // fires on every pointermove so always has a fresh value to work from.
     // 100ms throttle prevents _renderTheory from blocking the paint thread.
     const _dragHex = this.currentHex;
-    this._theoryFrozen = false;  // v:v14.05 — unfreeze when crosshair moves
+    this._theoryFrozen = false;  // v:v14.08 — unfreeze when crosshair moves
     if (_dragHex && _dragHex !== '#888888') {  // v:v13.99 — unconditional; no _theoryOpen gate
       const _now = Date.now();
       if (!this._ptrTheoryTs || _now - this._ptrTheoryTs > 100) {
@@ -7151,7 +7143,7 @@ const Sampler={
     this.updateLiveBar(hex,R,G,B);
     // v:v14.03 — RAF theory: update live even when camera is held still
     // movePicker only fires on drag; this fires every frame from the camera loop.
-    if (this._theoryOpen && !this._theoryFrozen && hex && hex !== '#888888') {  // v:v14.05 — respect freeze
+    if (this._theoryOpen && !this._theoryFrozen && hex && hex !== '#888888') {  // v:v14.08
       const _now = Date.now();
       if (!this._rafTheoryTs || _now - this._rafTheoryTs > 500) {
         this._rafTheoryTs = _now;
@@ -7462,7 +7454,7 @@ const Sampler={
   // v13.72 — Theory Switcher: generate 5 palette types from seed and display
   // ── Theory Switcher (v13.77) — fixed strip, top or left side ───────────────
   _theoryOpen: false,
-  _theoryFrozen: false,    // v:v14.05 — freeze on colour select; unfreeze on camera move
+  _theoryFrozen: false,    // v:v14.08 — freeze on colour select
   // v:v13.85 — _theoryMode removed; tp-top is the only layout
   _theoryLockedHex: null,   // hex locked on open; only changes on explicit sync
   _theoryCardIdx:   0,      // current visible theory card index (0-4)
@@ -7678,7 +7670,7 @@ const Sampler={
     sc.innerHTML = theories.map(t => {
       const swatches = t.hexes.map(h2 => {
         const pName = CS.poeticName(h2);
-        return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="(function(h){var e=DS.makeEntry(h,'theory');DS.add(e);App.refresh();Sampler._theoryFrozen=true;App.toast(CS.poeticName(h)+' saved');Haptics&&Haptics.light()})('${h2}')"></div>`;  // v:v14.05 — tap saves to library
+        return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="PaletteBuilder.addColourConveyor('${h2}');Haptics&&Haptics.light()"></div>`;  // v:v13.90 FIFO
       }).join('');
       return `<div class="theory-card"><div class="theory-card-label">${t.name}</div><div class="theory-swatches">${swatches}</div></div>`;  // v:v14.04 — name label inside card
     }).join('');
@@ -13905,7 +13897,7 @@ const PaletteBuilder = {
     this.colours.push(this._makeEntry(hex));
     this.render();
     // v:v13.95 — Reactive Theory: refresh harmony panel when colour is added
-    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} Sampler._theoryFrozen = true; }  // v:v14.05 — freeze
+    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} Sampler._theoryFrozen = true; }  // v:v14.08
     App.toast(`${CS.autoName(hex)} added`);
   },
 
@@ -13926,7 +13918,7 @@ const PaletteBuilder = {
     Haptics && Haptics.medium();
     this.render();
     // v:v13.95 — Reactive Theory: refresh harmony panel when conveyor adds colour
-    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} Sampler._theoryFrozen = true; }  // v:v14.05 — freeze after conveyor
+    if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} Sampler._theoryFrozen = true; }  // v:v14.08
   },
 
   saveToLib(idx) {
@@ -15232,9 +15224,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v59';
+    const SW_CACHE = 'spectrum-v60';
     const swSrc = `
-const CACHE='spectrum-v59';
+const CACHE='spectrum-v60';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
