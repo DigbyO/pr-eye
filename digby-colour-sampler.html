@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v13.96 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v13.97 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v13.96</title>
+<title>Digby v13.97</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '13.96';  // v:v13.96 — Vertical Right-Rail, Compact Chips
+  const APP_VERSION = '13.97';  // v:v13.97 — Live Theory Drag, Crosshair Centre Swatch
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -215,6 +215,20 @@ a{color:var(--accent);text-decoration:none}
   touch-action:none;
 }
 #picker-hitbox:active{cursor:grabbing;}
+/* v:v13.97 — live colour disc at exact crosshair centre */
+#picker-center-swatch{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:11px;height:11px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.92);
+  background:#888888;
+  pointer-events:none;
+  z-index:10;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,0.55),0 0 6px rgba(0,0,0,0.4);
+  transition:background 0.06s linear;
+}
 
 /* v125 NORTH STAR: live-bar hidden by default; shown only on sampler tab */
 /* v:v13.82 — Unified top dashboard: fixed wrapper eliminates layout-shift */
@@ -2306,6 +2320,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <line x1="3" y1="35" x2="16" y2="35" stroke="white" stroke-width="1.5" opacity=".75" stroke-linecap="round"/>
           <line x1="54" y1="35" x2="67" y2="35" stroke="white" stroke-width="1.5" opacity=".75" stroke-linecap="round"/>
         </svg>
+        <!-- v:v13.97 — live colour swatch: mirrors currentHex in real-time -->
+        <div id="picker-center-swatch"></div>
       </div>
 
       <!-- Mini collection (top right) -->
@@ -3649,7 +3665,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v13.96</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v13.97</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3776,7 +3792,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.96</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v13.97</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5933,7 +5949,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.96</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v13.97</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6768,6 +6784,22 @@ const Sampler={
     // v:v13.93 — GPU-accelerated: translate3d avoids layout/reflow (was style.left/top)
     // Offset by half width/height (35px) so (cx,cy) is the element centre
     ch.style.transform='translate3d('+(cx-35)+'px,'+(cy-35)+'px,0)';
+    // v:v13.97 — Live theory refresh: sync harmonics to current sample on drag
+    // currentHex is written by the RAF capture() loop at 60fps; movePicker
+    // fires on every pointermove so always has a fresh value to work from.
+    // 100ms throttle prevents _renderTheory from blocking the paint thread.
+    const _dragHex = this.currentHex;
+    if (this._theoryOpen && _dragHex && _dragHex !== '#888888') {
+      const _now = Date.now();
+      if (!this._ptrTheoryTs || _now - this._ptrTheoryTs > 100) {
+        this._ptrTheoryTs = _now;
+        this._theoryLockedHex = _dragHex;
+        try { this._renderTheory(_dragHex); } catch(e) {}
+      }
+    }
+    // v:v13.97 — Update centre swatch with live colour (Part 3)
+    const _cs = document.getElementById('picker-center-swatch');
+    if (_cs && _dragHex) { _cs.style.background = _dragHex; _cs.title = _dragHex.toUpperCase(); }
   },
 
   // ── Tap-to-play overlay (iOS autoplay policy) ──────────────────
@@ -15125,9 +15157,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v48';
+    const SW_CACHE = 'spectrum-v49';
     const swSrc = `
-const CACHE='spectrum-v48';
+const CACHE='spectrum-v49';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
