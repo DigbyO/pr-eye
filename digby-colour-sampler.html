@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.02 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.04 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.02</title>
+<title>Digby v14.04</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.02';  // v:v14.02 — 3-col Grid, Always-12, Theory Toggle Restored
+  const APP_VERSION = '14.04';  // v:v14.04 — Theory Name Label Fix (visible in-card + header)
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -366,9 +366,10 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 }
 
 #theory-name-label {
-  font-size: 8px; font-family: var(--mono); letter-spacing: .1em;
-  text-transform: uppercase; color: rgba(255,255,255,0.5);
-  white-space: nowrap; overflow: hidden;
+  font-size: 11px; font-family: var(--mono); font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent);  /* v:v14.04 — gold accent, clearly visible */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 #theory-dots {
   display: flex; align-items: center; gap: 4px; flex-shrink: 0;
@@ -488,12 +489,29 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 
 #theory-scroll::-webkit-scrollbar { display: none; }
 
-/* ── Theory cards: pure swatch blocks, fill entire scroll height/width ── */
+/* ── Theory cards: swatch blocks with inline name label ── */
 .theory-card {
   flex: 0 0 100%; scroll-snap-align: start;
   padding: 5px 8px;
-  display: flex; align-items: stretch;
+  display: flex; align-items: stretch; gap: 5px;
   box-sizing: border-box;
+}
+/* v:v14.04 — vertical name label inside each card so it is always visible */
+.theory-card-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
 }
 
 
@@ -3698,7 +3716,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.02</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.04</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3825,7 +3843,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.02</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.04</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5982,7 +6000,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.02</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.04</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -7124,6 +7142,16 @@ const Sampler={
     this.updateLiveLoupe(hex);  // v:F12.15 — guard lives in updateLiveLoupe
     if(this.lutOn&&App.activeLut) this.drawLutOverlay(v.videoWidth,v.videoHeight);
     this.updateLiveBar(hex,R,G,B);
+    // v:v14.03 — RAF theory: update live even when camera is held still
+    // movePicker only fires on drag; this fires every frame from the camera loop.
+    if (this._theoryOpen && hex && hex !== '#888888') {
+      const _now = Date.now();
+      if (!this._rafTheoryTs || _now - this._rafTheoryTs > 500) {
+        this._rafTheoryTs = _now;
+        this._theoryLockedHex = hex;
+        try { this._renderTheory(hex); } catch(e) {}
+      }
+    }
   },
 
   updateLiveLoupe(hex) {  // v:F12.15 — RAF gate: no-op when frozen or off-camera
@@ -7644,7 +7672,7 @@ const Sampler={
         const pName = CS.poeticName(h2);
         return `<div class="theory-swatch" data-hex="${h2}" style="background:${h2}" title="${pName}  ${h2.toUpperCase()}" onclick="PaletteBuilder.addColourConveyor('${h2}');Haptics&&Haptics.light()"></div>`;  // v:v13.90 FIFO
       }).join('');
-      return `<div class="theory-card"><div class="theory-swatches">${swatches}</div></div>`;
+      return `<div class="theory-card"><div class="theory-card-label">${t.name}</div><div class="theory-swatches">${swatches}</div></div>`;  // v:v14.04 — name label inside card
     }).join('');
 
     // ── Name label (header centre) shows current card theory name ─────────
@@ -15196,9 +15224,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v54';
+    const SW_CACHE = 'spectrum-v56';
     const swSrc = `
-const CACHE='spectrum-v54';
+const CACHE='spectrum-v56';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
