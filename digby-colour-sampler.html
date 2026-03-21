@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.27 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.28 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.27</title>
+<title>Digby v14.28</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.27';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.28';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -183,21 +183,16 @@ a{color:var(--accent);text-decoration:none}
   /* v109: flex:1 fills available col height — eliminates black gap */
 }
 /* v:v13.84 — video decoupled from UI flex flow; fixed full-viewport bg layer */
+/* v:v14.28 — absolute within #sampler-cam-wrap (was fixed/z-index:0 — hidden behind cam-col bg) */
 #cam-video{
-  position:fixed!important;top:0!important;left:0!important;
-  width:100vw!important;height:100vh!important;
+  position:absolute!important;top:0!important;left:0!important;
+  width:100%!important;height:100%!important;
   object-fit:cover!important;display:block;
   z-index:0;
-  transform-origin:center center; /* v:F1.8 — 2× zoom pivot */ /* v:v14.20 — will-change removed: caused squish on front cam WebRTC */
+  transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
 }
-/* v:v14.14 — desktop: centre video to match app container so it isn't offset */
-@media (min-width:768px) and (min-height:501px){
-  #cam-video{
-    left:calc((100vw - var(--app-max-w)) / 2)!important;
-    width:var(--app-max-w)!important;
-    object-fit:cover!important;
-  }
-}
+/* v:v14.28 — desktop @media for #cam-video removed; absolute positioning fills
+   #sampler-cam-wrap naturally — no manual centering offsets required */
 #cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
 /* v:v13.93 — GPU-accelerated: translate3d replaces top/left mutation */
@@ -216,7 +211,9 @@ a{color:var(--accent);text-decoration:none}
 /* v:v14.22 — shutter flash overlay: white pulse over camera on capture */
 #cam-shutter-flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:1;}
 /* v:v14.22 — crosshair ring bloom: confirms capture visually */
-@keyframes ch-pulse{0%{transform:scale(1);opacity:1}45%{transform:scale(1.55);opacity:0.3}100%{transform:scale(1);opacity:1}}
+/* v:v14.28 — use CSS `scale` individual property (not transform:scale) so it
+   composes with transform:translate3d set by movePicker instead of overriding it */
+@keyframes ch-pulse{0%{scale:1;opacity:1}45%{scale:1.55;opacity:0.3}100%{scale:1;opacity:1}}
 .ch-fire{animation:ch-pulse 0.35s cubic-bezier(.22,1,.36,1) forwards;}
 /* v:v14.22 — evolve shimmer: fade palette slots before new page swaps in */
 #pb-grid.pb-evolving .pb-slot{opacity:0.08;transform:scale(0.93);}
@@ -2396,7 +2393,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.27</div>
+  <div class="ws-ver" id="ws-version">v14.28</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -3860,7 +3857,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.27</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.28</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3987,7 +3984,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.27</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.28</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -6199,7 +6196,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.27</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.28</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6676,24 +6673,16 @@ const Sampler={
     }
   },
 
-  // v:v14.15 — desktop-aware video positioning; centres to --app-max-w on wide screens
+  // v:v14.28 — simplified: video is now position:absolute within #sampler-cam-wrap;
+  //   container fills the correct bounds on any screen — no manual offsets needed.
+  //   Retains transform-origin for 2× zoom; object-fit:cover for correct framing.
   _positionCamVideo(v) {
     v = v || document.getElementById('cam-video');
     if (!v) return;
-    // v:v14.27 — reverted 100dvh (v14.25 P13): CSS.supports false-positive on this
-    //   Android Chrome caused height:100dvh to render as 0 on position:fixed video.
-    //   100vh worked correctly before v14.25; reverting to avoid black camera screen.
-    const base = 'position:fixed!important;top:0!important;height:100vh!important;'
-               + 'object-fit:cover!important;z-index:0;';
-    if (window.innerWidth >= 768) {
-      const cs  = getComputedStyle(document.documentElement);
-      const raw = cs.getPropertyValue('--app-max-w').trim();
-      const appW = parseInt(raw) || 540;
-      const lft  = Math.round((window.innerWidth - appW) / 2);
-      v.style.cssText = base + 'width:' + appW + 'px!important;left:' + lft + 'px!important;';
-    } else {
-      v.style.cssText = base + 'width:100vw!important;left:0!important;';
-    }
+    v.style.cssText = 'position:absolute!important;top:0!important;left:0!important;'
+                    + 'width:100%!important;height:100%!important;'
+                    + 'object-fit:cover!important;z-index:0;'
+                    + 'transform-origin:center center;';
   },
 
   // v446: centralised stream teardown — prevents camera locks & battery drain
@@ -15728,9 +15717,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v79';
+    const SW_CACHE = 'spectrum-v80';
     const swSrc = `
-const CACHE='spectrum-v79';
+const CACHE='spectrum-v80';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
