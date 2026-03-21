@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.15 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.16 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.15</title>
+<title>Digby v14.16</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.15';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.16';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -712,8 +712,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 .live-act-btn:active { background: var(--accent); border-color: var(--accent); color: #000; }
 .live-act-btn.on { background: rgba(255,180,0,.22); border-color: rgba(255,180,0,.6); color: #ffb400; }
 /* v:v13.13 WB button — hidden unless pro-mode is active */
-#live-wb-btn { display: none !important; }
-body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-events: auto; }
+/* v:v14.16 — WB button now uses standard pro-only class (custom rules removed) */
 
 /* v449: WB Preset Panel — floats above live-bar */
 #wb-panel {
@@ -1746,6 +1745,7 @@ body.active-tab-sampler #sampler-bottom-dock { display: flex; }
 .sbd-btn:active { color: var(--accent); background: rgba(255,255,255,0.07); }
 .sbd-btn.on { color: var(--accent); }
 .sbd-icon { font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; }
+#live-wb-btn .sbd-icon { width: 100%; height: 22px; } /* v:v14.16 — full-width so sun aligns to label centre */
 .sbd-label { font-size: 8px; text-transform: uppercase; letter-spacing: .055em; white-space: nowrap; }
 /* Pro-only dock items hidden until pro mode */
 .sbd-btn.pro-only { display: none !important; }
@@ -2390,7 +2390,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.15</div>
+  <div class="ws-ver" id="ws-version">v14.16</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -3851,7 +3851,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.15</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.16</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3978,7 +3978,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.15</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.16</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -4059,8 +4059,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     </span>
     <span class="sbd-label">Picker</span>
   </button>
-  <button class="sbd-btn" id="live-wb-btn" title="White Balance"
-          onclick="Sampler.toggleWBDropdown()">
+  <button class="sbd-btn pro-only" id="live-wb-btn" title="White Balance — Pro"
+          onclick="Sampler.toggleWBDropdown()"> <!-- v:v14.16 pro-only -->
     <span class="sbd-icon">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="display:block;margin:auto">
         <circle cx="10" cy="10" r="3.5"/>
@@ -6174,7 +6174,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.15</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.16</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6656,7 +6656,7 @@ const Sampler={
     v = v || document.getElementById('cam-video');
     if (!v) return;
     const base = 'position:fixed!important;top:0!important;height:100vh!important;'
-               + 'object-fit:cover!important;z-index:0;will-change:transform;transform-origin:center center;';
+               + 'object-fit:cover!important;z-index:0;';
     if (window.innerWidth >= 768) {
       const cs  = getComputedStyle(document.documentElement);
       const raw = cs.getPropertyValue('--app-max-w').trim();
@@ -15622,9 +15622,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v67';
+    const SW_CACHE = 'spectrum-v68';
     const swSrc = `
-const CACHE='spectrum-v67';
+const CACHE='spectrum-v68';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
