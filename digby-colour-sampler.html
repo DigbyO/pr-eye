@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.24 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.25 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.24</title>
+<title>Digby v14.25</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.24';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.25';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2396,7 +2396,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.24</div>
+  <div class="ws-ver" id="ws-version">v14.25</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2864,6 +2864,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       </div>
     <!-- Floating colour console — v449: full-width swatch, single focused reading -->
     <div id="live-bar">
+      <!-- v:v14.25 — drag handle pill: gives users a clear grab zone above swatch -->
+      <div id="live-bar-handle" style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.28);margin:8px auto 2px;flex-shrink:0;cursor:grab;-webkit-tap-highlight-color:transparent;touch-action:none"></div>
       <!-- v449: WB Preset Panel — floats above bar, opened by WB button -->
             <!-- v:F1.1 WB dropdown — compact vertical list above live-bar -->
       <div id="wb-dropdown">
@@ -2889,7 +2891,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
       <!-- v:v13.86 — WB Pro relocated inside #top-dashboard live-bar overlay -->
-      <button class="cap-side-btn" id="wb-pro-btn"
+      <button class="cap-side-btn pro-only" id="wb-pro-btn"
               onclick="Sampler.toggleWBPro()"
               title="White balance — tap to calibrate to pure white"
               style="position:absolute;top:8px;right:8px;z-index:4;padding:5px 10px;font-size:9px;">[ WB ]</button>
@@ -3858,7 +3860,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.24</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.25</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3985,7 +3987,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.24</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.25</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -6197,7 +6199,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.24</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.25</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6678,7 +6680,8 @@ const Sampler={
   _positionCamVideo(v) {
     v = v || document.getElementById('cam-video');
     if (!v) return;
-    const base = 'position:fixed!important;top:0!important;height:100vh!important;'
+    const _dvh = CSS && CSS.supports && CSS.supports('height','100dvh') ? '100dvh' : '100vh';
+    const base = 'position:fixed!important;top:0!important;height:'+_dvh+'!important;'
                + 'object-fit:cover!important;z-index:0;';
     if (window.innerWidth >= 768) {
       const cs  = getComputedStyle(document.documentElement);
@@ -6770,11 +6773,15 @@ const Sampler={
     //    Tier 3: any camera (absolute last resort — also catches desktop single-cam setups)
     const _facing = this.camFront ? 'user' : 'environment';
     // v:v14.20 — front cam: no forced resolution (landscape 4K constraints squish portrait stream)
+    // v:v14.25 — front cam: add portrait aspectRatio hint to steer stream orientation
+    const _aspect = (window.innerWidth && window.innerHeight)
+      ? window.innerWidth / window.innerHeight  // e.g. 0.45 on portrait phone
+      : 0.5625;  // fallback 9:16
     const tier1 = this.camFront
-      ? { video: { facingMode: { exact: _facing } } }
+      ? { video: { facingMode: { exact: _facing }, aspectRatio: { ideal: _aspect } } }
       : { video: { facingMode: { exact: _facing }, width: { ideal: 3840 }, height: { ideal: 2160 } } }; // rear: demand max optical resolution
     const tier2 = this.camFront
-      ? { video: { facingMode: _facing } }
+      ? { video: { facingMode: _facing, aspectRatio: { ideal: _aspect } } }
       : { video: { facingMode: _facing,            width: { ideal: 3840 }, height: { ideal: 2160 } } }; // rear: 4K fallback
     const tier3 = { video: true };
 
@@ -15718,9 +15725,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v76';
+    const SW_CACHE = 'spectrum-v77';
     const swSrc = `
-const CACHE='spectrum-v76';
+const CACHE='spectrum-v77';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
