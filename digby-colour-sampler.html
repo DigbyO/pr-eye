@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.11 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.14 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.11</title>
+<title>Digby v14.14</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.11';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.14';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -190,6 +190,14 @@ a{color:var(--accent);text-decoration:none}
   z-index:0;
   will-change:transform;
   transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
+}
+/* v:v14.14 — desktop: centre video to match app container so it isn't offset */
+@media (min-width:768px) and (min-height:501px){
+  #cam-video{
+    left:calc((100vw - var(--app-max-w)) / 2)!important;
+    width:var(--app-max-w)!important;
+    object-fit:cover!important;
+  }
 }
 #cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
@@ -1322,6 +1330,22 @@ body.pro-mode #live-wb-btn { display: revert !important; opacity: 1; pointer-eve
 }
 #palette-builder-panel::-webkit-scrollbar{display:none}
 /* v:v14.09 — multi-palette page navigator */
+/* v:v14.12 — palette swipe container */
+#pb-swipe-wrap {
+  overflow: hidden;
+  position: relative;
+  touch-action: pan-y;          /* allow vertical scroll, intercept horizontal */
+}
+#pb-grid {
+  will-change: transform;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#pb-grid.pb-slide-left  { animation: pb-slide-in-left  0.28s cubic-bezier(0.4,0,0.2,1) both }
+#pb-grid.pb-slide-right { animation: pb-slide-in-right 0.28s cubic-bezier(0.4,0,0.2,1) both }
+@keyframes pb-slide-in-left  { from { transform: translateX(40px);  opacity:0 } to { transform: translateX(0); opacity:1 } }
+@keyframes pb-slide-in-right { from { transform: translateX(-40px); opacity:0 } to { transform: translateX(0); opacity:1 } }
+/* hide nav when only one page */
+#pb-page-nav.pb-nav-hidden { visibility: hidden; }
 #pb-page-nav {
   display: flex; align-items: center; justify-content: center;
   gap: 10px; padding: 4px 12px 0; flex-shrink: 0; min-height: 24px;
@@ -2194,6 +2218,40 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   position:relative;z-index:1;}
 .ws-ver{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px;opacity:.7}
 /* v:v14.11 — first-time onboarding hints */
+/* v:v14.14 — companion colour strip */
+#companion-strip{
+  position:fixed;
+  bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 64px);
+  left:50%;transform:translateX(-50%);
+  width:min(calc(var(--app-max-w) - 24px),calc(100vw - 24px));
+  background:rgba(8,8,8,0.92);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:18px;
+  padding:10px 14px 12px;
+  z-index:9950;
+  transition:opacity .3s ease, transform .3s cubic-bezier(.4,0,.2,1);
+}
+#companion-strip.cs-hidden{
+  opacity:0;transform:translateX(-50%) translateY(16px);pointer-events:none;
+}
+.cs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cs-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono)}
+.cs-dismiss{background:none;border:none;color:rgba(255,255,255,.35);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;-webkit-tap-highlight-color:transparent}
+.cs-dots{display:flex;gap:10px;align-items:center;justify-content:center}
+.cs-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cs-dot{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.cs-dot:active{transform:scale(.88)}
+.cs-dot-name{font-size:7px;color:var(--muted);font-family:var(--mono);white-space:nowrap;max-width:48px;overflow:hidden;text-overflow:ellipsis;text-align:center}
+/* lifetime counter badge */
+#pb-found-count{font-size:9px;color:var(--muted);text-align:center;padding:2px 0 6px;font-family:var(--mono);letter-spacing:.06em;transition:color .3s}
+#pb-found-count.pb-fc-bump{color:var(--accent)}
+/* empty palette invitation */
+.pb-empty-invite{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 24px;text-align:center}
+.pb-empty-invite-icon{font-size:36px;line-height:1}
+.pb-empty-invite-msg{font-size:13px;color:var(--muted);line-height:1.6;max-width:260px}
+.pb-empty-invite-sub{font-size:11px;color:rgba(255,255,255,.3);font-family:var(--mono)}
 .ob-hint{position:fixed;z-index:19999;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:ob-fade-in .4s ease both}
 .ob-hint.ob-hidden{display:none}
 .ob-bubble{background:rgba(255,180,0,.93);color:#111;font-size:12px;font-weight:700;
@@ -2312,6 +2370,14 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     </filter>
   </defs>
 </svg>
+<!-- v:v14.14 — Companion colour strip: slides up after every add -->
+<div id="companion-strip" class="cs-hidden" aria-label="Suggested companion colours">
+  <div class="cs-header">
+    <span class="cs-label">Colours that go with this →</span>
+    <button class="cs-dismiss" onclick="Sampler._dismissCompanions()" title="Dismiss">×</button>
+  </div>
+  <div class="cs-dots"></div>
+</div>
 <!-- v:v14.11 — Onboarding hints (shown once to new users) -->
 <div id="ob-capture" class="ob-hint ob-hidden" style="bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 72px);left:50%;transform:translateX(-50%)">
   <div class="ob-bubble ob-pulse">Tap to save a colour</div>
@@ -2325,7 +2391,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
-  <div class="ws-ver" id="ws-version">v14.11</div>
+  <div class="ws-ver" id="ws-version">v14.14</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3613,6 +3679,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   <div class="module" id="mod-palette">
     <div class="mod-scroll">
       <div id="palette-builder-panel">
+        <div id="pb-found-count"></div>
         <div id="pb-mood-label" style="display:none;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;font-family:var(--mono);padding:0 0 8px;text-align:center"></div>
         <!-- v:v14.02 — Capacity selector hidden: always 12 slots -->
         <div style="display:none">
@@ -3626,11 +3693,14 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
         <!-- v:v14.09 — multi-palette page nav -->
         <div id="pb-page-nav">
-          <button id="pb-page-prev" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx-1)" title="Previous palette">&#8249;</button>
+          <button id="pb-page-prev" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx-1,'right')" title="Previous palette">&#8249;</button>
           <div id="pb-page-dots"></div>
-          <button id="pb-page-next" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx+1)" title="Next palette">&#8250;</button>
+          <button id="pb-page-next" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx+1,'left')" title="Next palette">&#8250;</button>
         </div>
+        <div id="pb-swipe-wrap">
+        <div id="pb-empty-invite-wrap"></div>
         <div id="pb-grid"></div>
+      </div>
         <div id="pb-actions">
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.toggleWheelPicker()">+ Wheel</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.addFromLibrary()">+ Library</button>
@@ -3767,7 +3837,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.11</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.14</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3894,7 +3964,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.11</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.14</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -5495,20 +5565,44 @@ const App={
     if(t==='prompter') Prompter.render();
     if(t==='palette'){
       try{ PaletteBuilder.setCapacity(12); PaletteBuilder.render(); }catch(e){}  // v:v14.02 — always 12
-      // v:v14.09 — swipe left/right on pb-grid to switch palette pages (attach once)
+      // v:v14.12 — full-panel swipe with drag feedback + slide animation
       if (!PaletteBuilder._swipeInit) {
         PaletteBuilder._swipeInit = true;
-        const _pg = document.getElementById('pb-grid');
-        if (_pg) {
-          let _sx = 0, _sy = 0;
-          _pg.addEventListener('pointerdown', e => { _sx = e.clientX; _sy = e.clientY; }, {passive:true});
-          _pg.addEventListener('pointerup', e => {
+        const _wrap = document.getElementById('pb-swipe-wrap');
+        const _grid = document.getElementById('pb-grid');
+        if (_wrap && _grid) {
+          let _sx = 0, _sy = 0, _dragging = false;
+          _wrap.addEventListener('pointerdown', e => {
+            _sx = e.clientX; _sy = e.clientY; _dragging = false;
+          }, {passive: true});
+          _wrap.addEventListener('pointermove', e => {
+            if (!_sx) return;
             const dx = e.clientX - _sx, dy = e.clientY - _sy;
-            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 55) {
-              dx < 0 ? PaletteBuilder.goToPage(PaletteBuilder.pageIdx + 1)
-                     : PaletteBuilder.goToPage(PaletteBuilder.pageIdx - 1);
+            if (!_dragging && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+              _dragging = true;
             }
-          }, {passive:true});
+            if (_dragging) {
+              // live drag: translate grid with rubber-banding
+              const clamp = Math.sign(dx) * Math.min(Math.abs(dx) * 0.6, 60);
+              _grid.style.transition = 'none';
+              _grid.style.transform = `translateX(${clamp}px)`;
+            }
+          }, {passive: true});
+          _wrap.addEventListener('pointerup', e => {
+            const dx = e.clientX - _sx, dy = e.clientY - _sy;
+            _grid.style.transition = '';
+            _grid.style.transform = '';
+            if (_dragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
+              dx < 0
+                ? PaletteBuilder.goToPage(PaletteBuilder.pageIdx + 1, 'left')
+                : PaletteBuilder.goToPage(PaletteBuilder.pageIdx - 1, 'right');
+            }
+            _sx = 0; _sy = 0; _dragging = false;
+          }, {passive: true});
+          _wrap.addEventListener('pointercancel', () => {
+            _grid.style.transition = ''; _grid.style.transform = '';
+            _sx = 0; _dragging = false;
+          }, {passive: true});
         }
       }
       // v:F12.9 — scroll palette module to top on every open
@@ -6068,7 +6162,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.11</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.14</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6909,6 +7003,7 @@ const Sampler={
     // 100ms throttle prevents _renderTheory from blocking the paint thread.
     const _dragHex = this.currentHex;
     this._theoryFrozen = false;  // v:v14.08 — unfreeze when crosshair moves
+    try { Sampler._dismissCompanions(); } catch(e) {} // v:v14.14
     if (_dragHex && _dragHex !== '#888888') {  // v:v13.99 — unconditional; no _theoryOpen gate
       const _now = Date.now();
       if (!this._ptrTheoryTs || _now - this._ptrTheoryTs > 100) {
@@ -13963,15 +14058,7 @@ const PaletteBuilder = {
   addColour(hex) {
     if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) { App.toast('Invalid colour'); return; }
     if (this._isDuplicate(hex)) { App.toast('Already in palette'); return; }
-    if (this.colours.length >= this.MAX) {
-      // v:v14.09 — palette full: auto-create next page rather than blocking
-      this.pages[this.pageIdx] = this.colours.slice();
-      this.pageIdx = this.pages.length;
-      this.pages.push([]);
-      this.colours = this.pages[this.pageIdx];
-      this.render();
-      App.toast(`Palette ${this.pageIdx + 1} started — swipe to switch`);
-    }
+    this._paginate(); // v:v14.13 — auto-create new page if full
     Haptics.medium(); // v:v13.65 colour added to palette
     try { if(Onboard&&Onboard._shown){Onboard.dismissCapture();} }catch(e){} // v:v14.11
     this._pushHistory();
@@ -13980,6 +14067,17 @@ const PaletteBuilder = {
     // v:v13.95 — Reactive Theory: refresh harmony panel when colour is added
     if (Sampler._theoryOpen) { Sampler._theoryLockedHex = hex; try { Sampler._renderTheory(hex); } catch(e) {} Sampler._theoryFrozen = true; }  // v:v14.08
     App.toast(`${CS.autoName(hex)} added`);
+    // v:v14.14 — companion strip: show harmonics so there's always a next colour to try
+    try {
+      if (Sampler.mode === 'camera' || Sampler.mode === 'upload') {
+        Sampler._showCompanions(hex);
+      }
+    } catch(e) {}
+    // v:v14.14 — lifetime counter
+    try {
+      const _fc = parseInt(localStorage.getItem('digby_found') || '0') + 1;
+      localStorage.setItem('digby_found', _fc);
+    } catch(e) {}
   },
 
   // v:v13.90 — Conveyor Belt (FIFO): if palette is full, shift oldest out and push new in
@@ -14048,13 +14146,26 @@ const PaletteBuilder = {
   addFromWheel() { this.addColour(ColourWheel.getCurrentHex()); },
 
   // v:v14.09 — Multi-page palette navigation ───────────────────────────────
-  goToPage(idx) {
+  goToPage(idx, dir) {
     if (idx < 0 || idx >= this.pages.length) return;
     this.pages[this.pageIdx] = this.colours.slice();
     this.pageIdx = idx;
     this.colours = this.pages[this.pageIdx] ? this.pages[this.pageIdx].slice() : [];
     this.pages[this.pageIdx] = this.colours;
+    this._slideDir = dir || null; // v:v14.12 — pass direction for animation
     this.render();
+  },
+
+  // v:v14.13 — shared paginate helper: call before any add; creates a new page
+  // if the current one is full so all add pathways support multi-page
+  _paginate() {
+    if (this.colours.length < this.MAX) return; // space available — nothing to do
+    this.pages[this.pageIdx] = this.colours.slice();
+    this.pageIdx = this.pages.length;
+    this.pages.push([]);
+    this.colours = this.pages[this.pageIdx];
+    this._slideDir = 'left';
+    App.toast(`Palette ${this.pageIdx + 1} started — swipe to switch`);
   },
   _renderPageDots() {
     const c = document.getElementById('pb-page-dots');
@@ -14589,12 +14700,13 @@ const PaletteBuilder = {
         CS.hslToHex((h + 210) % 360, hs, hl),
       ];
     }
-    const emptySlots = this.MAX - this.colours.length;
-    if (emptySlots === 0) { App.toast('Palette full — clear some slots first'); return; }
-    const toAdd = hexes.filter(hx => !this.colours.find(c => c.hex === hx)).slice(0, emptySlots);
+    // v:v14.13 — paginate instead of blocking; add all non-duplicate hexes across pages
+    const toAdd = hexes.filter(hx => !this.colours.find(c => c.hex === hx));
+    if (!toAdd.length) { App.toast('All suggested colours already in palette'); return; }
     if (!toAdd.length) { App.toast('All suggested colours already in palette'); return; }
     this._pushHistory();
     toAdd.forEach(hex => {
+      this._paginate(); // v:v14.13 — auto-page mid-loop if we hit MAX
       const name = CS.pantoneFirst ? CS.pantoneFirst(hex) : hex.toUpperCase();
       this.colours.push({ hex, name, locked: false, pantone: name });
     });
@@ -14721,7 +14833,7 @@ const PaletteBuilder = {
   suggestFromTheme() {
     // v:F1.11 — Delegates to _themeCandidate() so the active theme card
     // (Analogous, Triadic, Complementary, Monochromatic, etc.) drives the pick.
-    if (this.colours.length >= this.MAX) { App.toast(`Palette full (max ${this.MAX})`); return; }
+    this._paginate(); // v:v14.13 — auto-page instead of blocking
     const hex = this._themeCandidate();
     if (!hex) { App.toast('No candidate found — try a different theme'); return; }
     if (this._isDuplicate(hex)) {
@@ -14744,8 +14856,8 @@ const PaletteBuilder = {
     // (Analogous, Triadic, Complementary, etc.) drives every fill pick.
     // After each addition the LCH candidate pool re-evaluates against the
     // growing palette, ensuring perceptual diversity in the filled slots.
+    this._paginate(); // v:v14.13 — auto-page if full
     const slots = this.MAX - this.colours.length;
-    if (!slots) { App.toast('Palette full'); return; }
     this._pushHistory();
     let added = 0;
     // Safety: cap attempts to avoid infinite loop on heavily-populated palettes
@@ -15218,7 +15330,53 @@ const PaletteBuilder = {
       html += `<div class="pb-slot-empty" onclick="PaletteBuilder.addFromWheel()">+</div>`;
     }
     grid.innerHTML = html;
+    // v:v14.14 — empty / sparse palette invitation
+    try {
+      const _inv = document.getElementById('pb-empty-invite-wrap');
+      if (_inv) {
+        if (this.colours.length === 0) {
+          _inv.innerHTML = '<div class="pb-empty-invite">'
+            + '<div class="pb-empty-invite-icon">🎨</div>'
+            + '<div class="pb-empty-invite-msg">Aim the camera at anything — every wall, mug, jacket and sunset holds a palette waiting to be found</div>'
+            + '<button class="btn btn-s" onclick="App.setTab(\x27sampler\x27)" style="margin-top:4px">← Start Sampling</button>'
+            + '<div class="pb-empty-invite-sub">Tap the gold button to capture any colour</div>'
+            + '</div>';
+        } else if (this.colours.length === 1) {
+          const _c = this.colours[0];
+          const _h = CS.harmonies(_c.hex);
+          const _comp = _h.complementary[1];
+          _inv.innerHTML = '<div class="pb-empty-invite" style="padding:16px 24px 4px">'
+            + '<div class="pb-empty-invite-sub">Great start — now hunt its complement →'
+            + '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:' + _comp + ';vertical-align:middle;margin-left:6px;border:1px solid rgba(255,255,255,.2)"></span>'
+            + '</div></div>';
+        } else {
+          _inv.innerHTML = '';
+        }
+      }
+    } catch(e) {}
     try { this._renderPageDots(); } catch(e) {}  // v:v14.09
+    // v:v14.14 — lifetime counter
+    try {
+      const _cEl = document.getElementById('pb-found-count');
+      if (_cEl) {
+        const _n = localStorage.getItem('digby_found') || '0';
+        _cEl.textContent = '🎨 ' + _n + ' colour' + (_n==='1'?'':'s') + ' found';
+        _cEl.classList.add('pb-fc-bump');
+        setTimeout(function(){ _cEl.classList.remove('pb-fc-bump'); }, 600);
+      }
+    } catch(e) {}
+    // v:v14.12 — slide animation on page change
+    if (this._slideDir) {
+      const g = document.getElementById('pb-grid');
+      if (g) {
+        const cls = this._slideDir === 'left' ? 'pb-slide-left' : 'pb-slide-right';
+        g.classList.remove('pb-slide-left','pb-slide-right');
+        void g.offsetWidth; // reflow to restart animation
+        g.classList.add(cls);
+        setTimeout(() => g.classList.remove(cls), 300);
+      }
+      this._slideDir = null;
+    }
     // v:F1.15 — Mood DNA: 2-word label from palette hue/saturation average
     const moodEl = document.getElementById('pb-mood-label');
     if(moodEl){
@@ -15309,6 +15467,45 @@ const WelcomeScreen = {
 // v132: switchTab global alias (spec-required name)
 function switchTab(id) { App.setTab(id); }
 
+// v:v14.14 — companion strip: shows harmonically related colours after every add
+// Creates the endless loop: sample → add → see companions → tap → add → more...
+Sampler._showCompanions = function(hex) {
+  try {
+    const h = CS.harmonies(hex);
+    // Curated 5: analogous warmth, analogous cool, complement, triadic, mono-light
+    const pool = [
+      h.analogous[0], h.analogous[2],
+      h.complementary[1],
+      h.triadic[1],
+      h.mono[0]
+    ].filter(function(c){ return c && c !== hex && /^#[0-9a-f]{6}$/i.test(c); });
+
+    const strip = document.getElementById('companion-strip');
+    if (!strip) return;
+    const dotsEl = strip.querySelector('.cs-dots');
+    if (!dotsEl) return;
+
+    dotsEl.innerHTML = pool.slice(0,5).map(function(c) {
+      const name = CS.autoName ? CS.autoName(c) : c.toUpperCase();
+      return '<div class="cs-dot-wrap" onclick="PaletteBuilder.addColour(\x27' + c + '\x27);Sampler._showCompanions(\x27' + c + '\x27);try{Haptics&&Haptics.light()}catch(e){}" title="' + name + '">'
+        + '<div class="cs-dot" style="background:' + c + '"></div>'
+        + '<div class="cs-dot-name">' + name.split(' ').slice(0,2).join(' ') + '</div>'
+        + '</div>';
+    }).join('');
+
+    strip.classList.remove('cs-hidden');
+    clearTimeout(Sampler._companionTimer);
+    Sampler._companionTimer = setTimeout(function(){ Sampler._dismissCompanions(); }, 10000);
+  } catch(e) {}
+};
+Sampler._dismissCompanions = function() {
+  try {
+    const strip = document.getElementById('companion-strip');
+    if (strip) strip.classList.add('cs-hidden');
+    clearTimeout(Sampler._companionTimer);
+  } catch(e) {}
+};
+
 // v:v14.11 — Onboarding hint controller
 const Onboard = {
   _shown: false,
@@ -15364,9 +15561,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v63';
+    const SW_CACHE = 'spectrum-v66';
     const swSrc = `
-const CACHE='spectrum-v63';
+const CACHE='spectrum-v66';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
