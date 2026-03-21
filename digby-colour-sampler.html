@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.14 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.15 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.14</title>
+<title>Digby v14.15</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.14';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.15';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2216,7 +2216,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   letter-spacing:.06em;margin-bottom:4px;
   animation:wsLogoGlow 7s ease-in-out infinite;
   position:relative;z-index:1;}
-.ws-ver{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px;opacity:.7}
+.ws-ver{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:4px;margin-bottom:10px;opacity:.7}
 /* v:v14.11 — first-time onboarding hints */
 /* v:v14.14 — companion colour strip */
 #companion-strip{
@@ -2262,7 +2262,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 .ob-pulse{animation:ob-pulse 1.4s ease-in-out infinite}
 @keyframes ob-pulse{0%,100%{box-shadow:0 4px 18px rgba(0,0,0,.45)}50%{box-shadow:0 4px 24px rgba(255,180,0,.7),0 0 0 4px rgba(255,180,0,.2)}}
 .ws-sub{font-size:11px;color:rgba(255,255,255,.38);font-family:var(--mono);
-  margin-bottom:28px;position:relative;z-index:1;}
+  margin-bottom:16px;margin-top:0;position:relative;z-index:1;}
 .ws-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px;
   position:relative;z-index:1;}
 .ws-skip{
@@ -2390,8 +2390,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
+  <div class="ws-ver" id="ws-version">v14.15</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
-  <div class="ws-ver" id="ws-version">v14.14</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3319,6 +3319,17 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
       <div id="bg-color-wrap" style="padding:0 12px 14px;display:flex;flex-direction:column;gap:8px">
+        <!-- v:v14.15 — Quick preset swatches for common background colours -->
+        <div id="bg-presets" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+          <div title="White" style="width:28px;height:28px;border-radius:6px;background:#ffffff;border:2px solid rgba(255,255,255,.28);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#ffffff')"></div>
+          <div title="Light grey" style="width:28px;height:28px;border-radius:6px;background:#d0d0d0;border:2px solid rgba(255,255,255,.18);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#d0d0d0')"></div>
+          <div title="Mid grey" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.18);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#888888')"></div>
+          <div title="Dark grey" style="width:28px;height:28px;border-radius:6px;background:#333333;border:2px solid rgba(255,255,255,.15);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#333333')"></div>
+          <div title="Black" style="width:28px;height:28px;border-radius:6px;background:#000000;border:2px solid rgba(255,255,255,.12);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#000000')"></div>
+          <div title="Ivory" style="width:28px;height:28px;border-radius:6px;background:#f5f0e8;border:2px solid rgba(255,255,255,.18);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#f5f0e8')"></div>
+          <div title="Studio black" style="width:28px;height:28px;border-radius:6px;background:#1a1a1a;border:2px solid rgba(255,255,255,.12);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="Prompter.setBgColor('s','#1a1a1a')"></div>
+          <div id="bg-preset-custom" title="Pick custom colour" style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff);border:2px solid rgba(255,255,255,.18);cursor:pointer;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.45);position:relative;overflow:hidden" onclick="document.getElementById('bg-inp-s').click()"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)">⭐</span></div>
+        </div>
         <!-- Single slot -->
         <div id="bg-single" style="display:flex;align-items:center;gap:8px">
           <div id="bg-chip-s" style="width:28px;height:28px;border-radius:6px;background:#888888;border:2px solid rgba(255,255,255,.28);flex-shrink:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)" onclick="document.getElementById('bg-inp-s').click()"></div>
@@ -3551,7 +3562,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <div style="font-size:12px;min-width:60px">Version</div>
           <div class="tog-group" id="ver-tog" style="flex:1;flex-wrap:wrap">
-            <button class="tog-btn on" data-ver="--v 7" onclick="Prompter.setVer(this)">v7</button>
+            <button class="tog-btn on" data-ver="--v 8" onclick="Prompter.setVer(this)">v8</button>
+            <button class="tog-btn" data-ver="--v 7" onclick="Prompter.setVer(this)">v7</button>
             <button class="tog-btn" data-ver="--v 6.1" onclick="Prompter.setVer(this)">v6.1</button>
             <button class="tog-btn" data-ver="--v 6" onclick="Prompter.setVer(this)">v6</button>
             <button class="tog-btn" data-ver="--niji 6" onclick="Prompter.setVer(this)">niji 6</button>
@@ -3711,7 +3723,9 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.seedHarmony('triadic')" title="Fill empty slots with triadic harmony from seed">△ Triadic</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
+          <button class="btn btn-p btn-sm" onclick="PaletteBuilder.evolve()" title="Evolve palette: hue-drift each colour to a new page for endless discovery">✧ Evolve</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
+          <button class="btn btn-s btn-sm" onclick="Vault.save()" title="Save current palette + Midjourney prompt to Vault">🏛️ Vault</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.swatchExport()"> Swatch</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.exportPNG()">Export PNG</button>
@@ -3837,7 +3851,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.14</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.15</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3964,7 +3978,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.14</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.15</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -4048,9 +4062,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   <button class="sbd-btn" id="live-wb-btn" title="White Balance"
           onclick="Sampler.toggleWBDropdown()">
     <span class="sbd-icon">
-      <!-- v:v13.61 WB — colour temperature sun with rays -->
-      <!-- v:v14.11 — rebalanced sun: equal-length rays at all 8 angles -->
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="display:block;margin:auto">
         <circle cx="10" cy="10" r="3.5"/>
         <line x1="10" y1="1.5" x2="10" y2="4.5"/>
         <line x1="10" y1="15.5" x2="10" y2="18.5"/>
@@ -6162,7 +6174,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.14</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.15</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -6639,6 +6651,23 @@ const Sampler={
     }
   },
 
+  // v:v14.15 — desktop-aware video positioning; centres to --app-max-w on wide screens
+  _positionCamVideo(v) {
+    v = v || document.getElementById('cam-video');
+    if (!v) return;
+    const base = 'position:fixed!important;top:0!important;height:100vh!important;'
+               + 'object-fit:cover!important;z-index:0;will-change:transform;transform-origin:center center;';
+    if (window.innerWidth >= 768) {
+      const cs  = getComputedStyle(document.documentElement);
+      const raw = cs.getPropertyValue('--app-max-w').trim();
+      const appW = parseInt(raw) || 540;
+      const lft  = Math.round((window.innerWidth - appW) / 2);
+      v.style.cssText = base + 'width:' + appW + 'px!important;left:' + lft + 'px!important;';
+    } else {
+      v.style.cssText = base + 'width:100vw!important;left:0!important;';
+    }
+  },
+
   // v446: centralised stream teardown — prevents camera locks & battery drain
   stopStream() {
     // v:v13.70 — reset JS-applied sizing so next camera start is clean
@@ -6781,10 +6810,8 @@ const Sampler={
           cvs.width  = v.videoWidth;
           cvs.height = v.videoHeight;
         }
-        // Re-assert full-viewport after any deferred style mutations
-        v.style.cssText = 'position:fixed!important;top:0!important;left:0!important;'
-                        + 'width:100vw!important;height:100vh!important;'
-                        + 'object-fit:cover!important;z-index:0;';
+        // v:v14.15 — re-assert using desktop-aware helper (replaces hard-coded full-viewport)
+        Sampler._positionCamVideo(v);
       };
       v.srcObject = stream;
 
@@ -6796,8 +6823,12 @@ const Sampler={
       try {
         await v.play();
         _diag('play() OK — w:' + (v.videoWidth||'?') + ' h:' + (v.videoHeight||'?'));
-        // v:v13.84 — video is position:fixed full-viewport background;
-        // no layout-relative aspect correction needed (removed _fixVideoAspect).
+        // v:v14.15 — apply desktop-aware camera positioning immediately after play
+        Sampler._positionCamVideo(v);
+        if (!Sampler._camResizeHandler) {
+          Sampler._camResizeHandler = () => Sampler._positionCamVideo();
+          window.addEventListener('resize', Sampler._camResizeHandler, { passive: true });
+        }
         // Hide diag after 4s once playing
         setTimeout(()=>{const d=document.getElementById('cam-diag-bar');if(d)d.style.display='none';},4000);
       } catch (err) {
@@ -11444,7 +11475,7 @@ const Prompter={
   tile:true,
   raw:false,
   ar:'1:1',
-  ver:'--v 7',
+  ver:'--v 8',
   quality:'--q 1',
   stylize:250,
   chaos:0,
@@ -14036,8 +14067,38 @@ const PaletteBuilder = {
   },
 
   // ── Initialiser (called from App.init) ────────────────────────────────
+  // v:v14.15 — Evolve: hue-drift entire palette to a new page for endless discovery
+  evolve() {
+    if (!this.colours.length) { App.toast('Add colours to evolve'); return; }
+    this._pushHistory();
+    const evolved = this.colours.map(c => {
+      if (c.locked) return { ...c };
+      const { r, g, b } = CS.hexToRgb(c.hex);
+      const hsl = CS.rgbToHsl(r, g, b);
+      // Drift hue 20–50°, subtle saturation and lightness variance
+      const dh = (Math.random() < 0.5 ? 1 : -1) * (20 + Math.random() * 30);
+      const ds = (Math.random() - 0.5) * 18;
+      const dl = (Math.random() - 0.5) * 12;
+      const nh  = ((hsl.h + dh) % 360 + 360) % 360;
+      const ns  = Math.max(12, Math.min(100, hsl.s + ds));
+      const nl  = Math.max(8,  Math.min(92,  hsl.l + dl));
+      const hex = CS.hslToHex(nh, ns / 100, nl / 100);
+      return this._makeEntry(hex);
+    });
+    // Save current page, create new page with evolved colours
+    this.pages[this.pageIdx] = this.colours.slice();
+    const newIdx = this.pages.length;
+    this.pages.push(evolved);
+    this.pageIdx = newIdx;
+    this.colours = this.pages[this.pageIdx];
+    this._slideDir = 'left';
+    this.render();
+    App.toast('Evolved → swipe left to compare');
+    Haptics && Haptics.medium();
+  },
+
+  // ── Initialiser (called from App.init) ─────────────────────────────────────────
   init() {
-    // Cmd/Ctrl+Z → undo
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
         // Only act if palette tab is in focus or no text field is active
@@ -15561,9 +15622,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v66';
+    const SW_CACHE = 'spectrum-v67';
     const swSrc = `
-const CACHE='spectrum-v66';
+const CACHE='spectrum-v67';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
@@ -17706,7 +17767,8 @@ const AIColourName = {
     <div id="vault-title">🏛️ Studio Vault</div>
     <div id="vault-grid"></div>
     <div id="vault-empty">No saved palettes yet.<br>Tap ♥ Save in Prompter to save one.</div>
-    <button class="btn btn-s btn-sm" style="width:100%;margin-top:14px" onclick="Vault.close()">Close</button>
+    <button class="btn btn-p btn-sm" style="width:100%;margin-bottom:8px" onclick="Vault.save()">+ Save Current Palette to Vault</button>
+    <button class="btn btn-s btn-sm" style="width:100%" onclick="Vault.close()">Close</button>
   </div>
 </div>
 <!-- v:F1.3 AI Design Quiz overlay -->
