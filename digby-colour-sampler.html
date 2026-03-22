@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.39 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.40 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.39</title>
+<title>Digby v14.40</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -113,7 +113,9 @@ a{color:var(--accent);text-decoration:none}
 #sampler-paint-search{touch-action:manipulation}  /* v:F12.15 — remove 300ms tap delay */
 
 /*  SHELL  */
-#app{display:flex;flex-direction:column;height:100dvh;height:-webkit-fill-available;overflow:hidden;position:relative}
+#app{display:flex;flex-direction:column;height:100dvh;height:-webkit-fill-available;overflow:visible;position:relative}
+/* v14.40: overflow:hidden removed from #app — same GPU layer promotion issue as .module/#modules/#sampler-cam-wrap:
+   overflow:hidden on a positioned ancestor forces a compositor clip layer → hardware MediaCodec video decode fails → black screen on Android */
 #top{height:var(--top-h);background:#000;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;z-index:var(--z-bar)}
 #title{font-family:var(--sharpie);font-size:21px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
 #last-dot{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid rgba(255,255,255,.12);transition:background 2s ease-in-out,box-shadow 2s ease-in-out;flex-shrink:0;box-shadow:0 0 8px rgba(212,165,53,.5)}
@@ -2430,7 +2432,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.39</div>
+  <div class="ws-ver" id="ws-version">v14.40</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -3894,7 +3896,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.39</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.40</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4021,7 +4023,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.39</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.40</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -9107,7 +9109,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.39</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.40</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
