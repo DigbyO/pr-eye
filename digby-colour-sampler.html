@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.40 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.41 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.40</title>
+<title>Digby v14.41</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -114,7 +114,7 @@ a{color:var(--accent);text-decoration:none}
 
 /*  SHELL  */
 #app{display:flex;flex-direction:column;height:100dvh;height:-webkit-fill-available;overflow:visible;position:relative}
-/* v14.40: overflow:hidden removed from #app — same GPU layer promotion issue as .module/#modules/#sampler-cam-wrap:
+/* v14.41: overflow:hidden removed from #app — same GPU layer promotion issue as .module/#modules/#sampler-cam-wrap:
    overflow:hidden on a positioned ancestor forces a compositor clip layer → hardware MediaCodec video decode fails → black screen on Android */
 #top{height:var(--top-h);background:#000;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;z-index:var(--z-bar)}
 #title{font-family:var(--sharpie);font-size:21px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
@@ -178,22 +178,32 @@ a{color:var(--accent);text-decoration:none}
    MODULE 1  SAMPLER (full-screen camera)
  */
 #sampler-cam-wrap{
-  position:relative;background:#000;
+  position:relative;
+  /* v14.41: background removed — transparent so position:fixed video below shows through */
   display:flex;align-items:center;justify-content:center;
   width:100%;flex:1;min-height:0;
   border-radius:16px;
-  /* v14.38: border-radius only — no overflow:hidden, no clip-path
-     Both force GPU layer promotion on Android → hardware video decode fails → black screen.
-     Video fills container 100% so nothing clips; border-radius is purely decorative. */
+  /* v14.41: no overflow:hidden — doesn't clip position:fixed video anyway;
+     border-radius is decorative for overlay UI elements only. */
 }
 /* v:v13.84 — video decoupled from UI flex flow; fixed full-viewport bg layer */
-/* v:v14.28 — absolute within #sampler-cam-wrap (was fixed/z-index:0 — hidden behind cam-col bg) */
+/* v:v14.41 — restored position:fixed (reverts v14.28 absolute change).
+   position:absolute puts the video inside the GPU compositing tree of ancestor
+   overflow:hidden elements → hardware MediaCodec video decode fails → black screen.
+   position:fixed renders outside that tree entirely, same as v14.14. */
 #cam-video{
-  position:absolute!important;top:0!important;left:0!important;
-  width:100%!important;height:100%!important;
+  position:fixed!important;top:0!important;left:0!important;
+  width:100vw!important;height:100vh!important;
   object-fit:cover!important;display:block;
   z-index:0;
   transform-origin:center center; /* v:F1.8 — 2× zoom pivot */
+}
+/* v:v14.41 — desktop: centre fixed video to app container width */
+@media (min-width:768px) and (min-height:501px){
+  #cam-video{
+    left:calc((100vw - var(--app-max-w)) / 2)!important;
+    width:var(--app-max-w)!important;
+  }
 }
 /* v:v14.28 — desktop @media for #cam-video removed; absolute positioning fills
    #sampler-cam-wrap naturally — no manual centering offsets required */
@@ -2432,7 +2442,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.40</div>
+  <div class="ws-ver" id="ws-version">v14.41</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2496,7 +2506,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     </div>
 
     <!-- v84: Camera + queue wrapper — flex column prevents squashing -->
-    <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1;">
+    <!-- v14.41: background:#000 removed — transparent so position:fixed cam-video shows through -->
+    <div id="sampler-cam-col" style="display: flex; flex-direction: column; flex: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
     <!-- Camera view (fills remaining space) -->
     <div id="sampler-cam-wrap">
       <video id="cam-video" autoplay playsinline webkit-playsinline muted></video>
@@ -3896,7 +3907,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.40</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.41</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4023,7 +4034,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.40</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.41</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -8488,11 +8499,19 @@ const App={
       if(Sampler.rafId){ cancelAnimationFrame(Sampler.rafId); Sampler.rafId = null; }
       // v:F1.13 stop stream on tab leave — prevents zombie iOS track
       if(Sampler.mode === 'camera') Sampler.stopStream();
+      // v14.41: position:fixed video escapes parent display:none — hide explicitly on tab leave
+      const _cvHide=document.getElementById('cam-video');
+      if(_cvHide) _cvHide.style.visibility='hidden';
     }
     if(t === 'sampler' && this.tab !== 'sampler'){
       if(Sampler.mode === 'camera' && !Sampler.frozen){
         // v:F1.13 restart camera fully — don't trust a stream that may have died in background
         setTimeout(()=>Sampler.startCamera(), 80);
+      }
+      // v14.41: restore video visibility when returning to sampler in camera mode
+      if(Sampler.mode === 'camera'){
+        const _cvShow=document.getElementById('cam-video');
+        if(_cvShow) _cvShow.style.visibility='';
       }
     }
     // v121: 4-tab nav — sampler/library/explorer/settings
@@ -9109,7 +9128,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.40</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.41</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9586,16 +9605,23 @@ const Sampler={
     }
   },
 
-  // v:v14.28 — simplified: video is now position:absolute within #sampler-cam-wrap;
-  //   container fills the correct bounds on any screen — no manual offsets needed.
-  //   Retains transform-origin for 2× zoom; object-fit:cover for correct framing.
+  // v:v14.41 — restored position:fixed (reverts v14.28).
+  //   position:absolute caused GPU compositor layer conflict with ancestor overflow:hidden → black screen.
+  //   position:fixed is outside that compositing tree entirely.
+  //   Desktop: centres to --app-max-w container. Mobile: full viewport width.
   _positionCamVideo(v) {
     v = v || document.getElementById('cam-video');
     if (!v) return;
-    v.style.cssText = 'position:absolute!important;top:0!important;left:0!important;'
-                    + 'width:100%!important;height:100%!important;'
-                    + 'object-fit:cover!important;z-index:0;'
-                    + 'transform-origin:center center;';
+    const base = 'position:fixed!important;top:0!important;height:100vh!important;'
+               + 'object-fit:cover!important;z-index:0;transform-origin:center center;';
+    if (window.innerWidth >= 768) {
+      const cs  = getComputedStyle(document.documentElement);
+      const appW = parseInt(cs.getPropertyValue('--app-max-w').trim()) || 540;
+      const lft  = Math.round((window.innerWidth - appW) / 2);
+      v.style.cssText = base + 'width:' + appW + 'px!important;left:' + lft + 'px!important;';
+    } else {
+      v.style.cssText = base + 'width:100vw!important;left:0!important;';
+    }
   },
 
   // v446: centralised stream teardown — prevents camera locks & battery drain
@@ -11686,9 +11712,12 @@ const Sampler={
     if(mb) mb.style.display=(m==='camera'||m==='wheel')?'none':'flex';
     const col=document.getElementById('sampler-cam-col');
     col.style.display=m==='camera'?'flex':'none';
-    // v:F12.38 — hide outer cam-wrap so its #000 background doesn't ghost in upload/wheel
+    // v:F12.38 — hide outer cam-wrap so its background doesn't ghost in upload/wheel
     const camWrap=document.getElementById('sampler-cam-wrap');
     if(camWrap) camWrap.style.display=m==='camera'?'flex':'none';
+    // v14.41: position:fixed video escapes parent display:none — must hide/show explicitly
+    const _cv=document.getElementById('cam-video');
+    if(_cv) _cv.style.visibility=m==='camera'?'':'hidden';
     // v:F12.12 — live-loupe: visible in camera, hidden in all other modes
     const _llEl=document.getElementById('live-loupe');
     if(_llEl) _llEl.style.display=m==='camera'?'block':'none';
