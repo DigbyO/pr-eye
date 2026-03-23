@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.45 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.47 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.45</title>
+<title>Digby v14.47</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -2430,7 +2430,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.45</div>
+  <div class="ws-ver" id="ws-version">v14.47</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2567,6 +2567,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <div id="cap-queue-badge" style="display:none">0</div>
         </button>
         <button class="cap-side-btn" id="flip-btn" onclick="Sampler.flipCamera()">Flip</button>
+        <button class="cap-side-btn" id="pro-stats-btn" onclick="NCSCalc.toggle()" title="Toggle NCS Pro Stats">NCS</button>
       </div>
 
       <!-- iOS autoplay-blocked overlay — shown when play() is deferred to user gesture -->
@@ -2581,7 +2582,12 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
 
-
+      <!-- v14.47: Designer Pro — NCS notation overlay -->
+      <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;background:rgba(5,5,5,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,255,157,.18);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
+        <div id="pst-ncs" style="font-size:13px;font-weight:700;color:#00ff9d;letter-spacing:.12em">S 0000-N</div>
+        <div id="pst-lrv" style="font-size:10px;color:rgba(255,255,255,.65)">LRV  —%</div>
+        <div id="pst-nuance" style="font-size:9px;color:rgba(255,255,255,.35)">B:—  C:—</div>
+      </div>
 
       <!-- No camera fallback -->
       <div id="cam-diag" style="display:none;position:absolute;bottom:60px;left:0;right:0;padding:6px 12px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-family:monospace;z-index:30;text-align:center;pointer-events:none" id="cam-diag-bar"></div>
@@ -3895,7 +3901,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.45</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.47</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3933,6 +3939,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
             <button class="live-disp-btn" data-ld="fb"     onclick="App.setLiveDisplay('fb')">&#127968;<br>F&amp;B</button>
             <button class="live-disp-btn" data-ld="lg"     onclick="App.setLiveDisplay('lg')">&#127808;<br>Little Greene</button>
             <button class="live-disp-btn" data-ld="ml"     onclick="App.setLiveDisplay('ml')">&#128396;<br>Mylands</button>
+            <button class="live-disp-btn" data-ld="dh"     onclick="App.setLiveDisplay('dh')">&#127963;<br>DH</button>
             <button class="live-disp-btn" data-ld="dl"     onclick="App.setLiveDisplay('dl')">&#127748;<br>Dulux</button>
             <button class="live-disp-btn" data-ld="eb"     onclick="App.setLiveDisplay('eb')">&#127807;<br>Earthborn</button>
           </div>
@@ -4024,7 +4031,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.45</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.47</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -7368,6 +7375,8 @@ const CS = {
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDL(lab){let b=null,bd=Infinity;for(const p of DL){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestEB(lab){let b=null,bd=Infinity;for(const p of EB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
+  // v14.47: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  nearestDH(lab){let b=null,bd=Infinity;for(const p of DH){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   // v:v14.29 - top-N matches sorted by deltaE
   topN(dataset,lab,n){
     const out=[];
@@ -8769,6 +8778,7 @@ const App={
         <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon">&#127968;</span>F&amp;B</button>
         <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon">&#127808;</span>Little Greene</button>
         <button class="live-disp-btn ${ld=='ml'?'on':''}" id="ld-ml" data-ld="ml" onclick="App.setLiveDisplay('ml')"><span class="ld-icon">&#128396;</span>Mylands</button>
+        <button class="live-disp-btn ${ld=='dh'?'on':''}" id="ld-dh" data-ld="dh" onclick="App.setLiveDisplay('dh')"><span class="ld-icon">&#127963;</span>DH</button>
         <button class="live-disp-btn ${ld=='dl'?'on':''}" id="ld-dl" data-ld="dl" onclick="App.setLiveDisplay('dl')"><span class="ld-icon">&#127748;</span>Dulux</button>
         <button class="live-disp-btn ${ld=='eb'?'on':''}" id="ld-eb" data-ld="eb" onclick="App.setLiveDisplay('eb')"><span class="ld-icon">&#127807;</span>Earthborn</button>
         </div>
@@ -8876,7 +8886,7 @@ const App={
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Little Greene / Farrow &amp; Ball</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Farrow &amp; Ball / Little Greene / Dulux Heritage / Mylands / Earthborn</div>
             <div style="font-size:11px;color:var(--muted);line-height:1.6">Digby carries embedded libraries of 2,000+ Pantone, 300+ Little Greene, 130+ Farrow &amp; Ball, 2,600+ Dulux, all 112 Dulux Heritage, 58 Mylands, and all 72 Earthborn Claypaint colours. For every sampled colour, it runs a nearest-neighbour search in Lab space using CIEDE2000 distance — finding the closest real-world paint match instantly, no internet required.</div>
           </div>
 
@@ -9113,7 +9123,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.45</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.47</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9409,12 +9419,12 @@ const App={
     if(mode==='paint') mode='fb';
     State.liveDisplay=mode; State.save();
     // Update all live-disp buttons wherever they exist (overlay or static)
-    ['pantone','hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dl','eb'].forEach(m=>{
+    ['pantone','hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dh','dl','eb'].forEach(m=>{
       const b=document.getElementById('ld-'+m);
       if(b) b.classList.toggle('on', m===mode);
     });
     const L={pantone:'Pantone',hex:'HEX + RGB',rgb:'RGB',hsl:'HSL',
-             kelvin:'Kelvin','lrv':'LRV',fb:'Farrow & Ball',lg:'Little Greene',ml:'Mylands',dl:'Dulux',eb:'Earthborn'};
+             kelvin:'Kelvin','lrv':'LRV',fb:'Farrow & Ball',lg:'Little Greene',ml:'Mylands',dh:'Dulux Heritage',dl:'Dulux',eb:'Earthborn'};
     App.toast('Live: '+(L[mode]||mode));
   },
 
@@ -9492,6 +9502,75 @@ const App={
     e.textContent=msg;e.classList.add('show');
     clearTimeout(App._toastT);
     App._toastT=setTimeout(()=>e.classList.remove('show'),ms);
+  }
+};
+</script>
+
+<!-- v14.47: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
+<!-- Standalone class. No modifications to existing functions. -->
+<script>
+const NCSCalc = {
+  _visible: false,
+
+  // Estimate NCS notation from RGB → e.g. "S 2050-Y80R" or "S 1500-N"
+  notation(r, g, b) {
+    const R = r/255, G = g/255, B = b/255;
+    // Remove sRGB gamma → linear light
+    const lin = v => v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    const Y = 0.2126*lin(R) + 0.7152*lin(G) + 0.0722*lin(B);
+    // Blackness (s): perceptual darkness
+    const s = Math.max(1, Math.min(99, Math.round((1 - Math.sqrt(Y)) * 100)));
+    // Chromaticness (c): HSV-style chroma
+    const max = Math.max(R,G,B), min = Math.min(R,G,B), chroma = max - min;
+    const c = Math.round(chroma * 100);
+    // Round to nearest 5 for clean notation
+    const sR = Math.round(s/5)*5, cR = Math.round(c/5)*5;
+    // Neutral test
+    if (c < 6) return 'S ' + String(sR).padStart(2,'0') + '00-N';
+    // Hue angle
+    let h = 0;
+    if (chroma > 0) {
+      if      (max === R) h = ((G-B)/chroma + (G<B ? 6 : 0)) * 60;
+      else if (max === G) h = ((B-R)/chroma + 2) * 60;
+      else                h = ((R-G)/chroma + 4) * 60;
+    }
+    h = ((h % 360) + 360) % 360;
+    return 'S ' + String(sR).padStart(2,'0') + String(cR).padStart(2,'0') + '-' + this._hue(h);
+  },
+
+  // Map HSL hue to NCS hue string, rounded to nearest 10
+  // NCS anchors: Y=60°, R=0°/360°, B=240°, G=120°
+  _hue(h) {
+    const r10 = v => Math.max(0, Math.min(100, Math.round(v/10)*10));
+    if (h <= 60)  { const p=r10((60-h)/60*100);  return p===0?'Y':p===100?'R':'Y'+p+'R'; }
+    if (h <= 120) { const p=r10((120-h)/60*100); return p===0?'G':p===100?'Y':'G'+p+'Y'; }
+    if (h <= 240) { const p=r10((240-h)/120*100);return p===0?'B':p===100?'G':'B'+p+'G'; }
+    /* 240–360 */   const p=r10((360-h)/120*100); return p===0?'R':p===100?'B':'R'+p+'B';
+  },
+
+  // Toggle the overlay on/off
+  toggle() {
+    this._visible = !this._visible;
+    const el = document.getElementById('pro-stats');
+    if (el) el.style.display = this._visible ? 'block' : 'none';
+    const btn = document.getElementById('pro-stats-btn');
+    if (btn) btn.classList.toggle('on', this._visible);
+    if (typeof App !== 'undefined') App.toast(this._visible ? 'NCS Pro Stats on' : 'NCS Pro Stats off');
+  },
+
+  // ── INTEGRATION HOOK: call this once per frame when the sampled colour changes ──
+  // Place inside _updateLiveDisplay or equivalent: NCSCalc.update(r, g, b);
+  update(r, g, b) {
+    if (!this._visible) return;
+    const ncs = this.notation(r, g, b);
+    const lrv = (typeof CS !== 'undefined') ? CS.lrvLinear(r, g, b) : '—';
+    const m = ncs.match(/S (\d{2})(\d{2})-(.+)/);
+    const nEl = document.getElementById('pst-ncs');
+    const lEl = document.getElementById('pst-lrv');
+    const bEl = document.getElementById('pst-nuance');
+    if (nEl) nEl.textContent = ncs;
+    if (lEl) lEl.textContent = 'LRV  ' + lrv + '%';
+    if (bEl && m) bEl.textContent = 'B:' + m[1] + '  C:' + m[2];
   }
 };
 </script>
@@ -10352,6 +10431,7 @@ const Sampler={
     const ml=CS.nearestML(lab);
     const dl=CS.nearestDL(lab);
     const eb=CS.nearestEB(lab);
+    const dh=CS.nearestDH(lab);
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
     const hsl=CS.rgbToHsl(r,g,b);
@@ -10398,6 +10478,10 @@ const Sampler={
         primary=ml?.name||'—';
         secondary=(ml?.code?ml.code+' · ':'')+hex.toUpperCase();
         break;
+      case 'dh':
+        primary=dh?.name||'—';
+        secondary=(dh?.code?dh.code+' · ':'')+hex.toUpperCase();
+        break;
       case 'dl':
         primary=dl?.name||'—';
         secondary=(dl?.code?dl.code+' · ':'')+hex.toUpperCase();
@@ -10429,6 +10513,7 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
+    NCSCalc.update(r,g,b); // v14.47: Designer Pro — update NCS stats every frame
     // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
     // while theory panel is open (prevents stutter when panning camera).
     if (this._theoryOpen && this._theoryLockedHex) {
@@ -12908,8 +12993,8 @@ const Library={
         const body=brandBlock('Farrow &amp; Ball',fbT,true)
                   +brandBlock('Little Greene',lgT,true)
                   +brandBlock('Pantone',panT,false)
-                  +brandBlock('Dulux',dlT,false)
                   +brandBlock('Dulux Heritage',dhT,true)
+                  +brandBlock('Dulux',dlT,false)
                   +brandBlock('Mylands',mlT,true)
                   +brandBlock('Earthborn',ebT,true);
         if(!body) return '';
