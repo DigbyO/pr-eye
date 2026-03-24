@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.50 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.51 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.50</title>
+<title>Digby v14.51</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.50';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.51';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1146,7 +1146,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
 .live-disp-btn{padding:10px 4px 8px;border-radius:var(--rs);font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;display:block;-webkit-tap-highlight-color:transparent;}
 .live-disp-btn .ld-icon{display:block;font-size:18px;margin-bottom:3px;}
-/* v14.50: SVG brand logos in live-disp buttons */
+/* v14.51: SVG brand logos in live-disp buttons */
 .live-disp-btn .ld-icon svg{display:block;margin:0 auto 1px;height:20px;width:auto;max-width:58px;}
 .live-disp-btn.on{background:var(--accent);color:#1a1208 !important;border-color:var(--accent);font-weight:700;}
 .live-disp-btn.on .ld-icon{color:#1a1208;}
@@ -1710,16 +1710,7 @@ body.simple-mode #freeze-btn,
 body.simple-mode #zoom2x-btn,
 body.simple-mode #flip-btn { display:none!important }
 /* v:v13.60 Auto Palette rainbow — draws attention in standard mode */
-body.simple-mode #auto-pal-btn {
-  background: linear-gradient(135deg,
-    #e03535 0%, #e07a20 20%, #d4c020 38%,
-    #3aaa48 55%, #2070d4 72%, #8030c8 100%);
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  text-shadow: 0 1px 3px rgba(0,0,0,.55);
-  box-shadow: 0 2px 10px rgba(0,0,0,.35);
-}
+/* v14.51: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
 body.simple-mode #auto-pal-btn:active { opacity: .82; transform: scale(0.94); }
 /* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
@@ -2432,7 +2423,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.50</div>
+  <div class="ws-ver" id="ws-version">v14.51</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2584,7 +2575,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
 
-      <!-- v14.50: Designer Pro — NCS notation overlay -->
+      <!-- v14.51: Designer Pro — NCS notation overlay -->
       <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;background:rgba(5,5,5,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,255,157,.18);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
         <div id="pst-ncs" style="font-size:13px;font-weight:700;color:#00ff9d;letter-spacing:.12em">S 0000-N</div>
         <div id="pst-lrv" style="font-size:10px;color:rgba(255,255,255,.65)">LRV  —%</div>
@@ -3903,7 +3894,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.50</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.51</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4033,7 +4024,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.50</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.51</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -7377,7 +7368,7 @@ const CS = {
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDL(lab){let b=null,bd=Infinity;for(const p of DL){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestEB(lab){let b=null,bd=Infinity;for(const p of EB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
-  // v14.50: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  // v14.51: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
   nearestDH(lab){let b=null,bd=Infinity;for(const p of DH){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   // v:v14.29 - top-N matches sorted by deltaE
   topN(dataset,lab,n){
@@ -8332,6 +8323,7 @@ const State = {
         liveDisplay:   this.liveDisplay,
         wbPresetId:    this.wbPresetId,
         wbCustomK:     this.wbCustomK,
+        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.51: persist camera facing so reload never resets it
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
       }));
@@ -8354,6 +8346,8 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
+      // v14.51: restore camera facing — prevents version-bump reload switching to wrong camera
+      if (data.camFront !== undefined && typeof Sampler !== 'undefined') Sampler.camFront = !!data.camFront;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
     try {
@@ -9125,7 +9119,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.50</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.51</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9508,7 +9502,7 @@ const App={
 };
 </script>
 
-<!-- v14.50: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
+<!-- v14.51: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
 <!-- Standalone class. No modifications to existing functions. -->
 <script>
 const NCSCalc = {
@@ -10515,7 +10509,7 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
-    NCSCalc.update(r,g,b); // v14.50: Designer Pro — update NCS stats every frame
+    NCSCalc.update(r,g,b); // v14.51: Designer Pro — update NCS stats every frame
     // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
     // while theory panel is open (prevents stutter when panning camera).
     if (this._theoryOpen && this._theoryLockedHex) {
