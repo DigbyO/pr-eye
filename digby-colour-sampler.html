@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.51 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.56 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.51</title>
+<title>Digby v14.56</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.51';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.56';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1146,7 +1146,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
 .live-disp-btn{padding:10px 4px 8px;border-radius:var(--rs);font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;display:block;-webkit-tap-highlight-color:transparent;}
 .live-disp-btn .ld-icon{display:block;font-size:18px;margin-bottom:3px;}
-/* v14.51: SVG brand logos in live-disp buttons */
+/* v14.56: SVG brand logos in live-disp buttons */
 .live-disp-btn .ld-icon svg{display:block;margin:0 auto 1px;height:20px;width:auto;max-width:58px;}
 .live-disp-btn.on{background:var(--accent);color:#1a1208 !important;border-color:var(--accent);font-weight:700;}
 .live-disp-btn.on .ld-icon{color:#1a1208;}
@@ -1709,8 +1709,9 @@ body.simple-mode .colour-blind-tool{display:none!important}
 body.simple-mode #freeze-btn,
 body.simple-mode #zoom2x-btn,
 body.simple-mode #flip-btn { display:none!important }
+body.simple-mode #pro-stats-btn { display:none!important } /* v14.56: NCS is Designer Pro only */
 /* v:v13.60 Auto Palette rainbow — draws attention in standard mode */
-/* v14.51: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
+/* v14.56: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
 body.simple-mode #auto-pal-btn:active { opacity: .82; transform: scale(0.94); }
 /* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
@@ -2423,7 +2424,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.51</div>
+  <div class="ws-ver" id="ws-version">v14.56</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2575,8 +2576,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
 
-      <!-- v14.51: Designer Pro — NCS notation overlay -->
-      <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;background:rgba(5,5,5,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,255,157,.18);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
+      <!-- v14.56: Designer Pro — NCS notation overlay -->
+      <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;contain:strict;background:rgba(8,8,8,.88);border:1px solid rgba(0,255,157,.22);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
         <div id="pst-ncs" style="font-size:13px;font-weight:700;color:#00ff9d;letter-spacing:.12em">S 0000-N</div>
         <div id="pst-lrv" style="font-size:10px;color:rgba(255,255,255,.65)">LRV  —%</div>
         <div id="pst-nuance" style="font-size:9px;color:rgba(255,255,255,.35)">B:—  C:—</div>
@@ -3894,7 +3895,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.51</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.56</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -3923,18 +3924,19 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0 10px">
           <div><div class="set-l">Display Mode</div><div class="set-sub">What the floating scanner shows while sampling</div></div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-            <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28"><rect x="1.5" y="1.5" width="21" height="25" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><text x="12" y="21" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="currentColor">P</text></svg></span></button>
-            <button class="live-disp-btn" data-ld="hex"    onclick="App.setLiveDisplay('hex')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 26"><path d="M1,13 A15,15 0 0,0 31,13" fill="none" stroke="#FF2200" stroke-width="2.2"/><path d="M3.4,13 A12.6,12.6 0 0,0 28.6,13" fill="none" stroke="#FF8800" stroke-width="2.2"/><path d="M5.8,13 A10.2,10.2 0 0,0 26.2,13" fill="none" stroke="#FFD700" stroke-width="2.2"/><path d="M8.2,13 A7.8,7.8 0 0,0 23.8,13" fill="none" stroke="#22BB44" stroke-width="2.2"/><path d="M10.6,13 A5.4,5.4 0 0,0 21.4,13" fill="none" stroke="#0055EE" stroke-width="2.2"/><text x="16" y="25" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="900" fill="currentColor">#RGB</text></svg></span></button>
-            <button class="live-disp-btn" data-ld="rgb"    onclick="App.setLiveDisplay('rgb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 30"><path d="M16,2 A9,9 0 0,1 23.79,6.5" fill="none" stroke="#FF2200" stroke-width="3"/><path d="M23.79,6.5 A9,9 0 0,1 23.79,15.5" fill="none" stroke="#FF8800" stroke-width="3"/><path d="M23.79,15.5 A9,9 0 0,1 16,20" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M16,20 A9,9 0 0,1 8.21,15.5" fill="none" stroke="#22BB44" stroke-width="3"/><path d="M8.21,15.5 A9,9 0 0,1 8.21,6.5" fill="none" stroke="#0055EE" stroke-width="3"/><path d="M8.21,6.5 A9,9 0 0,1 16,2" fill="none" stroke="#9900CC" stroke-width="3"/><text x="16" y="28" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="900" fill="currentColor">RGB</text></svg></span></button>
-            <button class="live-disp-btn" data-ld="hsl"    onclick="App.setLiveDisplay('hsl')"><span class="ld-icon">&#127752;</span>HSL</button>
-            <button class="live-disp-btn" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon">&#127777;</span>Kelvin</button>
-            <button class="live-disp-btn" data-ld="lrv"    onclick="App.setLiveDisplay('lrv')"><span class="ld-icon">&#9728;</span>LRV</button>
+            <button class="live-disp-btn on" data-ld="pantone" onclick="App.setLiveDisplay('pantone')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74 14"><text x="37" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">PANTONE</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="hex"    onclick="App.setLiveDisplay('hex')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 18"><text x="29" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="10" font-weight="700" fill="currentColor">HEX+RGB</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="rgb"    onclick="App.setLiveDisplay('rgb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">RGB</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="hsl"    onclick="App.setLiveDisplay('hsl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">HSL</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 18"><text x="26" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">Kelvin</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="lrv"    onclick="App.setLiveDisplay('lrv')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">LRV</text></svg></span></button>
             <button class="live-disp-btn" data-ld="fb"     onclick="App.setLiveDisplay('fb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1" fill="none"/><text x="16" y="20.5" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" font-weight="700" fill="currentColor">F&amp;B</text></svg></span></button>
             <button class="live-disp-btn" data-ld="lg"     onclick="App.setLiveDisplay('lg')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 26"><text x="25" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Little</text><text x="25" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Greene</text></svg></span></button>
             <button class="live-disp-btn" data-ld="ml"     onclick="App.setLiveDisplay('ml')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 14"><text x="32" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">MYLANDS</text></svg></span></button>
             <button class="live-disp-btn" data-ld="dh"     onclick="App.setLiveDisplay('dh')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 18"><text x="30" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">HERITAGE</text><line x1="6" y1="14.5" x2="54" y2="14.5" stroke="currentColor" stroke-width="0.6"/></svg></span></button>
             <button class="live-disp-btn" data-ld="dl"     onclick="App.setLiveDisplay('dl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 18"><text x="22" y="14" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="currentColor">Dulux</text></svg></span></button>
             <button class="live-disp-btn" data-ld="eb"     onclick="App.setLiveDisplay('eb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 16"><text x="31" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">earthborn</text></svg></span></button>
+            <button class="live-disp-btn" data-ld="bulmer"  onclick="App.setLiveDisplay('bulmer')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 26"><text x="28" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">edward</text><text x="28" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">bulmer</text></svg></span></button>
           </div>
         </div>
       </div>
@@ -4024,7 +4026,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.51</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.56</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -4263,79 +4265,61 @@ const PANTONE=[
 ];
 
 const LG=[
-  {code:"LG 1",name:"China Clay",hex:"#DEDAD0",url:"https://www.littlegreene.com/china-clay"},
-  {code:"LG 5",name:"Whisper",hex:"#E2DDD4",url:"https://www.littlegreene.com/whisper"},
-  {code:"LG 6",name:"Ashes of Roses",hex:"#D4A89C",url:"https://www.littlegreene.com/ashes-of-roses"},
-  {code:"LG 7",name:"Adventurer",hex:"#C08070",url:"https://www.littlegreene.com/adventurer"},
-  {code:"LG 9",name:"Rusling",hex:"#8B5A4A",url:"https://www.littlegreene.com/rusling"},
-  {code:"LG 11",name:"Shrimp Pink",hex:"#E8A8A0",url:"https://www.littlegreene.com/shrimp-pink"},
-  {code:"LG 12",name:"Tuscany",hex:"#C89090",url:"https://www.littlegreene.com/tuscany"},
-  {code:"LG 14",name:"Baked Cherry",hex:"#7A3028",url:"https://www.littlegreene.com/baked-cherry"},
-  {code:"LG 15",name:"Bronze Red",hex:"#8C3C28",url:"https://www.littlegreene.com/bronze-red"},
-  {code:"LG 19",name:"Orangerie",hex:"#D07040",url:"https://www.littlegreene.com/orangerie"},
-  {code:"LG 21",name:"Orange Aurora",hex:"#D88050",url:"https://www.littlegreene.com/orange-aurora"},
-  {code:"LG 23",name:"Terra di Sienna",hex:"#C07050",url:"https://www.littlegreene.com/terra-di-sienna"},
-  {code:"LG 24",name:"Heat",hex:"#B86040",url:"https://www.littlegreene.com/heat"},
-  {code:"LG 25",name:"Hollyhock",hex:"#D8A0A0",url:"https://www.littlegreene.com/hollyhock"},
-  {code:"LG 27",name:"Button",hex:"#D8C0B0",url:"https://www.littlegreene.com/button"},
-  {code:"LG 28",name:"50s Magnolia",hex:"#EDE0C8",url:"https://www.littlegreene.com/50s-magnolia"},
-  {code:"LG 29",name:"Beauvais Lilac",hex:"#C0B8D0",url:"https://www.littlegreene.com/beauvais-lilac"},
-  {code:"LG 30",name:"Regency Fawn",hex:"#C8B8A0",url:"https://www.littlegreene.com/regency-fawn"},
-  {code:"LG 31",name:"Roman Plaster",hex:"#D0C0A8",url:"https://www.littlegreene.com/roman-plaster"},
-  {code:"LG 33",name:"Linen Wash",hex:"#E0D8C8",url:"https://www.littlegreene.com/linen-wash"},
-  {code:"LG 37",name:"Stock",hex:"#E8D8C0",url:"https://www.littlegreene.com/stock"},
-  {code:"LG 39",name:"Clay",hex:"#C09870",url:"https://www.littlegreene.com/clay"},
-  {code:"LG 40",name:"Silt",hex:"#B0A080",url:"https://www.littlegreene.com/silt"},
-  {code:"LG 41",name:"Whitening",hex:"#F0ECE0",url:"https://www.littlegreene.com/whitening"},
-  {code:"LG 42",name:"Creamerie",hex:"#EEE0C0",url:"https://www.littlegreene.com/creamerie"},
-  {code:"LG 44",name:"Straw Colour",hex:"#E0C888",url:"https://www.littlegreene.com/straw-colour"},
-  {code:"LG 47",name:"Mister David",hex:"#D0C070",url:"https://www.littlegreene.com/mister-david"},
-  {code:"LG 49",name:"First Light",hex:"#E8E0C8",url:"https://www.littlegreene.com/first-light"},
-  {code:"LG 52",name:"French Stone",hex:"#C8C0A0",url:"https://www.littlegreene.com/french-stone"},
-  {code:"LG 53",name:"Light Gold",hex:"#D0B860",url:"https://www.littlegreene.com/light-gold"},
-  {code:"LG 54",name:"Indian Sand",hex:"#C8A870",url:"https://www.littlegreene.com/indian-sand"},
-  {code:"LG 55",name:"Cream Colour",hex:"#E8D8A8",url:"https://www.littlegreene.com/cream-colour"},
-  {code:"LG 57",name:"Lead White",hex:"#E8E4D8",url:"https://www.littlegreene.com/lead-white"},
-  {code:"LG 61",name:"Ivory",hex:"#F0ECD8",url:"https://www.littlegreene.com/ivory"},
-  {code:"LG 64",name:"Bath Stone",hex:"#C8B888",url:"https://www.littlegreene.com/bath-stone"},
-  {code:"LG 65",name:"Stone Pale Cool",hex:"#D8D0C0",url:"https://www.littlegreene.com/stone-pale-cool"},
-  {code:"LG 68",name:"Stargazer",hex:"#686078",url:"https://www.littlegreene.com/stargazer"},
-  {code:"LG 74",name:"White Lead",hex:"#ECEAE0",url:"https://www.littlegreene.com/white-lead"},
-  {code:"LG 76",name:"Acre",hex:"#C0C8A0",url:"https://www.littlegreene.com/acre"},
-  {code:"LG 77",name:"Portland Stone",hex:"#D0C8A8",url:"https://www.littlegreene.com/portland-stone"},
-  {code:"LG 81",name:"Clockface",hex:"#F0ECE4",url:"https://www.littlegreene.com/clockface"},
-  {code:"LG 105",name:"Slaked Lime",hex:"#F0EEE8",url:"https://www.littlegreene.com/slaked-lime"},
-  {code:"LG 109",name:"Welcome",hex:"#D8D4C8",url:"https://www.littlegreene.com/welcome"},
-  {code:"LG 113",name:"French Grey",hex:"#A8A898",url:"https://www.littlegreene.com/french-grey"},
-  {code:"LG 114",name:"Mid Lead Colour",hex:"#888878",url:"https://www.littlegreene.com/mid-lead-colour"},
-  {code:"LG 117",name:"Lead Colour",hex:"#B0A890",url:"https://www.littlegreene.com/lead-colour"},
-  {code:"LG 118",name:"Dark Lead Colour",hex:"#686058",url:"https://www.littlegreene.com/dark-lead-colour"},
-  {code:"LG 130",name:"Joanna",hex:"#98C0A0",url:"https://www.littlegreene.com/joanna"},
-  {code:"LG 132",name:"Chamois",hex:"#D0B888",url:"https://www.littlegreene.com/chamois"},
-  {code:"LG 141",name:"Firefly",hex:"#D89870",url:"https://www.littlegreene.com/firefly"},
-  {code:"LG 142",name:"Mushroom",hex:"#A89888",url:"https://www.littlegreene.com/mushroom"},
-  {code:"LG 143",name:"Rolling Fog",hex:"#C0B8B0",url:"https://www.littlegreene.com/rolling-fog"},
-  {code:"LG 144",name:"Attic",hex:"#B0A898",url:"https://www.littlegreene.com/attic"},
-  {code:"LG 148",name:"Carys",hex:"#8898A8",url:"https://www.littlegreene.com/carys"},
-  {code:"LG 200",name:"Hicks Blue",hex:"#2A4060",url:"https://www.littlegreene.com/hicks-blue"},
-  {code:"LG 215",name:"Aquamarine",hex:"#78B8B8",url:"https://www.littlegreene.com/aquamarine"},
-  {code:"LG 217",name:"Drizzle",hex:"#A0B0B8",url:"https://www.littlegreene.com/drizzle"},
-  {code:"LG 220",name:"Sage",hex:"#8A9880",url:"https://www.littlegreene.com/sage"},
-  {code:"LG 221",name:"Green Stone Pale",hex:"#A8B898",url:"https://www.littlegreene.com/green-stone-pale"},
-  {code:"LG 225",name:"Vert De Terre",hex:"#789068",url:"https://www.littlegreene.com/vert-de-terre"},
-  {code:"LG 235",name:"Puck",hex:"#3A6858",url:"https://www.littlegreene.com/puck"},
-  {code:"LG 240",name:"Green Verditer",hex:"#5A9880",url:"https://www.littlegreene.com/green-verditer"},
-  {code:"LG 250",name:"Woad",hex:"#304860",url:"https://www.littlegreene.com/woad"},
-  {code:"LG 255",name:"Paean Black",hex:"#201E1C",url:"https://www.littlegreene.com/paean-black"},
-  {code:"LG 260",name:"Bone",hex:"#E8E0D0",url:"https://www.littlegreene.com/bone"},
-  {code:"LG 265",name:"Pollen",hex:"#D0C040",url:"https://www.littlegreene.com/pollen"},
-  {code:"LG 275",name:"Sencha",hex:"#607850",url:"https://www.littlegreene.com/sencha"},
-  {code:"LG 280",name:"Livid",hex:"#708070",url:"https://www.littlegreene.com/livid"},
-  {code:"LG 285",name:"Apple Smiles",hex:"#88A838",url:"https://www.littlegreene.com/apple-smiles"},
-  {code:"LG 295",name:"Kigali",hex:"#184860",url:"https://www.littlegreene.com/kigali"},
-  {code:"LG 300",name:"Steel",hex:"#7898B0",url:"https://www.littlegreene.com/steel"},
-  {code:"LG 305",name:"Lead",hex:"#606878",url:"https://www.littlegreene.com/lead"},
-  {code:"LG 315",name:"Tuscan Red",hex:"#903028",url:"https://www.littlegreene.com/tuscan-red"},
+  {code:"LG 1",  name:"China Clay",            hex:"#EFE9E3",url:"https://www.littlegreene.com/china-clay"},
+  {code:"LG 176",name:"China Clay Mid",         hex:"#E5DBD5",url:"https://www.littlegreene.com/china-clay-mid"},
+  {code:"LG 177",name:"China Clay Deep",        hex:"#D9CEC6",url:"https://www.littlegreene.com/china-clay-deep"},
+  {code:"LG 178",name:"China Clay Dark",        hex:"#CDBFB6",url:"https://www.littlegreene.com/china-clay-dark"},
+  {code:"LG 161",name:"French Grey Pale",       hex:"#E5E3DE",url:"https://www.littlegreene.com/french-grey-pale"},
+  {code:"LG 162",name:"French Grey Mid",        hex:"#D9D7D1",url:"https://www.littlegreene.com/french-grey-mid"},
+  {code:"LG 113",name:"French Grey",            hex:"#CBC7C1",url:"https://www.littlegreene.com/french-grey"},
+  {code:"LG 163",name:"French Grey Dark",       hex:"#B4AEA4",url:"https://www.littlegreene.com/french-grey-dark"},
+  {code:"LG 106",name:"Gauze",                  hex:"#E4E6E6",url:"https://www.littlegreene.com/gauze"},
+  {code:"LG 164",name:"Gauze Mid",              hex:"#DBDEDF",url:"https://www.littlegreene.com/gauze-mid"},
+  {code:"LG 165",name:"Gauze Deep",             hex:"#D4D7D9",url:"https://www.littlegreene.com/gauze-deep"},
+  {code:"LG 166",name:"Gauze Dark",             hex:"#C6CACD",url:"https://www.littlegreene.com/gauze-dark"},
+  {code:"LG 182",name:"Bone China Blue Pale",   hex:"#DFE5E5",url:"https://www.littlegreene.com/bone-china-blue-pale"},
+  {code:"LG 183",name:"Bone China Blue Mid",    hex:"#D3DADC",url:"https://www.littlegreene.com/bone-china-blue-mid"},
+  {code:"LG 107",name:"Bone China Blue",        hex:"#A6B2B6",url:"https://www.littlegreene.com/bone-china-blue"},
+  {code:"LG 184",name:"Bone China Blue Deep",   hex:"#BAC4C8",url:"https://www.littlegreene.com/bone-china-blue-deep"},
+  {code:"LG 236",name:"Flint",                  hex:"#F4F3EE",url:"https://www.littlegreene.com/flint"},
+  {code:"LG 242",name:"Dawn",                   hex:"#E7E4E2",url:"https://www.littlegreene.com/dawn"},
+  {code:"LG 5",  name:"Whisper",                hex:"#DDD7DE",url:"https://www.littlegreene.com/whisper"},
+  {code:"LG 313",name:"Ferdinand",              hex:"#E8DDCD",url:"https://www.littlegreene.com/ferdinand"},
+  {code:"LG 131",name:"Aged Ivory",             hex:"#E0C9A6",url:"https://www.littlegreene.com/aged-ivory"},
+  {code:"LG 52", name:"French Stone",           hex:"#F7E2B6",url:"https://www.littlegreene.com/french-stone"},
+  {code:"LG 130",name:"Joanna",                 hex:"#E1DACE",url:"https://www.littlegreene.com/joanna"},
+  {code:"LG 87", name:"Acorn",                  hex:"#DDDCC5",url:"https://www.littlegreene.com/acorn"},
+  {code:"LG 132",name:"Chamois",                hex:"#DBC8A3",url:"https://www.littlegreene.com/chamois"},
+  {code:"LG 90", name:"Eau de Nil",             hex:"#C6C9A1",url:"https://www.littlegreene.com/eau-de-nil"},
+  {code:"LG 138",name:"Aquamarine",             hex:"#AAB9AB",url:"https://www.littlegreene.com/aquamarine"},
+  {code:"LG 270",name:"Green Stone",            hex:"#C4C1AB",url:"https://www.littlegreene.com/green-stone"},
+  {code:"LG 322",name:"Book Room Green",        hex:"#B5B199",url:"https://www.littlegreene.com/book-room-green"},
+  {code:"LG 234",name:"Grey Moss",              hex:"#7E7B71",url:"https://www.littlegreene.com/grey-moss"},
+  {code:"LG 94", name:"Canton",                 hex:"#538A8A",url:"https://www.littlegreene.com/canton"},
+  {code:"LG 56", name:"Invisible Green",        hex:"#595545",url:"https://www.littlegreene.com/invisible-green"},
+  {code:"LG 88", name:"Dark Brunswick Green",   hex:"#3F5443",url:"https://www.littlegreene.com/dark-brunswick-green"},
+  {code:"LG 266",name:"Hortense",               hex:"#B6C7C8",url:"https://www.littlegreene.com/hortense"},
+  {code:"LG 226",name:"Grey Teal",              hex:"#939793",url:"https://www.littlegreene.com/grey-teal"},
+  {code:"LG 217",name:"Drizzle",                hex:"#CFD8D9",url:"https://www.littlegreene.com/drizzle"},
+  {code:"LG 108",name:"James",                  hex:"#96ABBD",url:"https://www.littlegreene.com/james"},
+  {code:"LG 208",name:"Hicks Blue",             hex:"#4A5B6B",url:"https://www.littlegreene.com/hicks-blue"},
+  {code:"LG 207",name:"Deep Space Blue",        hex:"#294F6D",url:"https://www.littlegreene.com/deep-space-blue"},
+  {code:"LG 252",name:"Dock Blue",              hex:"#333A44",url:"https://www.littlegreene.com/dock-blue"},
+  {code:"LG 221",name:"Basalt",                 hex:"#383E46",url:"https://www.littlegreene.com/basalt"},
+  {code:"LG 246",name:"Dolphin",                hex:"#A09893",url:"https://www.littlegreene.com/dolphin"},
+  {code:"LG 144",name:"Attic II",               hex:"#6F6761",url:"https://www.littlegreene.com/attic-ii"},
+  {code:"LG 241",name:"Furrow",                 hex:"#716656",url:"https://www.littlegreene.com/furrow"},
+  {code:"LG 320",name:"Elysian Ground",         hex:"#4D4840",url:"https://www.littlegreene.com/elysian-ground"},
+  {code:"LG 124",name:"Chocolate Colour",       hex:"#49423F",url:"https://www.littlegreene.com/chocolate-colour"},
+  {code:"LG 119",name:"Black Jack",             hex:"#3B3B3B",url:"https://www.littlegreene.com/black-jack"},
+  {code:"LG 267",name:"Blush",                  hex:"#AD8A83",url:"https://www.littlegreene.com/blush"},
+  {code:"LG 213",name:"Dorchester Pink",        hex:"#CCBEBE",url:"https://www.littlegreene.com/dorchester-pink"},
+  {code:"LG 145",name:"Felt",                   hex:"#796963",url:"https://www.littlegreene.com/felt"},
+  {code:"LG 189",name:"Carmine",                hex:"#BC707B",url:"https://www.littlegreene.com/carmine"},
+  {code:"LG 6",  name:"Ashes of Roses",         hex:"#986C67",url:"https://www.littlegreene.com/ashes-of-roses"},
+  {code:"LG 7",  name:"Adventurer",             hex:"#765557",url:"https://www.littlegreene.com/adventurer"},
+  {code:"LG 316",name:"Arras",                  hex:"#69413C",url:"https://www.littlegreene.com/arras"},
+  {code:"LG 102",name:"Gentle Sky",             hex:"#CBE4E8",url:"https://www.littlegreene.com/gentle-sky"},
 ];
 
 const FB=[
@@ -7272,7 +7256,75 @@ const EB=[
 
 // v:F1.12.5 — Unified paint brand database: single searchable source across all brands
 // v14.33: added Mylands (58 colours) and Earthborn Claypaint (72 colours)
-const PAINT_DB = [...PANTONE, ...LG, ...FB, ...DL, ...DH, ...MYLANDS, ...EB];
+const EBULMER=[
+  {code:"Bulmer",name:"Pure White",hex:"#FBFDFF",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/pure-white/"},
+  {code:"Bulmer",name:"Plain White",hex:"#F9F9F9",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/plain-white/"},
+  {code:"Bulmer",name:"Fair White",hex:"#F7F8F3",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/fair-white/"},
+  {code:"Bulmer",name:"Spanish White",hex:"#F5F7EE",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/spanish-white/"},
+  {code:"Bulmer",name:"White Lead",hex:"#FBF4E4",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/white-lead/"},
+  {code:"Bulmer",name:"Fine White",hex:"#F7EBD8",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/fine-white/"},
+  {code:"Bulmer",name:"Stone White",hex:"#ECDFC6",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/stone-white/"},
+  {code:"Bulmer",name:"Milk White",hex:"#E9DDC7",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/milk-white/"},
+  {code:"Bulmer",name:"Edinburgh White",hex:"#E9DABA",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/edinburgh-white/"},
+  {code:"Bulmer",name:"Creami Colour",hex:"#F0E7CD",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/creami-colour/"},
+  {code:"Bulmer",name:"Water Glass",hex:"#EEF1E9",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/water-glass/"},
+  {code:"Bulmer",name:"Portland",hex:"#E1D7C1",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/portland/"},
+  {code:"Bulmer",name:"Buff",hex:"#EAD9B8",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/buff/"},
+  {code:"Bulmer",name:"Ethereal Blue",hex:"#A4B5AF",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/ethereal-blue/"},
+  {code:"Bulmer",name:"Welmish Blew",hex:"#BAC6C2",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/welmish-blew/"},
+  {code:"Bulmer",name:"Garter Blue",hex:"#87A4B3",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/garter-blue/"},
+  {code:"Bulmer",name:"Fair Blue",hex:"#A0B1C0",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/fair-blue/"},
+  {code:"Bulmer",name:"Sky Blue",hex:"#C2C7C5",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/sky-blue/"},
+  {code:"Bulmer",name:"Navy Blue",hex:"#626D7E",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/navy-blue/"},
+  {code:"Bulmer",name:"Indigo",hex:"#325C69",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/indigo/"},
+  {code:"Bulmer",name:"Azurite",hex:"#5B8191",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/azurite/"},
+  {code:"Bulmer",name:"Aerial Tint",hex:"#A9B7B8",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/aerial-tint/"},
+  {code:"Bulmer",name:"Sea Green",hex:"#9DB2A4",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/sea-green/"},
+  {code:"Bulmer",name:"Invisible Green",hex:"#7D9B5E",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/invisible-green/"},
+  {code:"Bulmer",name:"Eau de Nile",hex:"#C9C6A9",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/eau-de-nile/"},
+  {code:"Bulmer",name:"Duck Egg",hex:"#C2CEC1",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/duck-egg/"},
+  {code:"Bulmer",name:"Verdigris",hex:"#97B599",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/verdigris/"},
+  {code:"Bulmer",name:"Celadon",hex:"#DDE7DD",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/celadon/"},
+  {code:"Bulmer",name:"Pomona",hex:"#C8D0B6",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/pomona/"},
+  {code:"Bulmer",name:"Olympian Green",hex:"#B1B55E",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/olympian-green/"},
+  {code:"Bulmer",name:"Light Olive Green",hex:"#818D75",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/light-olive-green/"},
+  {code:"Bulmer",name:"Pea Green",hex:"#A5B687",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/pea-green/"},
+  {code:"Bulmer",name:"Tea Green",hex:"#A7AF9A",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/tea-green/"},
+  {code:"Bulmer",name:"Brunswick Green Deep",hex:"#434F2B",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/brunswick-green-deep/"},
+  {code:"Bulmer",name:"French Grey",hex:"#CAC2AD",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/french-grey/"},
+  {code:"Bulmer",name:"Paris Grey",hex:"#D7CBAE",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/paris-grey/"},
+  {code:"Bulmer",name:"Dove",hex:"#D6CFBA",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/dove/"},
+  {code:"Bulmer",name:"Flaxen Grey",hex:"#9F988C",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/flaxen-grey/"},
+  {code:"Bulmer",name:"Mouse Grey",hex:"#B1A89B",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/mouse-grey/"},
+  {code:"Bulmer",name:"Ash Grey",hex:"#B7AFA5",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/ash-grey/"},
+  {code:"Bulmer",name:"Pale Smoke Grey",hex:"#DFE0DB",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/pale-smoke-grey/"},
+  {code:"Bulmer",name:"Wash Stop",hex:"#D1CCC8",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/wash-stop/"},
+  {code:"Bulmer",name:"Fine Grey",hex:"#B8BCBD",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/fine-grey/"},
+  {code:"Bulmer",name:"Lead Colour",hex:"#B2AFAA",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/lead-colour/"},
+  {code:"Bulmer",name:"Slate",hex:"#818383",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/slate/"},
+  {code:"Bulmer",name:"Clove",hex:"#CDB49A",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/clove/"},
+  {code:"Bulmer",name:"Fawn",hex:"#C4B194",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/fawn/"},
+  {code:"Bulmer",name:"Clay",hex:"#C0B7A5",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/clay/"},
+  {code:"Bulmer",name:"Cinnamon",hex:"#C7A785",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/cinnamon/"},
+  {code:"Bulmer",name:"Tawny",hex:"#C9B497",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/tawny/"},
+  {code:"Bulmer",name:"Chocolate",hex:"#957A65",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/chocolate/"},
+  {code:"Bulmer",name:"London Brown",hex:"#745544",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/london-brown/"},
+  {code:"Bulmer",name:"Lute",hex:"#CBB486",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/lute/"},
+  {code:"Bulmer",name:"Laylock",hex:"#D2C1BD",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/laylock/"},
+  {code:"Bulmer",name:"Cuisse de Nymphe",hex:"#DDC2B3",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/cuisse-de-nymphe-emue/"},
+  {code:"Bulmer",name:"Lilac Pink",hex:"#DFCCB6",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/lilac-pink/"},
+  {code:"Bulmer",name:"Lavender",hex:"#B19A9C",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/lavender/"},
+  {code:"Bulmer",name:"Rose",hex:"#E7BEBA",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/rose/"},
+  {code:"Bulmer",name:"Sang de Boeuf",hex:"#95594A",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/sang-de-boeuf/"},
+  {code:"Bulmer",name:"Red Ochre",hex:"#985554",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/red-ochre/"},
+  {code:"Bulmer",name:"Brick",hex:"#C27A65",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/brick/"},
+  {code:"Bulmer",name:"Malahide",hex:"#CC6A45",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/malahide/"},
+  {code:"Bulmer",name:"Dutch Orange",hex:"#E0A068",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/dutch-orange/"},
+  {code:"Bulmer",name:"Naples Yellow",hex:"#F2D563",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/naples-yellow/"},
+  {code:"Bulmer",name:"Ochre",hex:"#F0D596",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/ochre/"},
+  {code:"Bulmer",name:"Trumpington",hex:"#E1B459",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/trumpington/"},
+];
+const PAINT_DB = [...PANTONE, ...LG, ...FB, ...DL, ...DH, ...MYLANDS, ...EB, ...EBULMER];
 </script>
 
 <!--  COLOUR SCIENCE  -->
@@ -7368,7 +7420,8 @@ const CS = {
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDL(lab){let b=null,bd=Infinity;for(const p of DL){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestEB(lab){let b=null,bd=Infinity;for(const p of EB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
-  // v14.51: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  // v14.56: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  nearestEBulmer(lab){let b=null,bd=Infinity;for(const p of EBULMER){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDH(lab){let b=null,bd=Infinity;for(const p of DH){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   // v:v14.29 - top-N matches sorted by deltaE
   topN(dataset,lab,n){
@@ -8323,7 +8376,7 @@ const State = {
         liveDisplay:   this.liveDisplay,
         wbPresetId:    this.wbPresetId,
         wbCustomK:     this.wbCustomK,
-        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.51: persist camera facing so reload never resets it
+        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.56: persist camera facing so reload never resets it
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
       }));
@@ -8346,7 +8399,7 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
-      // v14.51: restore camera facing — prevents version-bump reload switching to wrong camera
+      // v14.56: restore camera facing — prevents version-bump reload switching to wrong camera
       if (data.camFront !== undefined && typeof Sampler !== 'undefined') Sampler.camFront = !!data.camFront;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
@@ -8765,18 +8818,19 @@ const App={
       <div class="set-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 0">
         <div><div class="set-l">Display Mode</div><div class="set-sub">What the floating scanner shows while sampling</div></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-        <button class="live-disp-btn ${ld=='pantone'?'on':''}" id="ld-pantone" data-ld="pantone" onclick="App.setLiveDisplay('pantone')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28"><rect x="1.5" y="1.5" width="21" height="25" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><text x="12" y="21" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="currentColor">P</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='hex'?'on':''}" id="ld-hex" data-ld="hex" onclick="App.setLiveDisplay('hex')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 26"><path d="M1,13 A15,15 0 0,0 31,13" fill="none" stroke="#FF2200" stroke-width="2.2"/><path d="M3.4,13 A12.6,12.6 0 0,0 28.6,13" fill="none" stroke="#FF8800" stroke-width="2.2"/><path d="M5.8,13 A10.2,10.2 0 0,0 26.2,13" fill="none" stroke="#FFD700" stroke-width="2.2"/><path d="M8.2,13 A7.8,7.8 0 0,0 23.8,13" fill="none" stroke="#22BB44" stroke-width="2.2"/><path d="M10.6,13 A5.4,5.4 0 0,0 21.4,13" fill="none" stroke="#0055EE" stroke-width="2.2"/><text x="16" y="25" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="900" fill="currentColor">#RGB</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='rgb'?'on':''}" id="ld-rgb" data-ld="rgb" onclick="App.setLiveDisplay('rgb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 30"><path d="M16,2 A9,9 0 0,1 23.79,6.5" fill="none" stroke="#FF2200" stroke-width="3"/><path d="M23.79,6.5 A9,9 0 0,1 23.79,15.5" fill="none" stroke="#FF8800" stroke-width="3"/><path d="M23.79,15.5 A9,9 0 0,1 16,20" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M16,20 A9,9 0 0,1 8.21,15.5" fill="none" stroke="#22BB44" stroke-width="3"/><path d="M8.21,15.5 A9,9 0 0,1 8.21,6.5" fill="none" stroke="#0055EE" stroke-width="3"/><path d="M8.21,6.5 A9,9 0 0,1 16,2" fill="none" stroke="#9900CC" stroke-width="3"/><text x="16" y="28" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="900" fill="currentColor">RGB</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon">&#127752;</span>HSL</button>
-        <button class="live-disp-btn ${ld=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon">&#127777;</span>Kelvin</button>
-        <button class="live-disp-btn ${ld=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon">&#9728;</span>LRV</button>
+        <button class="live-disp-btn ${ld=='pantone'?'on':''}" id="ld-pantone" data-ld="pantone" onclick="App.setLiveDisplay('pantone')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74 14"><text x="37" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">PANTONE</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='hex'?'on':''}" id="ld-hex" data-ld="hex" onclick="App.setLiveDisplay('hex')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 18"><text x="29" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="10" font-weight="700" fill="currentColor">HEX+RGB</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='rgb'?'on':''}" id="ld-rgb" data-ld="rgb" onclick="App.setLiveDisplay('rgb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">RGB</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">HSL</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 18"><text x="26" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">Kelvin</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">LRV</text></svg></span></button>
         <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1" fill="none"/><text x="16" y="20.5" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" font-weight="700" fill="currentColor">F&amp;B</text></svg></span></button>
         <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 26"><text x="25" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Little</text><text x="25" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Greene</text></svg></span></button>
         <button class="live-disp-btn ${ld=='ml'?'on':''}" id="ld-ml" data-ld="ml" onclick="App.setLiveDisplay('ml')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 14"><text x="32" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">MYLANDS</text></svg></span></button>
         <button class="live-disp-btn ${ld=='dh'?'on':''}" id="ld-dh" data-ld="dh" onclick="App.setLiveDisplay('dh')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 18"><text x="30" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">HERITAGE</text><line x1="6" y1="14.5" x2="54" y2="14.5" stroke="currentColor" stroke-width="0.6"/></svg></span></button>
         <button class="live-disp-btn ${ld=='dl'?'on':''}" id="ld-dl" data-ld="dl" onclick="App.setLiveDisplay('dl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 18"><text x="22" y="14" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="currentColor">Dulux</text></svg></span></button>
         <button class="live-disp-btn ${ld=='eb'?'on':''}" id="ld-eb" data-ld="eb" onclick="App.setLiveDisplay('eb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 16"><text x="31" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">earthborn</text></svg></span></button>
+        <button class="live-disp-btn ${ld=='bulmer'?'on':''}" id="ld-bulmer" data-ld="bulmer" onclick="App.setLiveDisplay('bulmer')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 26"><text x="28" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">edward</text><text x="28" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">bulmer</text></svg></span></button>
         </div>
       </div>
       <div class="set-sec">Display</div>
@@ -9119,7 +9173,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.51</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.56</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9415,12 +9469,12 @@ const App={
     if(mode==='paint') mode='fb';
     State.liveDisplay=mode; State.save();
     // Update all live-disp buttons wherever they exist (overlay or static)
-    ['pantone','hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dh','dl','eb'].forEach(m=>{
+    ['pantone','hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dh','dl','eb','bulmer'].forEach(m=>{
       const b=document.getElementById('ld-'+m);
       if(b) b.classList.toggle('on', m===mode);
     });
     const L={pantone:'Pantone',hex:'HEX + RGB',rgb:'RGB',hsl:'HSL',
-             kelvin:'Kelvin','lrv':'LRV',fb:'Farrow & Ball',lg:'Little Greene',ml:'Mylands',dh:'Dulux Heritage',dl:'Dulux',eb:'Earthborn'};
+             kelvin:'Kelvin','lrv':'LRV',fb:'Farrow & Ball',lg:'Little Greene',ml:'Mylands',dh:'Dulux Heritage',dl:'Dulux',eb:'Earthborn',bulmer:'Edward Bulmer'};
     App.toast('Live: '+(L[mode]||mode));
   },
 
@@ -9502,7 +9556,7 @@ const App={
 };
 </script>
 
-<!-- v14.51: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
+<!-- v14.56: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
 <!-- Standalone class. No modifications to existing functions. -->
 <script>
 const NCSCalc = {
@@ -9546,6 +9600,7 @@ const NCSCalc = {
 
   // Toggle the overlay on/off
   toggle() {
+    if (!State.proMode) { App.toast('NCS is a Designer Pro feature'); return; }
     this._visible = !this._visible;
     const el = document.getElementById('pro-stats');
     if (el) el.style.display = this._visible ? 'block' : 'none';
@@ -10428,6 +10483,7 @@ const Sampler={
     const dl=CS.nearestDL(lab);
     const eb=CS.nearestEB(lab);
     const dh=CS.nearestDH(lab);
+    const bulmer=CS.nearestEBulmer(lab);
     const k=CS.kelvin({r,g,b});
     const _kC=Math.round(k-273);
     const hsl=CS.rgbToHsl(r,g,b);
@@ -10486,6 +10542,10 @@ const Sampler={
         primary=eb?.name||'—';
         secondary=(eb?.code?eb.code+' · ':'')+hex.toUpperCase();
         break;
+      case 'bulmer':
+        primary=bulmer?.name||'—';
+        secondary='Edward Bulmer · '+hex.toUpperCase();
+        break;
       default:
         primary=CS.pantoneFirst(hex);
         secondary=hex.toUpperCase();
@@ -10509,7 +10569,7 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
-    NCSCalc.update(r,g,b); // v14.51: Designer Pro — update NCS stats every frame
+    NCSCalc.update(r,g,b); // v14.56: Designer Pro — update NCS stats every frame
     // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
     // while theory panel is open (prevents stutter when panning camera).
     if (this._theoryOpen && this._theoryLockedHex) {
@@ -12955,6 +13015,7 @@ const Library={
         const dhT  = CS.topN(DH,      _lab, 3);
         const mlT  = CS.topN(MYLANDS, _lab, 3);
         const ebT  = CS.topN(EB,      _lab, 3);
+        const bulmerT = CS.topN(EBULMER, _lab, 3);
         const _lrv = hex => { const r=CS.hexToRgb(hex); return CS.lrv(CS.rgbToLab(r.r,r.g,r.b)); };
         const _lrvLabel = v => v<=25?'Dark':v<=55?'Medium':'Light';
         const brandBlock = (brandName, matches, showUrl) => {
@@ -12992,7 +13053,8 @@ const Library={
                   +brandBlock('Dulux Heritage',dhT,true)
                   +brandBlock('Dulux',dlT,false)
                   +brandBlock('Mylands',mlT,true)
-                  +brandBlock('Earthborn',ebT,true);
+                  +brandBlock('Earthborn',ebT,true)
+                  +brandBlock('Edward Bulmer',bulmerT,true);
         if(!body) return '';
         return '<div class="pm-section">'
           +'<div class="pm-section-hdr">Paint &amp; Colour Matches</div>'
@@ -18763,9 +18825,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Works in Chrome/Edge/Samsung Internet over HTTPS or localhost.
   // Blob-URL SW scope may be restricted on Firefox & Safari; fails silently.
   if ('serviceWorker' in navigator && 'caches' in window) {
-    const SW_CACHE = 'spectrum-v91';
+    const SW_CACHE = 'digby-v' + APP_VERSION;
     const swSrc = `
-const CACHE='spectrum-v91';
+const CACHE='digby-v${APP_VERSION}';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']).catch(()=>{})));
   self.skipWaiting();
