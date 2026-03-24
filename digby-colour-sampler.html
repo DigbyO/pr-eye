@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.57 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.58 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.57</title>
+<title>Digby v14.58</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.57';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.58';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1146,7 +1146,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
 .live-disp-btn{padding:10px 4px 8px;border-radius:var(--rs);font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;display:block;-webkit-tap-highlight-color:transparent;}
 .live-disp-btn .ld-icon{display:block;font-size:18px;margin-bottom:3px;}
-/* v14.57: SVG brand logos in live-disp buttons */
+/* v14.58: SVG brand logos in live-disp buttons */
 .live-disp-btn .ld-icon svg{display:block;margin:0 auto 1px;height:20px;width:auto;max-width:58px;}
 .live-disp-btn.on{background:var(--accent);color:#1a1208 !important;border-color:var(--accent);font-weight:700;}
 .live-disp-btn.on .ld-icon{color:#1a1208;}
@@ -1709,9 +1709,9 @@ body.simple-mode .colour-blind-tool{display:none!important}
 body.simple-mode #freeze-btn,
 body.simple-mode #zoom2x-btn,
 body.simple-mode #flip-btn { display:none!important }
-body.simple-mode #pro-stats-btn { display:none!important } /* v14.57: NCS is Designer Pro only */
+body.simple-mode #pro-stats-btn { display:none!important } /* v14.58: NCS is Designer Pro only */
 /* v:v13.60 Auto Palette rainbow — draws attention in standard mode */
-/* v14.57: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
+/* v14.58: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
 body.simple-mode #auto-pal-btn:active { opacity: .82; transform: scale(0.94); }
 /* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
@@ -2376,7 +2376,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 }
 
 
-/* ── v14.57: Play Mode ────────────────────────────────────────────────────── */
+/* ── v14.58: Play Mode ────────────────────────────────────────────────────── */
 @keyframes play-pulse {
   0%   { opacity:.9; transform:scale(1); }
   35%  { opacity:1;  transform:scale(1.06); }
@@ -2389,7 +2389,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 }
 #play-mode-flash.active { opacity:1; animation:play-pulse .4s ease-out; }
 
-/* ── v14.57: Favourites Drawer ───────────────────────────────────────────── */
+/* ── v14.58: Favourites Drawer ───────────────────────────────────────────── */
 #favs-backdrop {
   display:none;position:fixed;inset:0;z-index:9000;
   background:rgba(0,0,0,.45);
@@ -2526,7 +2526,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.57</div>
+  <div class="ws-ver" id="ws-version">v14.58</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2678,7 +2678,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
 
-      <!-- v14.57: Designer Pro — NCS notation overlay -->
+      <!-- v14.58: Designer Pro — NCS notation overlay -->
       <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;contain:strict;background:rgba(8,8,8,.88);border:1px solid rgba(0,255,157,.22);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
         <div id="pst-ncs" style="font-size:13px;font-weight:700;color:#00ff9d;letter-spacing:.12em">S 0000-N</div>
         <div id="pst-lrv" style="font-size:10px;color:rgba(255,255,255,.65)">LRV  —%</div>
@@ -3999,7 +3999,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.57</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.58</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4130,7 +4130,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.57</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.58</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -7524,7 +7524,7 @@ const CS = {
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDL(lab){let b=null,bd=Infinity;for(const p of DL){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestEB(lab){let b=null,bd=Infinity;for(const p of EB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
-  // v14.57: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  // v14.58: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
   nearestEBulmer(lab){let b=null,bd=Infinity;for(const p of EBULMER){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDH(lab){let b=null,bd=Infinity;for(const p of DH){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   // v:v14.29 - top-N matches sorted by deltaE
@@ -8480,7 +8480,7 @@ const State = {
         liveDisplay:   this.liveDisplay,
         wbPresetId:    this.wbPresetId,
         wbCustomK:     this.wbCustomK,
-        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.57: persist camera facing so reload never resets it
+        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.58: persist camera facing so reload never resets it
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
       }));
@@ -8503,7 +8503,7 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
-      // v14.57: restore camera facing — prevents version-bump reload switching to wrong camera
+      // v14.58: restore camera facing — prevents version-bump reload switching to wrong camera
       if (data.camFront !== undefined && typeof Sampler !== 'undefined') Sampler.camFront = !!data.camFront;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
@@ -9277,7 +9277,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.57</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.58</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9660,7 +9660,7 @@ const App={
 };
 </script>
 
-<!-- v14.57: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
+<!-- v14.58: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
 <!-- Standalone class. No modifications to existing functions. -->
 <script>
 const NCSCalc = {
@@ -9849,6 +9849,9 @@ const Sampler={
   },
 
   startCamera() {
+    // v14.58: iOS shake permission — requestMotionPermission must be called inside a
+    // user gesture; camera start is the ideal moment (deliberate button tap).
+    try { if (typeof PlayMode !== 'undefined') PlayMode.requestMotionPermission(); } catch(e) {}
     this.stopStream();
     const v = document.getElementById('cam-video');
     const noCam = document.getElementById('no-cam');
@@ -10673,7 +10676,7 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
-    NCSCalc.update(r,g,b); // v14.57: Designer Pro — update NCS stats every frame
+    NCSCalc.update(r,g,b); // v14.58: Designer Pro — update NCS stats every frame
     // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
     // while theory panel is open (prevents stutter when panning camera).
     if (this._theoryOpen && this._theoryLockedHex) {
@@ -13126,7 +13129,7 @@ const Library={
           if(!matches||!matches.length) return '';
           const best=matches[0], bc=CS.deConf(best.de), lrv=_lrv(best.hex);
           // v14.45: if best match is ΔE≥15 the dataset has no colours in this range — show "No close match" instead of a misleading result
-          if(best.de>=15) return '<div class="pm-brand"><div class="pm-brand-hdr"><span class="pm-brand-name">'+brandName+'</span><span class="pm-badge conf-approx">No match</span></div><div style="padding:8px 12px 10px;font-size:11px;color:var(--muted);font-family:var(--mono)">No close match in this range · ΔE '+best.de+'</div></div>';
+          if(best.de>=50) return '<div class="pm-brand"><div class="pm-brand-hdr"><span class="pm-brand-name">'+brandName+'</span><span class="pm-badge conf-approx">No match</span></div><div style="padding:8px 12px 10px;font-size:11px;color:var(--muted);font-family:var(--mono)">No close match in this range · ΔE '+best.de+'</div></div>'; // v14.58: raised from 15→50 so nearest is always shown
           const alts=matches.slice(1).map(m=>{
             const mc=CS.deConf(m.de);
             return '<div class="pm-alt">'
@@ -18913,8 +18916,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   await App.init();
   Theme.init();
   try { Onboard.init(); } catch(e) {} // v:v14.11
-  try { PlayMode.init(); } catch(e) {} // v14.57: Play Mode
-  try { Favs.render();   } catch(e) {} // v14.57: Taste Memory
+  try { PlayMode.init(); } catch(e) {} // v14.58: Play Mode
+  try { Favs.render();   } catch(e) {} // v14.58: Taste Memory
   restoreDesignProMode(); // v132: restore Design Pro Mode state
   // v:F1.12.5 — Welcome screen: show unless user has dismissed it
   try { if(State.showWelcome && !localStorage.getItem('fraggle_skipWelcome')) WelcomeScreen.show(); } catch(e){}
@@ -21069,7 +21072,7 @@ const AIColourName = {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   v14.57 — PLAY MODE  (Spacebar + Shake → palette generation)
+   v14.58 — PLAY MODE  (Spacebar + Shake → palette generation)
    ═══════════════════════════════════════════════════════════════════════════ */
 const PlayMode = {
   _shakeTs: 0,          // last shake timestamp (debounce)
@@ -21116,27 +21119,43 @@ const PlayMode = {
     }
   },
 
+  // ── iOS 13+: call this from a user gesture (e.g. camera start) ──────
+  requestMotionPermission() {
+    if (typeof DeviceMotionEvent === 'undefined') return;
+    if (typeof DeviceMotionEvent.requestPermission !== 'function') {
+      // Non-iOS or old iOS: attach directly, no permission needed
+      if (!this._motionBound) {
+        window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+        this._motionBound = true;
+      }
+      return;
+    }
+    // iOS 13+: must be called synchronously inside a user gesture handler
+    DeviceMotionEvent.requestPermission()
+      .then(state => {
+        if (state === 'granted' && !this._motionBound) {
+          window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+          this._motionBound = true;
+        }
+      })
+      .catch(() => {});
+  },
+
   init() {
     document.addEventListener('keydown', PlayMode._onKey);
-    if (window.DeviceMotionEvent) {
-      // iOS 13+ requires permission
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        // We request permission lazily on first user interaction
-        document.addEventListener('click', function _reqMotion() {
-          DeviceMotionEvent.requestPermission().then(s => {
-            if (s === 'granted') window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
-          }).catch(() => {});
-          document.removeEventListener('click', _reqMotion);
-        }, { once: true });
-      } else {
-        window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
-      }
+    // Non-iOS: attach motion listener immediately (no permission gate needed)
+    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission !== 'function') {
+      window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+      this._motionBound = true;
     }
+    // iOS 13+: motion permission is requested via PlayMode.requestMotionPermission()
+    // which is called from Sampler.startCamera() — a guaranteed user gesture.
   }
 };
+window.PlayMode = PlayMode; // v14.58: expose on window so inline onclick handlers can reach it
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   v14.57 — TASTE MEMORY  (Favourites — localStorage palette saving)
+   v14.58 — TASTE MEMORY  (Favourites — localStorage palette saving)
    ═══════════════════════════════════════════════════════════════════════════ */
 const Favs = {
   _KEY: 'digby_saved_palettes',
@@ -21254,6 +21273,7 @@ const Favs = {
     }).join('');
   }
 };
+window.Favs = Favs; // v14.58: expose on window so inline onclick handlers can reach it
 
 // v:v13.94 — Dim #top-dashboard to 40% opacity while palette is being interacted ──
 (function(){
@@ -21319,10 +21339,10 @@ const Favs = {
   </div>
 </div>
 
-<!-- v14.57: Play Mode flash overlay -->
+<!-- v14.58: Play Mode flash overlay -->
 <div id="play-mode-flash"></div>
 
-<!-- v14.57: Favourites Drawer -->
+<!-- v14.58: Favourites Drawer -->
 <div id="favs-backdrop" onclick="Favs.close()"></div>
 <div id="favs-drawer" role="dialog" aria-modal="true" aria-label="Your Favourite Palettes">
   <div id="favs-drawer-head">
