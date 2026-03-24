@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.56 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.57 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.56</title>
+<title>Digby v14.57</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.56';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.57';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1146,7 +1146,7 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 .wb-btn.on{background:rgba(255,180,0,.25)!important;color:#ffb400!important;border:1px solid rgba(255,180,0,.5)}
 .live-disp-btn{padding:10px 4px 8px;border-radius:var(--rs);font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;display:block;-webkit-tap-highlight-color:transparent;}
 .live-disp-btn .ld-icon{display:block;font-size:18px;margin-bottom:3px;}
-/* v14.56: SVG brand logos in live-disp buttons */
+/* v14.57: SVG brand logos in live-disp buttons */
 .live-disp-btn .ld-icon svg{display:block;margin:0 auto 1px;height:20px;width:auto;max-width:58px;}
 .live-disp-btn.on{background:var(--accent);color:#1a1208 !important;border-color:var(--accent);font-weight:700;}
 .live-disp-btn.on .ld-icon{color:#1a1208;}
@@ -1709,9 +1709,9 @@ body.simple-mode .colour-blind-tool{display:none!important}
 body.simple-mode #freeze-btn,
 body.simple-mode #zoom2x-btn,
 body.simple-mode #flip-btn { display:none!important }
-body.simple-mode #pro-stats-btn { display:none!important } /* v14.56: NCS is Designer Pro only */
+body.simple-mode #pro-stats-btn { display:none!important } /* v14.57: NCS is Designer Pro only */
 /* v:v13.60 Auto Palette rainbow — draws attention in standard mode */
-/* v14.56: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
+/* v14.57: auto-pal-btn uses same SVG diamond in all modes — removed gradient override */
 body.simple-mode #auto-pal-btn:active { opacity: .82; transform: scale(0.94); }
 /* PaletteBuilder: hide Tailwind + CVD buttons unless Design Pro active */
 body.simple-mode .pb-pro-btn{display:none!important}
@@ -2375,6 +2375,108 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   animation: suFast 0.22s cubic-bezier(0.4, 0.0, 0.2, 1) both;
 }
 
+
+/* ── v14.57: Play Mode ────────────────────────────────────────────────────── */
+@keyframes play-pulse {
+  0%   { opacity:.9; transform:scale(1); }
+  35%  { opacity:1;  transform:scale(1.06); }
+  100% { opacity:.9; transform:scale(1); }
+}
+#play-mode-flash {
+  position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:radial-gradient(ellipse at center,rgba(0,255,157,.13) 0%,transparent 70%);
+  opacity:0;transition:opacity .4s;
+}
+#play-mode-flash.active { opacity:1; animation:play-pulse .4s ease-out; }
+
+/* ── v14.57: Favourites Drawer ───────────────────────────────────────────── */
+#favs-backdrop {
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.45);
+}
+#favs-backdrop.open { display:block; }
+#favs-drawer {
+  position:fixed;top:0;right:0;height:100%;
+  width:min(340px,92vw);z-index:9001;
+  background:var(--surface,#111);
+  border-left:1px solid rgba(255,255,255,.1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.6);
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;
+  isolation:isolate;
+}
+#favs-drawer.open { transform:translateX(0); }
+#favs-drawer-head {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;
+}
+#favs-drawer-head h3 {
+  margin:0;font-size:14px;font-weight:700;
+  letter-spacing:.06em;color:var(--text);
+  font-family:Georgia,serif;
+}
+#favs-close-btn {
+  background:none;border:none;color:var(--muted);
+  font-size:18px;cursor:pointer;padding:4px 8px;line-height:1;
+  border-radius:6px;transition:color .15s;
+}
+#favs-close-btn:hover { color:var(--text); }
+#favs-list {
+  flex:1;overflow-y:auto;padding:12px;
+  display:flex;flex-direction:column;gap:12px;
+}
+#favs-list::-webkit-scrollbar { width:4px; }
+#favs-list::-webkit-scrollbar-track { background:transparent; }
+#favs-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2);border-radius:2px; }
+#favs-empty {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:10px;color:var(--muted);font-size:13px;text-align:center;
+  padding:24px;line-height:1.6;
+}
+#favs-empty svg { opacity:.3; }
+.fav-card {
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:10px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.fav-swatches {
+  display:flex;gap:3px;border-radius:8px;overflow:hidden;height:44px;
+}
+.fav-swatch {
+  flex:1;cursor:pointer;transition:transform .1s;
+}
+.fav-swatch:hover { transform:scaleY(1.06); }
+.fav-meta {
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+}
+.fav-label {
+  font-size:10px;color:var(--muted);font-family:var(--mono);
+  letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.fav-actions { display:flex;gap:4px;flex-shrink:0; }
+.fav-load-btn {
+  font-size:9px;padding:3px 8px;border-radius:6px;cursor:pointer;
+  background:var(--accent);color:#000;border:none;font-weight:700;
+  letter-spacing:.04em;white-space:nowrap;
+}
+.fav-del-btn {
+  font-size:10px;padding:3px 7px;border-radius:6px;cursor:pointer;
+  background:rgba(255,80,80,.15);color:rgba(255,100,100,.9);
+  border:1px solid rgba(255,80,80,.2);
+}
+#favs-footer {
+  padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;gap:8px;flex-shrink:0;
+}
+#favs-clear-btn {
+  flex:1;font-size:11px;padding:9px;border-radius:8px;cursor:pointer;
+  background:rgba(255,255,255,.06);color:var(--muted);border:none;
+}
 </style>
 </head>
 <body>
@@ -2424,7 +2526,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby</div>
-  <div class="ws-ver" id="ws-version">v14.56</div>
+  <div class="ws-ver" id="ws-version">v14.57</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2576,7 +2678,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         </div>
       </div>
 
-      <!-- v14.56: Designer Pro — NCS notation overlay -->
+      <!-- v14.57: Designer Pro — NCS notation overlay -->
       <div id="pro-stats" style="display:none;position:absolute;bottom:14px;left:12px;z-index:10;pointer-events:none;contain:strict;background:rgba(8,8,8,.88);border:1px solid rgba(0,255,157,.22);border-radius:8px;padding:9px 13px;font-family:'Courier New',Courier,monospace;line-height:1.8;letter-spacing:.06em">
         <div id="pst-ncs" style="font-size:13px;font-weight:700;color:#00ff9d;letter-spacing:.12em">S 0000-N</div>
         <div id="pst-lrv" style="font-size:10px;color:rgba(255,255,255,.65)">LRV  —%</div>
@@ -3768,6 +3870,8 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.evolve()" title="Evolve palette: hue-drift each colour to a new page for endless discovery">✧ Evolve</button>
+          <button class="btn btn-p btn-sm" id="pb-fav-btn" onclick="Favs.save()" title="Save palette to Favourites">♥ Save</button>
+          <button class="btn btn-s btn-sm" id="pb-favs-open-btn" onclick="Favs.open()" title="View your saved palettes">📖 Your Palettes</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
           <button class="btn btn-s btn-sm" onclick="Vault.save()" title="Save current palette + Midjourney prompt to Vault">🏛️ Vault</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
@@ -3895,7 +3999,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.56</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v14.57</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4026,7 +4130,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.56</span></div>
+        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.57</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -7180,78 +7284,78 @@ const MYLANDS=[
   {code:"ML",name:"Fluorite Violet",hex:"#4E4562",url:"https://mylands.com/collections/all-colours"},
 ];
 const EB=[
-  {code:"EB",name:"White Clay",hex:"#F2EEE4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Hopscotch",hex:"#F6F3F0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"St John",hex:"#FCFBF8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Bugle",hex:"#F7F7F7",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Piglet",hex:"#FFFDF4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Marbles",hex:"#FDF6EB",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Cat's Cradle",hex:"#ECE8E0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Kissing Gate",hex:"#E8E0D4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Feather Pillow",hex:"#F7F4EF",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Wood Smoke",hex:"#E8E8F0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Up Up Away",hex:"#E8ECEC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Flutterby",hex:"#EDD8E8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Mittens",hex:"#F4EED9",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Hippo Horray",hex:"#DDD4C4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Sandy Castle",hex:"#E8D8A8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Posset",hex:"#F4ECC8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Paw Print",hex:"#DED5CD",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Tom's Bakery",hex:"#D4C498",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Little Rascal",hex:"#D4C8B0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Crocky Road",hex:"#CCC4A8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Donkey Ride",hex:"#DED2C4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Whisker",hex:"#CCC4BC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Tick Tock",hex:"#C8C0A4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Straw",hex:"#EDE2C4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Vanilla",hex:"#FFF6D5",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Jemima",hex:"#FFF5B7",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Daisy Chain",hex:"#FFED7D",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Lemony",hex:"#F4E878",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Ballet Shoe",hex:"#FEEFDA",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Peach Baby",hex:"#FBE3CD",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Humpty Dumpty",hex:"#E8B96E",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Freckle",hex:"#DD9E64",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Flower Pot",hex:"#A8482C",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Maybe Maggie",hex:"#C8C0CC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Rosie Posie",hex:"#EEDADF",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Cupcake",hex:"#F4D8CC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Lily Lily Rose",hex:"#E6E4ED",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Eyebright",hex:"#ECECF0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Delilah",hex:"#E89078",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Can-Can",hex:"#C83038",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Lady Bug",hex:"#9C2C28",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Teacup",hex:"#F5FCFE",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Bo Peep",hex:"#DDE8EE",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Fresh Air",hex:"#D4ECF8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Bobble Hat",hex:"#A0B8CC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Gingham",hex:"#CCE3F1",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Shallows",hex:"#E8FDEE",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Milk Jug",hex:"#B8E3E9",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Dorothy",hex:"#98B0D8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Polka Dot",hex:"#739DAD",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Inglenook",hex:"#C48060",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"The Lido",hex:"#6BCBCA",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Toy Soldier",hex:"#254761",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Trumpet",hex:"#484E65",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Fiddlesticks",hex:"#EFF5D0",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Grasshopper",hex:"#D1E789",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Seagull",hex:"#CCCFC8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Cricket",hex:"#A5C09B",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Sunday Stroll",hex:"#B5BC97",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Sapling",hex:"#CEE0BC",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Gregory's Den",hex:"#98A090",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Grassy",hex:"#6A8040",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Secret Room",hex:"#758359",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Hobgoblin",hex:"#7A9988",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Hobby Wood",hex:"#3A5F46",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Tuffet",hex:"#B8B8B4",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Nellie",hex:"#B0ACA8",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Trilby",hex:"#70706C",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Skipper",hex:"#607890",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Rocky Horse",hex:"#A89D96",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Muddy Boots",hex:"#A69185",url:"https://earthbornpaints.co.uk/claypaint/"},
-  {code:"EB",name:"Hidey-Hole",hex:"#5D5955",url:"https://earthbornpaints.co.uk/claypaint/"},
+  {code:"EB",name:"White Clay",hex:"#F2EEE4",url:"https://www.earthbornpaints.co.uk/products/white-clay-claypaint"},
+  {code:"EB",name:"Hopscotch",hex:"#F6F3F0",url:"https://www.earthbornpaints.co.uk/products/hopscotch-claypaint"},
+  {code:"EB",name:"St John",hex:"#FCFBF8",url:"https://www.earthbornpaints.co.uk/products/st-john-claypaint"},
+  {code:"EB",name:"Bugle",hex:"#F7F7F7",url:"https://www.earthbornpaints.co.uk/products/bugle-claypaint"},
+  {code:"EB",name:"Piglet",hex:"#FFFDF4",url:"https://www.earthbornpaints.co.uk/products/piglet-claypaint"},
+  {code:"EB",name:"Marbles",hex:"#FDF6EB",url:"https://www.earthbornpaints.co.uk/products/marbles-claypaint"},
+  {code:"EB",name:"Cat's Cradle",hex:"#ECE8E0",url:"https://www.earthbornpaints.co.uk/products/cats-cradle-claypaint"},
+  {code:"EB",name:"Kissing Gate",hex:"#E8E0D4",url:"https://www.earthbornpaints.co.uk/products/kissing-gate-claypaint"},
+  {code:"EB",name:"Feather Pillow",hex:"#F7F4EF",url:"https://www.earthbornpaints.co.uk/products/feather-pillow-claypaint"},
+  {code:"EB",name:"Wood Smoke",hex:"#E8E8F0",url:"https://www.earthbornpaints.co.uk/products/wood-smoke-claypaint"},
+  {code:"EB",name:"Up Up Away",hex:"#E8ECEC",url:"https://www.earthbornpaints.co.uk/products/up-up-away-claypaint"},
+  {code:"EB",name:"Flutterby",hex:"#EDD8E8",url:"https://www.earthbornpaints.co.uk/products/flutterby-claypaint"},
+  {code:"EB",name:"Mittens",hex:"#F4EED9",url:"https://www.earthbornpaints.co.uk/products/mittens-claypaint"},
+  {code:"EB",name:"Hippo Horray",hex:"#DDD4C4",url:"https://www.earthbornpaints.co.uk/products/hippo-horray-claypaint"},
+  {code:"EB",name:"Sandy Castle",hex:"#E8D8A8",url:"https://www.earthbornpaints.co.uk/products/sandy-castle-claypaint"},
+  {code:"EB",name:"Posset",hex:"#F4ECC8",url:"https://www.earthbornpaints.co.uk/products/posset-claypaint"},
+  {code:"EB",name:"Paw Print",hex:"#DED5CD",url:"https://www.earthbornpaints.co.uk/products/paw-print-claypaint"},
+  {code:"EB",name:"Tom's Bakery",hex:"#D4C498",url:"https://www.earthbornpaints.co.uk/products/toms-bakery-claypaint"},
+  {code:"EB",name:"Little Rascal",hex:"#D4C8B0",url:"https://www.earthbornpaints.co.uk/products/little-rascal-claypaint"},
+  {code:"EB",name:"Crocky Road",hex:"#CCC4A8",url:"https://www.earthbornpaints.co.uk/products/crocky-road-claypaint"},
+  {code:"EB",name:"Donkey Ride",hex:"#DED2C4",url:"https://www.earthbornpaints.co.uk/products/donkey-ride-claypaint"},
+  {code:"EB",name:"Whisker",hex:"#CCC4BC",url:"https://www.earthbornpaints.co.uk/products/whisker-claypaint"},
+  {code:"EB",name:"Tick Tock",hex:"#C8C0A4",url:"https://www.earthbornpaints.co.uk/products/tick-tock-claypaint"},
+  {code:"EB",name:"Straw",hex:"#EDE2C4",url:"https://www.earthbornpaints.co.uk/products/straw-claypaint"},
+  {code:"EB",name:"Vanilla",hex:"#FFF6D5",url:"https://www.earthbornpaints.co.uk/products/vanilla-claypaint"},
+  {code:"EB",name:"Jemima",hex:"#FFF5B7",url:"https://www.earthbornpaints.co.uk/products/jemima-claypaint"},
+  {code:"EB",name:"Daisy Chain",hex:"#FFED7D",url:"https://www.earthbornpaints.co.uk/products/daisy-chain-claypaint"},
+  {code:"EB",name:"Lemony",hex:"#F4E878",url:"https://www.earthbornpaints.co.uk/products/lemony-claypaint"},
+  {code:"EB",name:"Ballet Shoe",hex:"#FEEFDA",url:"https://www.earthbornpaints.co.uk/products/ballet-shoe-claypaint"},
+  {code:"EB",name:"Peach Baby",hex:"#FBE3CD",url:"https://www.earthbornpaints.co.uk/products/peach-baby-claypaint"},
+  {code:"EB",name:"Humpty Dumpty",hex:"#E8B96E",url:"https://www.earthbornpaints.co.uk/products/humpty-dumpty-claypaint"},
+  {code:"EB",name:"Freckle",hex:"#DD9E64",url:"https://www.earthbornpaints.co.uk/products/freckle-claypaint"},
+  {code:"EB",name:"Flower Pot",hex:"#A8482C",url:"https://www.earthbornpaints.co.uk/products/flower-pot-claypaint"},
+  {code:"EB",name:"Maybe Maggie",hex:"#C8C0CC",url:"https://www.earthbornpaints.co.uk/products/maybe-maggie-claypaint"},
+  {code:"EB",name:"Rosie Posie",hex:"#EEDADF",url:"https://www.earthbornpaints.co.uk/products/rosie-posie-claypaint"},
+  {code:"EB",name:"Cupcake",hex:"#F4D8CC",url:"https://www.earthbornpaints.co.uk/products/cupcake-claypaint"},
+  {code:"EB",name:"Lily Lily Rose",hex:"#E6E4ED",url:"https://www.earthbornpaints.co.uk/products/lily-lily-rose-claypaint"},
+  {code:"EB",name:"Eyebright",hex:"#ECECF0",url:"https://www.earthbornpaints.co.uk/products/eyebright-claypaint"},
+  {code:"EB",name:"Delilah",hex:"#E89078",url:"https://www.earthbornpaints.co.uk/products/delilah-claypaint"},
+  {code:"EB",name:"Can-Can",hex:"#C83038",url:"https://www.earthbornpaints.co.uk/products/can-can-claypaint"},
+  {code:"EB",name:"Lady Bug",hex:"#9C2C28",url:"https://www.earthbornpaints.co.uk/products/lady-bug-claypaint"},
+  {code:"EB",name:"Teacup",hex:"#F5FCFE",url:"https://www.earthbornpaints.co.uk/products/teacup-claypaint"},
+  {code:"EB",name:"Bo Peep",hex:"#DDE8EE",url:"https://www.earthbornpaints.co.uk/products/bo-peep-claypaint"},
+  {code:"EB",name:"Fresh Air",hex:"#D4ECF8",url:"https://www.earthbornpaints.co.uk/products/fresh-air-claypaint"},
+  {code:"EB",name:"Bobble Hat",hex:"#A0B8CC",url:"https://www.earthbornpaints.co.uk/products/bobble-hat-claypaint"},
+  {code:"EB",name:"Gingham",hex:"#CCE3F1",url:"https://www.earthbornpaints.co.uk/products/gingham-claypaint"},
+  {code:"EB",name:"Shallows",hex:"#E8FDEE",url:"https://www.earthbornpaints.co.uk/products/shallows-claypaint"},
+  {code:"EB",name:"Milk Jug",hex:"#B8E3E9",url:"https://www.earthbornpaints.co.uk/products/milk-jug-claypaint"},
+  {code:"EB",name:"Dorothy",hex:"#98B0D8",url:"https://www.earthbornpaints.co.uk/products/dorothy-claypaint"},
+  {code:"EB",name:"Polka Dot",hex:"#739DAD",url:"https://www.earthbornpaints.co.uk/products/polka-dot-claypaint"},
+  {code:"EB",name:"Inglenook",hex:"#C48060",url:"https://www.earthbornpaints.co.uk/products/inglenook-claypaint"},
+  {code:"EB",name:"The Lido",hex:"#6BCBCA",url:"https://www.earthbornpaints.co.uk/products/the-lido-claypaint"},
+  {code:"EB",name:"Toy Soldier",hex:"#254761",url:"https://www.earthbornpaints.co.uk/products/toy-soldier-claypaint"},
+  {code:"EB",name:"Trumpet",hex:"#484E65",url:"https://www.earthbornpaints.co.uk/products/trumpet-claypaint"},
+  {code:"EB",name:"Fiddlesticks",hex:"#EFF5D0",url:"https://www.earthbornpaints.co.uk/products/fiddlesticks-claypaint"},
+  {code:"EB",name:"Grasshopper",hex:"#D1E789",url:"https://www.earthbornpaints.co.uk/products/grasshopper-claypaint"},
+  {code:"EB",name:"Seagull",hex:"#CCCFC8",url:"https://www.earthbornpaints.co.uk/products/seagull-claypaint"},
+  {code:"EB",name:"Cricket",hex:"#A5C09B",url:"https://www.earthbornpaints.co.uk/products/cricket-claypaint"},
+  {code:"EB",name:"Sunday Stroll",hex:"#B5BC97",url:"https://www.earthbornpaints.co.uk/products/sunday-stroll-claypaint"},
+  {code:"EB",name:"Sapling",hex:"#CEE0BC",url:"https://www.earthbornpaints.co.uk/products/sapling-claypaint"},
+  {code:"EB",name:"Gregory's Den",hex:"#98A090",url:"https://www.earthbornpaints.co.uk/products/gregorys-den-claypaint"},
+  {code:"EB",name:"Grassy",hex:"#6A8040",url:"https://www.earthbornpaints.co.uk/products/grassy-claypaint"},
+  {code:"EB",name:"Secret Room",hex:"#758359",url:"https://www.earthbornpaints.co.uk/products/secret-room-claypaint"},
+  {code:"EB",name:"Hobgoblin",hex:"#7A9988",url:"https://www.earthbornpaints.co.uk/products/hobgoblin-claypaint"},
+  {code:"EB",name:"Hobby Wood",hex:"#3A5F46",url:"https://www.earthbornpaints.co.uk/products/hobby-wood-claypaint"},
+  {code:"EB",name:"Tuffet",hex:"#B8B8B4",url:"https://www.earthbornpaints.co.uk/products/tuffet-claypaint"},
+  {code:"EB",name:"Nellie",hex:"#B0ACA8",url:"https://www.earthbornpaints.co.uk/products/nellie-claypaint"},
+  {code:"EB",name:"Trilby",hex:"#70706C",url:"https://www.earthbornpaints.co.uk/products/trilby-claypaint"},
+  {code:"EB",name:"Skipper",hex:"#607890",url:"https://www.earthbornpaints.co.uk/products/skipper-claypaint"},
+  {code:"EB",name:"Rocky Horse",hex:"#A89D96",url:"https://www.earthbornpaints.co.uk/products/rocky-horse-claypaint"},
+  {code:"EB",name:"Muddy Boots",hex:"#A69185",url:"https://www.earthbornpaints.co.uk/products/muddy-boots-claypaint"},
+  {code:"EB",name:"Hidey-Hole",hex:"#5D5955",url:"https://www.earthbornpaints.co.uk/products/hidey-hole-claypaint"},
 ];
 
 // v:F1.12.5 — Unified paint brand database: single searchable source across all brands
@@ -7420,7 +7524,7 @@ const CS = {
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDL(lab){let b=null,bd=Infinity;for(const p of DL){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestEB(lab){let b=null,bd=Infinity;for(const p of EB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
-  // v14.56: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
+  // v14.57: Dulux Heritage nearest-neighbour (named colours, unlike raw DL NCS codes)
   nearestEBulmer(lab){let b=null,bd=Infinity;for(const p of EBULMER){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestDH(lab){let b=null,bd=Infinity;for(const p of DH){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   // v:v14.29 - top-N matches sorted by deltaE
@@ -8376,7 +8480,7 @@ const State = {
         liveDisplay:   this.liveDisplay,
         wbPresetId:    this.wbPresetId,
         wbCustomK:     this.wbCustomK,
-        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.56: persist camera facing so reload never resets it
+        camFront:      typeof Sampler !== 'undefined' ? Sampler.camFront : false, // v14.57: persist camera facing so reload never resets it
         subjects:      this.subjects,   // MASTER-FIX-V53: persist subjects array
         mediums:       this.mediums,    // MASTER-FIX-V53: persist mediums array
       }));
@@ -8399,7 +8503,7 @@ const State = {
       // MASTER-FIX-V53: restore subjects/mediums arrays; guard against non-Array corrupt data
       if (Array.isArray(data.subjects)) this.subjects = data.subjects;
       if (Array.isArray(data.mediums))  this.mediums  = data.mediums;
-      // v14.56: restore camera facing — prevents version-bump reload switching to wrong camera
+      // v14.57: restore camera facing — prevents version-bump reload switching to wrong camera
       if (data.camFront !== undefined && typeof Sampler !== 'undefined') Sampler.camFront = !!data.camFront;
     } catch(e) { /* corrupt localStorage — start fresh */ }
     // v72: Also check dedicated spectrum-pro-mode key (takes priority — set by toggle)
@@ -9173,7 +9277,7 @@ const App={
       <div class="set-sec">About</div>
       <div class="set-row">
         <div class="set-l">Version</div>
-        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.56</span>
+        <span id="settings-ver-b" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">Digby v14.57</span>
       </div>
       <div class="set-row"><div class="set-l">Contact</div><a href="mailto:digby@preye.co.uk" style="font-size:11px;color:var(--accent);font-family:var(--mono)">digby@preye.co.uk</a></div>
       <!-- Shop hero at the bottom — premium brand close -->
@@ -9556,7 +9660,7 @@ const App={
 };
 </script>
 
-<!-- v14.56: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
+<!-- v14.57: DESIGNER PRO — NCS NOTATION ESTIMATOR -->
 <!-- Standalone class. No modifications to existing functions. -->
 <script>
 const NCSCalc = {
@@ -10569,7 +10673,7 @@ const Sampler={
     const utEl=document.getElementById('live-undertone');
     if(lrvLchEl) lrvLchEl.textContent='LRV '+lrvReal+'%  ·  L:'+lch.l+' C:'+lch.c+' H:'+lch.h+'°';
     if(utEl) utEl.textContent=CS.undertone(r,g,b);
-    NCSCalc.update(r,g,b); // v14.56: Designer Pro — update NCS stats every frame
+    NCSCalc.update(r,g,b); // v14.57: Designer Pro — update NCS stats every frame
     // v:v13.82 — Theory auto-refresh: update live swatches at ≤150ms cadence
     // while theory panel is open (prevents stutter when panning camera).
     if (this._theoryOpen && this._theoryLockedHex) {
@@ -18809,6 +18913,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   await App.init();
   Theme.init();
   try { Onboard.init(); } catch(e) {} // v:v14.11
+  try { PlayMode.init(); } catch(e) {} // v14.57: Play Mode
+  try { Favs.render();   } catch(e) {} // v14.57: Taste Memory
   restoreDesignProMode(); // v132: restore Design Pro Mode state
   // v:F1.12.5 — Welcome screen: show unless user has dismissed it
   try { if(State.showWelcome && !localStorage.getItem('fraggle_skipWelcome')) WelcomeScreen.show(); } catch(e){}
@@ -20961,6 +21067,194 @@ const AIColourName = {
   });
 })();
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v14.57 — PLAY MODE  (Spacebar + Shake → palette generation)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const PlayMode = {
+  _shakeTs: 0,          // last shake timestamp (debounce)
+  _shakeThresh: 18,     // m/s² threshold for shake detection
+  _debounce: 900,       // ms between triggers
+
+  trigger() {
+    // Flash feedback
+    const flash = document.getElementById('play-mode-flash');
+    if (flash) {
+      flash.classList.remove('active');
+      void flash.offsetWidth; // reflow to restart animation
+      flash.classList.add('active');
+      setTimeout(() => flash.classList.remove('active'), 420);
+    }
+    // Generate: evolve if palette has colours, else lucky random
+    try {
+      if (typeof PaletteBuilder !== 'undefined' && PaletteBuilder.colours && PaletteBuilder.colours.length) {
+        PaletteBuilder.evolve();
+        App.toast('✧ Evolved');
+      } else {
+        if (typeof PaletteBuilder !== 'undefined') PaletteBuilder.generateLucky();
+        App.toast('✨ Lucky palette!');
+      }
+    } catch(e) {}
+  },
+
+  _onKey(e) {
+    if (e.code !== 'Space') return;
+    const tag = (document.activeElement || {}).tagName || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    e.preventDefault();
+    PlayMode.trigger();
+  },
+
+  _onMotion(e) {
+    const acc = e.accelerationIncludingGravity || e.acceleration;
+    if (!acc) return;
+    const mag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
+    const now = Date.now();
+    if (mag > PlayMode._shakeThresh && now - PlayMode._shakeTs > PlayMode._debounce) {
+      PlayMode._shakeTs = now;
+      PlayMode.trigger();
+    }
+  },
+
+  init() {
+    document.addEventListener('keydown', PlayMode._onKey);
+    if (window.DeviceMotionEvent) {
+      // iOS 13+ requires permission
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        // We request permission lazily on first user interaction
+        document.addEventListener('click', function _reqMotion() {
+          DeviceMotionEvent.requestPermission().then(s => {
+            if (s === 'granted') window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+          }).catch(() => {});
+          document.removeEventListener('click', _reqMotion);
+        }, { once: true });
+      } else {
+        window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+      }
+    }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v14.57 — TASTE MEMORY  (Favourites — localStorage palette saving)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const Favs = {
+  _KEY: 'digby_saved_palettes',
+  _open: false,
+
+  // ── Persistence ─────────────────────────────────────────────────────────
+  load() {
+    try {
+      const raw = localStorage.getItem(this._KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  },
+
+  _persist(arr) {
+    try { localStorage.setItem(this._KEY, JSON.stringify(arr)); } catch(e) {}
+  },
+
+  // ── Save current palette ─────────────────────────────────────────────────
+  save() {
+    if (typeof PaletteBuilder === 'undefined') return;
+    const colours = (PaletteBuilder.colours || []).filter(c => c && c.hex);
+    if (!colours.length) { App.toast('Add colours to save'); return; }
+
+    const entry = {
+      ts: Date.now(),
+      hexes: colours.map(c => c.hex),
+      names: colours.map(c => c.name || c.hex)
+    };
+    const arr = this.load();
+    arr.unshift(entry); // newest first
+    if (arr.length > 50) arr.splice(50); // cap at 50 saved palettes
+    this._persist(arr);
+    App.toast('&#9825; Saved to Your Palettes');
+    // Pulse the heart button
+    const btn = document.getElementById('pb-fav-btn');
+    if (btn) {
+      btn.textContent = '♥ Saved!';
+      setTimeout(() => { btn.innerHTML = '&#9825; Save'; }, 1200);
+    }
+  },
+
+  // ── Load a saved palette into PaletteBuilder ────────────────────────────
+  load_palette(idx) {
+    const arr = this.load();
+    const entry = arr[idx];
+    if (!entry || typeof PaletteBuilder === 'undefined') return;
+    PaletteBuilder.clear();
+    entry.hexes.forEach(hex => PaletteBuilder.addColour(hex));
+    App.setTab('palette');
+    this.close();
+    App.toast('Palette loaded');
+  },
+
+  // ── Delete one saved palette ─────────────────────────────────────────────
+  del(idx) {
+    const arr = this.load();
+    arr.splice(idx, 1);
+    this._persist(arr);
+    this.render();
+  },
+
+  clearAll() {
+    if (!confirm('Clear all saved palettes?')) return;
+    this._persist([]);
+    this.render();
+  },
+
+  // ── Drawer open/close ────────────────────────────────────────────────────
+  open() {
+    this.render();
+    document.getElementById('favs-backdrop').classList.add('open');
+    document.getElementById('favs-drawer').classList.add('open');
+    this._open = true;
+  },
+
+  close() {
+    document.getElementById('favs-backdrop').classList.remove('open');
+    document.getElementById('favs-drawer').classList.remove('open');
+    this._open = false;
+  },
+
+  // ── Render saved palettes ────────────────────────────────────────────────
+  render() {
+    const el = document.getElementById('favs-list');
+    if (!el) return;
+    const arr = this.load();
+
+    if (!arr.length) {
+      el.innerHTML = '<div id="favs-empty">' +
+        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+        '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+        '</svg>' +
+        '<span>No saved palettes yet.<br>Build a palette and tap <b>&#9825; Save</b>.</span>' +
+        '</div>';
+      return;
+    }
+
+    el.innerHTML = arr.map((entry, i) => {
+      const swatches = entry.hexes.map(hex =>
+        '<div class="fav-swatch" style="background:' + hex + '" ' +
+        'title="' + hex + '" onclick="navigator.clipboard&&navigator.clipboard.writeText('' + hex + '').then(()=>App.toast('Copied ' + hex + ''))"></div>'
+      ).join('');
+      const label = entry.hexes.slice(0,4).join(' · ');
+      const date = new Date(entry.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      return '<div class="fav-card">' +
+        '<div class="fav-swatches">' + swatches + '</div>' +
+        '<div class="fav-meta">' +
+          '<span class="fav-label">' + label + ' &nbsp;·&nbsp; ' + date + '</span>' +
+          '<div class="fav-actions">' +
+            '<button class="fav-load-btn" onclick="Favs.load_palette(' + i + ')">Load</button>' +
+            '<button class="fav-del-btn" onclick="Favs.del(' + i + ')">&#x2715;</button>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+};
+
 // v:v13.94 — Dim #top-dashboard to 40% opacity while palette is being interacted ──
 (function(){
   var grid = document.getElementById('pb-grid');
@@ -21022,6 +21316,22 @@ const AIColourName = {
     </div>
 
     <button id="ai-quiz-submit" onclick="PaletteBuilder._submitAIQuiz()">Generate Narrative →</button>
+  </div>
+</div>
+
+<!-- v14.57: Play Mode flash overlay -->
+<div id="play-mode-flash"></div>
+
+<!-- v14.57: Favourites Drawer -->
+<div id="favs-backdrop" onclick="Favs.close()"></div>
+<div id="favs-drawer" role="dialog" aria-modal="true" aria-label="Your Favourite Palettes">
+  <div id="favs-drawer-head">
+    <h3>&#9825; Your Palettes</h3>
+    <button id="favs-close-btn" onclick="Favs.close()" aria-label="Close">&#x2715;</button>
+  </div>
+  <div id="favs-list"></div>
+  <div id="favs-footer">
+    <button id="favs-clear-btn" onclick="Favs.clearAll()">Clear All</button>
   </div>
 </div>
 </body>
