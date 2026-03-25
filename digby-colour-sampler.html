@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.62 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.63 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.62</title>
+<title>Digby v14.63</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.62';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.63';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -15903,7 +15903,7 @@ const Prompter={
 <!--  COLOUR WHEEL  -->
 <script>
 const ColourWheel = {
-  hue: 200, sat: 35, lit: 55,  // v:v13.49 — neutral blue-grey default (was red hue:0)
+  hue: 32,  sat: 40, lit: 52,  // v14.63 — warm tan default (was blue-grey hue:200)
   dragging: false,
   ready: false,  // v:F12.13 — true after init() completes; read by Sampler._seedWheel
 
@@ -21095,25 +21095,17 @@ const PlayMode = {
       flash.classList.add('active');
       setTimeout(() => flash.classList.remove('active'), 520);
     }
-    // v14.60: three-tier action
-    //  1. Camera live → extract dominant colours from frame (most tactile)
-    //  2. Palette has colours → evolve (hue-drift to new page)
-    //  3. Palette empty → generate lucky palette AND load directly (not just suggest)
+    // v14.63: palette-only — camera path removed (user request)
+    //  1. Palette has colours → evolve (hue-drift to new page)
+    //  2. Palette empty → generate lucky palette and load directly
     try {
-      if (typeof Sampler !== 'undefined' &&
-          Sampler.mode === 'camera' && !Sampler.frozen &&
-          typeof AutoPalette !== 'undefined') {
-        AutoPalette.fromCameraDensity();
-        App.toast('✧ Colours extracted!');
-      } else if (typeof PaletteBuilder !== 'undefined' &&
-                 PaletteBuilder.colours && PaletteBuilder.colours.length) {
+      if (typeof PaletteBuilder !== 'undefined' &&
+          PaletteBuilder.colours && PaletteBuilder.colours.length) {
         PaletteBuilder.evolve();
-        App.toast('✧ Palette evolved!');
+        App.toast('\u2727 Palette evolved!');
       } else if (typeof PaletteBuilder !== 'undefined') {
-        // v14.61: generateLucky() → suggestAlgo() → would force-open the suggest
-        // panel mid-shake, which is disorienting.  Call it, then immediately
-        // close the panel.  60 ms later _addAllAlgo() reads the (hidden) chips
-        // and adds them directly to the palette.
+        // generateLucky() populates the hidden algo tray; _addAllAlgo() loads all
+        // chips straight into the palette without opening the suggest panel.
         PaletteBuilder.generateLucky();
         try {
           const _sp = document.getElementById('pb-suggest-panel');
