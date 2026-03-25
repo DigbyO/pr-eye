@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.63 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.64 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.63</title>
+<title>Digby v14.64</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.63';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.64';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -3861,6 +3861,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <div id="pb-page-dots"></div>
           <button id="pb-page-next" class="pb-pg-btn" onclick="PaletteBuilder.goToPage(PaletteBuilder.pageIdx+1,'left')" title="Next palette">&#8250;</button>
           <button id="pb-favs-nav-btn" onclick="Vault.open()" title="View saved palettes" style="background:none;border:none;font-size:17px;cursor:pointer;padding:2px 5px;opacity:.75;color:var(--accent);-webkit-tap-highlight-color:transparent;line-height:1">&#9825;</button>
+          <span id="pb-motion-counter" title="Motion events (0=sensor not firing)" style="font-size:9px;font-family:var(--mono);color:var(--muted);padding:2px 5px;opacity:.7">&#128246; 0</span>
         </div>
         <div id="pb-swipe-wrap">
         <div id="pb-empty-invite-wrap"></div>
@@ -3877,6 +3878,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.evolve()" title="Evolve palette: hue-drift each colour to a new page for endless discovery">✧ Evolve</button>
+          <button class="btn btn-s btn-sm" id="pb-shake-test-btn" onclick="PlayMode.trigger();App.toast('Shake test ✓')" title="Test shake — same as shaking phone" style="border-color:rgba(200,169,110,.4);color:var(--accent)">&#128246; Shake Test</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
           <button class="btn btn-s btn-sm" onclick="Vault.save()" title="Save current palette + Midjourney prompt to Vault">🏛️ Vault</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
@@ -21130,6 +21132,12 @@ const PlayMode = {
   },
 
   _onMotion(e) {
+    // v14.64: raw counter on every event — proves sensor is delivering data
+    try {
+      PlayMode._rawCount = (PlayMode._rawCount || 0) + 1;
+      const _ctr = document.getElementById('pb-motion-counter');
+      if (_ctr) _ctr.textContent = '&#128246; ' + PlayMode._rawCount;
+    } catch(_ce) {}
     // v14.62: sum-of-absolutes is the most battle-tested shake algorithm.
     // accelerationIncludingGravity has a baseline of ~9.8 at rest (gravity);
     // a moderate shake brings the sum to 15-40+, making threshold=15 reliable.
