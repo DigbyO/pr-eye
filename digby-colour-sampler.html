@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby v14.60 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Digby v14.62 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby v14.60</title>
+<title>Digby v14.62</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.60';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.62';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -4136,7 +4136,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
         <!-- v14.60: Shake permission row -->
-        <div class="set-row" id="shake-enable-row"><div><div class="set-l">Shake to Generate</div><div class="set-sub" id="shake-status-lbl">Shake phone to evolve palette or sample camera</div></div><button class="btn btn-s btn-sm" id="shake-enable-btn" onclick="PlayMode.requestMotionPermission();document.getElementById('shake-status-lbl').textContent='Enabled ✓';this.textContent='Active';this.disabled=true;" style="flex-shrink:0">Enable</button></div>
+        <div class="set-row" id="shake-enable-row"><div><div class="set-l">Shake to Generate</div><div class="set-sub" id="shake-status-lbl">Shake phone to evolve palette or sample camera</div></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-s btn-sm" id="shake-enable-btn" onclick="PlayMode.requestMotionPermission();document.getElementById('shake-status-lbl').textContent='Permission requested…';this.textContent='Active';this.disabled=true;" style="flex-shrink:0">Enable</button><button class="btn btn-s btn-sm" onclick="PlayMode.trigger();App.toast('Test fired ✓')" title="Test the shake action directly">Test</button></div></div>
         <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.60</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
@@ -21083,7 +21083,7 @@ const AIColourName = {
    ═══════════════════════════════════════════════════════════════════════════ */
 const PlayMode = {
   _shakeTs: 0,          // last shake timestamp (debounce)
-  _shakeThresh: 10,     // v14.61: gravity-inclusive fallback threshold (lin path uses 7)
+  _shakeThresh: 15,     // v14.62: sum-of-abs; rest≈9.8, moderate shake≥15
   _debounce: 600,       // ms between triggers (was 900)
 
   trigger() {
@@ -21138,27 +21138,22 @@ const PlayMode = {
   },
 
   _onMotion(e) {
-    // v14.61: prefer e.acceleration (gravity-free, baseline ~0) over
-    // e.accelerationIncludingGravity (baseline ~9.8).  The old code always
-    // picked accelerationIncludingGravity because it is a truthy object even
-    // when its x/y/z are null, so linear acceleration was never tested.
-    const lin  = e.acceleration;
-    const grav = e.accelerationIncludingGravity;
-    let mag = 0;
-    if (lin && lin.x != null && lin.y != null && lin.z != null) {
-      // Linear acceleration — ~0 at rest, 5-25 m/s² when shaking
-      mag = Math.sqrt(lin.x * lin.x + lin.y * lin.y + lin.z * lin.z);
-      if (mag < 7) return;                  // below gentle-shake threshold
-    } else if (grav) {
-      // Fallback: includes 9.8 m/s² gravity baseline — need a higher threshold
-      mag = Math.sqrt((grav.x||0)**2 + (grav.y||0)**2 + (grav.z||0)**2);
-      if (mag < PlayMode._shakeThresh) return;
-    } else {
-      return;
-    }
+    // v14.62: sum-of-absolutes is the most battle-tested shake algorithm.
+    // accelerationIncludingGravity has a baseline of ~9.8 at rest (gravity);
+    // a moderate shake brings the sum to 15-40+, making threshold=15 reliable.
+    const acc = e.accelerationIncludingGravity || e.acceleration;
+    if (!acc) return;
+    const shock = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+    if (shock < PlayMode._shakeThresh) return;
     const now = Date.now();
     if (now - PlayMode._shakeTs < PlayMode._debounce) return;
     PlayMode._shakeTs = now;
+    // Update settings counter so user can see shake is firing
+    try {
+      PlayMode._shakeCount = (PlayMode._shakeCount || 0) + 1;
+      const lbl = document.getElementById('shake-status-lbl');
+      if (lbl) lbl.textContent = 'Shake detected ✓ (' + PlayMode._shakeCount + ')';
+    } catch(e2) {}
     PlayMode.trigger();
   },
 
@@ -21186,20 +21181,24 @@ const PlayMode = {
 
   init() {
     document.addEventListener('keydown', PlayMode._onKey);
-    // Non-iOS: attach motion listener immediately (no permission gate needed)
-    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission !== 'function') {
-      window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
-      this._motionBound = true;
-      // Mark shake as active in settings UI
-      setTimeout(() => {
-        const btn = document.getElementById('shake-enable-btn');
-        const lbl = document.getElementById('shake-status-lbl');
-        if (btn) { btn.textContent = 'Active'; btn.disabled = true; }
-        if (lbl)   lbl.textContent = 'Active ✓';
-      }, 800);
+    // v14.62: use typeof rather than window.DeviceMotionEvent — more portable
+    if (typeof DeviceMotionEvent !== 'undefined') {
+      if (typeof DeviceMotionEvent.requestPermission !== 'function') {
+        // Android / non-iOS: attach listener directly, no permission needed
+        try {
+          window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+          this._motionBound = true;
+          setTimeout(() => {
+            const btn = document.getElementById('shake-enable-btn');
+            const lbl = document.getElementById('shake-status-lbl');
+            if (btn) { btn.textContent = 'Active'; btn.disabled = true; }
+            if (lbl) lbl.textContent = 'Ready — shake now!';
+          }, 800);
+        } catch(ex) {}
+      }
+      // iOS 13+: DeviceMotionEvent.requestPermission is a function.
+      // Permission is requested via Settings > Enable or inside startCamera().
     }
-    // iOS 13+: requestMotionPermission() is called from startCamera() (camera gesture)
-    // or manually from the Settings > Enable Shake button.
   }
 };
 window.PlayMode = PlayMode; // v14.60: expose on window so inline onclick handlers can reach it
