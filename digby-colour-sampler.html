@@ -21083,7 +21083,7 @@ const AIColourName = {
    ═══════════════════════════════════════════════════════════════════════════ */
 const PlayMode = {
   _shakeTs: 0,          // last shake timestamp (debounce)
-  _shakeThresh: 12,     // v14.60: lowered from 18→12 — catches moderate shake
+  _shakeThresh: 10,     // v14.61: gravity-inclusive fallback threshold (lin path uses 7)
   _debounce: 600,       // ms between triggers (was 900)
 
   trigger() {
@@ -21110,12 +21110,21 @@ const PlayMode = {
         PaletteBuilder.evolve();
         App.toast('✧ Palette evolved!');
       } else if (typeof PaletteBuilder !== 'undefined') {
-        // generateLucky() populates the algo tray; _addAllAlgo() immediately loads all chips
+        // v14.61: generateLucky() → suggestAlgo() → would force-open the suggest
+        // panel mid-shake, which is disorienting.  Call it, then immediately
+        // close the panel.  60 ms later _addAllAlgo() reads the (hidden) chips
+        // and adds them directly to the palette.
         PaletteBuilder.generateLucky();
+        try {
+          const _sp = document.getElementById('pb-suggest-panel');
+          if (_sp) _sp.style.display = 'none';
+        } catch(e3) {}
         setTimeout(() => {
-          try { PaletteBuilder._addAllAlgo(); } catch(e2) {}
+          try {
+            PaletteBuilder._addAllAlgo();
+            App.toast('\u2728 Lucky palette!');
+          } catch(e2) { App.toast('\u2728 Lucky palette!'); }
         }, 60);
-        App.toast('\u2728 Lucky palette!');
       }
     } catch(e) {}
   },
@@ -21129,14 +21138,28 @@ const PlayMode = {
   },
 
   _onMotion(e) {
-    const acc = e.accelerationIncludingGravity || e.acceleration;
-    if (!acc) return;
-    const mag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
-    const now = Date.now();
-    if (mag > PlayMode._shakeThresh && now - PlayMode._shakeTs > PlayMode._debounce) {
-      PlayMode._shakeTs = now;
-      PlayMode.trigger();
+    // v14.61: prefer e.acceleration (gravity-free, baseline ~0) over
+    // e.accelerationIncludingGravity (baseline ~9.8).  The old code always
+    // picked accelerationIncludingGravity because it is a truthy object even
+    // when its x/y/z are null, so linear acceleration was never tested.
+    const lin  = e.acceleration;
+    const grav = e.accelerationIncludingGravity;
+    let mag = 0;
+    if (lin && lin.x != null && lin.y != null && lin.z != null) {
+      // Linear acceleration — ~0 at rest, 5-25 m/s² when shaking
+      mag = Math.sqrt(lin.x * lin.x + lin.y * lin.y + lin.z * lin.z);
+      if (mag < 7) return;                  // below gentle-shake threshold
+    } else if (grav) {
+      // Fallback: includes 9.8 m/s² gravity baseline — need a higher threshold
+      mag = Math.sqrt((grav.x||0)**2 + (grav.y||0)**2 + (grav.z||0)**2);
+      if (mag < PlayMode._shakeThresh) return;
+    } else {
+      return;
     }
+    const now = Date.now();
+    if (now - PlayMode._shakeTs < PlayMode._debounce) return;
+    PlayMode._shakeTs = now;
+    PlayMode.trigger();
   },
 
   // ── iOS 13+: call this from a user gesture (e.g. camera start) ──────
