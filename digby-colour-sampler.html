@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="PR Eye v14.74 [IP Safe Edition] — Colour Sampler by PR Eye">
+<meta name="description" content="PR Eye v14.75 [IP Safe Edition] — Colour Sampler by PR Eye">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>PR Eye v14.74 [IP Safe Edition]</title>
+<title>PR Eye v14.75 [IP Safe Edition]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.74';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.75';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -9321,45 +9321,44 @@ const App={
 
     const n = hexes.length;
 
-    // ── v14.73 Gallery Anchor: single-color premium layout ────────────────
+    // ── v14.75 'The Lens': single-color — circle on white, flat type ──────
     if (n === 1) {
       const hex = hexes[0];
-      const { r, g, b } = CS.hexToRgb(hex);
-      // YIQ luminance for dynamic contrast — no shadows needed
-      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-      const textColor = yiq > 128 ? '#1a1a1a' : '#ffffff';
+      const colName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
 
-      // White card first, then solid colour fills the inner area
+      // White card + white inner area
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
-      ctx.fillStyle = hex;
-      ctx.fillRect(BORDER, BORDER, CW, CH);
 
-      // Flat crisp text — shadow explicitly cleared
+      // The Lens: filled circle, slightly above vertical centre
+      const centerX = LOGICAL_W / 2;
+      const centerY = LOGICAL_H * 0.42;          // 210px — leaves room for text below
+      const radius  = LOGICAL_W * 0.30;           // 120px
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fillStyle = hex;
+      ctx.fill();
+
+      // Flat typography — no drop shadows, always dark charcoal on white
       ctx.shadowColor   = 'transparent';
       ctx.shadowBlur    = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
-      ctx.fillStyle     = textColor;
-      ctx.textAlign     = 'left';
+      ctx.fillStyle     = '#1a1a1a';
+      ctx.textAlign     = 'center';
 
-      const padL = BORDER + 30;
-      const padB = BORDER + CH - 30;  // baseline 30px above bottom of colour block
-
-      // HEX code — large, bold, anchored to the bottom
-      ctx.font         = 'bold 40px system-ui,-apple-system,sans-serif';
+      // HEX code — bold, large, anchored below circle
+      ctx.font         = 'bold 36px system-ui,-apple-system,sans-serif';
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText(hex.toUpperCase(), padL, padB);
+      ctx.fillText(hex.toUpperCase(), centerX, LOGICAL_H * 0.75);   // y ≈ 375
 
-      // Colour name — smaller, directly above the HEX
-      const colName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
-      ctx.font = '16px system-ui,-apple-system,sans-serif';
-      ctx.fillText(colName, padL, padB - 50);
+      // PR Eye reference name — directly below the HEX
+      ctx.font = '18px system-ui,-apple-system,sans-serif';
+      ctx.fillText(colName, centerX, LOGICAL_H * 0.75 + 28);        // y ≈ 403
 
       // Footer: PREYE.CO.UK centred in bottom white border
       ctx.fillStyle    = '#999999';
       ctx.font         = "6px 'Space Mono',monospace";
-      ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('PREYE.CO.UK', LOGICAL_W / 2, LOGICAL_H - BORDER / 2);
 
