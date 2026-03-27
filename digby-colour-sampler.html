@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="PR Eye v14.71 [IP Safe Edition] — Colour Sampler by PR Eye">
+<meta name="description" content="PR Eye v14.72 [IP Safe Edition] — Colour Sampler by PR Eye">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>PR Eye v14.71 [IP Safe Edition]</title>
+<title>PR Eye v14.72 [IP Safe Edition]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.71';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.72';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -20300,56 +20300,168 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
    *   [28px white border bottom]
    */
     async exportPolaroid(hexes) {
-    // v14.71 IP-Safe Card: vertical colour pillars, uniform 20px border, PREYE.CO.UK footer
-    if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
-
+    // v14.72: photo restored (camera + upload). IP-safe swatch strip below photo.
+    // Font gate — Permanent Marker ships weight 400 ONLY
     await Promise.all([
+      document.fonts.load('400 12px "Permanent Marker"'),
+      document.fonts.load('400 18px "Permanent Marker"'),
       document.fonts.load('400 10px "Space Mono"'),
-      document.fonts.load('400 12px "Permanent Marker"')
+      document.fonts.load('700 10px "Space Mono"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
+    const FONT_PM = '"Permanent Marker",cursive';
+    const FONT_SM = '"Space Mono",monospace';
+    const _patchCtxFonts = (ctx) => {
+      const origFont = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
+      const patchedSet = function(v) {
+        v = v.replace(/"Permanent Marker",cursive/g, FONT_PM);
+        v = v.replace(/'Permanent Marker',cursive/g, FONT_PM);
+        v = v.replace(/"Space Mono",monospace/g, FONT_SM);
+        v = v.replace(/'Space Mono',monospace/g, FONT_SM);
+        v = v.replace(/Space Mono,monospace/g,   FONT_SM);
+        origFont.set.call(ctx, v);
+      };
+      Object.defineProperty(ctx, 'font', { get: () => origFont.get.call(ctx), set: patchedSet });
+    };
+    if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
+    // ── Source image (camera snap or uploaded image) ──────────────────────────
+    let img = Sampler.uploadImg;
+    if (Sampler.mode === 'camera' || !img) {
+      if (AutoPalette._camSnap && Sampler.mode === 'camera') {
+        img = AutoPalette._camSnap;
+      } else {
+        const video = document.getElementById('cam-video');
+        if (video && video.videoWidth) {
+          const snap = document.createElement('canvas');
+          snap.width  = video.videoWidth;
+          snap.height = video.videoHeight;
+          snap.getContext('2d').drawImage(video, 0, 0);
+          img = snap;
+        }
+      }
+    }
+    if (!img) { App.toast('No image — use camera or upload a photo'); return; }
+
+    // ── Layout constants: 4:5, uniform 20px border ───────────────────────────
     const BORDER    = 20;
     const LOGICAL_W = 400;
     const LOGICAL_H = 500;
-    const CW = LOGICAL_W - BORDER * 2;  // 360px inner width
-    const CH = LOGICAL_H - BORDER * 2;  // 460px inner height
+    const CW        = LOGICAL_W - BORDER * 2;   // 360px inner width
+    const photoH    = CW;                        // square 360×360 photo
+    // Swatch strip fills the remaining inner height below the photo
+    const SW_STRIP  = LOGICAL_H - BORDER - photoH - BORDER;  // 100px
+    const SW_PAD    = 3;   // left/right inner margin inside strip
+    const SW_GAP    = 3;   // hairline gap between swatches
+    const srcW      = img.naturalWidth  || img.width  || 1;
+    const srcH      = img.naturalHeight || img.height || 1;
 
-    const _dpr = Math.min(window.devicePixelRatio || 2, 3);
+    // ── Canvas ────────────────────────────────────────────────────────────────
     const canvas = document.createElement('canvas');
+    const _dpr   = Math.min(window.devicePixelRatio || 2, 3);
     canvas.width  = Math.floor(LOGICAL_W * _dpr);
     canvas.height = Math.floor(LOGICAL_H * _dpr);
     const ctx = canvas.getContext('2d');
     ctx.scale(_dpr, _dpr);
+    _patchCtxFonts(ctx);
 
-    const n = hexes.length;
-    // Pixel-perfect pillar edges — no fractional bleed
-    const pillarLeft = i => BORDER + Math.round(i * CW / n);
-    const pillarW    = i => pillarLeft(i + 1) - pillarLeft(i);
+    // ── Rounded-rect helper ───────────────────────────────────────────────────
+    const rr = (x, y, w, h, tl, tr, br, bl) => {
+      tr = (tr === undefined) ? tl : tr;
+      br = (br === undefined) ? tl : br;
+      bl = (bl === undefined) ? tl : bl;
+      ctx.beginPath();
+      ctx.moveTo(x + tl, y);
+      ctx.lineTo(x + w - tr, y);       ctx.arcTo(x+w, y,   x+w,   y+tr,  tr);
+      ctx.lineTo(x + w, y + h - br);   ctx.arcTo(x+w, y+h, x+w-br,y+h,   br);
+      ctx.lineTo(x + bl, y + h);       ctx.arcTo(x,   y+h, x,     y+h-bl,bl);
+      ctx.lineTo(x, y + tl);           ctx.arcTo(x,   y,   x+tl,  y,     tl);
+      ctx.closePath();
+    };
 
-    // White card background
-    ctx.fillStyle = '#ffffff';
+    // ── White card + drop shadow ──────────────────────────────────────────────
+    ctx.fillStyle = '#e8e8e8';
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.save();
+    ctx.shadowColor   = 'rgba(0,0,0,.24)';
+    ctx.shadowBlur    = 28;
+    ctx.shadowOffsetY = 8;
+    ctx.fillStyle     = '#ffffff';
+    rr(BORDER, BORDER, CW, LOGICAL_H - BORDER * 2, 14);
+    ctx.fill();
+    ctx.restore();
 
+    // ── Photo: cover-fill the square area at the top ──────────────────────────
+    ctx.save();
+    rr(BORDER, BORDER, CW, photoH, 14, 14, 0, 0);
+    ctx.clip();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(BORDER, BORDER, CW, photoH);
+    const coverScale = Math.max(CW / srcW, photoH / srcH);
+    const drawW  = Math.round(srcW * coverScale);
+    const drawH  = Math.round(srcH * coverScale);
+    const drawX  = BORDER + Math.round((CW - drawW) / 2);
+    const drawY  = BORDER + Math.round((photoH - drawH) / 2);
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    // Subtle gradient at photo base for visual separation
+    const photoGrad = ctx.createLinearGradient(BORDER, BORDER + photoH * 0.75, BORDER, BORDER + photoH);
+    photoGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    photoGrad.addColorStop(1, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = photoGrad;
+    ctx.fillRect(BORDER, BORDER, CW, photoH);
+    ctx.restore();
+
+    // ── IP-safe swatch strip: solid colour blocks with vertical white text ────
+    const n         = hexes.length;
+    const swStripY  = BORDER + photoH;          // top of swatch area
+    const swInnerW  = CW - SW_PAD * 2;
+    const totalGapW = SW_GAP * (n - 1);
+    const availW    = swInnerW - totalGapW;
+
+    // Pixel-perfect widths (equal unless _apMosaic proportional mode is on)
+    const _proportional = !!window._apMosaic;
+    const _rawW   = (_proportional && window._apWeights && window._apWeights.length === n)
+                  ? window._apWeights : hexes.map(() => 1 / n);
+    const _totRaw = _rawW.reduce((a, b) => a + b, 0);
+    const _wts    = _rawW.map(w => w / _totRaw);
+    const swWidths = [];
+    let _acc = 0, _used = 0;
+    for (let i = 0; i < n; i++) {
+      if (i === n - 1) { swWidths.push(availW - _used); }
+      else { _acc += _wts[i] * availW; const nw = Math.round(_acc); swWidths.push(nw - _used); _used = nw; }
+    }
+
+    // White backing for the swatch row
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(BORDER, swStripY, CW, SW_STRIP);
+
+    let _swX = BORDER + SW_PAD;
     hexes.forEach((hex, i) => {
-      const px  = pillarLeft(i);
-      const pw  = pillarW(i);
-      const pcx = px + pw / 2;
+      const sw  = swWidths[i];
+      const x   = _swX;
+      _swX     += sw + SW_GAP;
+      const pcx = x + sw / 2;
+      const swH = SW_STRIP - SW_PAD;  // full height of the colour block in the strip
 
-      // Solid full-bleed colour pillar
+      // Solid colour block — no separate info strip below
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, swStripY + SW_PAD, sw, swH);
+      ctx.clip();
       ctx.fillStyle = hex;
-      ctx.fillRect(px, BORDER, pw, CH);
+      ctx.fillRect(x, swStripY + SW_PAD, sw, swH);
+      ctx.restore();
 
-      // ── Vertical text: name above hex, reading bottom-to-top ───────────
+      // Vertical text: name above hex, reading bottom-to-top
       const colName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
-      const maxTxtH = CH - 28;
+      const maxTxtH = swH - 12;
 
       ctx.save();
       ctx.beginPath();
-      ctx.rect(px, BORDER, pw, CH);
+      ctx.rect(x, swStripY + SW_PAD, sw, swH);
       ctx.clip();
-      ctx.translate(pcx, BORDER + CH - 14);
-      ctx.rotate(-Math.PI / 2);  // rotate anti-clockwise → text reads bottom-to-top
+      ctx.translate(pcx, swStripY + SW_PAD + swH - 8);
+      ctx.rotate(-Math.PI / 2);  // anti-clockwise → reads bottom-to-top
 
       ctx.shadowColor   = 'rgba(0,0,0,0.7)';
       ctx.shadowBlur    = 4;
@@ -20359,13 +20471,10 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       ctx.textAlign     = 'left';
       ctx.textBaseline  = 'middle';
 
-      // HEX at the bottom of the visible pillar
-      ctx.font = 'bold 8px "Space Mono",monospace';
+      ctx.font = `bold 7px ${FONT_SM}`;
       ctx.fillText(hex.toUpperCase(), 0, 0, maxTxtH);
-
-      // Colour name above it
-      ctx.translate(0, -13);
-      ctx.font = '400 10px "Permanent Marker",cursive';
+      ctx.translate(0, -11);
+      ctx.font = `400 9px ${FONT_PM}`;
       ctx.fillText(colName, 0, 0, maxTxtH);
 
       ctx.restore();
@@ -20375,19 +20484,19 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       ctx.shadowOffsetY = 0;
     });
 
-    // ── Footer: PREYE.CO.UK centred in bottom white border ──────────────
+    // ── Footer: PREYE.CO.UK centred in bottom white border ───────────────────
     ctx.fillStyle    = '#999999';
-    ctx.font         = "6px 'Space Mono',monospace";
+    ctx.font         = `6px ${FONT_SM}`;
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('PREYE.CO.UK', LOGICAL_W / 2, LOGICAL_H - BORDER / 2);
 
-    // ── Export — Web Share on mobile, anchor fallback on desktop ─────────
+    // ── Export: Web Share on mobile, anchor fallback on desktop ──────────────
     let pngDataUrl;
     try { pngDataUrl = canvas.toDataURL('image/png'); }
     catch(e) { App.toast('Export blocked — image may contain cross-origin content'); return; }
 
-    const filename = `preye-${Date.now()}.png`;
+    const filename  = `preye-${Date.now()}.png`;
     const _doAnchor = () => {
       const a = document.createElement('a');
       a.href = pngDataUrl; a.download = filename;
