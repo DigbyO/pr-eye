@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="PR Eye v14.69 [Capture Edition] — Colour Sampler by PR Eye">
+<meta name="description" content="PR Eye v14.70 [Capture Edition] — Colour Sampler by PR Eye">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>PR Eye v14.69 [Capture Edition]</title>
+<title>PR Eye v14.70 [Capture Edition]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.69';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.70';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -9727,9 +9727,8 @@ const Sampler={
   },
 
   startCamera() {
-    // v14.60: iOS shake permission — requestMotionPermission must be called inside a
-    // user gesture; camera start is the ideal moment (deliberate button tap).
-    try { if (typeof PlayMode !== 'undefined') PlayMode.requestMotionPermission(); } catch(e) {}
+    // v14.70: motion permission is now ONLY requested via the "Enable Shake" button
+    // in Settings, or when PlayMode.trigger() fires. Camera starts cleanly.
     this.stopStream();
     const v = document.getElementById('cam-video');
     const noCam = document.getElementById('no-cam');
@@ -20035,8 +20034,24 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
   },
 
   async fromCamera(k = 6) {
-    const video = document.getElementById('cam-video');
-    if (!video || !video.videoWidth) { App.toast('Camera not active'); return; }
+    // v14.70: wait up to 2 s for video dimensions (handles race on slow devices)
+    let video = document.getElementById('cam-video');
+    if (!video || !video.videoWidth) {
+      this._showSpinner('Waiting for camera…');
+      let waited = 0;
+      while (waited < 2000) {
+        await new Promise(r => setTimeout(r, 150));
+        waited += 150;
+        video = document.getElementById('cam-video');
+        if (video && video.videoWidth > 0) break;
+      }
+      const panel = document.getElementById('_ap_panel');
+      if (panel) panel.remove();
+    }
+    if (!video || !video.videoWidth) {
+      App.toast('Camera warming up — try again in a moment');
+      return;
+    }
     const snap = document.createElement('canvas');
     snap.width  = video.videoWidth;
     snap.height = video.videoHeight;
@@ -20588,7 +20603,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       const a = document.createElement('a');
       a.href = pngDataUrl; a.download = filename;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      App.toast('Polaroid exported ✓');
+      App.toast('JPG Card exported ✓');
     };
     try {
       // v:v13.42 — sync base64→blob to preserve user-gesture activation
@@ -20600,7 +20615,7 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Digby Palette' });
-        App.toast('Polaroid exported ✓');
+        App.toast('JPG Card exported ✓');
       } else {
         _doAnchor();
       }
