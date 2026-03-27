@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="PR Eye v14.70 [Capture Edition] — Colour Sampler by PR Eye">
+<meta name="description" content="PR Eye v14.71 [IP Safe Edition] — Colour Sampler by PR Eye">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>PR Eye v14.70 [Capture Edition]</title>
+<title>PR Eye v14.71 [IP Safe Edition]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '14.70';  // v:v14.09 — Multi-Palette Pages + static title fix
+  const APP_VERSION = '14.71';  // v:v14.09 — Multi-Palette Pages + static title fix
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -590,9 +590,11 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;          /* text anchored to bottom */
-  padding: 0 16px 13px;
+  padding: 0;
   position: relative;
   overflow: hidden;
+  align-items: center;
+  justify-content: flex-end;
   transition: background 0.4s ease-in-out,
               box-shadow  0.18s ease-out,
               transform   0.1s  cubic-bezier(0.4, 0, 0.2, 1);
@@ -602,23 +604,8 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   opacity: 0.88;
 }
 
-/* Gradient scrim — the readability guarantee.
-   transparent at top → rich dark at bottom.
-   Runs on its own composited layer, no repaints.                           */
-#live-swatch::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 72%;
-  background: linear-gradient(to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.08) 45%,
-    rgba(0, 0, 0, 0.36) 100%
-  );
-  border-radius: 0 0 14px 14px;
-  pointer-events: none;
-  z-index: 1;
-}
+/* v14.71 IP-Safe: gradient scrim removed — pure solid colour, no veil */
+#live-swatch::after { display: none !important; }
 
 /* All text sits ABOVE the scrim */
 #live-swatch > div { position: relative; z-index: 2; }
@@ -677,6 +664,30 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
   text-overflow: ellipsis;
   line-height: 1.3;
   transition: color 0.14s ease-out;
+}
+
+/* v14.71 IP-Safe: vertical text strip inside #live-swatch */
+.strip-info {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: translateX(-50%) rotate(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+  z-index: 2;
+}
+.strip-info > div {
+  color: #ffffff !important;
+  text-shadow: 0px 2px 6px rgba(0,0,0,0.5), 0px 0px 2px rgba(0,0,0,0.8) !important;
+  transition: none !important;
+  white-space: nowrap;
+  overflow: visible;
 }
 
 /* ── .live-light: flip text dark for pale colours (LRV > 60) ── */
@@ -3032,10 +3043,12 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
               style="position:absolute;top:8px;right:8px;z-index:4;padding:5px 10px;font-size:9px;">[ WB ]</button>
       <!-- v:v13.57 — full-bleed colour + gradient scrim; text at bottom -->
       <div id="live-swatch" title="Tap to sample this colour" onclick="Sampler.openInPicker()">
-        <div id="live-primary">#------</div>
-        <div id="live-secondary">Scanning…</div>
-        <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
-        <div id="live-undertone">—</div>
+        <div class="strip-info">
+          <div id="live-primary">#------</div>
+          <div id="live-secondary">Scanning…</div>
+          <div id="live-lrv-lch">LRV —%  ·  L:— C:— H:—°</div>
+          <div id="live-undertone">—</div>
+        </div>
       </div>
       <!-- v:F12.31 — live-actions emptied; buttons moved to #sampler-bottom-dock -->
       <div id="live-actions" style="display:none">
@@ -7561,16 +7574,10 @@ const CS = {
     return pantonePart || parts[0];
   },
 
-  pantoneFirst(hex){
-    try {
-      const rgb = this.hexToRgb(hex);
-      const lab = this.rgbToLab(rgb.r, rgb.g, rgb.b);
-      const pan = this.nearestPantone(lab);
-      if (pan && pan.name) return this._cleanName(pan.name);
-      if (pan && pan.code) return this._cleanName(pan.code);
-    } catch(e) {}
-    return this._cleanName(this.prefixedName(hex));
+  pantoneFirst(hex){ // v14.71: Pantone purged — delegate to prefixedName
+    return this.prefixedName ? this.prefixedName(hex) : (this.autoName(hex) || hex.toUpperCase());
   },
+  // v14.71: _pantoneFirstLegacy removed (Pantone purged)
   autoName(hex){
     if(!this._nameCache){try{this._nameCache=JSON.parse(localStorage.getItem('spectrum-name-cache')||'{}');}catch(e){this._nameCache={};}}
     if(this._nameCache[hex])return this._nameCache[hex];
@@ -9285,140 +9292,93 @@ const App={
   },
 
   async _downloadPolaroidPalette(hexes, title) {
+    // v14.71 IP-Safe: vertical colour pillars, 4:5 card, PREYE.CO.UK footer
     title = title || 'Palette';
     if (!hexes || !hexes.length) { this.toast('No colours to export'); return; }
 
-    const n      = hexes.length;
-    const SCALE  = 2;
-    const SAFE_ZONE = 30;   // FIX 5: Global margin — 30px logical border each side
-    const PAD    = SAFE_ZONE * SCALE;
-
-    // ── Card width scales with count: 88px per swatch at 1× (=176px @2×), min 3 swatches ──
-    const SWATCH_BASE = 88 * SCALE;
-    const CARD_W  = Math.max(n * SWATCH_BASE, 3 * SWATCH_BASE);
-    const photoW  = CARD_W - PAD * 2;
-
-    // ── Inter-swatch hairline gap (1px @1×) ──────────────────────────────────
-    const GAP = 1 * SCALE;
-
-    // ── Pixel-perfect slot edges — avoids fractional-pixel bleed ─────────────
-    // slotLeft(i) = left edge of slot i, slotLeft(n) = right edge of last slot
-    // Each slot spans exactly [slotLeft(i), slotLeft(i+1)) with no gaps or overlaps
-    const slotLeft = i => PAD + Math.round(i * photoW / n);
-    const slotW    = i => slotLeft(i + 1) - slotLeft(i);     // true slot width (integer pixels)
-    // Visible swatch width = slot width minus right-side hairline (except last slot)
-    const swVis    = i => slotW(i) - (i < n - 1 ? GAP : 0);
-
-    // ── Swatch height proportional to visible width — wider swatches are taller ──
-    // Clamp between 140 and 220px @1× so aspect ratio stays pleasing for n=2–9
-    const avgVis = (photoW - GAP * (n - 1)) / n;
-    const SW_H   = Math.round(Math.max(140 * SCALE, Math.min(220 * SCALE, avgVis * 1.5)));
-
-    // ── Info strip height scales gently with available swatch width ──────────
-    const INFO_H = Math.round(Math.max(56 * SCALE, Math.min(72 * SCALE, avgVis * 0.38)));
-    const FOOT_H = 28 * SCALE;  // v:v13.0 — tight footer; 28px at 1x eliminates bottom whitespace
-    const CARD_H = PAD + SW_H + INFO_H + FOOT_H + PAD;
-
-    const canvas = document.createElement('canvas');
-    canvas.width  = CARD_W;
-    canvas.height = CARD_H;
-    const ctx = canvas.getContext('2d');
-
-    // v:F1.13 DOM primer — forces PM binary download before canvas draw
-    const _pmPrimer = document.createElement('div');
-    _pmPrimer.style.cssText = 'font:400 18px "Permanent Marker",cursive;position:fixed;top:-9999px;left:-9999px;opacity:0.01;pointer-events:none;white-space:nowrap';
-    _pmPrimer.textContent = 'Colour';
-    document.body.appendChild(_pmPrimer);
-    void _pmPrimer.offsetWidth;
     await Promise.all([
-      document.fonts.load('400 18px "Permanent Marker"'),
-      document.fonts.load('400 10px "Space Mono"')
+      document.fonts.load('400 10px "Space Mono"'),
+      document.fonts.load('400 12px "Permanent Marker"')
     ]).catch(() => {});
     await document.fonts.ready.catch(() => {});
-    document.body.removeChild(_pmPrimer);
-    const FONT_PM = '"Permanent Marker",cursive';
-    const FONT_SM = '"Space Mono",monospace';
 
-    // White Polaroid card
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, CARD_W, CARD_H);
+    const BORDER    = 20;
+    const LOGICAL_W = 400;
+    const LOGICAL_H = 500;
+    const CW = LOGICAL_W - BORDER * 2;  // 360px
+    const CH = LOGICAL_H - BORDER * 2;  // 460px
+    const SCALE = 2;
 
-    hexes.forEach(function(hex, i) {
-      var x   = slotLeft(i);
-      var sw  = swVis(i);           // pixel-exact visible width for this slot
-      var cx  = x + sw / 2;        // true centre of visible swatch (used for all text)
+    const canvas = document.createElement('canvas');
+    canvas.width  = LOGICAL_W * SCALE;
+    canvas.height = LOGICAL_H * SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);
 
-      var rgb = CS.hexToRgb(hex);
-      var lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-      var lrv = CS.lrv(lab);
-      var onDark = lrv < 50;
+    const n = hexes.length;
+    const pillarLeft = i => BORDER + Math.round(i * CW / n);
+    const pillarW    = i => pillarLeft(i + 1) - pillarLeft(i);
 
-      // ── Swatch colour block ───────────────────────────────────────────────
+    // White card background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    hexes.forEach((hex, i) => {
+      const px  = pillarLeft(i);
+      const pw  = pillarW(i);
+      const pcx = px + pw / 2;
+
+      // Solid colour pillar — full inner height
       ctx.fillStyle = hex;
-      ctx.fillRect(x, PAD, sw, SW_H);
+      ctx.fillRect(px, BORDER, pw, CH);
 
-      // ── Info strip ───────────────────────────────────────────────────────
-      ctx.fillStyle = '#F5F2ED';
-      ctx.fillRect(x, PAD + SW_H, sw, INFO_H);
+      // Vertical text: name → hex, bottom-to-top
+      const colName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
+      const maxTxtH = CH - 28;
 
-      // Hairline divider between swatch and info strip
-      ctx.fillStyle = '#E8E4DE';
-      ctx.fillRect(x, PAD + SW_H, sw, 1);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(px, BORDER, pw, CH);
+      ctx.clip();
+      ctx.translate(pcx, BORDER + CH - 14);
+      ctx.rotate(-Math.PI / 2);
 
-      // ── Colour name ───────────────────────────────────────────────────────
-      // Font scales with swatch width: bigger swatches → larger type, capped
-      var nameSize = Math.round(Math.max(8 * SCALE, Math.min(10 * SCALE, sw * 0.065)));
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = nameSize + 'px ' + FONT_PM;
-      ctx.textAlign = 'center';
-      // MASTER-FIX-V54: prefer Pantone name as the canonical display name; autoName is the fallback.
-      var name = CS.pantoneFirst(hex);  // v130: Pantone name on polaroid
-      // Truncate to fit within swatch width with a small margin
-      var maxW = sw - 8;
-      while (name.length > 3 && ctx.measureText(name).width > maxW) {
-        name = name.slice(0, -1);
-      }
-      ctx.fillText(name, cx, PAD + SW_H + nameSize + Math.round(4 * SCALE));
+      ctx.shadowColor   = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur    = 4;
+      ctx.shadowOffsetX = -1;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle     = '#ffffff';
+      ctx.textAlign     = 'left';
+      ctx.textBaseline  = 'middle';
 
-      // ── Hex value — centred on visible swatch ─────────────────────────────
-      var hexSize = Math.round(Math.max(5.5 * SCALE, Math.min(7 * SCALE, sw * 0.042)));
-      // v85: WCAG-adaptive label contrast based on swatch luminance
-      var _lum85 = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
-      ctx.fillStyle = _lum85 > 150 ? '#333333' : '#999999';
-      ctx.font = hexSize + 'px ' + FONT_SM;
-      ctx.textAlign = 'center';
-      ctx.fillText(hex.toUpperCase(), cx, PAD + SW_H + nameSize + Math.round(4 * SCALE) + hexSize + Math.round(5 * SCALE));
+      ctx.font = 'bold 8px "Space Mono",monospace';
+      ctx.fillText(hex.toUpperCase(), 0, 0, maxTxtH);
+      ctx.translate(0, -13);
+      ctx.font = '400 10px "Permanent Marker",cursive';
+      ctx.fillText(colName, 0, 0, maxTxtH);
+
+      ctx.restore();
+      ctx.shadowColor   = 'transparent';
+      ctx.shadowBlur    = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     });
 
-    // ── Footer ────────────────────────────────────────────────────────────
-    var footY = PAD + SW_H + INFO_H;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, footY, CARD_W, FOOT_H + PAD);
+    // Footer: PREYE.CO.UK centred
+    ctx.fillStyle    = '#999999';
+    ctx.font         = "6px 'Space Mono',monospace";
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('PREYE.CO.UK', LOGICAL_W / 2, LOGICAL_H - BORDER / 2);
 
-    // Accent line above footer
-    ctx.fillStyle = '#E8E4DE';
-    ctx.fillRect(PAD, footY, photoW, 1 * SCALE);
-
-    // v:F1.15 — Footer: Sharpie "Digby Technical Match" left + digby.shop right
-    var footTextY = footY + Math.round(FOOT_H * 0.38);
-    var footFontSz = Math.round(6.5 * SCALE);
-    ctx.textBaseline = 'top';
-    var ftY = footTextY + Math.round(14 * SCALE);
-    // Footer: digby.shop right-aligned only
-    ctx.fillStyle = '#AAAAAA';
-    ctx.font = footFontSz + 'px system-ui,-apple-system,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('digby.shop', CARD_W / 2, ftY);
-
-    var a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
-    a.download = `spectrum-${Date.now()}.png`;
+    a.download = `preye-${Date.now()}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    this.toast(title + ' exported');
+    this.toast('Card exported ✓');
   },
-
   // v:F12.11 — Global Film Strip export: uses AP extraction weights or equal widths
   exportPaletteStrip() {  // v:F12.14 — vertical bands; proportional if mosaic, equal if piano-keys
     const hexes = (window._apHexes && window._apHexes.length)
@@ -9519,11 +9479,11 @@ const App={
     if(mode==='paint') mode='fb';
     State.liveDisplay=mode; State.save();
     // Update all live-disp buttons wherever they exist (overlay or static)
-    ['pantone','hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dh','dl','eb','bulmer'].forEach(m=>{
+    ['hex','rgb','hsl','kelvin','lrv','fb','lg','ml','dh','dl','eb','bulmer'].forEach(m=>{
       const b=document.getElementById('ld-'+m);
       if(b) b.classList.toggle('on', m===mode);
     });
-    const L={pantone:'Pantone',hex:'HEX + RGB',rgb:'RGB',hsl:'HSL',
+    const L={hex:'HEX + RGB',rgb:'RGB',hsl:'HSL',
              kelvin:'Kelvin','lrv':'LRV',fb:'Farrow & Ball',lg:'Little Greene',ml:'Mylands',dh:'Dulux Heritage',dl:'Dulux',eb:'Earthborn',bulmer:'Edward Bulmer'};
     App.toast('Live: '+(L[mode]||mode));
   },
@@ -20052,6 +20012,8 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       App.toast('Camera warming up — try again in a moment');
       return;
     }
+    // v14.71: 200ms settle — guarantees stable frame before snapshot
+    await new Promise(r => setTimeout(r, 200));
     const snap = document.createElement('canvas');
     snap.width  = video.videoWidth;
     snap.height = video.videoHeight;
@@ -20337,276 +20299,102 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
    *   [96px white bottom footer — brand byline]
    *   [28px white border bottom]
    */
-  /* v:F1.5 EXPORT POLISH — ORIGINAL HEIGHT CONSTANTS (pre-fix):
-     exportPolaroid:          SW_PAD=16, SW_LABEL_H=32, BYLINE_PAD=28, bottom BORDER=24 → total below photo: 180px
-     _downloadPolaroidPalette: FOOT_H=88*SCALE (176px @2x) → CARD_H bottom padding: 88+30=118px logical
-     Fix: reduced to save ~40-45px in each export path; no logic changes.
-  */
     async exportPolaroid(hexes) {
-    // v:F1.12 Triple Font Gate — PM ships weight 400 ONLY, never bold
-    // Gate 1: Promise.all — request the weights that actually exist
-    await Promise.all([
-      document.fonts.load('400 12px "Permanent Marker"'),
-      document.fonts.load('400 18px "Permanent Marker"'),
-      document.fonts.load('400 10px "Space Mono"'),
-      document.fonts.load('700 10px "Space Mono"')
-    ]).catch(() => {});
-    // Gate 2: document.fonts.ready
-    await document.fonts.ready.catch(() => {});
-    // PM has no bold variant — skip load-check, always use font directly
-    const FONT_PM = '"Permanent Marker",cursive';
-    const FONT_SM = '"Space Mono",monospace';
-    // Patch ctx font helper so all canvas drawing uses verified fonts
-    const _patchCtxFonts = (ctx) => {
-      const origFont = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
-      const patchedSet = function(v) {
-        v = v.replace(/"Permanent Marker",cursive/g, FONT_PM);
-        v = v.replace(/'Permanent Marker',cursive/g, FONT_PM);
-        v = v.replace(/"Space Mono",monospace/g, FONT_SM);
-        v = v.replace(/'Space Mono',monospace/g, FONT_SM);
-        v = v.replace(/Space Mono,monospace/g,   FONT_SM);
-        origFont.set.call(ctx, v);
-      };
-      Object.defineProperty(ctx, 'font', { get: () => origFont.get.call(ctx), set: patchedSet });
-    };
+    // v14.71 IP-Safe Card: vertical colour pillars, uniform 20px border, PREYE.CO.UK footer
     if (!hexes || !hexes.length) { App.toast('No palette to export'); return; }
 
-    // ── Source image ─────────────────────────────────────────────────────────
-    // v96: for camera mode, prefer the frame captured at analysis time (_camSnap).
-    // Re-capturing live risks a black/stale frame if the stream was throttled
-    // between palette panel open and the user tapping Polaroid.
-    let img = Sampler.uploadImg;
-    if (Sampler.mode === 'camera' || !img) {
-      if (AutoPalette._camSnap && Sampler.mode === 'camera') {
-        img = AutoPalette._camSnap;
-      } else {
-        const video = document.getElementById('cam-video');
-        if (video && video.videoWidth) {
-          const snap = document.createElement('canvas');
-          snap.width  = video.videoWidth;
-          snap.height = video.videoHeight;
-          snap.getContext('2d').drawImage(video, 0, 0);
-          img = snap;
-        }
-      }
-    }
-    if (!img) { App.toast('No image — use camera or upload a photo'); return; }
+    await Promise.all([
+      document.fonts.load('400 10px "Space Mono"'),
+      document.fonts.load('400 12px "Permanent Marker"')
+    ]).catch(() => {});
+    await document.fonts.ready.catch(() => {});
 
-    // ── v14.69 Capture Edition: 4:5 canvas, uniform 20px borders ─────────────
-    const BORDER      = 20;
-    const LOGICAL_W   = 400;
-    const LOGICAL_H   = 500;
-    const CW          = LOGICAL_W - BORDER * 2;    // 360px inner width
-    const photoH      = CW;                         // square 360×360 photo
-    const SW_PAD      = 3;
-    const SW_GAP      = 4;
-    const SW_COLOR_H  = 44;
-    const SW_LABEL_H  = 24;
-    const SWATCH_H    = SW_PAD + SW_COLOR_H + SW_LABEL_H + SW_PAD;  // 74px
-    const BYLINE_PAD  = Math.max(6, LOGICAL_H - BORDER - photoH - SWATCH_H - BORDER);
-    const srcW = img.naturalWidth  || img.width  || 1;
-    const srcH = img.naturalHeight || img.height || 1;
+    const BORDER    = 20;
+    const LOGICAL_W = 400;
+    const LOGICAL_H = 500;
+    const CW = LOGICAL_W - BORDER * 2;  // 360px inner width
+    const CH = LOGICAL_H - BORDER * 2;  // 460px inner height
 
-    // ── Canvas setup ──────────────────────────────────────────────────────────
+    const _dpr = Math.min(window.devicePixelRatio || 2, 3);
     const canvas = document.createElement('canvas');
-    const _dpr   = Math.min(window.devicePixelRatio || 2, 3);
     canvas.width  = Math.floor(LOGICAL_W * _dpr);
     canvas.height = Math.floor(LOGICAL_H * _dpr);
     const ctx = canvas.getContext('2d');
     ctx.scale(_dpr, _dpr);
-    _patchCtxFonts(ctx); // v119 Triple-Check Font Gate: redirect font assignments to verified font
 
-    // ── Helper: rounded rect path ─────────────────────────────────────────────
-    const rr = (x, y, w, h, tl, tr, br, bl) => {
-      tr = (tr === undefined) ? tl : tr;
-      br = (br === undefined) ? tl : br;
-      bl = (bl === undefined) ? tl : bl;
-      ctx.beginPath();
-      ctx.moveTo(x + tl, y);
-      ctx.lineTo(x + w - tr, y);        ctx.arcTo(x+w, y,   x+w,   y+tr,  tr);
-      ctx.lineTo(x + w, y + h - br);    ctx.arcTo(x+w, y+h, x+w-br,y+h,   br);
-      ctx.lineTo(x + bl, y + h);        ctx.arcTo(x,   y+h, x,     y+h-bl,bl);
-      ctx.lineTo(x, y + tl);            ctx.arcTo(x,   y,   x+tl,  y,     tl);
-      ctx.closePath();
-    };
+    const n = hexes.length;
+    // Pixel-perfect pillar edges — no fractional bleed
+    const pillarLeft = i => BORDER + Math.round(i * CW / n);
+    const pillarW    = i => pillarLeft(i + 1) - pillarLeft(i);
 
-    // ── White card ────────────────────────────────────────────────────────────
-    ctx.fillStyle = '#e8e8e8';
+    // White card background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
-    ctx.save();
-    ctx.shadowColor   = 'rgba(0,0,0,.24)';
-    ctx.shadowBlur    = 28;
-    ctx.shadowOffsetY = 8;
-    ctx.fillStyle     = '#ffffff';
-    rr(BORDER, BORDER, CW, LOGICAL_H - BORDER * 2, 14);
-    ctx.fill();
-    ctx.restore();
 
-    // ── Photo: contain/letterbox inside card top ───────────────────────────────
-    ctx.save();
-    rr(BORDER, BORDER, CW, photoH, 14, 14, 0, 0);
-    ctx.clip();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(BORDER, BORDER, CW, photoH);
-    // v404: use cover scaling (fill the photo area edge-to-edge, crop excess)
-    // This eliminates the letterbox gap line between photo and swatches
-    const coverScale = Math.max(CW / srcW, photoH / srcH);
-    const drawW  = Math.round(srcW * coverScale);
-    const drawH  = Math.round(srcH * coverScale);
-    const drawX  = BORDER + Math.round((CW - drawW) / 2);
-    const drawY  = BORDER + Math.round((photoH - drawH) / 2);
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-    // Subtle gradient overlay at base of photo for visual separation
-    const photoGrad = ctx.createLinearGradient(BORDER, BORDER + photoH * 0.7, BORDER, BORDER + photoH);
-    photoGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    photoGrad.addColorStop(1, 'rgba(0,0,0,0.18)');
-    ctx.fillStyle = photoGrad;
-    ctx.fillRect(BORDER, BORDER, CW, photoH);
-    ctx.restore();
-
-    // ── v106b: luxury swatch strip — safe-zone margins, gaps, labels BELOW colour ──
-    const n          = hexes.length;
-    // Inner drawable width for swatches, respecting left/right safe-zone padding
-    const swInnerW   = CW - SW_PAD * 2;
-    // v:F12.36 — proportional or equal swatch widths, mirrors film-strip behaviour
-    const _proportional = !!window._apMosaic;
-    const _rawW = (_proportional && window._apWeights && window._apWeights.length === n)
-      ? window._apWeights : hexes.map(() => 1 / n);
-    const _totalRaw = _rawW.reduce((a, b) => a + b, 0);
-    const _weights  = _rawW.map(w => w / _totalRaw);   // normalised fractions
-
-    // Pixel-perfect accumulator — same technique as film strip; no rounding gaps
-    const totalGapW = SW_GAP * (n - 1);
-    const availW    = swInnerW - totalGapW;
-    const swWidths  = [];
-    let _wAcc = 0, _usedW = 0;
-    for (let i = 0; i < n; i++) {
-      if (i === n - 1) { swWidths.push(availW - _usedW); }
-      else { _wAcc += _weights[i] * availW; const nw = Math.round(_wAcc); swWidths.push(nw - _usedW); _usedW = nw; }
-    }
-
-    // Y positions
-    const swColorY   = BORDER + photoH + SW_PAD;       // coloured block top
-    const swLabelY   = swColorY + SW_COLOR_H;           // white label strip top
-    const SW_R       = 8;                               // swatch corner radius
-
-    // White background for entire swatch strip (card is already white, this is explicit)
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(BORDER, BORDER + photoH, CW, SWATCH_H);
-
-    let _swX = BORDER + SW_PAD;
     hexes.forEach((hex, i) => {
-      const x  = _swX;
-      const w  = swWidths[i];
-      _swX += w + SW_GAP;
-      const cx = x + w / 2;
-      const maxTW = w - 6;
+      const px  = pillarLeft(i);
+      const pw  = pillarW(i);
+      const pcx = px + pw / 2;
 
-      // ── Coloured block with fully rounded corners ─────────────────────────
-      ctx.save();
-      rr(x, swColorY, w, SW_COLOR_H, SW_R);
-      ctx.clip();
+      // Solid full-bleed colour pillar
       ctx.fillStyle = hex;
-      ctx.fillRect(x, swColorY, w, SW_COLOR_H);
-      ctx.restore();  // v:v13.10 — % overlay removed from polaroid export
+      ctx.fillRect(px, BORDER, pw, CH);
 
-      // ── White label strip below the colour block ──────────────────────────
-      // (card background is already white — no fill needed)
+      // ── Vertical text: name above hex, reading bottom-to-top ───────────
+      const colName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
+      const maxTxtH = CH - 28;
 
-      // ── Labels: name + hex in solid black, strictly in white margin ───────
-      const slMode   = State.swatchLabel || 'both';
-      const showName = slMode === 'both' || slMode === 'name';
-      const showHex  = slMode === 'both' || slMode === 'hex';
-      const showGeo  = slMode === 'location';
-
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-
-      // v:v13.62 — hard-clip each swatch column: PM ink can't spill past edge
       ctx.save();
       ctx.beginPath();
-      ctx.rect(x, swLabelY, w, SW_LABEL_H + SW_PAD);
+      ctx.rect(px, BORDER, pw, CH);
       ctx.clip();
+      ctx.translate(pcx, BORDER + CH - 14);
+      ctx.rotate(-Math.PI / 2);  // rotate anti-clockwise → text reads bottom-to-top
 
-      if (showGeo) {
-        const geoStr = GeoCapture.label(GeoCapture.last);
-        if (geoStr) {
-          const gs = Math.max(5, Math.floor(w/14));
-          ctx.font=`bold ${gs}px 'Space Mono',monospace`;
-          ctx.fillStyle='#000';
-          ctx.fillText('\uD83D\uDCCD '+geoStr, cx, swLabelY+SW_LABEL_H/2, maxTW);
-        }
-      } else if (showName && showHex) {
-        // Name at top of label strip, hex below
-        let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
-        // Strip the prefix (e.g. "Sunlit / ") for compactness if too wide
-        let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
-        ctx.font = `400 ${fSize}px "Permanent Marker",cursive`;
-        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `400 ${fSize}px "Permanent Marker",cursive`; }
-        if (ctx.measureText(rawName).width > maxTW) {
-          // Try without prefix
-          const slash = rawName.indexOf(' / ');
-          if (slash !== -1) rawName = rawName.slice(slash + 3);
-          while (rawName.length > 3 && ctx.measureText(rawName + '…').width > maxTW) rawName = rawName.slice(0, -1);
-          if (ctx.measureText(rawName).width > maxTW) rawName = rawName + '…';
-        }
-        ctx.fillStyle = '#000000';
-        ctx.fillText(rawName, cx, swLabelY + 12, maxTW);
-        // HEX sits at y=26 in the expanded 32px strip
-        const hSize = Math.max(6, Math.floor(fSize * 0.72));
-        ctx.font      = `${hSize}px "Space Mono",monospace`;
-        ctx.fillStyle = '#444444';
-        ctx.fillText(hex.toUpperCase(), cx, swLabelY + 26, maxTW);
+      ctx.shadowColor   = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur    = 4;
+      ctx.shadowOffsetX = -1;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle     = '#ffffff';
+      ctx.textAlign     = 'left';
+      ctx.textBaseline  = 'middle';
 
-      } else if (showName) {
-        let rawName = CS.prefixedName ? CS.prefixedName(hex) : (CS.autoName(hex) || hex.toUpperCase());
-        let fSize = Math.min(11, Math.max(7, Math.floor(w / 5)));
-        ctx.font = `400 ${fSize}px "Permanent Marker",cursive`;
-        while (ctx.measureText(rawName).width > maxTW && fSize > 7) { fSize -= 0.5; ctx.font = `400 ${fSize}px "Permanent Marker",cursive`; }
-        if (ctx.measureText(rawName).width > maxTW) {
-          const slash = rawName.indexOf(' / ');
-          if (slash !== -1) rawName = rawName.slice(slash + 3);
-          while (rawName.length > 3 && ctx.measureText(rawName + '…').width > maxTW) rawName = rawName.slice(0, -1);
-        }
-        ctx.fillStyle = '#000000';
-        ctx.fillText(rawName, cx, swLabelY + SW_LABEL_H / 2, maxTW);
+      // HEX at the bottom of the visible pillar
+      ctx.font = 'bold 8px "Space Mono",monospace';
+      ctx.fillText(hex.toUpperCase(), 0, 0, maxTxtH);
 
-      } else if (showHex) {
-        const hSize = Math.min(10, Math.max(6, Math.floor(w / 7)));
-        ctx.font      = `${hSize}px "Space Mono",monospace`;
-        ctx.fillStyle = '#000000';
-        ctx.fillText(hex.toUpperCase(), cx, swLabelY + SW_LABEL_H / 2, maxTW);
-      }
-      // slMode === 'none': no labels
+      // Colour name above it
+      ctx.translate(0, -13);
+      ctx.font = '400 10px "Permanent Marker",cursive';
+      ctx.fillText(colName, 0, 0, maxTxtH);
 
-      ctx.restore();  // v:v13.62 end per-swatch label clip
+      ctx.restore();
+      ctx.shadowColor   = 'transparent';
+      ctx.shadowBlur    = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     });
 
-    // ── digby.shop byline ────────────────────────────────────────────────────
-    const bylineY = BORDER + photoH + SWATCH_H + Math.round(BYLINE_PAD / 2);   // v:v13.35 match LOGICAL_H
+    // ── Footer: PREYE.CO.UK centred in bottom white border ──────────────
     ctx.fillStyle    = '#999999';
-    ctx.font         = "7px 'SF Mono','Space Mono',monospace";
+    ctx.font         = "6px 'Space Mono',monospace";
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('digby.shop', LOGICAL_W / 2, bylineY);
+    ctx.fillText('PREYE.CO.UK', LOGICAL_W / 2, LOGICAL_H - BORDER / 2);
 
-    // ── Download — Web Share on mobile (works on iOS PWA), anchor fallback desktop ──
-    // v:F12.7 — Guard against SecurityError if canvas is CORS-tainted
+    // ── Export — Web Share on mobile, anchor fallback on desktop ─────────
     let pngDataUrl;
     try { pngDataUrl = canvas.toDataURL('image/png'); }
-    catch(e) {
-      App.toast('Export blocked — image may contain cross-origin content');
-      return;
-    }
-    const filename   = `spectrum-${Date.now()}.png`;
-    const _doAnchor  = () => {
+    catch(e) { App.toast('Export blocked — image may contain cross-origin content'); return; }
+
+    const filename = `preye-${Date.now()}.png`;
+    const _doAnchor = () => {
       const a = document.createElement('a');
       a.href = pngDataUrl; a.download = filename;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      App.toast('JPG Card exported ✓');
+      App.toast('Card exported ✓');
     };
     try {
-      // v:v13.42 — sync base64→blob to preserve user-gesture activation
       const _b64 = pngDataUrl.split(',')[1];
       const _bin = atob(_b64);
       const _u8  = new Uint8Array(_bin.length);
@@ -20614,13 +20402,12 @@ background:rgba(0,0,0,0.4);-webkit-backdrop-filter:blur(20px) saturate(160%);bac
       const blob = new Blob([_u8], { type: 'image/png' });
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Digby Palette' });
-        App.toast('JPG Card exported ✓');
+        await navigator.share({ files: [file], title: 'Colour Card' });
+        App.toast('Card exported ✓');
       } else {
         _doAnchor();
       }
     } catch(e) {
-      App.toast('Sharing interrupted. Attempting direct download...');
       _doAnchor();
     }
   }
