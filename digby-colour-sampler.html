@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.21 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.23 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.21 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.23 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.21';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '16.23';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2577,7 +2577,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby Oldridge</div>
-  <div class="ws-ver" id="ws-version">v14.60</div>
+  <div class="ws-ver" id="ws-version">v16.23</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -2890,10 +2890,10 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!--  WHEEL + SLIDERS side by side on wider screens, stacked on narrow -->
       <div style="padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:10px">
 
-        <!-- v:F12.12 — Paint / Pantone search bar -->
+        <!-- Heritage + paint brand search bar -->
         <div style="width:100%;max-width:300px;position:relative">
           <input type="text" id="sampler-paint-search"
-            placeholder="Search F&amp;B, Little Greene, Dulux Heritage, Mylands, Earthborn…"
+            placeholder="Search heritage names, F&amp;B, Little Greene, Dulux…"
             autocomplete="off" spellcheck="false"
             style="width:100%;padding:9px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:12px;box-sizing:border-box;outline:none"
             oninput="Sampler._paintSearchInput(this.value)">
@@ -3918,7 +3918,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.shuffle()" title="Randomly reorder swatches to reveal new Base/Accent combinations">⇄ Shuffle</button>
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.mutate()" title="Shift palette ±10% HSL to create Vibrant or Muted variation">✦ Mutate</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.evolve()" title="Evolve palette: hue-drift each colour to a new page for endless discovery">✧ Evolve</button>
-          <button class="btn btn-s btn-sm" id="pb-shake-test-btn" onclick="PlayMode.trigger();App.toast('Shake test ✓')" title="Test shake — same as shaking phone" style="border-color:rgba(200,169,110,.4);color:var(--accent)">&#128246; Shake Test</button>
+          
           <button class="btn btn-s btn-sm" onclick="PaletteBuilder.sharePalette()">Share </button>
           <button class="btn btn-s btn-sm" onclick="Vault.save()" title="Save current palette + Midjourney prompt to Vault">🏛️ Vault</button>
           <button class="btn btn-p btn-sm" onclick="PaletteBuilder.saveAll()">+ Save All</button>
@@ -4046,7 +4046,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v14.60</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v16.23</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -4177,9 +4177,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── About ── -->
       <div class="sec">About</div>
       <div class="card" style="padding:0 12px">
-        <!-- v14.60: Shake permission row -->
-        <div class="set-row" id="shake-enable-row"><div><div class="set-l">Shake to Generate</div><div class="set-sub" id="shake-status-lbl">Shake phone to evolve palette or sample camera</div></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-s btn-sm" id="shake-enable-btn" onclick="PlayMode.requestMotionPermission();document.getElementById('shake-status-lbl').textContent='Permission requested…';this.textContent='Active';this.disabled=true;" style="flex-shrink:0">Enable</button><button class="btn btn-s btn-sm" onclick="PlayMode.trigger();App.toast('Test fired ✓')" title="Test the shake action directly">Test</button></div></div>
-        <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.60</span></div>
+                <div class="set-row"><div class="set-l">Version</div><span id="settings-ver-a-badge" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.25);padding:3px 8px;border-radius:10px">v14.60</span></div>
         <div class="set-row"><div><div class="set-l">Colour Science</div><div class="set-sub">Glossary, algorithms &amp; methodology</div></div><button class="btn btn-s btn-sm" onclick="App.openSettings()">Explore &#8599;</button></div>
       </div>
 
@@ -4373,7 +4371,6 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 
 <!--  DATASETS  -->
 <script>
-const PANTONE=[];
 
 const LG=[
   {code:"LG 1",  name:"China Clay",            hex:"#EFE9E3",url:"https://www.littlegreene.com/china-clay"},
@@ -7435,7 +7432,7 @@ const EBULMER=[
   {code:"Bulmer",name:"Ochre",hex:"#F0D596",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/ochre/"},
   {code:"Bulmer",name:"Trumpington",hex:"#E1B459",url:"https://www.edwardbulmerpaint.co.uk/product/natural-paint/trumpington/"},
 ];
-const PAINT_DB = [...PANTONE, ...LG, ...FB, ...DL, ...DH, ...MYLANDS, ...EB, ...EBULMER];
+const PAINT_DB = [...LG, ...FB, ...DL, ...DH, ...MYLANDS, ...EB, ...EBULMER];
 </script>
 
 <!--  HERITAGE NAMER ENGINE  -->
@@ -8577,7 +8574,6 @@ const CS = {
     const RT=-Math.sin(rad(2*dTheta))*RC;
     return Math.sqrt(Math.pow(dLp/SL,2)+Math.pow(dCp/SC,2)+Math.pow(dHp/SH,2)+RT*(dCp/SC)*(dHp/SH));
   },
-  nearestPantone(lab){return null;}, // v14.69: Pantone purged
   nearestLG(lab){let b=null,bd=Infinity;for(const p of LG){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestFB(lab){let b=null,bd=Infinity;for(const p of FB){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
   nearestML(lab){let b=null,bd=Infinity;for(const p of MYLANDS){const pl=this.rgbToLab(...Object.values(this.hexToRgb(p.hex)));const d=this.dE(lab,pl);if(d<bd){bd=d;b=p}}return b?{...b,de:+bd.toFixed(1)}:null},
@@ -8667,7 +8663,7 @@ const CS = {
     return parts[0];
   },
 
-  pantoneFirst(hex){ return this.autoName(hex) || hex.toUpperCase(); },  // v16.12: legacy shim — routes to HeritageNamer via autoName
+  heritageName(hex){ return this.autoName(hex) || hex.toUpperCase(); },  // v16.23: heritage name lookup
   autoName(hex){
     if(typeof HeritageNamer!=='undefined'){const _hn=HeritageNamer.generateName(hex);if(_hn)return _hn;}
     if(!this._nameCache){try{this._nameCache=JSON.parse(localStorage.getItem('spectrum-name-cache')||'{}');}catch(e){this._nameCache={};}}
@@ -9422,11 +9418,10 @@ const DS = {
       hsl:         CS.rgbToHsl(rgb.r, rgb.g, rgb.b),
       lab,
       lch:         CS.labToLch(lab),
-      // MASTER-FIX 3: prefer closest Pantone name as the canonical name;
+      // Use heritage name as canonical name;
       // autoName() is the generative fallback.
       name:        CS.autoName(hex)||hex.toUpperCase(),
       nameSource:  'hue-prefix',
-      pantone:     CS.nearestPantone(lab),
       littleGreene:CS.nearestLG(lab),
       farrowBall:  CS.nearestFB(lab),
       lrv:         CS.lrv(lab),
@@ -9972,6 +9967,7 @@ const App={
         <button class="live-disp-btn ${ld=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">HSL</text></svg></span></button>
         <button class="live-disp-btn ${ld=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 18"><text x="26" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">Kelvin</text></svg></span></button>
         <button class="live-disp-btn ${ld=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">LRV</text></svg></span></button>
+        ${App.isProMode ? `
         <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1" fill="none"/><text x="16" y="20.5" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" font-weight="700" fill="currentColor">F&amp;B</text></svg></span></button>
         <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 26"><text x="25" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Little</text><text x="25" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Greene</text></svg></span></button>
         <button class="live-disp-btn ${ld=='ml'?'on':''}" id="ld-ml" data-ld="ml" onclick="App.setLiveDisplay('ml')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 14"><text x="32" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">MYLANDS</text></svg></span></button>
@@ -9979,6 +9975,7 @@ const App={
         <button class="live-disp-btn ${ld=='dl'?'on':''}" id="ld-dl" data-ld="dl" onclick="App.setLiveDisplay('dl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 18"><text x="22" y="14" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="currentColor">Dulux</text></svg></span></button>
         <button class="live-disp-btn ${ld=='eb'?'on':''}" id="ld-eb" data-ld="eb" onclick="App.setLiveDisplay('eb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 16"><text x="31" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">earthborn</text></svg></span></button>
         <button class="live-disp-btn ${ld=='bulmer'?'on':''}" id="ld-bulmer" data-ld="bulmer" onclick="App.setLiveDisplay('bulmer')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 26"><text x="28" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">edward</text><text x="28" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">bulmer</text></svg></span></button>
+        ` : ``}
         <button class="live-disp-btn ${ld=='digby'?'on':''}" id="ld-digby" data-ld="digby" onclick="App.setLiveDisplay('digby')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 26"><text x="26" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="1" fill="currentColor">DIGBY</text><text x="26" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8" letter-spacing="1" fill="currentColor">ARCHIVE</text></svg></span></button>
         </div>
       </div>
@@ -10051,7 +10048,7 @@ const App={
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">CIE Lab (L*a*b*) — Human Vision Mathematics</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">The perceptual colour space that powers all of Digby's matching. <b style="color:var(--text)">L*</b> = perceived lightness (0–100). <b style="color:var(--text)">a*</b> = green↔red axis. <b style="color:var(--text)">b*</b> = blue↔yellow axis. Designed so equal numerical distances feel equal to the human eye — standard RGB math thinks pure Yellow and pure Blue are equally bright, which they are not. Digby converts every sampled colour to Lab before running all paint and Pantone matching.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">The perceptual colour space that powers all of Digby's matching. <b style="color:var(--text)">L*</b> = perceived lightness (0–100). <b style="color:var(--text)">a*</b> = green↔red axis. <b style="color:var(--text)">b*</b> = blue↔yellow axis. Designed so equal numerical distances feel equal to the human eye — standard RGB math thinks pure Yellow and pure Blue are equally bright, which they are not. Digby converts every sampled colour to Lab before running all paint matching.</div>
           </div>
 
           <div>
@@ -10085,8 +10082,8 @@ const App={
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone® / Farrow &amp; Ball / Little Greene / Dulux Heritage / Mylands / Earthborn</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Digby carries embedded libraries of 2,000+ Pantone, 300+ Little Greene, 130+ Farrow &amp; Ball, 2,600+ Dulux, all 112 Dulux Heritage, 58 Mylands, and all 72 Earthborn Claypaint colours. For every sampled colour, it runs a nearest-neighbour search in Lab space using CIEDE2000 distance — finding the closest real-world paint match instantly, no internet required.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Paint Brand References (Pro)</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">In Pro Mode, Digby cross-references 300+ Little Greene, 130+ Farrow &amp; Ball, 2,600+ Dulux, 112 Dulux Heritage, 58 Mylands, and 72 Earthborn Claypaint colours using CIEDE2000 nearest-neighbour search in Lab space — finding the closest real-world paint match instantly, no internet required.</div>
           </div>
 
           <div>
@@ -10126,8 +10123,8 @@ const App={
           </div>
 
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Pantone-First (P_Code) — Standardised Naming</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Digby resolves every sampled colour to a <b style="color:var(--text)">Pantone name</b> as its primary identifier, using ΔE CIEDE2000 in Lab space to find the nearest Pantone standard. The priority is: Pantone name → Pantone code → auto-generated hue-prefix name. The UI enforces a <b style="color:var(--text)">zero-slash rule</b> — compound names containing "/" are automatically split, and the Pantone portion is always kept. This ensures every colour in your library, export, and prompt has a clean, industry-standard identifier that communicates precisely to paint suppliers, printers, and designers worldwide.</div>
+            <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">Heritage Naming — The Safe Sovereign Archive</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Digby names every sampled colour from the <b style="color:var(--text)">1,002-entry heritage palette</b> — original compositions derived from Oxfordshire topography, Domesday records, and ancient Vale of White Horse folklore. Nearest-neighbour matching uses perceptual weighted RGB distance. All names are public-domain originals — no trademarks, no brand references.</div>
           </div>
 
           <div>
@@ -10234,7 +10231,8 @@ const App={
             <div style="font-size:11px;color:var(--muted);line-height:1.7">
               All your sampled colours in one place. Tap any swatch to open the <b style="color:var(--text)">Inspector</b>, which shows:<br><br>
               • Full colour science data: HEX, RGB, HSL, OKLCH, LRV, Kelvin temperature and description<br>
-              • Nearest <b style="color:var(--text)">Pantone®</b>, <b style="color:var(--text)">Little Greene</b>, and <b style="color:var(--text)">Farrow &amp; Ball</b> paint matches with ΔE accuracy score<br>
+              • Heritage name match from 1,002-entry Sovereign Archive (perceptual weighted distance)<br>
+              • Pro: nearest Little Greene and Farrow &amp; Ball paint matches with ΔE accuracy score<br>
               • <b style="color:var(--text)">WCAG</b> contrast ratios against white and black<br>
               • Psychology tag and mood association<br>
               • Export options: copy HEX, copy as CSS, share as Polaroid card<br><br>
@@ -11540,7 +11538,6 @@ const Sampler={
     const _sw = document.getElementById('live-swatch');
     if (_sw) _sw.style.background = hex;
     const lab=CS.rgbToLab(r,g,b);
-    const pan=CS.nearestPantone(lab);
     const lg=CS.nearestLG(lab);
     const fb=CS.nearestFB(lab);
     const ml=CS.nearestML(lab);
@@ -11554,13 +11551,9 @@ const Sampler={
     const lrv=CS.lrv(lab);
     // v449: single focused reading — driven by State.liveDisplay
     // 'paint' is legacy alias → 'fb' (Farrow & Ball)
-    const mode=State.liveDisplay||'pantone';
+    const mode=State.liveDisplay||'hex';
     let primary='', secondary='';
     switch(mode){
-      case 'pantone': // v14.69: Pantone removed
-        primary=hex.toUpperCase();
-        secondary='rgb('+r+','+g+','+b+')';
-        break;
       case 'hex':
         primary=hex.toUpperCase();
         secondary='rgb('+r+','+g+','+b+')';
@@ -12194,7 +12187,6 @@ const Sampler={
     this.pendingHex=hex;
     const rgb=CS.hexToRgb(hex);
     const lab=CS.rgbToLab(rgb.r,rgb.g,rgb.b);
-    const pan=CS.nearestPantone(lab);
     const lg=CS.nearestLG(lab);
     const fb=CS.nearestFB(lab);
     const ml=CS.nearestML(lab);
@@ -13232,7 +13224,7 @@ const Sampler={
     App.toast(`${val} added to queue`);
   },
 
-  // v:F12.12 — Paint / Pantone search: filter PAINT_DB, render dropdown
+  // Heritage + paint brand search: filter PAINT_DB, render dropdown
   _paintSearchInput(query) {  // v:F12.15 — 150ms debounce on DB search
     const dd = document.getElementById('sampler-paint-dropdown');
     if (!dd) return;
@@ -13254,19 +13246,24 @@ const Sampler={
     this._paintSearchTimer = setTimeout(() => {
       const q = query.trim().toLowerCase();
       if (q.length < 2) { dd.innerHTML = ''; dd.style.display = 'none'; return; }
-      // PAINT_DB = [...PANTONE, ...LG, ...FB]
-      const results = (typeof PAINT_DB !== 'undefined' ? PAINT_DB : [])
+      // Search Digby heritage palette first, then brand paint DB (Pro brands)
+      const _digbyHits = (typeof HeritageNamer !== 'undefined' ? HeritageNamer.palette : [])
+        .filter(p => p.name && p.name.toLowerCase().includes(q))
+        .slice(0, 3)
+        .map(p => ({ name: p.name, hex: p.hex, _brand: 'DIGBY' }));
+      const _paintHits = (typeof PAINT_DB !== 'undefined' ? PAINT_DB : [])
         .filter(p =>
           (p.name  && p.name.toLowerCase().includes(q)) ||
           (p.code  && p.code.toLowerCase().includes(q))
-        ).slice(0, 5);
+        ).slice(0, 3);
+      const results = [..._digbyHits, ..._paintHits].slice(0, 6);
       if (!results.length) { dd.innerHTML = ''; dd.style.display = 'none'; return; }
       dd.innerHTML = results.map(p => {
         const label = p.name ? p.name + (p.code ? ' · ' + p.code : '') : p.code;
         // Determine brand tag
-        const brand = (typeof FB !== 'undefined' && FB.includes(p)) ? 'F&B'
+        const brand = p._brand || ((typeof FB !== 'undefined' && FB.includes(p)) ? 'F&B'
                     : (typeof LG !== 'undefined' && LG.includes(p)) ? 'LG'
-                    : 'PMS';
+                    : 'Paint');
         return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;'
              + 'cursor:pointer;border-bottom:1px solid var(--border);user-select:none"'
              + ' onmouseenter="this.style.background=\'var(--surface2)\'"'
@@ -13424,10 +13421,10 @@ const ColorMath = {
     hexes.forEach(hex => {
       const rgb = CS.hexToRgb(hex);
       if (!rgb) return;
-      // v:F12.27 — colour entry name: "PantoneName — Category" or "#HEX — Category"
+      // Colour entry name: heritage name + category label
       // so the swatch is searchable by category name inside Photoshop / InDesign
-      const _pantone = CS.autoName(hex)||hex.toUpperCase();
-      const colorEntryName = _pantone + ' — ' + label;
+      const _hname = CS.autoName(hex)||hex.toUpperCase();
+      const colorEntryName = _hname + ' — ' + label;
       const nameBuf = encName(colorEntryName);
       // Block data: name + "RGB " + R f32 + G f32 + B f32 + colorType u16
       const colorPartLen = 4 + 4 + 4 + 4 + 2;  // "RGB " + 3×float32 + type
@@ -14075,7 +14072,6 @@ const Library={
         const _lab = c.lab || CS.rgbToLab(...Object.values(CS.hexToRgb(c.hex)));
         const fbT  = CS.topN(FB,     _lab, 3);
         const lgT  = CS.topN(LG,     _lab, 3);
-        const panT = CS.topN(PANTONE,_lab, 3);
         const dlT  = CS.topN(DL,      _lab, 3);
         const dhT  = CS.topN(DH,      _lab, 3);
         const mlT  = CS.topN(MYLANDS, _lab, 3);
@@ -14112,14 +14108,16 @@ const Library={
             +(alts?'<div class="pm-alts">'+alts+'</div>':'')
             +'</div>';
         };
-        const body=brandBlock('Farrow &amp; Ball',fbT,true)
-                  +brandBlock('Little Greene',lgT,true)
-                  +brandBlock('Pantone',panT,false)
-                  +brandBlock('Dulux Heritage',dhT,true)
-                  +brandBlock('Dulux',dlT,false)
-                  +brandBlock('Mylands',mlT,true)
-                  +brandBlock('Earthborn',ebT,true)
-                  +brandBlock('Edward Bulmer',bulmerT,true);
+        const _proBlocks = App.isProMode
+          ? brandBlock('Farrow &amp; Ball',fbT,true)
+            +brandBlock('Little Greene',lgT,true)
+            +brandBlock('Dulux Heritage',dhT,true)
+            +brandBlock('Dulux',dlT,false)
+            +brandBlock('Mylands',mlT,true)
+            +brandBlock('Earthborn',ebT,true)
+            +brandBlock('Edward Bulmer',bulmerT,true)
+          : '';
+        const body=_proBlocks;
         if(!body) return '';
         return '<div class="pm-section">'
           +'<div class="pm-section-hdr">Paint &amp; Colour Matches</div>'
@@ -14568,19 +14566,19 @@ const Library={
   },
 
   // MASTER-FIX-V53: Export all sampled colours as CSV.
-  // Spec columns: Date, Pantone Name, Hex, Celsius, AI Tags.
+  // Spec columns: Date, Heritage Name, Hex, Celsius, AI Tags.
   // Loops through DS.all() (live data store)  NOT State.library.
   exportData(){
     const all = DS.all();
     if (!all.length) { App.toast('No colours to export'); return; }
-    // MASTER-FIX-V53: spec-mandated columns  Date, Pantone Name, Hex, Celsius, AI Tags
-    const header = ['Date', 'Pantone Name', 'Hex', 'Celsius', 'AI Tags'];
+    // MASTER-FIX-V53: Columns: Date, Heritage Name, Hex, Celsius, AI Tags
+    const header = ['Date', 'Heritage Name', 'Hex', 'Celsius', 'AI Tags'];
     const rows = [header];
     all.forEach(c => {
       // Date: use stored timestamp if available, else today
       const dateStr = c.timestamp ? new Date(c.timestamp).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
-      // Pantone name: entry.pantone is the full match object {name, code, hex}
-      const pantoneName = c.pantone?.name || c.pantone || c.name || '';
+      // Heritage name from saved colour entry
+      const heritageName = (typeof HeritageNamer !== 'undefined' ? HeritageNamer.generateName(c.hex) : null) || c.name || c.hex.toUpperCase();
       // Hex: uppercase, always #RRGGBB
       const hexStr = c.hex ? c.hex.toUpperCase() : '';
       // Celsius: derived from stored kelvin or computed on the fly
@@ -14589,7 +14587,7 @@ const Library={
       // AI Tags: combine autoTags + manual tags, deduplicated, semicolon-separated
       const allTags = [...new Set([...(c.autoTags||[]), ...(c.tags||[])])];
       const tagsStr = allTags.join('; ');
-      rows.push([dateStr, pantoneName, hexStr, celsiusStr, tagsStr]);
+      rows.push([dateStr, heritageName, hexStr, celsiusStr, tagsStr]);
     });
     const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     try {
@@ -16925,7 +16923,6 @@ const ColourWheel = {
     // Nearest matches — v441: labelled paint chips
     const rgb = CS.hexToRgb(hex);
     const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-    const pan = CS.nearestPantone(lab);
     const lg  = CS.nearestLG(lab);
     const fb  = CS.nearestFB(lab);
     const chips = document.getElementById('wheel-paint-chips');
@@ -16937,8 +16934,7 @@ const ColourWheel = {
              + '<span style="color:var(--accent);font-weight:700">'+brand+'</span>&nbsp;'
              + '<span style="color:var(--text)">'+name+'</span></span>';
       };
-      chips.innerHTML = mkChip('PMS', pan?.name||pan?.code||'', pan?.hex)
-                      + mkChip('F&amp;B', fb?.name||'', fb?.hex)
+      chips.innerHTML = mkChip('F&amp;B', fb?.name||'', fb?.hex)
                       + mkChip('LG', lg?.name||'', lg?.hex);
     }
     if (matchEl) matchEl.textContent = '';
@@ -17386,7 +17382,7 @@ const SwatchExport = {
   },
 
   renderPolaroids(ctx, W, H, colours, scale) {
-    // v14.77 IP-Safe: 'The Lens' circle cards — replaces white-chin Pantone-style layout
+    // v14.77 IP-Safe: 'The Lens' circle cards — replaces white-chin card layout
     const n = colours.length;
     const cols = (n <= 2) ? n : (n === 3) ? 3 : Math.min(4, Math.ceil(Math.sqrt(n)));
     const rows = Math.ceil(n / cols);
@@ -17473,7 +17469,7 @@ const SwatchExport = {
       ctx.fillText(c.name,tx,y+Math.round(rowH*0.45));
       ctx.font=`${Math.max(7,Math.round(9*scale))}px 'Space Mono',monospace`;
       ctx.fillStyle=this.bgColor==='#1a1a1a'?'#888':'#666';
-      ctx.fillText(`${c.hex.toUpperCase()} · ${c.pantone?.code||''}`,tx,y+Math.round(rowH*0.45)+Math.round(16*scale));
+      ctx.fillText(c.hex.toUpperCase(),tx,y+Math.round(rowH*0.45)+Math.round(16*scale));
       if(this.includeLG||this.includeFB){
         if(!c.lab){const _rgb=CS.hexToRgb(c.hex);c.lab=CS.rgbToLab(_rgb.r,_rgb.g,_rgb.b);}
         const _lg=this.includeLG?(c.littleGreene||CS.nearestLG(c.lab)):null;
@@ -17897,8 +17893,7 @@ const ColourGenerator = {
     const swatchHTML = this.currentPalette.map((hex, i) => {
       const rgb = CS.hexToRgb(hex);
       const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-      const pan = CS.nearestPantone(lab);
-      const lrv = CS.lrv(lab);
+        const lrv = CS.lrv(lab);
       const onDark = lrv < 50;
       const name = CS.autoName(hex)||hex.toUpperCase();
       return `<div class="colgen-swatch" style="background:${hex}">
@@ -18016,8 +18011,7 @@ const PaletteBuilder = {
   _makeEntry(hex) {
     const rgb = CS.hexToRgb(hex);
     const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
-    const pan = CS.nearestPantone(lab);
-    return { hex, name: CS.autoName(hex)||hex.toUpperCase(), pantone: pan ? pan.code : '' };
+    return { hex, name: CS.autoName(hex)||hex.toUpperCase() };
   },
 
   // ── Undo history ──────────────────────────────────────────────────────
@@ -18057,7 +18051,7 @@ const PaletteBuilder = {
   _applyLocks(hexes) {
     return hexes.map((hex, i) => {
       if (this.colours[i] && this.colours[i].locked) {
-        return this.colours[i]; // keep exact locked entry — hex, name, pantone, locked flag
+        return this.colours[i]; // keep exact locked entry — hex, name, locked flag
       }
       return this._makeEntry(hex);
     });
@@ -18851,7 +18845,7 @@ const PaletteBuilder = {
     toAdd.forEach(hex => {
       this._paginate(); // v:v14.13 — auto-page mid-loop if we hit MAX
       const name = CS.autoName(hex)||hex.toUpperCase();
-      this.colours.push({ hex, name, locked: false, pantone: name });
+      this.colours.push({ hex, name, locked: false });
     });
     this.render();
     App.toast(toAdd.length + ' ' + type + ' colour' + (toAdd.length > 1 ? 's' : '') + ' added');
@@ -19465,7 +19459,7 @@ const PaletteBuilder = {
         <div class="pb-slot-info">
           <div class="pb-slot-name">${c.name}</div>
           <div class="pb-slot-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
-          <div class="pb-slot-pan">${c.pantone}</div>
+          
         </div>
       </div>`;
     });
@@ -21870,7 +21864,7 @@ const PlayMode = {
     if (typeof DeviceMotionEvent.requestPermission !== 'function') {
       // Non-iOS or old iOS: attach directly, no permission needed
       if (!this._motionBound) {
-        window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+        // devicemotion removed v16.22
         this._motionBound = true;
       }
       return;
@@ -21879,7 +21873,7 @@ const PlayMode = {
     DeviceMotionEvent.requestPermission()
       .then(state => {
         if (state === 'granted' && !this._motionBound) {
-          window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
+          // devicemotion removed v16.22
           this._motionBound = true;
         }
       })
@@ -21888,24 +21882,7 @@ const PlayMode = {
 
   init() {
     document.addEventListener('keydown', PlayMode._onKey);
-    // v14.62: use typeof rather than window.DeviceMotionEvent — more portable
-    if (typeof DeviceMotionEvent !== 'undefined') {
-      if (typeof DeviceMotionEvent.requestPermission !== 'function') {
-        // Android / non-iOS: attach listener directly, no permission needed
-        try {
-          window.addEventListener('devicemotion', PlayMode._onMotion, { passive: true });
-          this._motionBound = true;
-          setTimeout(() => {
-            const btn = document.getElementById('shake-enable-btn');
-            const lbl = document.getElementById('shake-status-lbl');
-            if (btn) { btn.textContent = 'Active'; btn.disabled = true; }
-            if (lbl) lbl.textContent = 'Ready — shake now!';
-          }, 800);
-        } catch(ex) {}
-      }
-      // iOS 13+: DeviceMotionEvent.requestPermission is a function.
-      // Permission is requested via Settings > Enable or inside startCamera().
-    }
+    // Shake-to-generate removed in v16.22 — spacebar / Evolve button still triggers PlayMode
   }
 };
 window.PlayMode = PlayMode; // v14.60: expose on window so inline onclick handlers can reach it
