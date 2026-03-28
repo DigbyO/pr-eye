@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.18 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.19 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.18 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.19 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.18';  // v:v16.18 — The Safe Sovereign Archive
+  const APP_VERSION = '16.19';  // v:v16.19 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -2499,7 +2499,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
   background:rgba(255,255,255,.06);color:var(--muted);border:none;
 }
 
-/* v16.18: Sovereign Ledger background */
+/* v16.18: The Library background */
 #library-toolbar, #library-grid, #library-actions { background: #FAFAFA; }
 </style>
 </head>
@@ -2572,7 +2572,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
       </svg>Pick a Colour
     </div>
-    <div class="ws-btn" onclick="WelcomeScreen.go('ledger')">
+    <div class="ws-btn" onclick="WelcomeScreen.go('library')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
         <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -3084,10 +3084,10 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     <div id="library-toolbar">
       <span id="gal-count">0 colours</span>
       <div class="tog-group">
-        <button class="tog-btn" onclick="Ledger.setView('3')" id="gv3">3</button>
-        <button class="tog-btn on" onclick="Ledger.setView('6')" id="gv6">6</button>
-        <button class="tog-btn" onclick="Ledger.setView('9')" id="gv9">9</button>
-        <button class="tog-btn" onclick="Ledger.setView('631')" id="gv631" title="60-30-10 rule">60/30/10</button>
+        <button class="tog-btn" onclick="Library.setView('3')" id="gv3">3</button>
+        <button class="tog-btn on" onclick="Library.setView('6')" id="gv6">6</button>
+        <button class="tog-btn" onclick="Library.setView('9')" id="gv9">9</button>
+        <button class="tog-btn" onclick="Library.setView('631')" id="gv631" title="60-30-10 rule">60/30/10</button>
       </div>
     </div>
     <!-- Folder tabs -->
@@ -3095,12 +3095,12 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     <!-- Sort bar -->
     <div id="gal-sort-bar">
       <span class="sort-label">Sort</span>
-      <button class="sort-btn on"  id="gsort-newest"   onclick="Ledger.setSort('newest')">Newest</button>
-      <button class="sort-btn"     id="gsort-hue"      onclick="Ledger.setSort('hue')">Hue</button>
-      <button class="sort-btn"     id="gsort-lightness" onclick="Ledger.setSort('lightness')">Lightness</button>
-      <button class="sort-btn"     id="gsort-palette"   onclick="Ledger.setSort('palette')">Palette</button>
+      <button class="sort-btn on"  id="gsort-newest"   onclick="Library.setSort('newest')">Newest</button>
+      <button class="sort-btn"     id="gsort-hue"      onclick="Library.setSort('hue')">Hue</button>
+      <button class="sort-btn"     id="gsort-lightness" onclick="Library.setSort('lightness')">Lightness</button>
+      <button class="sort-btn"     id="gsort-palette"   onclick="Library.setSort('palette')">Palette</button>
       <button class="sort-btn" id="gsort-seq"
-              onclick="App.showSeq=!App.showSeq;this.classList.toggle('on',App.showSeq);Ledger.render()">№</button>
+              onclick="App.showSeq=!App.showSeq;this.classList.toggle('on',App.showSeq);Library.render()">№</button>
     </div>
     <!-- Tag filter bar (hidden until tags exist) -->
     <div id="gal-tag-bar" style="display:none"></div>
@@ -3110,10 +3110,10 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <div id="library-actions" style="display:none">
         <button class="btn btn-s btn-sm" onclick="SwatchExport.openAs('polaroids')">Capture Sheet</button>
         <button class="btn btn-p btn-sm" onclick="SwatchExport.open()"> Swatch Export</button>
-        <button class="btn btn-s btn-sm" onclick="Ledger.shareAll()">Share</button>
+        <button class="btn btn-s btn-sm" onclick="Library.shareAll()">Share</button>
         <button class="btn btn-s btn-sm cvd-feature colour-blind-tool" onclick="CVDSim.open()" title="Simulate colour blindness (Pro)">👁</button>
         <!-- MASTER-FIX-V52: Data Export button — saves all sampled colours as CSV -->
-        <button class="btn btn-s btn-sm" onclick="Ledger.exportData()" title="Export all colours as CSV file">📊 Export</button>
+        <button class="btn btn-s btn-sm" onclick="Library.exportData()" title="Export all colours as CSV file">📊 Export</button>
       </div>
       <!-- 60-30-10 view -->
       <div id="gal-631-view"></div>
@@ -4117,7 +4117,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       </div>
 
       <!-- ── Library ── -->
-      <div class="sec">Sovereign Ledger</div>
+      <div class="sec">The Library</div>
       <div class="card" style="padding:0 12px">
         <div class="set-row" id="set-lib-count"></div>
         <div class="set-row"><div><div class="set-l">Backup</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
@@ -4286,7 +4286,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
     Sampler
   </button>
-  <button class="tab" id="tab-library" onclick="App.setTab('ledger')">
+  <button class="tab" id="tab-library" onclick="App.setTab('library')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     Library
   </button>
@@ -9623,7 +9623,7 @@ const App={
 
     document.body.classList.add('active-tab-sampler'); // v121: seed initial tab class
     Sampler.init();
-    Ledger.render();
+    Library.render();
     Explorer.init();
     Prompter.init();
     PaletteBuilder.init();   // registers Ctrl/Cmd+Z undo
@@ -9667,7 +9667,7 @@ const App={
       }
     }
     // v121: 4-tab nav — sampler/library/explorer/settings
-    const validMods = ['sampler','ledger','explorer','prompter','palette','settings'];
+    const validMods = ['sampler','library','explorer','prompter','palette','settings'];
     document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
     const modEl = document.getElementById('mod-'+t);
@@ -9675,7 +9675,7 @@ const App={
     if(modEl) modEl.classList.add('active');
     if(tabEl) tabEl.classList.add('on');
     this.tab=t;
-    if(t==='ledger') Ledger.render();
+    if(t==='library') Library.render();
     if(t==='explorer') Explorer.onOpen();
     if(t==='prompter') Prompter.render();
     if(t==='palette'){
@@ -9767,7 +9767,7 @@ const App={
   refresh(){
     try {
       this.updateDot();
-      if(this.tab==='ledger')Ledger.render();
+      if(this.tab==='library')Library.render();
       if(this.tab==='explorer')Explorer.render();
       if(this.tab==='prompter')Prompter.render();
       if(this.tab==='palette'){try{PaletteBuilder.render();}catch(e){}}
@@ -10161,8 +10161,8 @@ const App={
         <div style="padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)">
           <div style="font-size:11px;color:var(--muted);line-height:1.7">
             <b style="color:var(--text);display:block;margin-bottom:6px">🎯 In 60 seconds</b>
-            <b style="color:var(--accent)">1.</b> Point your camera at any colour and tap <b style="color:var(--text)">⊙ Sample</b> — it saves to your Ledger.<br><br>
-            <b style="color:var(--accent)">2.</b> Tap <b style="color:var(--text)">Sovereign Ledger</b> to see all saved colours. Tap any swatch to inspect it — name, HEX, Kelvin, LRV, and paint matches.<br><br>
+            <b style="color:var(--accent)">1.</b> Point your camera at any colour and tap <b style="color:var(--text)">⊙ Sample</b> — it saves to your Library.<br><br>
+            <b style="color:var(--accent)">2.</b> Tap <b style="color:var(--text)">The Library</b> to see all saved colours. Tap any swatch to inspect it — name, HEX, Kelvin, LRV, and paint matches.<br><br>
             <b style="color:var(--accent)">3.</b> Tap <b style="color:var(--text)">Explorer</b> to set a Root Colour and see instant colour harmonies, tints/shades, and a Wall &amp; Trim preview.<br><br>
             <b style="color:var(--accent)">4.</b> In <b style="color:var(--text)">Palette Builder</b>, tap <b style="color:var(--text)">+ Add</b> to build a palette from your library, then export as a Polaroid card or image strip.<br><br>
             <b style="color:var(--accent)">5.</b> In <b style="color:var(--text)">Prompter</b> (Pro), select colours and tap <b style="color:var(--text)">Generate</b> to create a Midjourney prompt with your real-world palette baked in.
@@ -10184,15 +10184,15 @@ const App={
             <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">📷 Sampler Tab</div>
             <div style="font-size:11px;color:var(--muted);line-height:1.7">
               The Sampler is your main colour capture tool with three modes:<br><br>
-              <b style="color:var(--text)">Camera</b> — Live video feed with a crosshair sampler at centre. The live bar shows the current colour name, HEX code, and Kelvin temperature in real time. Tap <b style="color:var(--text)">⊙ Sample</b> to save the current colour to your Ledger. Tap <b style="color:var(--text)">❄ Freeze</b> to lock the frame for careful sampling. The <b style="color:var(--text)">loupe</b> (magnifier) in the top-right helps you pick fine detail.<br><br>
-              <b style="color:var(--text)">📸 Auto-Palette</b> — Tap the camera icon to snap the current scene and extract 6 dominant colours automatically using k-means clustering. Each colour saves directly to your Ledger.<br><br>
+              <b style="color:var(--text)">Camera</b> — Live video feed with a crosshair sampler at centre. The live bar shows the current colour name, HEX code, and Kelvin temperature in real time. Tap <b style="color:var(--text)">⊙ Sample</b> to save the current colour to your Library. Tap <b style="color:var(--text)">❄ Freeze</b> to lock the frame for careful sampling. The <b style="color:var(--text)">loupe</b> (magnifier) in the top-right helps you pick fine detail.<br><br>
+              <b style="color:var(--text)">📸 Auto-Palette</b> — Tap the camera icon to snap the current scene and extract 6 dominant colours automatically using k-means clustering. Each colour saves directly to your Library.<br><br>
               <b style="color:var(--text)">Picker</b> — Manual hex entry or colour wheel. Type any HEX code or drag the wheel to a colour and tap Sample to save it.<br><br>
               <b style="color:var(--text)">Upload</b> — Import a photo from your camera roll. Tap anywhere on the image to sample that colour, or use Auto-Palette to extract the dominant palette from the whole image.
             </div>
           </div>
 
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">📚 Sovereign Ledger Tab</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">📚 The Library Tab</div>
             <div style="font-size:11px;color:var(--muted);line-height:1.7">
               All your sampled colours in one place. Tap any swatch to open the <b style="color:var(--text)">Inspector</b>, which shows:<br><br>
               • Full colour science data: HEX, RGB, HSL, OKLCH, LRV, Kelvin temperature and description<br>
@@ -10209,7 +10209,7 @@ const App={
             <div style="font-size:11px;color:var(--muted);line-height:1.7">
               The Explorer generates colour relationships from a single Root Colour.<br><br>
               <b style="color:var(--text)">Root Colour</b> — Set from your Library or type a HEX. Everything below updates instantly.<br><br>
-              <b style="color:var(--text)">Colour Harmonies</b> — Complementary, Analogous, Triadic, Tetradic, Split-Complementary, and Monochromatic sets generated in OKLCH. Tap any swatch to add it to your Ledger. Switch between harmony types with the segmented control.<br><br>
+              <b style="color:var(--text)">Colour Harmonies</b> — Complementary, Analogous, Triadic, Tetradic, Split-Complementary, and Monochromatic sets generated in OKLCH. Tap any swatch to add it to your Library. Switch between harmony types with the segmented control.<br><br>
               <b style="color:var(--text)">Tints, Shades &amp; Tones</b> — A full lightness ramp from your root colour. Tap to save any step.<br><br>
               <b style="color:var(--text)">Mood Analysis</b> — Psychology and emotional associations for your root colour.<br><br>
               <b style="color:var(--text)">Surface Tester</b> — Set a Wall and Trim colour to preview them together on a simulated room render. Use Auto-Suggest to let Digby pick the best wall/trim pairing from your Library by LRV contrast.<br><br>
@@ -10222,7 +10222,7 @@ const App={
             <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">🎨 Palette Builder Tab</div>
             <div style="font-size:11px;color:var(--muted);line-height:1.7">
               Build curated palettes from your Library colours and export them in multiple formats.<br><br>
-              Tap <b style="color:var(--text)">+ Add Slot</b> to add a colour slot, then tap a slot to fill it from your Ledger. Drag slots to reorder. Tap the <b style="color:var(--text)">× remove</b> button to clear a slot.<br><br>
+              Tap <b style="color:var(--text)">+ Add Slot</b> to add a colour slot, then tap a slot to fill it from your Library. Drag slots to reorder. Tap the <b style="color:var(--text)">× remove</b> button to clear a slot.<br><br>
               <b style="color:var(--text)">Export formats:</b><br>
               • <b style="color:var(--text)">Polaroid Card</b> — A stylised export with photo (if captured from camera) and colour swatches beneath<br>
               • <b style="color:var(--text)">Colour Strip</b> — Clean horizontal swatch strip with names and HEX codes<br>
@@ -10261,7 +10261,7 @@ const App={
 
         </div>
       </details>
-      <div class="set-sec">Sovereign Ledger</div>
+      <div class="set-sec">The Library</div>
       <div class="set-row"><div><div class="set-l">${all.length} / ${DS.MAX_COLOURS} colours</div><div class="set-sub" style="${all.length > 400 ? 'color:#d4a830' : ''}">${all.length > 400 ? '⚠ Approaching limit (' + DS.MAX_COLOURS + ')' : DS._db ? '✓ Stored in IndexedDB' : 'Stored in localStorage'}</div></div></div>
       <div class="set-row"><div><div class="set-l">Backup Library</div><div class="set-sub">Download all colours as .json</div></div><button class="btn btn-s btn-sm" onclick="App.exportLib()">Backup JSON</button></div>
       <div class="set-row"><div><div class="set-l">Restore Library</div><div class="set-sub">Merge or overwrite from .json</div></div><button class="btn btn-s btn-sm" onclick="document.getElementById('imp-input').click()">Restore JSON</button></div>
@@ -10843,14 +10843,9 @@ const Sampler={
     // v:v14.20 — front cam: no forced resolution (landscape 4K constraints squish portrait stream)
     // v:v14.26 — reverted aspectRatio hint (v14.25 P12): it pushed stream to portrait
     //   (720×1280) which made the canvas squish maximally visible. Root fix is P10 above.
-    const tier1 = this.camFront
-      ? { video: { facingMode: 'user' } }                                                // front: soft hint — exact throws OverconstrainedError on many Android
-      : { video: { facingMode: { exact: _facing }, width: { ideal: 3840 }, height: { ideal: 2160 } } }; // rear: demand max optical resolution
-    const tier2 = this.camFront
-      ? { video: true }                                                                  // front: any camera (some Android only expose one input)
-      : { video: { facingMode: _facing,            width: { ideal: 3840 }, height: { ideal: 2160 } } }; // rear: 4K fallback
+    const tier1 = { video: { facingMode: this.camFront ? 'user' : 'environment' }, audio: false };
+    const tier2 = { video: true };
     const tier3 = { video: true };
-
     const isOverconstrained = function(e) {
       return e.name === 'OverconstrainedError' || e.name === 'ConstraintNotSatisfiedError' || e.name === 'NotFoundError';
     };
@@ -11660,9 +11655,7 @@ const Sampler={
       if (this.stream) {
         try {
           this.stream.getTracks().filter(t => t.kind === 'video').forEach(t => {
-            t.applyConstraints({ advanced: [{
-              focusMode: 'manual', exposureMode: 'manual', whiteBalanceMode: 'manual'
-            }] }).catch(() => {});
+            // advanced camera constraints removed for compatibility
           });
         } catch(e) {}
       }
@@ -12510,9 +12503,7 @@ const Sampler={
       try {
         this.stream.getTracks().filter(t => t.kind === 'video').forEach(t => {
           if (t.readyState === 'live') {
-            t.applyConstraints({ advanced: [{
-              focusMode: 'continuous', exposureMode: 'continuous', whiteBalanceMode: 'continuous'
-            }] }).catch(() => {});
+            // advanced camera constraints removed for compatibility
           }
         });
       } catch(e) {}
@@ -12940,7 +12931,7 @@ const Sampler={
     all.forEach(c=>{
       const d=document.createElement('div');
       d.className='cam-swatch-mini';d.style.background=c.hex;d.title=c.name;
-      d.onclick=()=>Ledger.openDetail(c.id);
+      d.onclick=()=>Library.openDetail(c.id);
       wrap.insertBefore(d,badge);
     });
   },
@@ -13500,7 +13491,7 @@ const FolderManager = {
     this._active = name;
     this._save();
     this.renderUI();
-    Ledger.render();
+    Library.render();
     if(typeof CVDSim!=='undefined'&&CVDSim.mode!=='normal') requestAnimationFrame(()=>CVDSim._applyToUI());
   },
 
@@ -13526,7 +13517,7 @@ const FolderManager = {
       // v:F1.13 Persistence audit — hard flush guarantees no entry orphaning on close
       try { localStorage.setItem(this.FK, JSON.stringify({ folders: this._folders, active: this._active })); } catch(e) {}
       this.renderUI();
-      Ledger.render();
+      Library.render();
     });
   },
 
@@ -13615,7 +13606,7 @@ function _cvRow(row) {
   }).catch(() => {});
 }
 
-const Ledger={
+const Library={
   view:'6',
   sort:'newest',   // 'newest' | 'hue' | 'lightness'
 
@@ -13794,9 +13785,9 @@ const Ledger={
     DS.all().forEach(c => { if (Array.isArray(c.tags)) c.tags.forEach(t => tagSet.add(t)); });
     const tags = [...tagSet].sort();
     const active = this.activeTagFilter;
-    bar.innerHTML = `<button class="tag-filter-btn${!active?' on':''}" onclick="Ledger.setTagFilter(null)">All</button>`
+    bar.innerHTML = `<button class="tag-filter-btn${!active?' on':''}" onclick="Library.setTagFilter(null)">All</button>`
       + tags.map(t =>
-          `<button class="tag-filter-btn${t===active?' on':''}" onclick="Ledger.setTagFilter('${t.replace(/'/g,"\'")}')">${t}</button>`
+          `<button class="tag-filter-btn${t===active?' on':''}" onclick="Library.setTagFilter('${t.replace(/'/g,"\'")}')">${t}</button>`
         ).join('');
     bar.style.display = tags.length ? 'flex' : 'none';
   },
@@ -13834,9 +13825,9 @@ const Ledger={
     const active = this.activeMoodFilter;
     if (!orderedCats.length) { bar.style.display = 'none'; return; }
     bar.innerHTML =
-      `<button class="mood-filter-btn${!active ? ' on' : ''}" onclick="Ledger.setMoodFilter(null)">All</button>` +
+      `<button class="mood-filter-btn${!active ? ' on' : ''}" onclick="Library.setMoodFilter(null)">All</button>` +
       orderedCats.map(cat =>
-        `<button class="mood-filter-btn${cat === active ? ' on' : ''}" onclick="Ledger.setMoodFilter('${cat}')">${CAT_LABELS[cat] || cat}</button>`
+        `<button class="mood-filter-btn${cat === active ? ' on' : ''}" onclick="Library.setMoodFilter('${cat}')">${CAT_LABELS[cat] || cat}</button>`
       ).join('');
     bar.style.display = 'flex';
   },
@@ -13907,20 +13898,20 @@ const Ledger={
       <div class="rule-block" style="background:${sec.hex};height:80px"><div class="rule-label" style="font-size:14px">30%  ${this._esc(sec.name)}<span style="font-size:9px;opacity:.55;margin-left:8px">LRV ${Math.round(_lrv(sec))}</span></div></div>
       <div class="rule-block" style="background:${acc.hex};height:40px"><div class="rule-label" style="font-size:11px">10%  ${this._esc(acc.name)}<span style="font-size:9px;opacity:.55;margin-left:6px">LRV ${Math.round(_lrv(acc))}</span></div></div>
       <div style="padding:10px 12px;display:flex;gap:7px;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="Ledger.export631('${dom.hex}','${sec.hex}','${acc.hex}')">Export PNG</button>
+        <button class="btn btn-s btn-sm" onclick="Library.export631('${dom.hex}','${sec.hex}','${acc.hex}')">Export PNG</button>
         <button class="btn btn-p btn-sm" onclick="SwatchExport.open6310('${dom.id}','${sec.id}','${acc.id}')">Swatch Export</button>
         <button class="btn btn-s btn-sm" onclick="Prompter.use631('${dom.id||''}','${sec.id||''}','${acc.id||''}')">Use in Prompter</button>
       </div>
       <div style="padding:0 12px 20px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em">Full Collection</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${all.map(c=>`<div style="width:36px;height:36px;border-radius:50%;background:${c.hex};border:2px solid var(--border)" title="${c.name}" onclick="Ledger.openDetail('${c.id}')"></div>`).join('')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${all.map(c=>`<div style="width:36px;height:36px;border-radius:50%;background:${c.hex};border:2px solid var(--border)" title="${c.name}" onclick="Library.openDetail('${c.id}')"></div>`).join('')}</div>
       </div>`;
   },
 
   polaroidHTML(c){
     const angle=(parseInt(c.id.slice(-3),36)%9-4)*0.7;
     const vtName='pol-'+c.id;
-    return`<div class="polaroid" data-id="${c.id}" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Ledger.setFocus('${c.id}');Ledger.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Ledger.setFocus('${c.id}');Ledger.openDetail('${c.id}')}">
+    return`<div class="polaroid" data-id="${c.id}" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Library.setFocus('${c.id}');Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.setFocus('${c.id}');Library.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
       <div class="pol-name">${c.name}</div>
       ${App.showSeq && c.captureSeq ? `<div class="pol-match" style="font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:1px">№ ${c.captureSeq}</div>` : ''}
@@ -13928,7 +13919,7 @@ const Ledger={
       <div class="pol-match">${c.pantone?.code||''}</div>
       <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
       ${(()=>{const _pt=CS.psychTag(c.hex);return`<div class="pol-match" style="margin-top:2px"><span class="psych-pill psych-${_pt.category}">${_pt.label}</span></div>`})()}
-      <button class="pol-folder-btn" onclick="event.stopPropagation();Ledger._addToFolder('${c.id}')" title="Move to folder">📁</button>
+      <button class="pol-folder-btn" onclick="event.stopPropagation();Library._addToFolder('${c.id}')" title="Move to folder">📁</button>
     </div>`;
   },
 
@@ -13974,7 +13965,7 @@ const Ledger={
       `<span class="tag-chip tag-chip-auto" title="AI mood tag">${t}</span>`
     ).join('');
     const tagsHtml = (c.tags || []).map((t, i) =>
-      `<span class="tag-chip">${t}<span class="rm" onclick="Ledger._removeTag('${id}',${i})">×</span></span>`
+      `<span class="tag-chip">${t}<span class="rm" onclick="Library._removeTag('${id}',${i})">×</span></span>`
     ).join('');
 
     // ── Celsius for inspector ──
@@ -14010,19 +14001,19 @@ const Ledger={
       <div style="display:flex;justify-content:center;padding:10px 16px 4px;background:var(--surface)">
         <input id="insp-hex-input" type="text" maxlength="7" placeholder="#HEX" value="${c.hex.toUpperCase()}"
           style="width:140px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.08em;padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface2);color:var(--text);outline:none"
-          onkeydown="if(event.key==='Enter'){Ledger._goToHex(this.value)}"
-          onblur="Ledger._goToHex(this.value)">
+          onkeydown="if(event.key==='Enter'){Library._goToHex(this.value)}"
+          onblur="Library._goToHex(this.value)">
       </div>
 
       <!-- ═══ QUICK ACTION BAR ═══════════════════════════════════════════════ -->
       <div class="insp-action-bar">
         <button class="insp-action-btn" style="background:var(--accent);color:#000;border-color:var(--accent)" onclick="PaletteBuilder.addColour('${c.hex}');App.forceCloseOv();App.setTab('palette')">+ Palette</button>
-        <button class="insp-action-btn" onclick="Ledger.shareOneNative('${id}')">Share ↗</button>
-        <button class="insp-action-btn" onclick="Ledger.swatchExportMode=true;Ledger.exportOne('${id}')">Export ↗</button>
-        <button class="insp-action-btn" onclick="Ledger.toExplorer('${id}')">Explore</button>
-        <button class="insp-action-btn" onclick="Ledger.rename('${id}')">Rename</button>
-        <button class="insp-action-btn" onclick="Ledger._addToFolder('${id}')">📁 Folder</button>
-        <button class="insp-action-btn danger" onclick="Ledger.del('${id}')">Delete</button>
+        <button class="insp-action-btn" onclick="Library.shareOneNative('${id}')">Share ↗</button>
+        <button class="insp-action-btn" onclick="Library.swatchExportMode=true;Library.exportOne('${id}')">Export ↗</button>
+        <button class="insp-action-btn" onclick="Library.toExplorer('${id}')">Explore</button>
+        <button class="insp-action-btn" onclick="Library.rename('${id}')">Rename</button>
+        <button class="insp-action-btn" onclick="Library._addToFolder('${id}')">📁 Folder</button>
+        <button class="insp-action-btn danger" onclick="Library.del('${id}')">Delete</button>
       </div>
 
       <!-- ═══ QUICK COPY RIBBON: HEX · RGB · HSL · CMYK ══════════════════════════ -->
@@ -14193,8 +14184,8 @@ const Ledger={
         <div class="tag-chips" id="insp-tag-chips">${tagsHtml}</div>
         <div class="tag-add-row">
           <input class="tag-input" id="insp-tag-input" placeholder="Add a custom tag…" maxlength="30"
-            onkeydown="if(event.key==='Enter'){Ledger._addTag('${id}');event.preventDefault()}">
-          <button class="btn btn-s btn-sm" onclick="Ledger._addTag('${id}')">Add</button>
+            onkeydown="if(event.key==='Enter'){Library._addTag('${id}');event.preventDefault()}">
+          <button class="btn btn-s btn-sm" onclick="Library._addTag('${id}')">Add</button>
         </div>
       </div>
 
@@ -14238,9 +14229,9 @@ const Ledger={
     // Re-render chips without closing overlay
     const chips = document.getElementById('insp-tag-chips');
     if (chips) chips.innerHTML = tags.map((t, i) =>
-      `<span class="tag-chip">${t}<span class="rm" onclick="Ledger._removeTag('${id}',${i})">×</span></span>`
+      `<span class="tag-chip">${t}<span class="rm" onclick="Library._removeTag('${id}',${i})">×</span></span>`
     ).join('');
-    Ledger._updateTagBar();
+    Library._updateTagBar();
     App.toast(`Tag "${tag}" added`);
   },
 
@@ -14252,9 +14243,9 @@ const Ledger={
     DS.update(id, { tags });
     const chips = document.getElementById('insp-tag-chips');
     if (chips) chips.innerHTML = tags.map((t, i) =>
-      `<span class="tag-chip">${t}<span class="rm" onclick="Ledger._removeTag('${id}',${i})">×</span></span>`
+      `<span class="tag-chip">${t}<span class="rm" onclick="Library._removeTag('${id}',${i})">×</span></span>`
     ).join('');
-    Ledger._updateTagBar();
+    Library._updateTagBar();
   },
 
   rename(id){
@@ -14279,7 +14270,7 @@ const Ledger={
     const ov=document.createElement('div');
     ov.id='_fraggle-folder-ov';
     ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:var(--z-top);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
-    const btns=folders.map(f=>{const isCur=c.folder===f;return`<button onclick="Ledger._doMove('${id.replace(/'/g,"\\'")}','${f.replace(/'/g,"\\'")}');document.getElementById('_fraggle-folder-ov').remove()"
+    const btns=folders.map(f=>{const isCur=c.folder===f;return`<button onclick="Library._doMove('${id.replace(/'/g,"\\'")}','${f.replace(/'/g,"\\'")}');document.getElementById('_fraggle-folder-ov').remove()"
       style="display:block;width:100%;text-align:left;padding:10px 14px;background:${isCur?'#243824':'#242424'};border:1px solid ${isCur?'#3a6a3a':'#3a3a3a'};border-radius:7px;color:${isCur?'#7fff7f':'#ccc'};font-size:13px;font-family:var(--mono);cursor:pointer;margin-bottom:6px">${f}${isCur?' ✓':''}</button>`;}).join('');
     const label=(c.name||c.hex||'colour').toUpperCase().slice(0,24);
     ov.innerHTML=`<div style="background:#1e1e1e;border:1px solid #444;border-radius:12px;padding:20px;width:100%;max-width:300px">
@@ -14337,7 +14328,7 @@ const Ledger={
     if(!c.littleGreene){c.littleGreene=CS.nearestLG(c.lab);}
     if(!c.farrowBall){c.farrowBall=CS.nearestFB(c.lab);}
     const pngDataUrl = await this._renderSharePolaroid(c);
-    const filename = Ledger.swatchExportMode ? `spectrum-${Date.now()}-swatch.png` : `spectrum-${Date.now()}.png`;
+    const filename = Library.swatchExportMode ? `spectrum-${Date.now()}-swatch.png` : `spectrum-${Date.now()}.png`;
 
     // Try native file share (iOS Safari 15+, Android Chrome 75+)
     const tryNativeShare = async () => {
@@ -14843,7 +14834,7 @@ const Explorer={
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${analogousHex}')">+ Save 30%</button>
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer.addToLib('${compHex}')">+ Save 10%</button>
             <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Explorer._cycleDesignerMode()">Cycle</button>
-            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Ledger.export631('${hex}','${analogousHex}','${compHex}')">Export</button>
+            <button class="btn btn-s btn-sm" style="flex:1;font-size:9px" onclick="Library.export631('${hex}','${analogousHex}','${compHex}')">Export</button>
           </div>
         </div>
       </div>`;
