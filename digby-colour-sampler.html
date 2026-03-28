@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.23 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.24 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.23 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.24 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.23';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '16.24';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1729,6 +1729,11 @@ body.active-tab-sampler .pb-slot-empty{flex-shrink:0!important;width:60px!import
 
 /* ── v72/v73: Simple Mode (Pro Mode OFF) — hides advanced UI elements ────── */
 body:not(.design-pro-on) #tab-prompter{display:none!important}
+/* v16.24: paint brand elements — only visible in Designer Pro mode */
+.pro-brand-only{display:none!important}
+body.design-pro-on .pro-brand-only{display:inline-flex!important}
+body.design-pro-on .pro-brand-row{display:flex!important}
+.pro-brand-row{display:none!important}
 body.simple-mode .insp-advanced{display:none!important}
 body.simple-mode #manual-picker-section{display:none!important}
 /* Sampler: hide Manual Picker + Upload buttons */
@@ -2577,7 +2582,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby Oldridge</div>
-  <div class="ws-ver" id="ws-version">v16.23</div>
+  <div class="ws-ver" id="ws-version">v16.24</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -4046,7 +4051,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v16.23</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v16.24</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -9967,15 +9972,14 @@ const App={
         <button class="live-disp-btn ${ld=='hsl'?'on':''}" id="ld-hsl" data-ld="hsl" onclick="App.setLiveDisplay('hsl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">HSL</text></svg></span></button>
         <button class="live-disp-btn ${ld=='kelvin'?'on':''}" id="ld-kelvin" data-ld="kelvin" onclick="App.setLiveDisplay('kelvin')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 18"><text x="26" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">Kelvin</text></svg></span></button>
         <button class="live-disp-btn ${ld=='lrv'?'on':''}" id="ld-lrv" data-ld="lrv" onclick="App.setLiveDisplay('lrv')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18"><text x="18" y="13" text-anchor="middle" font-family="Courier New,Courier,monospace" font-size="12" font-weight="700" fill="currentColor">LRV</text></svg></span></button>
-        ${App.isProMode ? `
-        <button class="live-disp-btn ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1" fill="none"/><text x="16" y="20.5" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" font-weight="700" fill="currentColor">F&amp;B</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 26"><text x="25" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Little</text><text x="25" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Greene</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='ml'?'on':''}" id="ld-ml" data-ld="ml" onclick="App.setLiveDisplay('ml')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 14"><text x="32" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">MYLANDS</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='dh'?'on':''}" id="ld-dh" data-ld="dh" onclick="App.setLiveDisplay('dh')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 18"><text x="30" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">HERITAGE</text><line x1="6" y1="14.5" x2="54" y2="14.5" stroke="currentColor" stroke-width="0.6"/></svg></span></button>
-        <button class="live-disp-btn ${ld=='dl'?'on':''}" id="ld-dl" data-ld="dl" onclick="App.setLiveDisplay('dl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 18"><text x="22" y="14" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="currentColor">Dulux</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='eb'?'on':''}" id="ld-eb" data-ld="eb" onclick="App.setLiveDisplay('eb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 16"><text x="31" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">earthborn</text></svg></span></button>
-        <button class="live-disp-btn ${ld=='bulmer'?'on':''}" id="ld-bulmer" data-ld="bulmer" onclick="App.setLiveDisplay('bulmer')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 26"><text x="28" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">edward</text><text x="28" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">bulmer</text></svg></span></button>
-        ` : ``}
+        ${
+        <button class="live-disp-btn pro-brand-only ${ld=='fb'?'on':''}" id="ld-fb" data-ld="fb" onclick="App.setLiveDisplay('fb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1" fill="none"/><text x="16" y="20.5" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" font-weight="700" fill="currentColor">F&amp;B</text></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='lg'?'on':''}" id="ld-lg" data-ld="lg" onclick="App.setLiveDisplay('lg')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 26"><text x="25" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Little</text><text x="25" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">Greene</text></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='ml'?'on':''}" id="ld-ml" data-ld="ml" onclick="App.setLiveDisplay('ml')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 14"><text x="32" y="12" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="2" fill="currentColor">MYLANDS</text></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='dh'?'on':''}" id="ld-dh" data-ld="dh" onclick="App.setLiveDisplay('dh')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 18"><text x="30" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">HERITAGE</text><line x1="6" y1="14.5" x2="54" y2="14.5" stroke="currentColor" stroke-width="0.6"/></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='dl'?'on':''}" id="ld-dl" data-ld="dl" onclick="App.setLiveDisplay('dl')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 18"><text x="22" y="14" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="currentColor">Dulux</text></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='eb'?'on':''}" id="ld-eb" data-ld="eb" onclick="App.setLiveDisplay('eb')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 16"><text x="31" y="13" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="11" fill="currentColor">earthborn</text></svg></span></button>
+        <button class="live-disp-btn pro-brand-only ${ld=='bulmer'?'on':''}" id="ld-bulmer" data-ld="bulmer" onclick="App.setLiveDisplay('bulmer')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 26"><text x="28" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">edward</text><text x="28" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="10" fill="currentColor">bulmer</text></svg></span></button>
         <button class="live-disp-btn ${ld=='digby'?'on':''}" id="ld-digby" data-ld="digby" onclick="App.setLiveDisplay('digby')"><span class="ld-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 26"><text x="26" y="11" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="9" letter-spacing="1" fill="currentColor">DIGBY</text><text x="26" y="23" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="8" letter-spacing="1" fill="currentColor">ARCHIVE</text></svg></span></button>
         </div>
       </div>
@@ -17137,22 +17141,20 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
-      ${App.isProMode ? `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="pro-brand-row" style="align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
           <div style="font-size:13px">Little Greene <span style="font-size:9px;color:var(--accent);font-family:var(--mono);margin-left:4px">PRO</span></div>
           <div style="font-size:10px;color:var(--muted)">LG paint names on swatches</div>
         </div>
         <div class="sw ${this.includeLG?'on':''}" onclick="SwatchExport.toggleLG(this)"></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="pro-brand-row" style="align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
           <div style="font-size:13px">Farrow &amp; Ball <span style="font-size:9px;color:var(--accent);font-family:var(--mono);margin-left:4px">PRO</span></div>
           <div style="font-size:10px;color:var(--muted)">F&amp;B paint names on swatches</div>
         </div>
         <div class="sw ${this.includeFB?'on':''}" onclick="SwatchExport.toggleFB(this)"></div>
       </div>
-      ` : ''}
 
       <div style="margin-bottom:16px">
         <div style="font-size:13px;margin-bottom:8px">Background</div>
@@ -19916,6 +19918,13 @@ function toggleProMode(cb) {
   state.isProMode = val;
   try { localStorage.setItem('spectrum-design-pro-mode', val ? '1' : '0'); } catch(e) {}
   document.body.classList.toggle('design-pro-on', val);
+  // v16.24: refresh detail panel if open, so brand blocks show/hide immediately
+  try {
+    const detPanel = document.getElementById('colour-detail');
+    if (detPanel && detPanel.style.display !== 'none' && State.focusedColor) {
+      Library.openDetail(State.focusedColor);
+    }
+  } catch(e) {}
   // Sync overlay checkbox + slider + label
   const cb2 = document.getElementById('pro-mode-toggle');
   if (cb2) cb2.checked = val;
