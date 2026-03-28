@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.19 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.20 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.19 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.20 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.19';  // v:v16.19 — The Safe Sovereign Archive
+  const APP_VERSION = '16.20';  // v:v16.20 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1036,16 +1036,43 @@ body:not(.pro-mode) #theory-dock-btn { display: none !important; }
 #gal-count{font-size:11px;color:var(--muted)}
 #library-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
 .polaroid{
-  background:#fff;padding:7px 7px 26px;border-radius:2px;
-  box-shadow:0 3px 12px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.15);
-  cursor:pointer;transition:transform .18s;user-select:none;-webkit-user-select:none;
-  position:relative;
+  position:relative;border-radius:2px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  cursor:pointer;transition:transform .18s,box-shadow .18s;
+  user-select:none;-webkit-user-select:none;
+  overflow:hidden;aspect-ratio:1;
 }
 .polaroid:active{transform:scale(.96)}
-.pol-block{width:100%;aspect-ratio:1;border-radius:1px;margin-bottom:5px}
-.pol-name{font-family:var(--sharpie);font-size:11px;color:#1a1a1a;text-align:center;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.pol-hex{font-family:'Space Mono',monospace;font-size:8px;color:#777;text-align:center;margin-top:2px}
-.pol-match{font-family:'Space Mono',monospace;font-size:7px;color:#aaa;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.polaroid.focused{box-shadow:0 0 0 2px var(--accent),0 2px 8px rgba(0,0,0,.25)}
+.pol-block{position:absolute;inset:0;width:100%;height:100%}
+.pol-info{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:20px 7px 7px;
+  background:linear-gradient(transparent,rgba(0,0,0,.55));
+}
+.pol-name{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);
+  line-height:1.25;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.pol-hex{
+  font-family:var(--mono);font-size:7px;
+  color:rgba(255,255,255,.75);text-shadow:0 1px 2px rgba(0,0,0,.9);
+  margin-top:2px;letter-spacing:.04em;
+}
+.pol-match{display:none}
+.pol-psych{position:absolute;top:5px;left:5px}
+.pol-psych .psych-pill{font-size:7px;padding:1px 4px;opacity:.85}
+.pol-folder-btn{
+  position:absolute;top:5px;right:5px;
+  opacity:0;transition:opacity .15s;
+  background:rgba(0,0,0,.45);border:none;border-radius:50%;
+  width:24px;height:24px;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;padding:0;
+}
+.polaroid:hover .pol-folder-btn,.polaroid:active .pol-folder-btn{opacity:1}
 .gal-empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)}
 .gal-empty h3{font-size:15px;margin-bottom:8px}
 .gal-empty p{font-size:12px;line-height:1.6}
@@ -13909,16 +13936,21 @@ const Library={
   },
 
   polaroidHTML(c){
-    const angle=(parseInt(c.id.slice(-3),36)%9-4)*0.7;
     const vtName='pol-'+c.id;
-    return`<div class="polaroid" data-id="${c.id}" style="transform:rotate(${angle}deg);view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name}  ${c.hex.toUpperCase()}" onclick="Library.setFocus('${c.id}');Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.setFocus('${c.id}');Library.openDetail('${c.id}')}">
+    const _rgb=CS.hexToRgb(c.hex);
+    const _lab=CS.rgbToLab(_rgb.r,_rgb.g,_rgb.b);
+    const _lrv=Math.round(CS.lrv(_lab));
+    const _pt=CS.psychTag(c.hex);
+    const _hex=c.hex.toUpperCase();
+    const _gamut=CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">!</span>':'';
+    const _seq=App.showSeq&&c.captureSeq?` <span style="opacity:.55">№${c.captureSeq}</span>`:'';
+    return`<div class="polaroid" data-id="${c.id}" style="view-transition-name:${vtName}" role="button" tabindex="0" aria-label="${c.name} ${_hex}" onclick="Library.setFocus('${c.id}');Library.openDetail('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){Library.setFocus('${c.id}');Library.openDetail('${c.id}')}">
       <div class="pol-block" style="background:${c.hex}"></div>
-      <div class="pol-name">${c.name}</div>
-      ${App.showSeq && c.captureSeq ? `<div class="pol-match" style="font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:1px">№ ${c.captureSeq}</div>` : ''}
-      <div class="pol-hex">${c.hex.toUpperCase()}${CS.isOutOfSRGBGamut(c.hex)?'<span class="gamut-warn" title="Out of sRGB Gamut">⚠️<span class="gamut-tip">Out of sRGB Gamut</span></span>':''}</div>
-      <div class="pol-match">${c.pantone?.code||''}</div>
-      <div class="pol-match">${(c.littleGreene||c.farrowBall)?`${c.littleGreene?.name||''}${c.littleGreene&&c.farrowBall?' · ':''}${c.farrowBall?.name||''}`:''}</div>
-      ${(()=>{const _pt=CS.psychTag(c.hex);return`<div class="pol-match" style="margin-top:2px"><span class="psych-pill psych-${_pt.category}">${_pt.label}</span></div>`})()}
+      <div class="pol-psych"><span class="psych-pill psych-${_pt.category}">${_pt.label}</span></div>
+      <div class="pol-info">
+        <div class="pol-name">${c.name}${_seq}</div>
+        <div class="pol-hex">${_hex}${_gamut} · LRV ${_lrv}</div>
+      </div>
       <button class="pol-folder-btn" onclick="event.stopPropagation();Library._addToFolder('${c.id}')" title="Move to folder">📁</button>
     </div>`;
   },
@@ -17093,7 +17125,7 @@ const SwatchExport = {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
           <div style="font-size:13px">Include labels</div>
-          <div style="font-size:10px;color:var(--muted)">Name, hex, Pantone</div>
+          <div style="font-size:10px;color:var(--muted)">Name, hex, heritage name</div>
         </div>
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
