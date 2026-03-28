@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.20 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.21 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.20 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.21 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.20';  // v:v16.20 — The Safe Sovereign Archive
+  const APP_VERSION = '16.21';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -4188,6 +4188,17 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
         <div class="settings-footer-name">Digby Oldridge</div>
         <div class="settings-footer-by">Made by Digby Oldridge &middot; 2026</div>
         <div style="font-size:9px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;margin-top:14px;line-height:1.8;text-align:center;padding:0 12px">Paint matches for specification reference only.<br>Not affiliated with any third-party paint brand.<br>Digby Oldridge &copy; 2026. All rights reserved.</div>
+      </div>
+
+      <div class="set-sec">Legal</div>
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:10px;padding:14px 0">
+        <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono)">Terms of Use</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">Digby Colour Sampler is provided for personal and professional use. All colour data, heritage names, and palette suggestions are for reference only. Colour appearance varies between screens, print, and physical paint. Always test physical samples before committing to a scheme. Digby Oldridge accepts no liability for decisions made on the basis of on-screen colour representation.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono);margin-top:4px">Heritage Colour Names</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">The 1,002-entry heritage palette is derived from public-domain topographical, historical, and folkloric sources. Names referencing Oxfordshire geography, Domesday records, and ancient folklore are original compositions. No paint brand names, registered trademarks, or proprietary colour systems are referenced or implied.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono);margin-top:4px">Privacy</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">Digby runs entirely on-device. No colour data, camera images, or usage information is transmitted to any server. All saved colours are stored locally in your browser. Camera access is used only for real-time colour sampling — no images are retained or uploaded.</div>
+        <div style="font-size:11px;color:var(--faint);font-family:var(--mono);margin-top:10px;text-align:center;width:100%">&copy; 2024&ndash;2026 Digby Oldridge. All rights reserved.<br>digby.shop</div>
       </div>
 
     </div>
@@ -17130,20 +17141,22 @@ const SwatchExport = {
         <div class="sw ${this.includeText?'on':''}" onclick="SwatchExport.toggleText(this)"></div>
       </div>
 
+      ${App.isProMode ? `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
-          <div style="font-size:13px">Little Greene</div>
+          <div style="font-size:13px">Little Greene <span style="font-size:9px;color:var(--accent);font-family:var(--mono);margin-left:4px">PRO</span></div>
           <div style="font-size:10px;color:var(--muted)">LG paint names on swatches</div>
         </div>
         <div class="sw ${this.includeLG?'on':''}" onclick="SwatchExport.toggleLG(this)"></div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
-          <div style="font-size:13px">Farrow &amp; Ball</div>
+          <div style="font-size:13px">Farrow &amp; Ball <span style="font-size:9px;color:var(--accent);font-family:var(--mono);margin-left:4px">PRO</span></div>
           <div style="font-size:10px;color:var(--muted)">F&amp;B paint names on swatches</div>
         </div>
         <div class="sw ${this.includeFB?'on':''}" onclick="SwatchExport.toggleFB(this)"></div>
       </div>
+      ` : ''}
 
       <div style="margin-bottom:16px">
         <div style="font-size:13px;margin-bottom:8px">Background</div>
@@ -17187,13 +17200,13 @@ const SwatchExport = {
       </div>
       ${sel.length === 0 ? `<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px 0">Select at least one colour above</div>` : ''}
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-p" style="flex:1;min-width:120px" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>↓ PNG</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <button class="btn btn-p" style="flex:2;min-width:140px;min-height:48px;font-size:15px;letter-spacing:.03em" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>↓ Save PNG</button>
+        <button class="btn btn-s" style="flex:1;min-width:80px;min-height:48px;font-size:14px" onclick="SwatchExport.share()">Share</button>
         ${App.isProMode ? `
-          <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
-          <button class="btn btn-s" style="flex:1;min-width:80px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
+          <button class="btn btn-s" style="flex:1;min-width:70px;min-height:48px;font-size:13px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
+          <button class="btn btn-s" style="flex:1;min-width:70px;min-height:48px;font-size:13px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
-        <button class="btn btn-s" onclick="SwatchExport.share()">Share</button>
       </div>
     </div>`;
   },
