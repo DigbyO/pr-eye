@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.25 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.26 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.25 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.26 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.25';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '16.26';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1729,7 +1729,7 @@ body.active-tab-sampler .pb-slot-empty{flex-shrink:0!important;width:60px!import
 
 /* ── v72/v73: Simple Mode (Pro Mode OFF) — hides advanced UI elements ────── */
 body:not(.design-pro-on) #tab-prompter{display:none!important}
-/* v16.25: paint brand elements — only visible in Designer Pro mode */
+/* v16.26: paint brand elements — only visible in Designer Pro mode */
 .pro-brand-only{display:none!important}
 body.design-pro-on .pro-brand-only{display:inline-flex!important}
 body.design-pro-on .pro-brand-row{display:flex!important}
@@ -2582,7 +2582,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby Oldridge</div>
-  <div class="ws-ver" id="ws-version">v16.25</div>
+  <div class="ws-ver" id="ws-version">v16.26</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -4051,7 +4051,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v16.25</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v16.26</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -14111,7 +14111,7 @@ const Library={
             +(alts?'<div class="pm-alts">'+alts+'</div>':'')
             +'</div>';
         };
-        const _proBlocks = App.isProMode
+        const _proBlocks = state.isProMode
           ? brandBlock('Farrow &amp; Ball',fbT,true)
             +brandBlock('Little Greene',lgT,true)
             +brandBlock('Dulux Heritage',dhT,true)
@@ -17200,7 +17200,7 @@ const SwatchExport = {
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
         <button class="btn btn-p" style="flex:2;min-width:140px;min-height:48px;font-size:15px;letter-spacing:.03em" onclick="SwatchExport.download()" ${sel.length===0?'disabled':''}>↓ Save PNG</button>
         <button class="btn btn-s" style="flex:1;min-width:80px;min-height:48px;font-size:14px" onclick="SwatchExport.share()">Share</button>
-        ${App.isProMode ? `
+        ${state.isProMode ? `
           <button class="btn btn-s" style="flex:1;min-width:70px;min-height:48px;font-size:13px" onclick="SwatchExport.downloadASE()" ${sel.length===0?'disabled':''}>↓ ASE</button>
           <button class="btn btn-s" style="flex:1;min-width:70px;min-height:48px;font-size:13px" onclick="SwatchExport.downloadCLR()" ${sel.length===0?'disabled':''}>↓ CLR</button>
         ` : ''}
@@ -19917,7 +19917,7 @@ function toggleProMode(cb) {
   state.isProMode = val;
   try { localStorage.setItem('spectrum-design-pro-mode', val ? '1' : '0'); } catch(e) {}
   document.body.classList.toggle('design-pro-on', val);
-  // v16.25: refresh detail panel if open, so brand blocks show/hide immediately
+  // v16.26: refresh detail panel if open, so brand blocks show/hide immediately
   try {
     const detPanel = document.getElementById('colour-detail');
     if (detPanel && detPanel.style.display !== 'none' && State.focusedColor) {
