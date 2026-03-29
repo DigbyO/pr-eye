@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Digby">
 <meta name="application-name" content="Digby">
-<meta name="description" content="Digby Oldridge v16.28 [The Safe Sovereign Archive] — Colour Sampler">
+<meta name="description" content="Digby Oldridge v16.29 [The Safe Sovereign Archive] — Colour Sampler">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Digby Oldridge v16.28 [The Safe Sovereign Archive]</title>
+<title>Digby Oldridge v16.29 [The Safe Sovereign Archive]</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.28';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '16.29';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored !== APP_VERSION) {
@@ -1729,7 +1729,7 @@ body.active-tab-sampler .pb-slot-empty{flex-shrink:0!important;width:60px!import
 
 /* ── v72/v73: Simple Mode (Pro Mode OFF) — hides advanced UI elements ────── */
 body:not(.design-pro-on) #tab-prompter{display:none!important}
-/* v16.28: paint brand elements — only visible in Designer Pro mode */
+/* v16.29: paint brand elements — only visible in Designer Pro mode */
 .pro-brand-only{display:none!important}
 body.design-pro-on .pro-brand-only{display:inline-flex!important}
 body.design-pro-on .pro-brand-row{display:flex!important}
@@ -2582,7 +2582,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 <!-- v:F1.12.5 — Welcome Screen -->
 <div id="welcome-screen">
   <div class="ws-logo">Digby Oldridge</div>
-  <div class="ws-ver" id="ws-version">v16.28</div>
+  <div class="ws-ver" id="ws-version">v16.29</div>
   <div class="ws-sub">Colour Sampler · digby.shop</div>
   <div class="ws-grid">
     <div class="ws-btn" onclick="WelcomeScreen.go('sampler')">
@@ -4051,7 +4051,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
       <!-- ── Signature header ── -->
       <div class="settings-hero-wrap">
         <div class="settings-hero-title">Settings</div>
-        <div class="settings-hero-ver" id="settings-ver-a">v16.28</div>
+        <div class="settings-hero-ver" id="settings-ver-a">v16.29</div>
       </div>
 
       <!-- ── Shop hero — brand moment ── -->
@@ -17407,15 +17407,14 @@ const SwatchExport = {
   },
 
   renderPolaroids(ctx, W, H, colours, scale) {
-    // v16.28: Paint chip design — full-bleed colour block (62%) + white info footer (38%)
-    // Standard industry paint sample format: IP-safe, functional, shows maximum colour
+    // v16.29: Full-bleed editorial — colour fills entire card, text overlaid via gradient
+    // Adaptive: dark colours get light-lift gradient + white text; light colours reversed.
     const n = colours.length;
     const cols = (n <= 2) ? n : (n === 3) ? 3 : Math.min(4, Math.ceil(Math.sqrt(n)));
     const rows = Math.ceil(n / cols);
-    const pad  = Math.round(16 * scale);
-    const gap  = Math.round(10 * scale);
-    const r    = Math.round(4 * scale);
-    const SPLIT = 0.62; // colour occupies top 62% of card
+    const pad  = Math.round(14 * scale);
+    const gap  = Math.round(8  * scale);
+    const r    = Math.round(5  * scale);
 
     const availW = W - pad * 2 - gap * Math.max(cols - 1, 0);
     const availH = H - pad * 2 - gap * Math.max(rows - 1, 0);
@@ -17424,92 +17423,89 @@ const SwatchExport = {
 
     colours.forEach((c, i) => {
       const col = i % cols, row = Math.floor(i / cols);
-      const x = pad + col * (cardW + gap);
-      const y = pad + row * (cardH + gap);
-      const colH  = Math.round(cardH * SPLIT);
-      const infoH = cardH - colH;
-      const cx    = x + cardW / 2;
+      const x  = pad + col * (cardW + gap);
+      const y  = pad + row * (cardH + gap);
+      const cx = x + cardW / 2;
 
-      // Card: white base + shadow
-      ctx.shadowColor   = 'rgba(0,0,0,0.18)';
-      ctx.shadowBlur    = Math.round(8 * scale);
+      // Adaptive text colours based on LRV
+      const _lrv   = c.lrv ?? 50;
+      const onDark = _lrv < 48;
+      const textCol = onDark ? 'rgba(255,255,255,0.95)' : 'rgba(18,18,18,0.88)';
+      const subCol  = onDark ? 'rgba(255,255,255,0.52)' : 'rgba(18,18,18,0.46)';
+      const gradEnd = onDark ? 'rgba(0,0,0,0.58)'       : 'rgba(255,255,255,0.80)';
+
+      // Card shadow + full-bleed colour fill
+      ctx.shadowColor   = 'rgba(0,0,0,0.28)';
+      ctx.shadowBlur    = Math.round(10 * scale);
       ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = Math.round(2 * scale);
-      ctx.fillStyle     = '#ffffff';
+      ctx.shadowOffsetY = Math.round(3 * scale);
+      ctx.fillStyle     = c.hex;
       this._roundRect(ctx, x, y, cardW, cardH, r); ctx.fill();
       ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
 
-      // Colour block — full width, top rounded corners only
+      // Gradient overlay — bottom 38%, fades from transparent to gradEnd
       ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + cardW - r, y); ctx.arcTo(x + cardW, y, x + cardW, y + r, r);
-      ctx.lineTo(x + cardW, y + colH);
-      ctx.lineTo(x, y + colH);
-      ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
-      ctx.closePath();
-      ctx.fillStyle = c.hex; ctx.fill();
+      this._roundRect(ctx, x, y, cardW, cardH, r); ctx.clip();
+      const gradH = Math.round(cardH * 0.38);
+      const grad  = ctx.createLinearGradient(x, y + cardH - gradH, x, y + cardH);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, gradEnd);
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y + cardH - gradH, cardW, gradH);
       ctx.restore();
 
-      // Thin separator line
-      ctx.strokeStyle = 'rgba(0,0,0,0.07)';
-      ctx.lineWidth   = Math.max(0.5, 0.5 * scale);
-      ctx.beginPath(); ctx.moveTo(x, y + colH); ctx.lineTo(x + cardW, y + colH); ctx.stroke();
+      // Typography — anchored from bottom up
+      ctx.shadowColor  = 'transparent';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'bottom';
 
-      // Info area typography
-      ctx.shadowColor = 'transparent';
-      ctx.textAlign   = 'center';
-      const nameSize  = Math.max(6, Math.round(Math.min(10 * scale, cardW * 0.085)));
-      const hexSize   = Math.max(5, Math.round(nameSize * 0.70));
-      const lrvSize   = Math.max(4, Math.round(nameSize * 0.58));
-      const maxLblW   = cardW - Math.round(10 * scale);
-      const infoTop   = y + colH + Math.round(infoH * 0.13);
+      const nameSize = Math.max(7, Math.round(Math.min(13 * scale, cardW * 0.092)));
+      const subSize  = Math.max(5, Math.round(nameSize * 0.62));
+      const maxLblW  = cardW - Math.round(14 * scale);
 
-      // Name — bold Permanent Marker
-      ctx.textBaseline = 'top';
-      ctx.fillStyle    = '#1a1a1a';
-      ctx.font = `bold ${nameSize}px 'Permanent Marker',cursive`;
-      let dn = c.name || c.hex.toUpperCase();
-      while (ctx.measureText(dn).width > maxLblW && dn.length > 3) dn = dn.slice(0, -1);
-      ctx.fillText(dn, cx, infoTop);
+      // Bottom margin from card edge
+      const btm = y + cardH - Math.round(cardH * 0.055);
 
-      // HEX
-      ctx.fillStyle = '#444444';
-      ctx.font = `${hexSize}px 'Space Mono',monospace`;
-      ctx.fillText(c.hex.toUpperCase(), cx, infoTop + Math.round(nameSize * 1.4));
+      // HEX · LRV on one compact line (lowest)
+      ctx.fillStyle = subCol;
+      ctx.font = `${subSize}px 'Space Mono',monospace`;
+      const metaLine = `${c.hex.toUpperCase()}  ·  LRV ${_lrv}%`;
+      ctx.fillText(metaLine, cx, btm);
 
-      // LRV
-      ctx.fillStyle = '#999999';
-      ctx.font = `${lrvSize}px 'Space Mono',monospace`;
-      ctx.fillText('LRV ' + (c.lrv || '?') + '%', cx,
-        infoTop + Math.round(nameSize * 1.4) + Math.round(hexSize * 1.5));
-
-      // Heritage description (when includeDesc toggled on and card tall enough)
+      // Heritage description (optional, above meta)
+      let descLineH = 0;
       if (this.includeDesc) {
         const _dn = (typeof HeritageNamer !== 'undefined') ? HeritageNamer.getBase(c.hex) : '';
-        if (_dn && infoH > 55 * scale) {
-          const ds = Math.max(4, Math.round(lrvSize * 0.88));
-          ctx.fillStyle = '#c0c0c0';
+        if (_dn) {
+          const ds = Math.max(4, Math.round(subSize * 0.88));
           ctx.font = `italic ${ds}px serif`;
-          const dy = infoTop + Math.round(nameSize*1.4) + Math.round(hexSize*1.5) + Math.round(lrvSize*1.7);
+          ctx.fillStyle = subCol;
           let desc = _dn;
           while (ctx.measureText(desc).width > maxLblW && desc.length > 10) {
             const sp = desc.lastIndexOf(' ');
             desc = desc.slice(0, sp > 0 ? sp : desc.length - 1);
           }
           if (desc.length < _dn.length) desc += '…';
-          if (dy < y + cardH - Math.round(4 * scale)) ctx.fillText(desc, cx, dy);
+          descLineH = Math.round(ds * 1.7);
+          ctx.fillText(desc, cx, btm - Math.round(subSize * 1.7));
         }
       }
+
+      // Colour name — largest, just above meta (and desc if present)
+      const nameY = btm - Math.round(subSize * 1.7) - descLineH - Math.round(nameSize * 0.35);
+      ctx.fillStyle = textCol;
+      ctx.font = `bold ${nameSize}px 'Permanent Marker',cursive`;
+      let dn = c.name || c.hex.toUpperCase();
+      while (ctx.measureText(dn).width > maxLblW && dn.length > 3) dn = dn.slice(0, -1);
+      ctx.fillText(dn, cx, nameY);
     });
 
     // Watermark
-    ctx.fillStyle    = 'rgba(150,150,150,0.5)';
-    ctx.font         = `${Math.max(6, Math.round(8 * scale))}px 'Space Mono',monospace`;
+    ctx.fillStyle    = 'rgba(200,200,200,0.38)';
+    ctx.font         = `${Math.max(6, Math.round(7 * scale))}px 'Space Mono',monospace`;
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('digby.shop', W - Math.round(12 * scale), H - Math.round(8 * scale));
+    ctx.fillText('digby.shop', W - Math.round(10 * scale), H - Math.round(8 * scale));
   },
 
   renderBlocks(ctx, W, H, colours, scale) {
@@ -19991,7 +19987,7 @@ function toggleProMode(cb) {
   state.isProMode = val;
   try { localStorage.setItem('spectrum-design-pro-mode', val ? '1' : '0'); } catch(e) {}
   document.body.classList.toggle('design-pro-on', val);
-  // v16.28: refresh detail panel if open, so brand blocks show/hide immediately
+  // v16.29: refresh detail panel if open, so brand blocks show/hide immediately
   try {
     const detPanel = document.getElementById('colour-detail');
     if (detPanel && detPanel.style.display !== 'none' && State.focusedColor) {
