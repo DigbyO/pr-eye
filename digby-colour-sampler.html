@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Colour Memory">
 <meta name="application-name" content="Colour Memory">
-<meta name="description" content="Colour Memory v17.0 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Colour Memory v17.1 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Colour Memory v17.0</title>
+<title>Colour Memory v17.1</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '17.0';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '17.1';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored && stored !== APP_VERSION) {
@@ -2857,7 +2857,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
     <input type="file" id="up-input" accept="image/*" style="display:none" onchange="Sampler.loadUpload(this)">
 
     <!-- Colour Wheel Picker -->
-    <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--bg)">
+    <div id="wheel-wrap" style="display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--bg);padding-bottom:calc(var(--tab-h) + 16px + var(--safe-bottom) + 160px)">
       <!-- v:F12.31 — Upload from picker -->
       <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 0">
         <button class="btn btn-s btn-sm" style="flex-shrink:0"
