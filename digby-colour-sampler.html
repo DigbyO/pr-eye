@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Colour Memory">
 <meta name="application-name" content="Colour Memory">
-<meta name="description" content="Colour Memory v16.30 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Colour Memory v17.0 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Colour Memory v16.30</title>
+<title>Colour Memory v17.0</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,13 +28,15 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '16.30';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '17.0';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
-    if (stored !== APP_VERSION) {
+    if (stored && stored !== APP_VERSION) {
       localStorage.setItem('stored_version', APP_VERSION);
       if ('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
       window.location.reload();
+    } else {
+      localStorage.setItem('stored_version', APP_VERSION);
     }
   } catch(e) {
     // Safari Private Mode — localStorage throws; skip version check silently
@@ -10292,7 +10294,7 @@ const App={
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">⚡ Auto-Palette — K-Means Clustering</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">To extract a palette from a photo, Colour Memory runs a <b style="color:var(--text)">K-Means Clustering</b> algorithm on a background Web Worker thread, so the UI never freezes. It treats every pixel as a data point in 3D RGB space and iteratively groups them until it finds the dominant mathematical centres — ensuring your palette represents the true soul of an image, not just random pixels. Extracts 3, 6, or 9 dominant colours in under a second.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">To extract a palette from a photo, Digby runs a <b style="color:var(--text)">K-Means Clustering</b> algorithm on a background Web Worker thread, so the UI never freezes. It treats every pixel as a data point in 3D RGB space and iteratively groups them until it finds the dominant mathematical centres — ensuring your palette represents the true soul of an image, not just random pixels. Extracts 3, 6, or 9 dominant colours in under a second.</div>
           </div>
 
           <div>
@@ -10302,7 +10304,7 @@ const App={
 
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);margin-bottom:3px">🌐 Online Colour Names</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">When online, Colour Memory queries The Color API (thecolorapi.com) to retrieve a human-readable name for each saved colour — names like "Dusty Rose" or "Slate Grey" that feel more natural than algorithmic codes. This is the only network call the app makes; all matching, science, and analysis runs entirely on your device.</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">When online, Digby queries The Color API (thecolorapi.com) to retrieve a human-readable name for each saved colour — names like "Dusty Rose" or "Slate Grey" that feel more natural than algorithmic codes. This is the only network call the app makes; all matching, science, and analysis runs entirely on your device.</div>
           </div>
 
           <div style="font-size:9px;color:var(--faint);text-align:center;padding-top:4px;font-family:var(--mono);line-height:1.6">
@@ -13465,7 +13467,7 @@ const Sampler={
              + 'cursor:pointer;border-bottom:1px solid var(--border);user-select:none"'
              + ' onmouseenter="this.style.background=\'var(--surface2)\'"'
              + ' onmouseleave="this.style.background=\'\'"'
-             + ' onclick="ColourWheel.fromHex(\'' + p.hex + '\');document.getElementById(\'sampler-paint-search\').value=\'' + label.replace(/'/g,'\\'') + '\';document.getElementById(\'sampler-paint-dropdown\').style.display=\'none\'">'
+             + ' onclick="ColourWheel.fromHex(\'' + p.hex + '\');document.getElementById(\'sampler-paint-search\').value=\'' + label.replace(/'/g,'\\\'') + '\';document.getElementById(\'sampler-paint-dropdown\').style.display=\'none\'">'
              + '<div style="width:22px;height:22px;border-radius:4px;background:' + p.hex + ';border:1px solid rgba(128,128,128,.35);flex-shrink:0"></div>'
              + '<div style="flex:1;min-width:0">'
              + '<div style="font-size:11px;color:var(--text);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</div>'
@@ -13759,7 +13761,7 @@ const FolderManager = {
     const bar = document.getElementById('gal-folder-bar');
     if (!bar) return;
     bar.innerHTML = this._folders.map(f => {
-      const safe = f.replace(/'/g,"\'");
+      const safe = f.replace(/'/g,"\\'");
       return `<button class="folder-tab${f === this._active ? ' on' : ''}" onclick="FolderManager.setActive('${safe}')">${f}${f !== 'Default' ? ` <span onclick="event.stopPropagation();FolderManager.deleteFolder('${safe}');" style="opacity:.5;margin-left:4px;font-size:10px;cursor:pointer">×</span>` : ''}</button>`;
     }).join('') + `<button id="gal-add-folder-btn" onclick="FolderManager._promptNew()">+ New Folder</button>`;
   },
@@ -14511,7 +14513,7 @@ const Library={
     const ov=document.createElement('div');
     ov.id='_fraggle-folder-ov';
     ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:var(--z-top);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
-    const btns=folders.map(f=>{const isCur=c.folder===f;return`<button onclick="Library._doMove('${id.replace(/'/g,"\'")}','${f.replace(/'/g,"\'")}');document.getElementById('_fraggle-folder-ov').remove()"
+    const btns=folders.map(f=>{const isCur=c.folder===f;return`<button onclick="Library._doMove('${id.replace(/'/g,"\\'")}','${f.replace(/'/g,"\\'")}');document.getElementById('_fraggle-folder-ov').remove()"
       style="display:block;width:100%;text-align:left;padding:10px 14px;background:${isCur?'#243824':'#242424'};border:1px solid ${isCur?'#3a6a3a':'#3a3a3a'};border-radius:7px;color:${isCur?'#7fff7f':'#ccc'};font-size:13px;font-family:var(--mono);cursor:pointer;margin-bottom:6px">${f}${isCur?' ✓':''}</button>`;}).join('');
     const label=(c.name||c.hex||'colour').toUpperCase().slice(0,24);
     ov.innerHTML=`<div style="background:#1e1e1e;border:1px solid #444;border-radius:12px;padding:20px;width:100%;max-width:300px">
