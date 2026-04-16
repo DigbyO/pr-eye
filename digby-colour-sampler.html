@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Colour Memory">
 <meta name="application-name" content="Colour Memory">
-<meta name="description" content="Colour Memory v17.1 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Colour Memory v17.2 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Colour Memory v17.1</title>
+<title>Colour Memory v17.2</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '17.1';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '17.2';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored && stored !== APP_VERSION) {
@@ -2535,7 +2535,7 @@ body:not(.pro-mode) #live-imm-btn { display: none !important; }
 }
 
 /* v16.18: The Library background */
-#library-toolbar, #library-grid, #library-actions { background: #FAFAFA; }
+#library-toolbar, #library-grid, #library-actions { background: var(--bg); }
 </style>
 </head>
 <body>
@@ -9906,7 +9906,39 @@ const App={
     if(modEl) modEl.classList.add('active');
     if(tabEl) tabEl.classList.add('on');
     this.tab=t;
-    if(t==='library') Library.render();
+    if(t==='library') {
+      Library.render();
+      // v17.1 — swipe left/right on library to cycle sort modes
+      if (!Library._swipeInit) {
+        Library._swipeInit = true;
+        const _sorts = ['newest','hue','lightness','palette'];
+        const _mod = document.getElementById('mod-library');
+        if (_mod) {
+          let _lx = 0, _ly = 0, _lswiping = false;
+          _mod.addEventListener('touchstart', e => {
+            _lx = e.touches[0].clientX; _ly = e.touches[0].clientY; _lswiping = false;
+          }, {passive: true});
+          _mod.addEventListener('touchmove', e => {
+            const dx = e.touches[0].clientX - _lx;
+            const dy = e.touches[0].clientY - _ly;
+            if (!_lswiping && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) _lswiping = true;
+          }, {passive: true});
+          _mod.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - _lx;
+            if (_lswiping && Math.abs(dx) > 60) {
+              const cur = _sorts.indexOf(Library.sort);
+              const next = dx < 0
+                ? _sorts[(cur + 1) % _sorts.length]
+                : _sorts[(cur - 1 + _sorts.length) % _sorts.length];
+              Library.setSort(next);
+              Library.render();
+              App.toast('Sort: ' + next.charAt(0).toUpperCase() + next.slice(1));
+            }
+            _lswiping = false;
+          }, {passive: true});
+        }
+      }
+    }
     if(t==='explorer') Explorer.onOpen();
     if(t==='prompter') Prompter.render();
     if(t==='palette'){
@@ -10016,10 +10048,85 @@ const App={
     if(all.length&&dot)dot.style.background=all[0].hex;
   },
 
-  openOv(html){
-    Haptics.light(); // v:v13.55 modal open
+  openOv(html, _ovLibId){
+    Haptics.light();
     document.getElementById('ov-content').innerHTML=html;
-    document.getElementById('ov').classList.add('open');
+    const ov = document.getElementById('ov');
+    ov.classList.add('open');
+    // v17.1 — swipe left/right to browse library colours in detail view
+    const panel = document.getElementById('ov-panel');
+    if (panel) {
+      panel._libNavId = _ovLibId || null;
+      if (!panel._libSwipeInit) {
+        panel._libSwipeInit = true;
+        let _ox = 0, _oy = 0, _oswiping = false;
+        panel.addEventListener('touchstart', e => {
+          _ox = e.touches[0].clientX; _oy = e.touches[0].clientY; _oswiping = false;
+        }, {passive: true});
+        panel.addEventListener('touchmove', e => {
+          const dx = e.touches[0].clientX - _ox;
+          const dy = e.touches[0].clientY - _oy;
+          if (!_oswiping && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) _oswiping = true;
+        }, {passive: true});
+        panel.addEventListener('touchend', e => {
+          const dx = e.changedTouches[0].clientX - _ox;
+          const dy = e.changedTouches[0].clientY - _oy;
+          // Swipe up = like, swipe down = delete
+          if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx)) {
+            if (dy < 0 && panel._libNavId) {
+              // Swipe UP = like
+              const c = DS.get(panel._libNavId);
+              if (c) {
+                const tags = Array.isArray(c.tags) ? c.tags : [];
+                if (!tags.includes('♥')) {
+                  tags.push('♥');
+                  DS.update(panel._libNavId, { tags });
+                  App.toast('♥ Liked');
+                } else {
+                  App.toast('Already liked');
+                }
+              }
+            } else if (dy > 0 && panel._libNavId) {
+              // Swipe DOWN = delete with undo
+              const delId = panel._libNavId;
+              DS.remove(delId);
+              App.forceCloseOv();
+              App.refresh();
+              const toastEl = document.getElementById('toast');
+              if (toastEl) {
+                toastEl.innerHTML = 'Deleted &nbsp;<span onclick="DS.undoRemove()" style="text-decoration:underline;cursor:pointer;font-weight:700">Undo</span>';
+                toastEl.classList.add('show');
+                clearTimeout(App._toastT);
+                App._toastT = setTimeout(() => { toastEl.classList.remove('show'); toastEl.innerHTML = ''; }, 7000);
+              }
+            }
+          } else if (_oswiping && Math.abs(dx) > 55 && panel._libNavId) {
+            // Swipe LEFT/RIGHT = browse colours
+            const sorted = Library._currentSorted || DS.all();
+            const idx = sorted.findIndex(c => c.id === panel._libNavId);
+            if (idx !== -1) {
+              const next = dx < 0 ? sorted[idx + 1] : sorted[idx - 1];
+              if (next) {
+                panel.style.transition = 'transform .18s';
+                panel.style.transform = `translateX(${dx < 0 ? '-100%' : '100%'})`;
+                setTimeout(() => {
+                  panel.style.transition = 'none';
+                  panel.style.transform = `translateX(${dx < 0 ? '100%' : '-100%'})`;
+                  Library.openDetail(next.id);
+                  requestAnimationFrame(() => {
+                    panel.style.transition = 'transform .18s';
+                    panel.style.transform = '';
+                  });
+                }, 180);
+              }
+            }
+          }
+          _oswiping = false;
+        }, {passive: true});
+      } else {
+        panel._libNavId = _ovLibId || null;
+      }
+    }
   },
 
 
@@ -14176,6 +14283,13 @@ const Library={
   openDetail(id){
     let c = DS.get(id);
     if (!c) return;
+    // v17.1 — cache current sorted list for swipe navigation
+    try {
+      const allRaw = DS.all();
+      const activeFolder = (typeof FolderManager !== 'undefined') ? FolderManager.active : 'Default';
+      const all = allRaw.filter(c => !c.folder || c.folder === activeFolder);
+      Library._currentSorted = Library._sortedEntries(all);
+    } catch(e) { Library._currentSorted = DS.all(); }
     // Hydrate missing fields
     if (!c.lab) { const rgb = CS.hexToRgb(c.hex); c.lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b); }
     if (!c.hsl) { const rgb = CS.hexToRgb(c.hex); c.hsl = CS.rgbToHsl(rgb.r, rgb.g, rgb.b); }
@@ -14432,7 +14546,7 @@ const Library={
         </div>
       </div>
 
-    </div>`);
+    </div>`, id);
   },
 
   // viewDetail(hex) — open colour detail by hex code (Prompter + generated palettes)
@@ -18748,6 +18862,10 @@ const PaletteBuilder = {
     const lbl   = document.getElementById('pb-algo-tray-label');
     if (!tray || !chips) return;
     if (lbl) lbl.textContent = label;
+    // v17.1 — filter out colours already in the palette
+    const existingHexes = this.colours.map(c => c.hex.toUpperCase());
+    hexes = hexes.filter(hex => !existingHexes.includes(hex.toUpperCase()) && !this._isDuplicate(hex));
+    if (!hexes.length) { App.toast('All suggestions already in palette — try a different theme'); return; }
     chips.innerHTML = hexes.map(hex => {
       const rgb = CS.hexToRgb(hex);
       const lab = CS.rgbToLab(rgb.r, rgb.g, rgb.b);
@@ -19747,6 +19865,56 @@ const PaletteBuilder = {
       }
     } catch(e) {}
     try { this._renderPageDots(); } catch(e) {}  // v:v14.09
+    // v17.1 — swipe down=delete, swipe up=save to library on palette slots
+    try {
+      grid.querySelectorAll('.pb-slot').forEach((slot, i) => {
+        let tx = 0, ty = 0, swiping = false, dir = null;
+        slot.addEventListener('touchstart', e => {
+          tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+          swiping = false; dir = null;
+          slot.style.transition = 'none';
+        }, {passive: true});
+        slot.addEventListener('touchmove', e => {
+          const dx = e.touches[0].clientX - tx;
+          const dy = e.touches[0].clientY - ty;
+          if (!swiping && Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+            swiping = true; dir = dy > 0 ? 'down' : 'up';
+          }
+          if (swiping) {
+            const clamp = dir === 'down'
+              ? Math.min(Math.max(dy, 0), 100)
+              : Math.max(Math.min(dy, 0), -100);
+            slot.style.transform = `translateY(${clamp}px)`;
+            slot.style.opacity = Math.max(0.3, 1 - Math.abs(clamp)/100);
+            slot.style.background = dir === 'down'
+              ? `rgba(220,60,60,${Math.abs(clamp)/200})`
+              : `rgba(60,180,100,${Math.abs(clamp)/200})`;
+          }
+        }, {passive: true});
+        slot.addEventListener('touchend', e => {
+          const dy = e.changedTouches[0].clientY - ty;
+          slot.style.transition = 'transform .2s, opacity .2s, background .2s';
+          slot.style.transform = '';
+          slot.style.opacity = '';
+          slot.style.background = '';
+          if (swiping && dir === 'down' && dy > 70) {
+            PaletteBuilder.remove(i);
+            App.toast('🗑 Colour removed');
+          } else if (swiping && dir === 'up' && dy < -70) {
+            PaletteBuilder.saveToLib(i);
+            App.toast('♡ Saved to library');
+          }
+          swiping = false; dir = null;
+        }, {passive: true});
+        slot.addEventListener('touchcancel', () => {
+          slot.style.transition = '';
+          slot.style.transform = '';
+          slot.style.opacity = '';
+          slot.style.background = '';
+          swiping = false; dir = null;
+        }, {passive: true});
+      });
+    } catch(e) {}
     // v:v14.14 — lifetime counter
     try {
       const _cEl = document.getElementById('pb-found-count');
