@@ -20954,9 +20954,14 @@ self.onmessage = function(e) {
   const samples = [];
   // v446: stride=16 — samples every 4th pixel for 60fps on hi-res images
   const STRIDE = 16;
+  // v17: track brightest pixel across ALL pixels (including highlights)
+  let brightestPixel = null, brightestLum = -1;
   for (let i = 0; i < pixels.length; i += STRIDE) {
     const r = pixels[i], g = pixels[i+1], b = pixels[i+2], a = pixels[i+3];
     if (a < 128) continue;
+    // Track brightest regardless of thresholds
+    const lum = 0.299*r + 0.587*g + 0.114*b;
+    if (lum > brightestLum) { brightestLum = lum; brightestPixel = [r, g, b]; }
     const bright = (r + g + b) / 3;
     if (bright < 12 || bright > 248) continue;
     samples.push([r, g, b]);
@@ -21019,6 +21024,19 @@ self.onmessage = function(e) {
 
   // Build combined array [centroid, weight] then sort by luminance
   const combined = centroids.map((c, i) => ({ c, w: finalClusters[i] }));
+
+  // v17: Force brightest pixel into palette if not already represented
+  if (brightestPixel) {
+    const alreadyCovered = combined.some(x => dist2(x.c, brightestPixel) < 2000);
+    if (!alreadyCovered) {
+      // Replace the darkest (least luminant) centroid with the brightest pixel
+      combined.sort((a, b) =>
+        (0.299*a.c[0]+0.587*a.c[1]+0.114*a.c[2]) - (0.299*b.c[0]+0.587*b.c[1]+0.114*b.c[2])
+      );
+      combined[0] = { c: brightestPixel, w: 1 }; // small weight — it's a highlight
+    }
+  }
+
   combined.sort((a, b) =>
     (0.299*b.c[0]+0.587*b.c[1]+0.114*b.c[2]) - (0.299*a.c[0]+0.587*a.c[1]+0.114*a.c[2])
   );
