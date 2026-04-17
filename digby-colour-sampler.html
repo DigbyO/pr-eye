@@ -17,10 +17,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Colour Memory">
 <meta name="application-name" content="Colour Memory">
-<meta name="description" content="Colour Memory v17.2 — Colour Sampler by Digby Oldridge">
+<meta name="description" content="Colour Memory v17.3 — Colour Sampler by Digby Oldridge">
 <meta name="theme-color" content="#0c0c0c">
 <link rel="manifest" id="pwa-manifest-link">
-<title>Colour Memory v17.2</title>
+<title>Colour Memory v17.3</title>
 <!-- PRODUCT ANALYTICS — paste your tracking snippet / ID here -->
 <script>
   // Replace this block with your analytics provider (e.g. Plausible, PostHog, GA4).
@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '17.2';  // v:v16.21 — The Safe Sovereign Archive
+  const APP_VERSION = '17.3';  // v:v16.21 — The Safe Sovereign Archive
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored && stored !== APP_VERSION) {
@@ -7454,12 +7454,12 @@ const PAINT_DB = [...LG, ...FB, ...DL, ...DH, ...MYLANDS, ...EB, ...EBULMER];
 const HeritageNamer = (function() {
   'use strict';
   const _P = [
-  {n:'Ridgeway Scour — Chalk Wash',h:'#F8F5EF',b:'Historical Scour deposit.'},
-  {n:'Kirtlington Stone — Foundation Stone',h:'#F5F2EC',b:'Historical Bedrock deposit.'},
+  {n:'Ridgeway Scour',h:'#F8F5EF',b:'Historical Scour deposit.'},
+  {n:'Kirtlington Stone',h:'#F5F2EC',b:'Historical Bedrock deposit.'},
   {n:'Vale Gossamer',h:'#F9F7F4',b:''},
-  {n:'Filkins Lime — Kiln Residue',h:'#F4F1E8',b:'Historical Lime deposit.'},
-  {n:'Wayland\'s Vellum — Parchment Tone',h:'#F6F3E9',b:'Historical Vellum deposit.'},
-  {n:'Idstone Bloom — Surface Haze',h:'#F3F0E7',b:'Historical Bloom deposit.'},
+  {n:'Filkins Lime',h:'#F4F1E8',b:'Historical Lime deposit.'},
+  {n:'Wayland\'s Vellum',h:'#F6F3E9',b:'Historical Vellum deposit.'},
+  {n:'Idstone Bloom',h:'#F3F0E7',b:'Historical Bloom deposit.'},
   {n:'Uffington Chalk',h:'#F7F5F1',b:'Historical Chalk deposit.'},
   {n:'Manger Frost',h:'#FAFAF8',b:''},
   {n:'Littleworth Dust',h:'#F2EFEA',b:''},
@@ -7479,10 +7479,10 @@ const HeritageNamer = (function() {
   {n:'Hackpen Nave',h:'#EDEAE5',b:''},
   {n:'Dragon Hill Pallor',h:'#F7F5F2',b:''},
   {n:'Cherbury Caliche',h:'#ECE8E3',b:''},
-  {n:'Daglingworth Chalk — Kiln Residue',h:'#F5F3EF',b:'Historical Lime deposit.'},
-  {n:'Abingdon Vellum — Parchment Tone',h:'#F2EFE9',b:'Historical Vellum deposit.'},
+  {n:'Daglingworth Chalk',h:'#F5F3EF',b:'Historical Lime deposit.'},
+  {n:'Abingdon Vellum',h:'#F2EFE9',b:'Historical Vellum deposit.'},
   {n:'Aldbourne Cob',h:'#EEE9E3',b:''},
-  {n:'Ock Limestone — Kiln Residue',h:'#F0EDE7',b:'Historical Lime deposit.'},
+  {n:'Ock Limestone',h:'#F0EDE7',b:'Historical Lime deposit.'},
   {n:'Thames Chalk-Run',h:'#F8F6F2',b:'Historical Chalk deposit.'},
   {n:'Fernham Fleece',h:'#F4F2EE',b:''},
   {n:'Baulking White',h:'#F9F7F5',b:''},
@@ -7494,13 +7494,13 @@ const HeritageNamer = (function() {
   {n:'Grove Quicklime',h:'#EFE9DF',b:''},
   {n:'Pusey Common Fleece',h:'#F6F3EE',b:''},
   {n:'Stanford Bone-Ash',h:'#EBE7E0',b:''},
-  {n:'East Hanney Lime — Kiln Residue',h:'#EDE9E3',b:'Historical Lime deposit.'},
+  {n:'East Hanney Lime',h:'#EDE9E3',b:'Historical Lime deposit.'},
   {n:'Marcham Glebe',h:'#EFE9E2',b:''},
   {n:'Garford Caliche',h:'#EBE7DF',b:''},
   {n:'Tubney Pasture',h:'#F1EEEA',b:''},
   {n:'Drayton Silt',h:'#EDE8E1',b:''},
   {n:'Steventon Nave',h:'#F0ECE6',b:''},
-  {n:'Lock\'s Book Vellum — Parchment Tone',h:'#F3F0EB',b:'Historical Vellum deposit.'},
+  {n:'Lock\'s Book Vellum',h:'#F3F0EB',b:'Historical Vellum deposit.'},
   {n:'Abingdon Fair',h:'#F6F4F1',b:''},
   {n:'Uffington Bleach',h:'#F9F8F5',b:''},
   {n:'Ashbury Flux',h:'#F1EDE7',b:''},
@@ -7509,7 +7509,7 @@ const HeritageNamer = (function() {
   {n:'Hinton Parva Plaster',h:'#EFE9E3',b:''},
   {n:'Wanborough Cob',h:'#F2EFE8',b:''},
   {n:'Ogbourne Silt',h:'#ECEAE5',b:''},
-  {n:'Cropredy Vellum — Parchment Tone',h:'#F3F0EA',b:'Historical Vellum deposit.'},
+  {n:'Cropredy Vellum',h:'#F3F0EA',b:'Historical Vellum deposit.'},
   {n:'Ridgeway Oolite',h:'#E8E3D6',b:''},
   {n:'Wayland Sarsen',h:'#DDD8CC',b:''},
   {n:'Uffington Loam',h:'#DED9CE',b:''},
@@ -7732,7 +7732,7 @@ const HeritageNamer = (function() {
   {n:'Bibury Madder',h:'#9C4236',b:''},
   {n:'Wayland Smelter',h:'#8C3C2A',b:''},
   {n:'Uffington Foxed',h:'#A84C38',b:''},
-  {n:'Hatherop Madder — Chalk Wash',h:'#9E4030',b:'Historical Scour deposit.'},
+  {n:'Hatherop Madder',h:'#9E4030',b:'Historical Scour deposit.'},
   {n:'Ridgeway Ochre',h:'#B05A3A',b:''},
   {n:'Vale Brick',h:'#9A4530',b:''},
   {n:'Cherbury Palisade',h:'#8E3B2A',b:''},
@@ -7880,7 +7880,7 @@ const HeritageNamer = (function() {
   {n:'Uffington Bronze',h:'#6A6E3A',b:''},
   {n:'Knighton Bronze',h:'#7A7848',b:''},
   {n:'Coxwell Moss',h:'#7E8855',b:''},
-  {n:'Aldsworth Lime — Kiln Residue',h:'#6E7645',b:'Historical Lime deposit.'},
+  {n:'Aldsworth Lime',h:'#6E7645',b:'Historical Lime deposit.'},
   {n:'Ardington Bronze',h:'#6A6838',b:''},
   {n:'Thames Eel-Green',h:'#687040',b:''},
   {n:'Segsbury Bronze',h:'#746E40',b:''},
@@ -8032,7 +8032,7 @@ const HeritageNamer = (function() {
   {n:'Standlake Silt',h:'#6A5840',b:''},
   {n:'Wayland Hearth',h:'#7A5A3A',b:''},
   {n:'Vale Linseed',h:'#C8B070',b:''},
-  {n:'Ridgeway Chalk-Bloom — Surface Haze',h:'#E8E6E0',b:'Historical Bloom deposit.'},
+  {n:'Ridgeway Chalk-Bloom',h:'#E8E6E0',b:'Historical Bloom deposit.'},
   {n:'Steventon Turf',h:'#7E7E70',b:''},
   {n:'Manger Dew',h:'#D8DDD8',b:''},
   {n:'Uffington Noon',h:'#D4C8A0',b:''},
@@ -8100,7 +8100,7 @@ const HeritageNamer = (function() {
   {n:'Wittenham Chalk',h:'#F3EFE8',b:'Historical Chalk deposit.'},
   {n:'Brightwell Marl',h:'#ECE9E1',b:''},
   {n:'Cholsey Chalk',h:'#F2EEE7',b:'Historical Chalk deposit.'},
-  {n:'Blewbury Lime — Kiln Residue',h:'#F4F3EC',b:'Historical Lime deposit.'},
+  {n:'Blewbury Lime',h:'#F4F3EC',b:'Historical Lime deposit.'},
   {n:'Aston Upthorpe',h:'#EDEAE3',b:''},
   {n:'Chilton Stone',h:'#E2DDD0',b:''},
   {n:'Harwell Stone',h:'#DEDACD',b:''},
@@ -8240,7 +8240,7 @@ const HeritageNamer = (function() {
   {n:'Sinodun Stone',h:'#D3C8AC',b:''},
   {n:'Tubney Stone',h:'#D8CEAF',b:''},
   {n:'Eaton Hastings',h:'#D5C8AA',b:''},
-  {n:'Buscot Limestone — Kiln Residue',h:'#D7CAB0',b:'Historical Lime deposit.'},
+  {n:'Buscot Limestone',h:'#D7CAB0',b:'Historical Lime deposit.'},
   {n:'Coleshill Stone',h:'#D8CEB0',b:''},
   {n:'Little Faringdon',h:'#D5CAA8',b:''},
   {n:'Lechlade Stone',h:'#D7CBB0',b:''},
@@ -8457,19 +8457,19 @@ const HeritageNamer = (function() {
   {n:'Ridgeway Chalk Night',h:'#F0ECE4',b:'Historical Chalk deposit.'},
   {n:'Abingdon Night',h:'#1A191A',b:''},
   {n:'Barnsley Rose',h:'#FF69B4',b:''},
-  {n:'Faringdon Smalt',h:'#4050B8',b:'Smalt — cobalt glass ground to powder. Used in Tudor wall paintings at Faringdon House estate. C16th–C18th standard blue pigment before Prussian Blue (1704).'},
-  {n:'Godstow Ultramarine',h:'#2838A8',b:'Ultramarine from lapis lazuli — traded through medieval Oxford via Godstow Nunnery accounts (1130s). The most expensive pigment in medieval England.'},
-  {n:'Radcot Verdigris — Basic copper acetate Cu(CH3COO)2·Cu(OH)2',h:'#2E8C6A',b:'Verdigris — copper acetate formed on bronze fittings at Radcot Bridge (earliest Thames bridge, C12th). Scraped and traded as pigment. Roman through medieval standard.'},
-  {n:'Uffington Malachite — Cu2CO3(OH)2',h:'#1E9050',b:'Malachite — copper carbonate mineral. Bronze Age copper-working at Uffington (White Horse hill fort area). Pre-Roman pigment, the earliest bright green in English use.'},
-  {n:'Wayland Orpiment — As2S3',h:'#D4A800',b:'Orpiment (arsenic trisulphide) — medieval pigment traded through Wayland\'s Smithy market. The original \'king\'s yellow\', brighter than weld or gorse extraction. C9th–C16th.'},
-  {n:'Abingdon Azurite — Cu3(CO3)2(OH)2',h:'#3068C0',b:'Azurite — basic copper carbonate (blue form of malachite). Documented in Abingdon Abbey accounts, 1220s, for wall decoration of the chapter house. The medieval mid-blue.'},
-  {n:'Cherbury Cinnabar — HgS (mercury sulphide)',h:'#C83030',b:'Cinnabar (mercury sulphide) — the original vermilion. Traded through Cherbury Camp (Iron Age hillfort, Vale of White Horse). Pre-Roman to C18th. Brighter than any iron-oxide red.'},
-  {n:'Wittenham Viridian — Cr2O3·2H2O',h:'#1A7860',b:'Viridian (chromium oxide dihydrate) — post-1838 synthetic pigment. Wittenham Clumps viewpoint pigment — the exact colour of the Thames Valley seen from height on a clear September morning.'},
-  {n:'Dorchester Woad-Indigo — Indigotin (C16H10N2O2) at saturation',h:'#2E4888',b:'Woad-indigo (indigotin) at full extraction depth. Dorchester-on-Thames was a major woad-processing site — the town\'s Roman and Saxon textile trade is documented. Deep vat blue.'},
-  {n:'Bampton Manganese Violet — Mn(NH4)(P2O7)',h:'#7840A0',b:'Manganese violet (manganese ammonium pyrophosphate) — first synthetic violet, 1868. Bampton\'s medieval textile guild records document purple mordant dyeing using local mineral deposits.'},
+  {n:'Faringdon Smalt',h:'#4050B8',b:'Smalt — cobalt glass ground to powder. Used in Tudor wall paintings at Faringdon House estate. C16th–C18th standard blue'},
+  {n:'Godstow Ultramarine',h:'#2838A8',b:'Ultramarine from lapis lazuli — traded through medieval Oxford via Godstow Nunnery accounts (1130s). The most expensive '},
+  {n:'Radcot Verdigris',h:'#2E8C6A',b:'Verdigris — copper acetate formed on bronze fittings at Radcot Bridge (earliest Thames bridge, C12th). Scraped and trade'},
+  {n:'Uffington Malachite',h:'#1E9050',b:'Malachite — copper carbonate mineral. Bronze Age copper-working at Uffington (White Horse hill fort area). Pre-Roman pig'},
+  {n:'Wayland Orpiment',h:'#D4A800',b:'Orpiment (arsenic trisulphide) — medieval pigment traded through Wayland\'s Smithy market. The original \'king\'s yellow'},
+  {n:'Abingdon Azurite',h:'#3068C0',b:'Azurite — basic copper carbonate (blue form of malachite). Documented in Abingdon Abbey accounts, 1220s, for wall decora'},
+  {n:'Cherbury Cinnabar',h:'#C83030',b:'Cinnabar (mercury sulphide) — the original vermilion. Traded through Cherbury Camp (Iron Age hillfort, Vale of White Hor'},
+  {n:'Wittenham Viridian',h:'#1A7860',b:'Viridian (chromium oxide dihydrate) — post-1838 synthetic pigment. Wittenham Clumps viewpoint pigment — the exact colour'},
+  {n:'Dorchester Woad-Indigo',h:'#2E4888',b:'Woad-indigo (indigotin) at full extraction depth. Dorchester-on-Thames was a major woad-processing site — the town\'s Ro'},
+  {n:'Bampton Manganese Violet',h:'#7840A0',b:'Manganese violet (manganese ammonium pyrophosphate) — first synthetic violet, 1868. Bampton\'s medieval textile guild re'},
   {n:'Sparsholt Thistle',h:'#7f3182',b:'Forensic mineral extraction.'},
-  {n:'Abingdon Cochineal — Vestment Crimson',h:'#842368',b:''},
-  {n:'Uffington Iron-Ochre — Calcined Orange',h:'#D47A33',b:''},
+  {n:'Abingdon Cochineal',h:'#842368',b:''},
+  {n:'Uffington Iron-Ochre',h:'#D47A33',b:''},
   {n:'Coln Madder',h:'#C45C5F',b:''},
   {n:'Quenington Rose',h:'#DD858D',b:'Historical Chalk deposit.'},
   {n:'Brazilwood Crimson Market Red',h:'#AD3858',b:''},
@@ -8482,27 +8482,27 @@ const HeritageNamer = (function() {
   {n:'Chrysocolla Corallian Blue',h:'#027F7E',b:''},
   {n:'Ridgeway Lichen',h:'#76a982',b:'Forensic mineral extraction.'},
   {n:'Abingdon Orpiment',h:'#EFC944',b:''},
-  {n:'Abingdon Aqua — Market House Copper',h:'#00BFB7',b:''},
-  {n:'Oxford Night — Academic Blue',h:'#003A4A',b:''},
-  {n:'Ock Navy — River Deep',h:'#00485F',b:''},
-  {n:'Abingdon Dock Blue — Wharf Dark',h:'#074056',b:''},
-  {n:'Buscot Claret — Georgian dining room, Buscot Park, 1790',h:'#6B1A2A',b:''},
-  {n:'Coleshill Bottle — Ice House Green',h:'#1A3828',b:''},
-  {n:'Thames Ironwork — Ballast Blue',h:'#1C2D40',b:''},
+  {n:'Abingdon Aqua',h:'#00BFB7',b:''},
+  {n:'Oxford Night',h:'#003A4A',b:''},
+  {n:'Ock Navy',h:'#00485F',b:''},
+  {n:'Abingdon Dock Blue',h:'#074056',b:''},
+  {n:'Buscot Claret',h:'#6B1A2A',b:''},
+  {n:'Coleshill Bottle',h:'#1A3828',b:''},
+  {n:'Thames Ironwork',h:'#1C2D40',b:''},
   {n:'Abingdon Aubergine',h:'#3C1E38',b:''},
-  {n:'Didcot Mustard — Works Yellow',h:'#8C6E18',b:''},
-  {n:'Swinford Coalface — Lock Soot',h:'#1E1A16',b:''},
-  {n:'Childrey Tin — Chalk Works',h:'#C4C0AE',b:''},
+  {n:'Didcot Mustard',h:'#8C6E18',b:''},
+  {n:'Swinford Coalface',h:'#1E1A16',b:''},
+  {n:'Childrey Tin',h:'#C4C0AE',b:''},
   {n:'Uffington Madder',h:'#8C2840',b:''},
-  {n:'Wallingford Sheffield — Cold Steel',h:'#585E66',b:''},
-  {n:'Lambourn Trainer — Gallops Grey',h:'#8C8880',b:''},
-  {n:'Dorchester Roman Tile — Tegula Stain',h:'#D9B0A0',b:''},
+  {n:'Wallingford Sheffield',h:'#585E66',b:''},
+  {n:'Lambourn Trainer',h:'#8C8880',b:''},
+  {n:'Dorchester Roman Tile',h:'#D9B0A0',b:''},
   {n:'Dorchester Iron',h:'#8C4830',b:''},
-  {n:'Ock Grease — Crushed first-century tegula',h:'#485055',b:''},
-  {n:'Abingdon Carbon — Dry Black',h:'#131210',b:''},
-  {n:'Faringdon Plaster — Lime Bloom',h:'#E8E4DC',b:''},
+  {n:'Ock Grease',h:'#485055',b:''},
+  {n:'Abingdon Carbon',h:'#131210',b:''},
+  {n:'Faringdon Plaster',h:'#E8E4DC',b:''},
   {n:'Sparsholt Sloe Ink',h:'#4A2858',b:''},
-  {n:'Radcot Bridge — Thames & Severn Canal water in summer',h:'#4AA880',b:'Thames & Severn Canal water in summer. The specific blue-green of navigable water under willow shade.'},
+  {n:'Radcot Bridge',h:'#4AA880',b:'Thames & Severn Canal water in summer. The specific blue-green of navigable water under willow shade.'},
   {n:'Lechlade Weed',h:'#6EB898',b:'Ranunculus fluitans on the upper Thames in June. The river plant that makes chalk-stream water seem lit from below.'},
   {n:'Bampton Verdigris',h:'#5AB090',b:'Church copper guttering after twenty years of Oxfordshire weather. Not decorative patina — working oxidation.'},
   {n:'Faringdon Algae',h:'#3A9870',b:'Still water under overhanging willows at the old Faringdon mill pond. The green that only happens in shade.'},
@@ -8511,19 +8511,19 @@ const HeritageNamer = (function() {
   {n:'Duxford Copper',h:'#2A8060',b:'Copper-bearing Corallian limestone at the Duxford ford. The colour geology makes when water and metal meet.'},
   {n:'Coleshill Lawn',h:'#78C0A0',b:'Frost-burned grass on the Coleshill estate in late November. The green that survives cold.'},
   {n:'Kelmscott Willow',h:'#5AA888',b:'Willow fronds reflected in the Thames at Kelmscott. The colour William Morris saw from his bedroom window.'},
-  {n:'Buscot Algae — Algae on the Buscot weir stonework',h:'#1A6848',b:'Algae on the Buscot weir stonework. Dark enough to read as void in evening light; green enough to read as life.'},
-  {n:'Inglesham Watermeadow — Water meadow after the flooding recedes',h:'#B8E0D0',b:'Water meadow after the flooding recedes. The ghost of teal — pale but not colourless.'},
+  {n:'Buscot Algae',h:'#1A6848',b:'Algae on the Buscot weir stonework. Dark enough to read as void in evening light; green enough to read as life.'},
+  {n:'Inglesham Watermeadow',h:'#B8E0D0',b:'Water meadow after the flooding recedes. The ghost of teal — pale but not colourless.'},
   {n:'Tadpole Bridge',h:'#C8E4D8',b:'Oxford limestone in chalk stream light at Tadpole Bridge. Near-white with a teal memory.'},
   {n:'Thames Lock',h:'#00A888',b:'Lock chamber copper patina in direct summer sun. The bright teal the app needs for accurate green-teal matching.'},
   {n:'Abingdon Patina',h:'#00B898',b:'Oxidised copper on the Abingdon Market House dome. Slightly lighter than Lock Copper — outdoor age.'},
   {n:'Radcot Lock',h:'#20A890',b:'Lock gate timber stained by teal algae at Radcot. The colour between copper and water.'},
-  {n:'Eynsham Weir — Weir water in high summer at Eynsham',h:'#00C8A8',b:'Weir water in high summer at Eynsham. Oxygenated water is this colour: bright, cold, alive.'},
+  {n:'Eynsham Weir',h:'#00C8A8',b:'Weir water in high summer at Eynsham. Oxygenated water is this colour: bright, cold, alive.'},
   {n:'Newbridge Copper',h:'#409880',b:'Copper oxide on medieval bridge stonework at Newbridge, oldest Thames bridge. Slow oxidation over eight centuries.'},
   {n:'Uffington Sky',h:'#6888A8',b:'The White Horse vale sky in August, late afternoon. Not blue — slate with warmth underneath.'},
-  {n:'Ridgeway Mist — Chalk escarpment in morning mist',h:'#8898B0',b:'Chalk escarpment in morning mist. The blue-grey that the Ridgeway is, most mornings of the year.'},
+  {n:'Ridgeway Mist',h:'#8898B0',b:'Chalk escarpment in morning mist. The blue-grey that the Ridgeway is, most mornings of the year.'},
   {n:'Wayland Forge',h:'#485878',b:'Forge smoke on a cold morning at Wayland\'s Smithy. Blue-black with the weight of iron.'},
-  {n:'Abingdon Bridge — Abingdon bridge stonework in rain',h:'#7888A8',b:'Abingdon bridge stonework in rain. Limestone becomes this colour when it\'s wet and the sky is flat.'},
-  {n:'Minchinhampton Flint — Brook surface in November at Childrey',h:'#90A0B8',b:'Brook surface in November at Childrey. The colour of still water when there\'s no sun to reflect.'},
+  {n:'Abingdon Bridge',h:'#7888A8',b:'Abingdon bridge stonework in rain. Limestone becomes this colour when it\'s wet and the sky is flat.'},
+  {n:'Minchinhampton Flint',h:'#90A0B8',b:'Brook surface in November at Childrey. The colour of still water when there\'s no sun to reflect.'},
   {n:'Letcombe Brook',h:'#A0B0C8',b:'Chalk stream over flint at Letcombe Bassett. The specific pale blue-grey of clean chalk water.'},
   {n:'Kingston Bagpuize',h:'#B8C4D8',b:'Limestone pale in winter light at Kingston Bagpuize. Ghost slate — barely there, entirely right.'},
   {n:'Ock Valley',h:'#606878',b:'Rain over the Ock valley from the Ridgeway. The colour of distance in wet weather.'},
@@ -8531,8 +8531,8 @@ const HeritageNamer = (function() {
   {n:'Godstow Lapis',h:'#3858A8',b:'Lapis ground used in Godstow Nunnery manuscripts, 12th century. Saturated blue in the indigo-blue border.'},
   {n:'Bampton Indigo',h:'#305090',b:'Indigo-dyed Saxon cloth, Bampton market fair. The richest blue available before synthetic indigo.'},
   {n:'Faringdon Cobalt',h:'#4868B0',b:'Cobalt-blue Staffordshire bone china popular in Oxfordshire households. A domestic blue of the 1820s.'},
-  {n:'Uffington Woad — Woad cultivated on the chalk downs',h:'#4870A0',b:'Woad cultivated on the chalk downs. The specific blue that British woad produced — less purple than indigo.'},
-  {n:'Thames Zinc — Victorian bridge zinc primer',h:'#5878A8',b:'Victorian bridge zinc primer. The blue-grey of industrial infrastructure — functional and durable.'},
+  {n:'Uffington Woad',h:'#3A5C8C',b:'Woad cultivated on the chalk downs. The specific blue that British woad produced — less purple than indigo.'},
+  {n:'Thames Zinc',h:'#5878A8',b:'Victorian bridge zinc primer. The blue-grey of industrial infrastructure — functional and durable.'},
   {n:'Longcot Lead',h:'#485870',b:'Lead roof on a Vale of White Horse church. The colour of maintenance, of permanence, of English weather.'},
   {n:'Charney Bassett',h:'#8898C0',b:'Field woad in pale chalk-wash ground at Charney Bassett. The diluted version of the dyer\'s vat.'},
   {n:'Pusey Church',h:'#6878A8',b:'Limestone church at Pusey in November rain. The blue that stone becomes when clouds are permanent.'},
@@ -8555,7 +8555,71 @@ const HeritageNamer = (function() {
   {n:'Blewbury Plaster',h:'#EAD0C8',b:'Lime-washed cob wall in afternoon sun at Blewbury. The pink that appears when chalk absorbs iron.'},
   {n:'Compton Dene',h:'#F2E0DA',b:'Almost-pink limestone at Compton Dene in low winter sun. The palest entry in the Pink-Red zone.'},
   {n:'Sparsholt Sloe',h:'#681840',b:'Sloe berry pressed and oxidised at Sparsholt. The specific blue-red-black of November hedgerow fruit.'},
-  {n:'Knighton Damson',h:'#5C1838',b:'Old orchard damson at peak colour, Knighton. The colour between blackberry jam and dried blood.'}
+  {n:'Knighton Damson',h:'#5C1838',b:'Old orchard damson at peak colour, Knighton. The colour between blackberry jam and dried blood.'},
+  {n:'Bourton Bloom',h:'#F2B8D0',b:'Cotswolds meadow flower · late spring bloom'},
+  {n:'Fairford Blush',h:'#EAC0CC',b:'Limestone rose · Fairford church stone at dusk'},
+  {n:'Burford Petal',h:'#E8B0C4',b:'Cotswolds hedgerow rose · pale blush petal'},
+  {n:'Chipping Rose',h:'#E070A0',b:'Cotswolds market town rose · mid vivid pink'},
+  {n:'Moreton Magenta',h:'#C83880',b:'Moreton-in-Marsh signal dye · saturated magenta'},
+  {n:'Stow Fuchsia',h:'#C02878',b:'Stow-on-the-Wold hanging basket · vivid fuchsia'},
+  {n:'Cirencester Carmine',h:'#A01858',b:'Roman dye · Corinium carmine pigment'},
+  {n:'Lechlade Orchid',h:'#CC68A8',b:'Thames headwaters bloom · mid orchid'},
+  {n:'Northleach Mauve',h:'#C090B8',b:'Wool-town mauve · historic wool dye'},
+  {n:'Bourton Powder',h:'#F0D0E0',b:'Bourton-on-the-Water pale blush · tourist flower trail'},
+  {n:'Bibury Carnation',h:'#E888B0',b:'Arlington Row carnation · vivid mid pink'},
+  {n:'Snowshill Rose',h:'#E04080',b:'Snowshill Manor garden · bold rose'},
+  {n:'Chastleton Pink',h:'#D8A0BC',b:'Chastleton House garden pink · muted mid'},
+  {n:'Campden Blush',h:'#F4C8D8',b:'Chipping Campden stone at sunset · warm blush'},
+  {n:'Cricklade Aqua',h:'#40B0B0',b:'River Thames source · clear aqua at Cricklade'},
+  {n:'Kempsford Cyan',h:'#30A0A8',b:'Kempsford water meadow · vivid cyan-teal'},
+  {n:'Fairford Aqua',h:'#50B8C0',b:'Fairford mill leat · clear aquamarine'},
+  {n:'Bibury Aquamarine',h:'#48C0B8',b:'Arlington Row stream · pale aquamarine'},
+  {n:'Coln Turquoise',h:'#38B0B8',b:'River Coln headwaters · vivid turquoise'},
+  {n:'Cerney Wick Canal',h:'#60B8C0',b:'North Meadow canal · light cyan'},
+  {n:'Ampney Brook',h:'#80C8CC',b:'Ampney Brook pale cyan · clear chalk stream'},
+  {n:'Daglingworth Pale',h:'#A8D4D8',b:'Daglingworth village pale · light sky-cyan'},
+  {n:'Sherborne Lake Cyan',h:'#308898',b:'Sherborne lake surface · mid cyan'},
+  {n:'Winstone Vitriol',h:'#1C7880',b:'Cotswold vitriol blue-green · deep cyan'},
+  {n:'Chedworth Rill',h:'#70C0C8',b:'Chedworth Roman villa rill · clear cyan'},
+  {n:'Burford Cobalt',h:'#2848C0',b:'Burford church medieval glass · vivid cobalt'},
+  {n:'Bourton Azure',h:'#3058C8',b:'Bourton-on-the-Water clear sky · vivid azure'},
+  {n:'Stow Ultramarine',h:'#2038B0',b:'Stow-on-the-Wold painted sign · ultramarine'},
+  {n:'Minster Lovell Blue',h:'#3060C0',b:'Minster Lovell ruin sky · clear vivid blue'},
+  {n:'Winchcombe Azure',h:'#3868D0',b:'Winchcombe summer sky · bright azure'},
+  {n:'Bourton Cerulean',h:'#4070D0',b:'Bourton water reflection · mid cerulean'},
+  {n:'Stow Saffron',h:'#E09818',b:'Cotswolds saffron crocus · vivid golden saffron'},
+  {n:'Chipping Gold',h:'#D89020',b:'Chipping Campden honey stone · warm vivid gold'},
+  {n:'Guiting Ochre',h:'#C88C28',b:'Temple Guiting stone · ochre-gold'},
+  {n:'Winchcombe Amber',h:'#D09830',b:'Winchcombe honeyed stone · warm amber'},
+  {n:'Stanway Gilt',h:'#E0A830',b:'Stanway House gatehouse · gilt amber'},
+  {n:'Bourton Honey',h:'#CC9020',b:'Cotswolds limestone honey · golden'},
+  {n:'Bledington Corn',h:'#D4A040',b:'Bledington cornfield · mid gold corn'},
+  {n:'Bourton Verdant',h:'#28A040',b:'Bourton-on-the-Water water meadow · vivid green'},
+  {n:'Windrush Green',h:'#309838',b:'River Windrush water meadow · fresh vivid green'},
+  {n:'Slaughter Grass',h:'#38A840',b:'Upper Slaughter village green · bright grass'},
+  {n:'Chipping Emerald',h:'#208838',b:'Chipping Campden garden · deep vivid emerald'},
+  {n:'Minster Green',h:'#30A048',b:'Minster Lovell meadow · bright mid green'},
+  {n:'Sherborne Park',h:'#409040',b:'Sherborne Park grounds · park green'},
+  {n:'Icomb Meadow',h:'#48A848',b:'Icomb hill meadow · mid vivid'},
+  {n:'Farmington Lawn',h:'#50A050',b:'Farmington village lawn · fresh'},
+  {n:'Bourton Waterside',h:'#208878',b:'Bourton brook · vivid teal-green waterside'},
+  {n:'Coln Teal',h:'#189880',b:'River Coln clear teal · vivid'},
+  {n:'Sherborne Teal',h:'#208880',b:'Sherborne brook · vivid teal'},
+  {n:'Windrush Teal',h:'#288870',b:'River Windrush teal · vivid mid'},
+  {n:'Bibury Mill Teal',h:'#309878',b:'Bibury mill race teal · vivid'},
+  {n:'Ampney Teal',h:'#208070',b:'Ampney Brook teal · mid vivid'},
+  {n:'Cricklade Sky',h:'#A8C0CC',b:'Cricklade meadow sky · pale cyan-blue'},
+  {n:'Kempsford Pale',h:'#B0C8D4',b:'Kempsford open sky · light blue-cyan'},
+  {n:'Bourton Wisteria',h:'#C0A8D0',b:'Bourton-on-the-Water wisteria · pale blue-violet'},
+  {n:'Chipping Lavender',h:'#B8A0D0',b:'Chipping Campden lavender · mid pale lavender'},
+  {n:'Stow Heather',h:'#A890C0',b:'Stow-on-the-Wold heather · muted mid purple'},
+  {n:'Snowshill Violet',h:'#7858A8',b:'Snowshill lavender field · vivid violet'},
+  {n:'Chastleton Violet',h:'#6848A0',b:'Chastleton House wisteria · deep vivid violet'},
+  {n:'Bourton Raspberry',h:'#E03868',b:'Cotswolds raspberry · vivid mid red-pink'},
+  {n:'Burford Scarlet',h:'#C82030',b:'Burford church banner · vivid scarlet'},
+  {n:'Winchcombe Crimson',h:'#A01828',b:'Winchcombe abbey rose · deep crimson'},
+  {n:'Chipping Red',h:'#B82030',b:'Chipping Campden red sandstone · vivid'},
+  {n:'Stanway Pomegranate',h:'#D02848',b:'Stanway House pomegranate · vivid mid red'}
 
   ];
 
@@ -21123,17 +21187,49 @@ self.onmessage = function(e) {
   // v446: stride=16 — samples every 4th pixel for 60fps on hi-res images
   const STRIDE = 16;
   // v17: track brightest pixel across ALL pixels (including highlights)
+  // v17.3: track most-saturated pixel too — vivid accent colours
   let brightestPixel = null, brightestLum = -1;
+  let mostSatPixel = null, mostSat = -1;
   for (let i = 0; i < pixels.length; i += STRIDE) {
     const r = pixels[i], g = pixels[i+1], b = pixels[i+2], a = pixels[i+3];
     if (a < 128) continue;
     // Track brightest regardless of thresholds
     const lum = 0.299*r + 0.587*g + 0.114*b;
     if (lum > brightestLum) { brightestLum = lum; brightestPixel = [r, g, b]; }
+    // Track most saturated (HSL saturation)
+    const mx = Math.max(r,g,b)/255, mn = Math.min(r,g,b)/255;
+    const l = (mx+mn)/2;
+    const sat = (mx===mn) ? 0 : (l>0.5 ? (mx-mn)/(2-mx-mn) : (mx-mn)/(mx+mn));
+    if (sat > mostSat && l > 0.15 && l < 0.92) { mostSat = sat; mostSatPixel = [r, g, b]; }
     const bright = (r + g + b) / 3;
     if (bright < 12 || bright > 248) continue;
     samples.push([r, g, b]);
   }
+
+  // v17.3: Saturation boosting — inject extra copies of saturated pixels so
+  // vivid accent colours aren't outvoted by large neutral regions.
+  // Each saturated pixel with sat > 0.35 gets duplicated proportional to its
+  // chroma, giving the k-means centroid a gravitational pull toward vivid hues.
+  const satBoostCopies = [];
+  const STRIDE2 = 32; // coarser pass for sat scan (fast)
+  for (let i = 0; i < pixels.length; i += STRIDE2) {
+    const r = pixels[i], g = pixels[i+1], b = pixels[i+2], a = pixels[i+3];
+    if (a < 128) continue;
+    const bright = (r + g + b) / 3;
+    if (bright < 12 || bright > 248) continue;
+    const mx = Math.max(r,g,b)/255, mn = Math.min(r,g,b)/255;
+    const l = (mx+mn)/2;
+    const sat = (mx===mn) ? 0 : (l>0.5 ? (mx-mn)/(2-mx-mn) : (mx-mn)/(mx+mn));
+    if (sat > 0.35) {
+      // copies: 1 extra at 0.35, up to 4 extra at full saturation
+      const copies = Math.round((sat - 0.35) / 0.65 * 4);
+      for (let c = 0; c < copies; c++) satBoostCopies.push([r, g, b]);
+    }
+  }
+  // Inject boost copies (capped to avoid overwhelming tiny palettes)
+  const maxBoost = Math.floor(samples.length * 0.4);
+  const toAdd = Math.min(satBoostCopies.length, maxBoost);
+  for (let i = 0; i < toAdd; i++) samples.push(satBoostCopies[i]);
 
   if (samples.length < k) {
     const hexes = samples.map(s => rgbToHex(s[0], s[1], s[2]));
@@ -21201,7 +21297,20 @@ self.onmessage = function(e) {
       combined.sort((a, b) =>
         (0.299*a.c[0]+0.587*a.c[1]+0.114*a.c[2]) - (0.299*b.c[0]+0.587*b.c[1]+0.114*b.c[2])
       );
-      combined[0] = { c: brightestPixel, w: 1 }; // small weight — it's a highlight
+      combined[0] = { c: brightestPixel, w: 1 };
+    }
+  }
+
+  // v17.3: Force most-saturated pixel into palette if vivid and not represented
+  if (mostSatPixel && mostSat > 0.45) {
+    const alreadyCoveredSat = combined.some(x => dist2(x.c, mostSatPixel) < 3000);
+    if (!alreadyCoveredSat) {
+      combined.sort((a, b) => {
+        const satA = Math.max(a.c[0],a.c[1],a.c[2]) - Math.min(a.c[0],a.c[1],a.c[2]);
+        const satB = Math.max(b.c[0],b.c[1],b.c[2]) - Math.min(b.c[0],b.c[1],b.c[2]);
+        return satA - satB;
+      });
+      combined[0] = { c: mostSatPixel, w: 1 };
     }
   }
 
