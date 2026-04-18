@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '17.5';  // v17.5 — denser k-means sampling (320×240, stride 8)
+  const APP_VERSION = '17.6';  // v17.6 — hue rescue: replaces weak centroids with underrepresented hue zones
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored && stored !== APP_VERSION) {
@@ -21189,6 +21189,70 @@ self.onmessage = function(e) {
     }
     finalClusters[bi]++;
   });
+
+  // v17.6 — Hue rescue: find hue zones with >3% of coloured samples but no centroid,
+  // and replace the weakest centroid with the mean of that zone's samples.
+  // This catches thin-but-real stripes (e.g. edge green) that k-means absorbs into neighbours.
+  (function hueRescue() {
+    function rgbToHue(r, g, b) {
+      const mx = Math.max(r,g,b), mn = Math.min(r,g,b), d = mx - mn;
+      if (d < 30) return -1; // near-grey — skip achromatic
+      let h;
+      if (mx===r)      h = ((g-b)/d + (g<b?6:0)) / 6;
+      else if (mx===g) h = ((b-r)/d + 2) / 6;
+      else             h = ((r-g)/d + 4) / 6;
+      return h * 360;
+    }
+    const BINS = 12, BIN_DEG = 30; // 12 × 30° hue sectors
+    const binCount = new Array(BINS).fill(0);
+    const binSum   = Array.from({length: BINS}, () => [0, 0, 0]);
+    samples.forEach(s => {
+      const h = rgbToHue(s[0], s[1], s[2]);
+      if (h < 0) return;
+      const b = Math.floor(h / BIN_DEG) % BINS;
+      binCount[b]++;
+      binSum[b][0] += s[0]; binSum[b][1] += s[1]; binSum[b][2] += s[2];
+    });
+    const colouredTotal = binCount.reduce((a, b) => a + b, 0) || 1;
+    let rescued = false;
+    for (let bin = 0; bin < BINS; bin++) {
+      if (binCount[bin] / colouredTotal < 0.03) continue; // <3% — ignore
+      const binHue = bin * BIN_DEG + BIN_DEG / 2;
+      // Check if any centroid already covers this hue sector (within 45°)
+      const covered = centroids.some(c => {
+        const ch = rgbToHue(c[0], c[1], c[2]);
+        if (ch < 0) return false;
+        const diff = Math.min(Math.abs(ch - binHue), 360 - Math.abs(ch - binHue));
+        return diff < 45;
+      });
+      if (covered) continue;
+      // Uncovered zone — replace the weakest centroid with this zone's mean colour
+      let weakIdx = 0;
+      for (let i = 1; i < centroids.length; i++) {
+        if (finalClusters[i] < finalClusters[weakIdx]) weakIdx = i;
+      }
+      const n = binCount[bin];
+      centroids[weakIdx] = [
+        Math.round(binSum[bin][0] / n),
+        Math.round(binSum[bin][1] / n),
+        Math.round(binSum[bin][2] / n)
+      ];
+      finalClusters[weakIdx] = n;
+      rescued = true;
+    }
+    // Re-run assignment so weights reflect rescued centroids
+    if (rescued) {
+      finalClusters.fill(0);
+      samples.forEach(s => {
+        let bi = 0, bd = dist2(s, centroids[0]);
+        for (let i = 1; i < centroids.length; i++) {
+          const d = dist2(s, centroids[i]);
+          if (d < bd) { bd = d; bi = i; }
+        }
+        finalClusters[bi]++;
+      });
+    }
+  })();
 
   // Build combined array [centroid, weight] then sort by luminance
   const combined = centroids.map((c, i) => ({ c, w: finalClusters[i] }));
