@@ -28,7 +28,7 @@
 </script>
 <script>
 (function(){
-  const APP_VERSION = '17.6';  // v17.6 — hue rescue: replaces weak centroids with underrepresented hue zones
+  const APP_VERSION = '17.7';  // v17.7 — saturation-weighted centroid refinement (de-creams stripe colours)
   try {
     const stored = localStorage.getItem('stored_version');
     if (stored && stored !== APP_VERSION) {
@@ -21178,6 +21178,28 @@ self.onmessage = function(e) {
     });
     if (!moved) break;
   }
+
+  // v17.7 — Saturation-weighted centroid refinement
+  // Woven textiles have cream warp threads crossing every coloured stripe, pulling
+  // each K-means centroid toward cream. One refinement pass weights each pixel by
+  // its RGB saturation (max-min), so cream warp threads (sat≈20) get ~8× less
+  // influence than pure coloured weft (sat≈160). Centroids shift to true stripe hues.
+  (function satRefine() {
+    const cl = centroids.map(() => ({ sR:0, sG:0, sB:0, tw:0 }));
+    samples.forEach(s => {
+      let bi = 0, bd = dist2(s, centroids[0]);
+      for (let i = 1; i < centroids.length; i++) {
+        const d = dist2(s, centroids[i]);
+        if (d < bd) { bd = d; bi = i; }
+      }
+      const w = Math.max(Math.max(s[0],s[1],s[2]) - Math.min(s[0],s[1],s[2]), 8);
+      cl[bi].sR += s[0]*w; cl[bi].sG += s[1]*w; cl[bi].sB += s[2]*w; cl[bi].tw += w;
+    });
+    cl.forEach((c, i) => {
+      if (!c.tw) return;
+      centroids[i] = [Math.round(c.sR/c.tw), Math.round(c.sG/c.tw), Math.round(c.sB/c.tw)];
+    });
+  })();
 
   // Final assignment pass — count cluster sizes for proportional mosaic
   const finalClusters = centroids.map(() => 0);
